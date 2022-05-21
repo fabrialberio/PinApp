@@ -1,0 +1,7 @@
+data/com.github.fabrialberio.pinapp.desktop.in
+data/com.github.fabrialberio.pinapp.appdata.xml.in
+data/com.github.fabrialberio.pinapp.gschema.xml
+src/window.ui
+src/main.py
+src/window.py
+
