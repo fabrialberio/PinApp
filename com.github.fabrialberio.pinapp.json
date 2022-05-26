@@ -24,7 +24,7 @@
     ],
     "modules" : [
         {
-            "name" : "pinapp",
+            "name" : "PinApp",
             "builddir" : true,
             "buildsystem" : "meson",
             "sources" : [

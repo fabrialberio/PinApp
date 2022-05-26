@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=pinapp
+Name=PinApp
 Exec=pinapp
 Icon=com.github.fabrialberio.pinapp
 Terminal=false

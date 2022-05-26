@@ -22,10 +22,10 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
-from .window import PinappWindow, AboutDialog
+from .window import PinAppWindow, AboutDialog
 
 
-class PinappApplication(Adw.Application):
+class PinAppApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
@@ -43,7 +43,7 @@ class PinappApplication(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = PinappWindow(application=self)
+            win = PinAppWindow(application=self)
         win.present()
 
     def on_about_action(self, widget, _):
@@ -73,5 +73,5 @@ class PinappApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = PinappApplication()
+    app = PinAppApplication()
     return app.run(sys.argv)

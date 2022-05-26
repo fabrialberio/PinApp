@@ -24,7 +24,7 @@ import locale
 import gettext
 
 VERSION = '0.1.0'
-pkgdatadir = '/app/share/pinapp'
+pkgdatadir = '/app/share/PinApp'
 localedir = '/app/share/locale'
 
 sys.path.insert(1, pkgdatadir)

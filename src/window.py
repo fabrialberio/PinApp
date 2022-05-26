@@ -15,27 +15,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+#from apps_view import AppsView
 
+from gi.repository import Gtk, Adw
+
+from .apps_view import AppsView
+from .file_view import FileView
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/window.ui')
-class PinappWindow(Gtk.ApplicationWindow):
-    __gtype_name__ = 'PinappWindow'
+class PinAppWindow(Adw.ApplicationWindow):
+    __gtype_name__ = 'PinAppWindow'
 
-    label = Gtk.Template.Child()
+    leaflet = Gtk.Template.Child('main_leaflet')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.leaflet.append(AppsView(self.leaflet))
+        self.leaflet.append(FileView())
 
 class AboutDialog(Gtk.AboutDialog):
 
     def __init__(self, parent):
         Gtk.AboutDialog.__init__(self)
-        self.props.program_name = 'pinapp'
-        self.props.version = "0.1.0"
-        self.props.authors = ['Fabri210']
-        self.props.copyright = '2022 Fabri210'
+        self.props.program_name = 'PinApp'
+        self.props.version = '0.1.0'
+        self.props.authors = ['Fabrizio Alberio']
+        self.props.copyright = '2022 Fabrizio Alberio'
         self.props.logo_icon_name = 'com.github.fabrialberio.pinapp'
         self.props.modal = True
         self.set_transient_for(parent)

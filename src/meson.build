@@ -29,6 +29,8 @@ pinapp_sources = [
   '__init__.py',
   'main.py',
   'window.py',
+  'apps_view.py',
+  'file_view.py',
 ]
 
 install_data(pinapp_sources, install_dir: moduledir)

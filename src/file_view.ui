@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <!-- Main window -->
+  <template class='FileView' parent='GtkBox'>
+    <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+    <child>
+      <!-- HeaderBar -->
+      <object class='AdwHeaderBar' id='header_bar'>
+        <!-- Back button, only shown in file view -->
+        <child type='start'>
+          <object class='GtkButton' id='back_button'>
+            <property name='icon-name'>go-previous</property>
+            <property name='visible'>false</property>
+          </object>
+        </child>
+        <!-- New file button, only shown in apps view -->
+        <child type='start'>
+          <object class='GtkButton' id='new_file_button'>
+            <property name='icon-name'>list-add-symbolic</property>
+            <property name='visible'>true</property>
+          </object>
+        </child>
+        <!-- Title (PinApp) -->
+        <property name='title-widget'>
+          <object class='AdwWindowTitle' id='title_widget'>
+            <property name='title' translatable='yes'>PinApp</property>
+            <!-- Subtitle, only shown in file view -->
+            <property name='subtitle' translatable='no'></property>
+          </object>
+        </property>
+        <!-- Menu button, only shown in apps view -->
+        <child type='end'>
+          <object class='GtkMenuButton' id='menu_button'>
+            <property name='icon-name'>open-menu-symbolic</property>
+            <property name='menu-model'>primary_menu</property>
+            <property name='visible'>true</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class='AdwClamp'>
+        <placeholder/>
+      </object>
+    </child>
+  </template>
+
+  <menu id='primary_menu'>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Preferences</attribute>
+        <attribute name='action'>app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Keyboard Shortcuts</attribute>
+        <attribute name='action'>win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_About PinApp</attribute>
+        <attribute name='action'>app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
