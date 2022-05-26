@@ -31,7 +31,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.leaflet.append(AppsView(self.leaflet))
+        self.leaflet.append(AppsView())
         self.leaflet.append(FileView())
 
 class AboutDialog(Gtk.AboutDialog):

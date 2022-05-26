@@ -6,36 +6,19 @@
     <child>
       <!-- HeaderBar -->
       <object class='AdwHeaderBar' id='header_bar'>
-        <!-- Back button, only shown in file view -->
+        <!-- Back button -->
         <child type='start'>
           <object class='GtkButton' id='back_button'>
             <property name='icon-name'>go-previous</property>
-            <property name='visible'>false</property>
-          </object>
-        </child>
-        <!-- New file button, only shown in apps view -->
-        <child type='start'>
-          <object class='GtkButton' id='new_file_button'>
-            <property name='icon-name'>list-add-symbolic</property>
-            <property name='visible'>true</property>
           </object>
         </child>
         <!-- Title (PinApp) -->
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>
             <property name='title' translatable='yes'>PinApp</property>
-            <!-- Subtitle, only shown in file view -->
-            <property name='subtitle' translatable='no'></property>
+            <property name='subtitle' translatable='no'>File View</property>
           </object>
         </property>
-        <!-- Menu button, only shown in apps view -->
-        <child type='end'>
-          <object class='GtkMenuButton' id='menu_button'>
-            <property name='icon-name'>open-menu-symbolic</property>
-            <property name='menu-model'>primary_menu</property>
-            <property name='visible'>true</property>
-          </object>
-        </child>
       </object>
     </child>
     <child>
