@@ -6,6 +6,8 @@
     <child>
       <!-- HeaderBar -->
       <object class='AdwHeaderBar' id='header_bar'>
+        <property name='show-end-title-buttons'>false</property>
+        <property name='show-start-title-buttons'>false</property>
         <!-- Back button -->
         <child type='start'>
           <object class='GtkButton' id='back_button'>
@@ -16,9 +18,19 @@
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>
             <property name='title' translatable='yes'>PinApp</property>
+            <!-- Subtitle (App name) -->
             <property name='subtitle' translatable='no'>File View</property>
           </object>
         </property>
+        <!-- Save button -->
+        <child type='end'>
+          <object class='GtkButton' id='save_button'>
+            <property name='label' translatable='yes'>Save</property>
+            <style>
+              <class name='suggested-action'/>
+            </style>
+          </object>
+        </child>
       </object>
     </child>
     <child>

@@ -33,6 +33,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.leaflet.append(AppsView())
         self.leaflet.append(FileView())
+        self.leaflet.navigate(Adw.NavigationDirection.FORWARD)
 
 class AboutDialog(Gtk.AboutDialog):
 
