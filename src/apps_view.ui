@@ -31,11 +31,20 @@
     </child>
     <child>
       <object class='AdwClamp'>
-        <placeholder/>
+        <child>
+          <object class='GtkBox'>
+            <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+            <property name='margin-start'>12</property>
+            <property name='margin-end'>12</property>
+            <property name='margin-top'>6</property>
+            <property name='margin-bottom'>6</property>
+          </object>
+        </child>
       </object>
     </child>
   </template>
 
+  <!-- Primary menu model -->
   <menu id='primary_menu'>
     <section>
       <item>

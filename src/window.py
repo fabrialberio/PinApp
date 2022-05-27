@@ -22,7 +22,7 @@ from gi.repository import Gtk, Adw, Gio
 from .apps_view import AppsView
 from .file_view import FileView
 from .desktop_entry import DesktopFile, DesktopFileFolder
-from .settings import Settings
+
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
@@ -50,8 +50,6 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_file_save(self, file_view):
         print('file saved')
-        settings = Settings.new()
-        print(settings.set_string('test', 'test'))
         self.leaflet.set_visible_child(self.apps_view)
 
 class AboutDialog(Gtk.AboutDialog):

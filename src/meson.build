@@ -31,7 +31,6 @@ pinapp_sources = [
   'desktop_entry.py',
   'file_view.py',
   'main.py',
-  'settings.py',
   'window.py',
 ]
 
