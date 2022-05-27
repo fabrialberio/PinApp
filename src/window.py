@@ -21,6 +21,8 @@ from gi.repository import Gtk, Adw
 
 from .apps_view import AppsView
 from .file_view import FileView
+from .desktop_entry import DesktopFile, DesktopFileFolder
+from .settings import Settings
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
@@ -31,9 +33,26 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.leaflet.append(AppsView())
-        self.leaflet.append(FileView())
-        self.leaflet.navigate(Adw.NavigationDirection.FORWARD)
+        self.apps_view = AppsView()
+        self.apps_view.connect('new-file', self.on_new_file)
+        self.leaflet.append(self.apps_view)
+
+        self.file_view = FileView()
+        self.file_view.connect('go-back', self.on_file_back)
+        self.file_view.connect('save', self.on_file_save)
+        self.leaflet.append(self.file_view)
+
+    def on_new_file(self, apps_view):
+        self.leaflet.set_visible_child(self.file_view)
+
+    def on_file_back(self, file_view):
+        self.leaflet.set_visible_child(self.apps_view)
+
+    def on_file_save(self, file_view):
+        print('file saved')
+        settings = Settings.new()
+        settings.set_boolean('test', True)
+        self.leaflet.set_visible_child(self.apps_view)
 
 class AboutDialog(Gtk.AboutDialog):
 

@@ -1,2 +1,5 @@
 /.flatpak
 /.vscode
+_build
+.vscode
+builddir

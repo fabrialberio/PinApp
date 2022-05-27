@@ -27,10 +27,12 @@ configure_file(
 
 pinapp_sources = [
   '__init__.py',
-  'main.py',
-  'window.py',
   'apps_view.py',
+  'desktop_entry.py',
   'file_view.py',
+  'main.py',
+  'settings.py',
+  'window.py',
 ]
 
 install_data(pinapp_sources, install_dir: moduledir)
