@@ -1,8 +1,6 @@
 from pathlib import Path
 from configparser import ConfigParser
 
-from .settings import Settings
-
 
 class DesktopFileFolder():
     """Folder containing a list of DesktopFiles and managing related settings"""
@@ -15,6 +13,7 @@ class DesktopFileFolder():
         self.files = []
         self.get_files()
 
+    '''
     @classmethod
     def new(cls, path: Path):
         """Returns a new DesktopFileFolder object"""
@@ -45,6 +44,7 @@ class DesktopFileFolder():
             paths.remove(self.path)
 
         settings.set(Settings.APP_FOLDERS_KEY, paths)
+    '''
 
     def get_files(self, recursive=False):
         self.files = [

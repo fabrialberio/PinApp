@@ -17,7 +17,7 @@
 
 #from apps_view import AppsView
 
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, Gio
 
 from .apps_view import AppsView
 from .file_view import FileView
@@ -51,7 +51,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     def on_file_save(self, file_view):
         print('file saved')
         settings = Settings.new()
-        settings.set_boolean('test', True)
+        print(settings.set_string('test', 'test'))
         self.leaflet.set_visible_child(self.apps_view)
 
 class AboutDialog(Gtk.AboutDialog):
