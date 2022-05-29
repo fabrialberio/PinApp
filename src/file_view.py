@@ -13,10 +13,11 @@ class FileView(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
 
         GObject.type_register(FileView)
-        GObject.signal_new('go-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-        GObject.signal_new('save', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-save', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-edit', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
-        self.back_button.connect('clicked', lambda _: self.emit('go-back'))
-        self.save_button.connect('clicked', lambda _: self.emit('save'))
+        self.back_button.connect('clicked', lambda _: self.emit('file-back'))
+        self.save_button.connect('clicked', lambda _: self.emit('file-save'))
     
     def load_file(self, file: DesktopFile): ...

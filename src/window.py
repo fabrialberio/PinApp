@@ -34,12 +34,12 @@ class PinAppWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.apps_view = AppsView()
-        self.apps_view.connect('new-file', self.on_new_file)
+        self.apps_view.connect('file-new', self.on_new_file)
         self.leaflet.append(self.apps_view)
 
         self.file_view = FileView()
-        self.file_view.connect('go-back', self.on_file_back)
-        self.file_view.connect('save', self.on_file_save)
+        self.file_view.connect('file-back', self.on_file_back)
+        self.file_view.connect('file-save', self.on_file_save)
         self.leaflet.append(self.file_view)
 
     def on_new_file(self, apps_view):
@@ -50,6 +50,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_file_save(self, file_view):
         print('file saved')
+        self.apps_view.build_ui()
         self.leaflet.set_visible_child(self.apps_view)
 
 class AboutDialog(Gtk.AboutDialog):
