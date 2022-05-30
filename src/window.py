@@ -35,6 +35,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.apps_view = AppsView()
         self.apps_view.connect('file-new', self.on_new_file)
+        self.apps_view.connect('file-open', self.on_file_open)
         self.leaflet.append(self.apps_view)
 
         self.file_view = FileView()
@@ -52,6 +53,13 @@ class PinAppWindow(Adw.ApplicationWindow):
         print('file saved')
         self.apps_view.build_ui()
         self.leaflet.set_visible_child(self.apps_view)
+
+    def on_file_open(self, file_view, file):
+        print(f'Opening file {file}')
+        self.file_view.load_file(file)
+        self.leaflet.set_visible_child(self.file_view)
+        #self.file_view.set_file(file)
+        #self.leaflet.set_visible_child(self.file_view)
 
 class AboutDialog(Gtk.AboutDialog):
 

@@ -6,7 +6,7 @@ class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
     
     def __init__(self, path: Path):
-        self.path = path if path is Path else Path(path)
+        self.path = Path(path)
         self.path = self.path.expanduser()
         if not self.path.is_dir():
             raise ValueError(f'Path "{self.path} is not a directory"')
@@ -80,7 +80,9 @@ class DesktopFile(ConfigParser):
         if not (self.path.is_file() or self.path.suffix == 'desktop'):
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
-        super().__init__()
+        super().__init__(
+            interpolation=None,
+        )
         self.load()
         if self.APP_GROUPNAME not in self.sections():
             self.add_section(self.APP_GROUPNAME)

@@ -9,42 +9,39 @@ class AppsView(Gtk.Box):
     new_file_button = Gtk.Template.Child('new_file_button')
     main_view = Gtk.Template.Child('main_clamp')
 
-    DEFAULT_FOLDERS = [
-        '~/.local/share/applications/',
-        '/usr/share/applications/',
-        #'/usr/local/share/applications/',
-    ]
-
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
 
         GObject.type_register(AppsView)
         GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+        
+        GObject.type_register(AppsGroup)
+        GObject.signal_new('file-open', AppsGroup, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self.folders = [DesktopFileFolder(p) for p in self.DEFAULT_FOLDERS]
+        self.folders = {
+            'User': DesktopFileFolder('~/.local/share/applications/'),
+            'System': DesktopFileFolder('/usr/share/applications/'),
+            #'Local System': '/usr/local/share/applications/',
+        }
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
-
-        self.build_ui()
-
-
-    def load_apps(self):
-        for folder in self.folders:
-            folder.get_files()
 
         self.build_ui()
 
     def build_ui(self):
         box = Gtk.Box(
             orientation = Gtk.Orientation.VERTICAL,
-            margin_top = 6,
-            margin_bottom = 6,
+            margin_top = 24,
+            margin_bottom = 24,
             margin_start = 12,
             margin_end = 12,
             spacing = 12,
         )
 
-        for folder in self.folders:
-            box.append(AppsGroup(folder))
+        for title, folder in self.folders.items():
+            apps_group = AppsGroup(folder, title)
+            apps_group.connect('file-open', lambda _, file: self.emit('file-open', file))
+            box.append(apps_group)
 
         self.main_view.set_child(box)
 
@@ -52,9 +49,10 @@ class AppsView(Gtk.Box):
 class AppsGroup(Adw.PreferencesGroup):
     __gtype_name__ = 'AppsGroup'
 
-    def __init__(self, folder: DesktopFileFolder):
+    def __init__(self, folder: DesktopFileFolder, title: str = None):        
         super().__init__(
-            title = str(folder.path),
+            title = title if title else str(folder.path),
+            description = folder.path if title else None,
         )
 
         self.folder = folder
@@ -65,15 +63,15 @@ class AppsGroup(Adw.PreferencesGroup):
             app_row.connect('activated', lambda _: self.emit('file-open', file))
 
             self.add(app_row)
-        
-        
+
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
     def __init__(self, file: DesktopFile):
         super().__init__(
-            icon_name = file.app_dict.get(DesktopFile.ICON_KEY),
+            icon_name = file.app_dict.get(DesktopFile.ICON_KEY) or 'application-x-executable',
             title = file.app_dict.get(DesktopFile.APP_NAME_KEY),
             subtitle = file.app_dict.get(DesktopFile.COMMENT_KEY),
+            activatable = True,
         )

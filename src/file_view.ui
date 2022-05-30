@@ -26,6 +26,7 @@
         <child type='end'>
           <object class='GtkButton' id='save_button'>
             <property name='label' translatable='yes'>Save</property>
+            <property name='sensitive' translatable='yes'>false</property>
             <style>
               <class name='suggested-action'/>
             </style>
@@ -34,8 +35,67 @@
       </object>
     </child>
     <child>
-      <object class='AdwClamp'>
-        <placeholder/>
+      <object class='GtkScrolledWindow'>
+        <property name='vexpand'>true</property>
+        <property name='hexpand'>true</property>
+        <child>
+          <object class='AdwClamp' id='main_clamp'>
+            <child>
+              <object class='GtkBox' id='main_box'>
+                <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                <child>
+                  <!-- Application banner -->
+                  <object class='GtkBox' id='app_banner'>
+                    <property name='orientation'>GTK_ORIENTATION_HORIZONTAL</property>
+                    <property name='margin-start'>12</property>
+                    <property name='margin-end'>12</property>
+                    <property name='margin-top'>24</property>
+                    <property name='margin-bottom'>24</property>
+                    <property name='spacing'>12</property>
+                    <child>
+                      <!-- Application icon -->
+                      <object class='GtkImage' id='app_icon'>
+                        <property name='icon-name'>application-x-executable</property>
+                        <property name='pixel-size'>128</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='GtkBox'>
+                        <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                        <property name='valign'>GTK_ALIGN_CENTER</property>
+                        <property name='hexpand'>true</property>
+                        <property name='spacing'>6</property>
+                        <child>
+                          <!-- Application name -->
+                          <object class='GtkEntry' id='app_name'>
+                            <property name='placeholder-text' translatable='yes'>App name</property>
+                            <property name='has-frame'>false</property>
+                            <style>
+                              <class name='title-1'/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <!-- Application description -->
+                          <object class='GtkEntry' id='app_comment'>
+                            <property name='placeholder-text' translatable='yes'>Comment</property>
+                            <property name='has-frame'>false</property>
+                            <style>
+                              <class name='dim-label'/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </template>

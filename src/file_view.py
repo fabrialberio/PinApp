@@ -9,8 +9,17 @@ class FileView(Gtk.Box):
     back_button = Gtk.Template.Child('back_button')
     save_button = Gtk.Template.Child('save_button')
 
-    def __init__(self, **kwargs):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
+    app_icon = Gtk.Template.Child('app_icon')
+    app_name = Gtk.Template.Child('app_name')
+    app_comment = Gtk.Template.Child('app_comment')
+
+    main_view = Gtk.Template.Child('main_box')
+
+
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL)
+
+        self.file = None
 
         GObject.type_register(FileView)
         GObject.signal_new('file-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
@@ -20,4 +29,13 @@ class FileView(Gtk.Box):
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
     
-    def load_file(self, file: DesktopFile): ...
+    def load_file(self, file: DesktopFile):
+        self.file = file
+        self.build_ui()
+
+    def build_ui(self):
+        print(self.file)
+        if self.file:
+            self.save_button.set_sensitive(True)
+        else:
+            self.save_button.set_sensitive(False)
