@@ -34,8 +34,11 @@ class FileView(Gtk.Box):
         self.build_ui()
 
     def build_ui(self):
-        print(self.file)
         if self.file:
             self.save_button.set_sensitive(True)
         else:
             self.save_button.set_sensitive(False)
+
+class EntryRow(Adw.ActionRow):
+    def __init__(self, title) -> None:
+        super().__init__()

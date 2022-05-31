@@ -55,7 +55,7 @@
                     <child>
                       <!-- Application icon -->
                       <object class='GtkImage' id='app_icon'>
-                        <property name='icon-name'>application-x-executable</property>
+                        <property name='icon-name'>image-missing</property>
                         <property name='pixel-size'>128</property>
                       </object>
                     </child>
@@ -68,10 +68,14 @@
                         <child>
                           <!-- Application name -->
                           <object class='GtkEntry' id='app_name'>
-                            <property name='placeholder-text' translatable='yes'>App name</property>
+                            <property name='placeholder-text' translatable='yes'>Name</property>
                             <property name='has-frame'>false</property>
+                            <property name='secondary-icon-name'>document-edit</property>
+                            <property name='secondary-icon-sensitive'>false</property>
+                            <property name='secondary-icon-activatable'>false</property>
                             <style>
                               <class name='title-1'/>
+                              <class name='suggested-action'/>
                             </style>
                           </object>
                         </child>

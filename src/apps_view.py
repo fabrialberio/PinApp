@@ -51,8 +51,8 @@ class AppsGroup(Adw.PreferencesGroup):
 
     def __init__(self, folder: DesktopFileFolder, title: str = None):        
         super().__init__(
-            title = title if title else str(folder.path),
-            description = folder.path if title else None,
+            title = title,
+            description = folder.path,
         )
 
         self.folder = folder
@@ -70,7 +70,7 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopFile):
         super().__init__(
-            icon_name = file.app_dict.get(DesktopFile.ICON_KEY) or 'application-x-executable',
+            icon_name = file.app_dict.get(DesktopFile.ICON_KEY) or 'image-missing',
             title = file.app_dict.get(DesktopFile.APP_NAME_KEY),
             subtitle = file.app_dict.get(DesktopFile.COMMENT_KEY),
             activatable = True,
