@@ -28,7 +28,7 @@ class FileView(Gtk.Box):
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
-    
+
     def load_file(self, file: DesktopFile):
         self.file = file
         self.build_ui()
@@ -39,6 +39,13 @@ class FileView(Gtk.Box):
         else:
             self.save_button.set_sensitive(False)
 
-class EntryRow(Adw.ActionRow):
-    def __init__(self, title) -> None:
-        super().__init__()
+class StringRow(Adw.ActionRow):
+    def __init__(self, 
+                 title,
+                 monospace=False,) -> None:
+        self.entry = Gtk.Entry()
+        if monospace:
+            self.entry.add_css_class('monospace')
+        
+        super().__init__(title=title,
+                         activatable_widget=self.entry,)

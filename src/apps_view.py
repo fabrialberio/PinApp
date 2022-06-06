@@ -75,3 +75,4 @@ class AppRow(Adw.ActionRow):
             subtitle = file.app_dict.get(DesktopFile.COMMENT_KEY),
             activatable = True,
         )
+        self.add_suffix(Gtk.Image(icon_name='go-next-symbolic'))
