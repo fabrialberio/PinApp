@@ -8,12 +8,16 @@ class FileView(Gtk.Box):
     
     back_button = Gtk.Template.Child('back_button')
     save_button = Gtk.Template.Child('save_button')
-    
+    main_view = Gtk.Template.Child('main_box')
+
     app_icon = Gtk.Template.Child('app_icon')
     app_name_entry = Gtk.Template.Child('app_name')
     app_comment = Gtk.Template.Child('app_comment')
 
-    main_view = Gtk.Template.Child('main_box')
+    strings_group = Gtk.Template.Child('strings_group')
+    add_string_button = Gtk.Template.Child('add_string_button')
+    bools_group = Gtk.Template.Child('bools_group')
+    add_bool_button = Gtk.Template.Child('add_bool_button')
 
     def __init__(self):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -47,12 +51,14 @@ class FileView(Gtk.Box):
         self.save_button.set_sensitive(True)
 
         # TODO: remove the existing group before adding a new one
-        stringGroup = ValuesGroup(self.file)
-        self.main_view.append(stringGroup)
+
 
     def build_ui(self):
         self.app_name_entry.set_buffer(self.app_name_buffer)
         self.app_comment.set_buffer(self.app_comment_buffer)
+
+        self.strings_group.add(StringRow('Buongiorno', True))
+        self.bools_group.add(BoolRow('Test'))
 
     @classmethod
     def _update_buffer(self, buffer: Gtk.EntryBuffer, text: str):
@@ -63,46 +69,33 @@ class FileView(Gtk.Box):
             buffer.set_text('', 0)
 
 
-class ValuesGroup(Adw.PreferencesGroup):
-    
-    def __init__(self, 
-        file: DesktopFile, 
-        type: str = 'string',
-    ):
-        super().__init__(
-            title = f'{type.capitalize()} values',
-            description = '',
-            header_suffix = Gtk.Button(
-                child = Adw.ButtonContent(
-                    icon_name = 'list-add',
-                    label = 'Add',
-                )
-            )
-        )
-
-        self.file = file
-        self.type = type
-
-        self.build_ui()
-    
-    def build_ui(self):...
-
 class StringRow(Adw.ActionRow):
     def __init__(
-        self, 
-        title,
-        monospace=False,
-    ) -> None:
-
-        self.buffer = Gtk.EntryBuffer()
-        self.entry = Gtk.Entry(
-            buffer=self.buffer,
-            css_classes = ['monospace'] if monospace else None,
-        )
-        
-        self.entry.connect('activate', lambda _: self.emit('activate', self.entry.get_text()))
+            self, 
+            title: str,
+            monospace: bool = False,
+        ) -> None:
+        # TODO: Replace this with Adw.EntryRow when possible
 
         super().__init__(
             title=title,
-            activatable_widget=self.entry,
+            css_classes = ['monospace'] if monospace else None,
         )
+
+class BoolRow(Adw.ActionRow):
+    def __init__(
+            self,
+            title: str,
+            default_state: bool = False
+        ) -> None:
+
+        self.switch = Gtk.Switch(
+            active=default_state,
+            valign=Gtk.Align.CENTER,
+        )
+
+        super().__init__(
+            title=title,
+            activatable_widget=self.switch,
+        )
+        super().add_suffix(self.switch)

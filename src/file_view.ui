@@ -41,6 +41,7 @@
             <child>
               <object class='GtkBox' id='main_box'>
                 <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                <property name='spacing'>12</property>
                 <child>
                   <!-- Application banner -->
                   <object class='GtkBox' id='app_banner'>
@@ -92,6 +93,38 @@
                         </child>
                       </object>
                     </child>
+                  </object>
+                </child>
+                <child>
+                  <!-- String values group -->
+                  <object class='AdwPreferencesGroup' id='strings_group'>
+                    <property name='title' translatable='yes'>String values</property>
+                    <property name='header-suffix'>
+                      <object class='GtkButton' id='add_string_button'>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='label' translatable='yes'>Add</property>
+                            <property name='icon-name'>list-add</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <!-- Bool values group -->
+                  <object class='AdwPreferencesGroup' id='bools_group'>
+                    <property name='title' translatable='yes'>Boolean values</property>
+                    <property name='header-suffix'>
+                      <object class='GtkButton' id='add_bool_button'>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='label' translatable='yes'>Add</property>
+                            <property name='icon-name'>list-add</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
                   </object>
                 </child>
               </object>
