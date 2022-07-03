@@ -11,20 +11,23 @@ class AppsView(Gtk.Box):
 
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
-
-        GObject.type_register(AppsView)
-        GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-        GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-        
-        GObject.type_register(AppsGroup)
-        GObject.signal_new('file-open', AppsGroup, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-
         self.folders = {
             'User': DesktopFileFolder('~/.local/share/applications/'),
             'System': DesktopFileFolder('/usr/share/applications/'),
             #'Local System': '/usr/local/share/applications/',
         }
+
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
+
+        GObject.type_register(AppsView)
+        GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+
+        GObject.type_register(AppsGroup)
+        GObject.signal_new('file-open', AppsGroup, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+
+        GObject.type_register(AppRow)
+        GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
         self.build_ui()
 
@@ -60,7 +63,7 @@ class AppsGroup(Adw.PreferencesGroup):
 
         for file in self.folder.files:
             app_row = AppRow(file)
-            app_row.connect('activated', lambda _: self.emit('file-open', file))
+            app_row.connect('file-open', lambda _, f: self.emit('file-open', f))
 
             self.add(app_row)
 
@@ -70,9 +73,13 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopFile):
         super().__init__(
-            icon_name = file.app_dict.get(DesktopFile.ICON_KEY) or 'image-missing',
-            title = file.app_dict.get(DesktopFile.APP_NAME_KEY),
-            subtitle = file.app_dict.get(DesktopFile.COMMENT_KEY),
-            activatable = True,
-        )
-        self.add_suffix(Gtk.Image(icon_name='go-next-symbolic'))
+            icon_name = file.icon_name or 'image-missing',
+            title = file.app_name,
+            subtitle = file.comment,
+            activatable = True,)
+
+        self.add_suffix(Gtk.Image(
+            icon_name='go-next-symbolic',
+            css_classes=['icon-dropshadow']))
+
+        self.connect('activated', lambda _: self.emit('file-open', file))

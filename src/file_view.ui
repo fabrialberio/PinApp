@@ -18,8 +18,6 @@
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>
             <property name='title' translatable='yes'>PinApp</property>
-            <!-- Subtitle (App name) -->
-            <property name='subtitle' translatable='no'>File View</property>
           </object>
         </property>
         <!-- Save button -->
@@ -57,6 +55,9 @@
                       <object class='GtkImage' id='app_icon'>
                         <property name='icon-name'>image-missing</property>
                         <property name='pixel-size'>128</property>
+                        <style>
+                          <class name='icon'/>
+                        </style>
                       </object>
                     </child>
                     <child>

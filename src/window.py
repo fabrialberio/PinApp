@@ -55,7 +55,6 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_open(self, file_view, file):
-        print(f'Opening file {file}')
         self.file_view.load_file(file)
         self.leaflet.set_visible_child(self.file_view)
         #self.file_view.set_file(file)

@@ -58,7 +58,7 @@ class DesktopFileFolder():
 
 class DesktopFile(ConfigParser):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
-    APP_GROUPNAME = 'Desktop Entry'
+    APP_SECTION = 'Desktop Entry'
 
     # Common keys
     CATEGORIES_KEY = 'Categories'
@@ -77,15 +77,13 @@ class DesktopFile(ConfigParser):
 
     def __init__(self, path) -> None:
         self.path = Path(path)
-        if not (self.path.is_file() or self.path.suffix == 'desktop'):
+        if not (self.path.is_file() or self.path.suffix == '.desktop'):
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
-        super().__init__(
-            interpolation=None,
-        )
+        super().__init__(interpolation=None,)
         self.load()
-        if self.APP_GROUPNAME not in self.sections():
-            self.add_section(self.APP_GROUPNAME)
+        if self.APP_SECTION not in self.sections():
+            self.add_section(self.APP_SECTION)
 
     # File properties
     @property
@@ -99,7 +97,22 @@ class DesktopFile(ConfigParser):
 
     # Desktop file specific properties
     @property
-    def app_dict(self) -> dict: return self[self.APP_GROUPNAME]
+    def app_dict(self) -> dict: return self[self.APP_SECTION]
+    @property
+    def app_name(self) -> str: return self.app_dict.get(self.APP_NAME_KEY)
+    @property
+    def comment(self) -> str: return self.app_dict.get(self.COMMENT_KEY)
+    @property
+    def icon_name(self) -> str: return self.app_dict.get(self.ICON_KEY)
+    @property
+    def executable_path(self) -> str: return self.app_dict.get(self.EXEC_KEY)
+    @property
+    def app_type(self) -> str: return self.app_dict.get(self.TYPE_KEY)
+    @property
+    def is_terminal(self) -> str: return self.app_dict.get(self.IS_TERMINAL_KEY)
+    @property
+    def is_no_display(self) -> str: return self.app_dict.get(self.NO_DISPLAY_KEY)
+
 
     def get_categories(self) -> list: 
         if self.CATEGORIES_KEY in self.app_dict:
@@ -109,7 +122,7 @@ class DesktopFile(ConfigParser):
     
     def set_categories(self, new_categories: list):
         '''Sets the categories of the desktop file'''
-        self.set(self.APP_GROUPNAME, self.CATEGORIES_KEY, ';'.join(new_categories))
+        self.set(self.APP_SECTION, self.CATEGORIES_KEY, ';'.join(new_categories))
 
     def load(self):
         return self.read(self.path)
