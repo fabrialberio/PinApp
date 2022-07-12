@@ -1,5 +1,5 @@
 from pathlib import Path
-from configparser import ConfigParser
+from configparser import ConfigParser, NoOptionError
 
 
 class DesktopFileFolder():
@@ -99,6 +99,34 @@ class DesktopFile(ConfigParser):
     @property
     def app_dict(self) -> dict: return self[self.APP_SECTION]
     @property
+    def bool_values(self) -> dict:
+        for k, v in self.app_dict.items():
+            try:
+                self.getboolean(self.APP_SECTION, k)
+            except (ValueError, NoOptionError):
+                continue
+            else:
+                yield k, v
+    @property
+    def float_values(self) -> dict:
+        for k, v in self.app_dict.items():
+            try:
+                self.getfloat(self.APP_SECTION, k)
+            except (ValueError, NoOptionError):
+                continue
+            else:
+                yield k, v
+    @property
+    def string_values(self) -> dict:
+        '''All the values except numbers (float or int), booleans and categories'''
+        # TODO: Remove categories too
+        all_items = self.app_dict.items()
+        floats = dict(self.float_values).items()
+        bools = dict(self.bool_values).items()
+
+        return dict(all_items - floats - bools)
+
+    @property
     def app_name(self) -> str: return self.app_dict.get(self.APP_NAME_KEY)
     @property
     def comment(self) -> str: return self.app_dict.get(self.COMMENT_KEY)
@@ -112,7 +140,6 @@ class DesktopFile(ConfigParser):
     def is_terminal(self) -> str: return self.app_dict.get(self.IS_TERMINAL_KEY)
     @property
     def is_no_display(self) -> str: return self.app_dict.get(self.NO_DISPLAY_KEY)
-
 
     def get_categories(self) -> list: 
         if self.CATEGORIES_KEY in self.app_dict:

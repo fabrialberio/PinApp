@@ -73,13 +73,16 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopFile):
         super().__init__(
-            icon_name = file.icon_name or 'image-missing',
             title = file.app_name,
             subtitle = file.comment,
             activatable = True,)
 
+        self.add_prefix(Gtk.Image(
+            icon_name = file.icon_name or 'image-missing',
+            css_classes=['icon-dropshadow'],))
+
         self.add_suffix(Gtk.Image(
             icon_name='go-next-symbolic',
-            css_classes=['icon-dropshadow']))
+            opacity=.6))
 
         self.connect('activated', lambda _: self.emit('file-open', file))

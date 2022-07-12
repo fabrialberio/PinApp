@@ -15,9 +15,7 @@ class FileView(Gtk.Box):
     app_comment = Gtk.Template.Child('app_comment')
 
     strings_group = Gtk.Template.Child('strings_group')
-    add_string_button = Gtk.Template.Child('add_string_button')
     bools_group = Gtk.Template.Child('bools_group')
-    add_bool_button = Gtk.Template.Child('add_bool_button')
 
     def __init__(self):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -31,12 +29,13 @@ class FileView(Gtk.Box):
         GObject.signal_new('file-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-save', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-edit', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-
-        GObject.type_register(StringRow)
-        #GObject.signal_new('activate', StringRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new('add-string-field', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('add-bool-field', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
+        self.strings_group.get_header_suffix().connect('clicked', lambda _: self.emit('add-string-field'))
+        self.bools_group.get_header_suffix().connect('clicked', lambda _: self.emit('add-bool-field'))
 
         self.build_ui()
 
@@ -48,17 +47,18 @@ class FileView(Gtk.Box):
         self._update_buffer(self.app_name_buffer, self.file.app_name)
         self._update_buffer(self.app_comment_buffer, self.file.comment)
 
-        self.save_button.set_sensitive(True)
+        string_rows = [StringRow(title=k, default_value=v) for k, v in self.file.string_values.items()]
+        self._update_preferences_group(self.strings_group, string_rows)
 
-        # TODO: remove the existing group before adding a new one
+        bool_rows = [BoolRow(title=k, default_state=v) for k, v in dict(self.file.bool_values).items()]
+        self._update_preferences_group(self.bools_group, bool_rows)
+
+        self.save_button.set_sensitive(True)
 
 
     def build_ui(self):
         self.app_name_entry.set_buffer(self.app_name_buffer)
         self.app_comment.set_buffer(self.app_comment_buffer)
-
-        self.strings_group.add(StringRow('Buongiorno', True))
-        self.bools_group.add(BoolRow('Test'))
 
     @classmethod
     def _update_buffer(self, buffer: Gtk.EntryBuffer, text: str):
@@ -68,19 +68,44 @@ class FileView(Gtk.Box):
         except TypeError:
             buffer.set_text('', 0)
 
+    @classmethod
+    def _update_preferences_group(self, preferences_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], max_children = 10000):
+        '''Removes all present children of the group and adds the new ones'''
+
+        listbox = (
+            preferences_group
+            .get_first_child()  # Main group GtkBox
+            .get_last_child()   # GtkBox containing the listbox
+            .get_first_child()) # GtkListbox
+
+        old_children: list[Gtk.Widget] = []
+
+        i = 0
+        while listbox.get_row_at_index(i) is not None:
+            old_children.append(listbox.get_row_at_index(i))
+            if i > max_children:
+                raise IndexError('Listbox has too many children, maybe something is wrong')
+            i += 1
+
+        for c in old_children:
+            preferences_group.remove(c)
+
+        for c in new_children:
+            preferences_group.add(c)
 
 class StringRow(Adw.ActionRow):
+    # TODO: Replace this with Adw.EntryRow when possible
     def __init__(
             self, 
             title: str,
-            monospace: bool = False,
-        ) -> None:
-        # TODO: Replace this with Adw.EntryRow when possible
+            default_value: str,
+            monospace: bool = False,) -> None:
 
         super().__init__(
-            title=title,
-            css_classes = ['monospace'] if monospace else None,
-        )
+            title=title.capitalize())
+        super().add_suffix(Gtk.Label(
+            label = default_value,
+            css_classes = ['monospace'] if monospace else None))
 
 class BoolRow(Adw.ActionRow):
     def __init__(
