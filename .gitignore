@@ -1,7 +1,6 @@
-.flatpak-builder
-.flatpak
-.vscode
-.vscode
 _build
-builddir
+.flatpak
+.flatpak-builder
+.vscode
 build-dir
+builddir
