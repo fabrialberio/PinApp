@@ -60,7 +60,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         #self.file_view.set_file(file)
         #self.leaflet.set_visible_child(self.file_view)
 
-class AboutDialog(Gtk.AboutDialog):
+class AboutDialog(Adw.AboutWindow):
 
     def __init__(self, parent):
         Gtk.AboutDialog.__init__(self)

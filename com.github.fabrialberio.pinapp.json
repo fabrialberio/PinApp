@@ -33,6 +33,18 @@
                     "url" : "file:///home/fabri/Progetti/Gnome/PinApp"
                 }
             ]
+        },    
+        {
+            "name": "libadwaita",
+            "buildsystem": "meson",
+            "config-opts": ["-Dtests=false", "-Dexamples=false"],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://gitlab.gnome.org/GNOME/libadwaita/-/archive/df80e9087b80b6a0c3d2494434391730481789c2/libadwaita-df80e9087b80b6a0c3d2494434391730481789c2.tar.gz",
+                    "sha256": "828355cd0f023acb9cb715c0c5e8bf1ac3c12b10f8e2ea285cf638fba89bb01b"
+                }
+            ]
         }
     ]
 }
