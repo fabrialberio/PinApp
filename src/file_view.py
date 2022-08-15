@@ -40,17 +40,20 @@ class FileView(Gtk.Box):
         self.build_ui()
 
     def load_file(self, file: DesktopFile):
-        print(f'Loading file named {file.path.name}')
         self.file = file
 
         self.app_icon.set_from_icon_name(self.file.icon_name)
         self._update_buffer(self.app_name_buffer, self.file.app_name)
         self._update_buffer(self.app_comment_buffer, self.file.comment)
 
-        string_rows = [StringRow(title=k, default_value=v) for k, v in self.file.string_values.items()]
+        file_items = self.file.items()
+        
+
+
+        string_rows = [StringRow(title=k, default_value=v) for k, v in self.file.string_items.items()]
         self._update_preferences_group(self.strings_group, string_rows)
 
-        bool_rows = [BoolRow(title=k, default_state=v) for k, v in dict(self.file.bool_values).items()]
+        bool_rows = [BoolRow(title=k, default_state=v) for k, v in self.file.bool_items.items()]
         self._update_preferences_group(self.bools_group, bool_rows)
 
         self.save_button.set_sensitive(True)
@@ -93,7 +96,7 @@ class FileView(Gtk.Box):
         for c in new_children:
             preferences_group.add(c)
 
-class StringRow(Adw.ActionRow):
+class StringRow(Adw.EntryRow):
     # TODO: Replace this with Adw.EntryRow when possible
     def __init__(
             self, 
@@ -101,11 +104,12 @@ class StringRow(Adw.ActionRow):
             default_value: str,
             monospace: bool = False,) -> None:
 
+        self._buffer = Gtk.EntryBuffer()
+        self._buffer.set_text(default_value, len(default_value))
+
         super().__init__(
-            title=title.capitalize())
-        super().add_suffix(Gtk.Label(
-            label = default_value,
-            css_classes = ['monospace'] if monospace else None))
+            title=title.capitalize(),
+            css_classes = ['monospace'] if monospace else None,)
 
 class BoolRow(Adw.ActionRow):
     def __init__(

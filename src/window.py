@@ -59,15 +59,9 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.leaflet.set_visible_child(self.file_view)
         #self.file_view.set_file(file)
         #self.leaflet.set_visible_child(self.file_view)
-
-class AboutDialog(Gtk.AboutDialog):
-
-    def __init__(self, parent):
-        Gtk.AboutDialog.__init__(self)
-        self.props.program_name = 'PinApp'
-        self.props.version = '0.1.0'
-        self.props.authors = ['Fabrizio Alberio']
-        self.props.copyright = '2022 Fabrizio Alberio'
-        self.props.logo_icon_name = 'com.github.fabrialberio.pinapp'
-        self.props.modal = True
-        self.set_transient_for(parent)
+    
+    def show_about_window(self):
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/about.ui')
+        about_window = builder.get_object('about_window')
+        about_window.set_transient_for(self)
+        about_window.present()

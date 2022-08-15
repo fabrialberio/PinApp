@@ -99,32 +99,43 @@ class DesktopFile(ConfigParser):
     @property
     def app_dict(self) -> dict: return self[self.APP_SECTION]
     @property
-    def bool_values(self) -> dict:
-        for k, v in self.app_dict.items():
-            try:
-                self.getboolean(self.APP_SECTION, k)
-            except (ValueError, NoOptionError):
-                continue
-            else:
-                yield k, v
+    def bool_items(self) -> dict: return dict(filter(lambda i: self.is_bool(i[0]), self.app_dict.items()))
     @property
-    def float_values(self) -> dict:
-        for k, v in self.app_dict.items():
-            try:
-                self.getfloat(self.APP_SECTION, k)
-            except (ValueError, NoOptionError):
-                continue
-            else:
-                yield k, v
+    def float_items(self) -> dict: return dict(filter(lambda i: self.is_int(i[0]), self.app_dict.items()))
     @property
-    def string_values(self) -> dict:
+    def string_items(self) -> dict:
         '''All the values except numbers (float or int), booleans and categories'''
-        # TODO: Remove categories too
-        all_items = self.app_dict.items()
-        floats = dict(self.float_values).items()
-        bools = dict(self.bool_values).items()
-
-        return dict(all_items - floats - bools)
+        return dict(filter(
+            lambda i: not (
+                self.is_int(i[0]) or 
+                self.is_bool(i[0]) or 
+                self.is_float(i[0]) or 
+                self.is_categories(i[0])),
+            self.app_dict.items()))
+    
+    def is_bool(self, key: str):
+        try:
+            self.getboolean(self.APP_SECTION, key)
+        except (ValueError, NoOptionError):
+            return False
+        else:
+            return True
+    def is_int(self, key: str):
+        try:
+            self.getint(self.APP_SECTION, key)
+        except (ValueError, NoOptionError):
+            return False
+        else:
+            return True
+    def is_float(self, key: str):
+        try:
+            self.getfloat(self.APP_SECTION, key)
+        except (ValueError, NoOptionError):
+            return False
+        else:
+            return True
+    def is_categories(self, key: str):
+        return key.title() == self.CATEGORIES_KEY
 
     @property
     def app_name(self) -> str: return self.app_dict.get(self.APP_NAME_KEY)

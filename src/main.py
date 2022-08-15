@@ -24,7 +24,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
-from .window import PinAppWindow, AboutDialog
+from .window import PinAppWindow
 
 
 class PinAppApplication(Adw.Application):
@@ -36,8 +36,10 @@ class PinAppApplication(Adw.Application):
         Gtk.init_check()
 
         self.create_action('quit', self.quit, ['<primary>q'])
-        self.create_action('about', self.on_about_action)
+        self.create_action('about', self.show_about_window)
         self.create_action('preferences', self.on_preferences_action)
+
+        self.window = None
 
     def do_activate(self):
         """Called when the application is activated.
@@ -45,15 +47,15 @@ class PinAppApplication(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
-        win = self.props.active_window
-        if not win:
-            win = PinAppWindow(application=self)
-        win.present()
+        self.window = self.props.active_window
+        if not self.window:
+            self.window = PinAppWindow(application=self)
+        self.window.present()
 
-    def on_about_action(self, widget, _):
+    def show_about_window(self, widget, _):
         """Callback for the app.about action."""
-        about = AboutDialog(self.props.active_window)
-        about.present()
+        # I'm not shure this is the best way, but it works perfectly fine for now
+        self.window.show_about_window()
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
