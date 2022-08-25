@@ -1,6 +1,318 @@
 from pathlib import Path
-from configparser import ConfigParser, NoOptionError
+from configparser import ConfigParser, SectionProxy
 
+from locale import getlocale
+
+
+
+class LocaleString:
+    def __init__(self, raw_string: str):
+        split_by_mod = raw_string.split('@')
+        self.modifier = split_by_mod[1] if len(split_by_mod) > 1 else None
+        split_by_cnt = split_by_mod[0].split('_')
+        self.country = split_by_cnt[1] if len(split_by_cnt) > 1 else None
+        self.lang = split_by_cnt[0]
+
+        if not self.lang:
+            raise ValueError('LocaleString must contain a language to be defined')
+
+    def find_closest(self, candidates: list['LocaleString']) -> 'LocaleString':
+        if len(candidates) > 0:
+            closeness: list[int] = [0 for _ in candidates] # Higher is better
+
+            for i, l in enumerate(candidates):
+                not_valid_flag = False
+
+                if l.lang:
+                    if self.lang == l.lang:
+                        closeness[i] += 1
+                    else:
+                        not_valid_flag = True
+                if l.country:
+                    if self.country == l.country:
+                        closeness[i] += 4
+                    else:
+                        not_valid_flag = True
+                if l.modifier:
+                    if self.modifier == l.modifier:
+                        closeness[i] += 2
+                    else:
+                        not_valid_flag = True
+
+                if not_valid_flag:
+                    closeness[i] = 0
+            
+            if max(closeness) > 0:
+                return candidates[closeness.index(max(closeness))]
+
+
+    def __str__(self):
+        return self.lang + \
+            (f'_{self.country}' if self.country else '') + \
+            (f'@{self.modifier}' if self.modifier else '')
+
+    def __repr__(self):
+        return f'<LocaleString {self.__str__()}>'
+
+class Field:
+    '''
+    A field in a DesktopFile
+    It handles type convertion and localization
+    '''
+
+    def __init__(self, key: str, section: SectionProxy) -> None:
+        self.key = key
+        self.section = section
+
+    @staticmethod
+    def list_from_section(section: SectionProxy) -> list['Field']:
+        unlocalized_keys = list(filter(
+            lambda k: '[' not in k,
+            section.keys()))
+
+        return [Field(k, section) for k in unlocalized_keys]
+    @staticmethod
+    def dict_from_section(section: SectionProxy) -> dict[str, 'Field']:
+        unlocalized_keys = list(filter(
+            lambda k: '[' not in k,
+            section.keys()))
+
+        return {k: Field(k, section) for k in unlocalized_keys}
+
+    @property
+    def _value(self) -> str: return self.section.get(self.key)
+
+    def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
+        field = self.localize(locale) if locale != None else self
+        
+        if field.as_bool() != None: return field.as_bool()
+        elif field.as_int() != None: return field.as_int()
+        elif field.as_float() != None: return field.as_float()
+        elif field.as_str_list() != None: return field.as_str_list()
+        else: return field.as_str()
+
+    def set(self, new_value: 'bool | int | float | list[str] | str'):
+        if isinstance(new_value, bool):
+            new_str_value = 'true' if new_value else 'false'
+        elif isinstance(new_value, list):
+            new_value = [str(i) for i in new_value]
+            new_str_value = ';'.join(new_value) + ';'
+        else:
+            new_str_value = str(new_value)
+
+        self.section.parser.set(self.section.name, self.key, new_str_value)
+
+    def localize(self, locale_str: str = None, strict = False) -> 'Field':
+        '''If the field has localizations, returns the most similar one. If not given, returns the system locale.'''
+
+        # If locale is not given, gets the system locale
+        if locale_str == None:
+            if strict:
+                raise TypeError(f'Localization string cannot be None')
+            else:
+                locale_str = LocaleString(getlocale()[0])
+        else:
+            locale_str = LocaleString(str(locale_str))
+    
+        # Finds the closest locale to the one specified from the localizations
+        unlocalized_key = self.key.split('[')[0]
+        key_locales: list[str] = [
+            LocaleString(
+                k.removeprefix(unlocalized_key).removeprefix('[').removesuffix(']'))\
+            for k in self.section.keys() \
+            if k.startswith(unlocalized_key) \
+            and k != unlocalized_key]
+        
+        closest_locale = locale_str.find_closest(key_locales)
+
+        # If no close locale is found, returns the unlocalized version of itself
+        if closest_locale != None:
+            return Field(f'{unlocalized_key}[{closest_locale}]', self.section)
+        elif strict:
+            raise ValueError(f'{self.__repr__()} cannot be localized as \'{locale_str}\'')
+        else:
+            return Field(unlocalized_key, self.section)
+    
+    def exists(self):
+        return self._value != None
+
+
+    def as_bool(self, strict = False) -> 'bool | None':
+        if self.exists():
+            if self._value.lower() == 'true':
+                return True
+            elif self._value.lower() == 'false':
+                return False
+        
+        if strict:
+            raise ValueError(f'{self.__repr__()} cannot be converted to bool')
+
+    def as_int(self, strict = False):
+        if self.exists():
+            if self._value.isdecimal():
+                return int(self._value)
+
+        if strict:
+            raise ValueError(f'{self.__repr__()} cannot be converted to int')
+
+    def as_float(self, strict = False):
+        try: 
+            return float(self._value)
+        except (ValueError, TypeError):
+            if strict:
+                raise ValueError(f'{self.__repr__()} cannot be converted to float')
+
+    def as_str_list(self, strict = False) -> 'list[str] | None':
+        if self.exists():
+            if self._value.strip().endswith(';'):
+                return self._value.split(';')[:-1]
+        
+        if strict:
+            raise ValueError(f'{self.__repr__()} cannot be converted to list[str]')
+
+    def as_str(self, strict = False) -> str:
+        if self.exists():
+            return str(self._value)
+        elif strict:
+            raise ValueError(f'{None} cannot be converted to str')
+
+    def __getitem__(self, value: str):
+        return self.localize(locale_str=value, strict=True)
+
+    def __bool__(self) -> bool: return self.as_bool(strict=True)
+    def __int__(self) -> int: return self.as_int(strict=True)
+    def __float__(self) -> float: return self.as_float(strict=True)
+    def __list__(self) -> list: return self.as_str_list(strict=True)
+    def __str__(self) -> str: return f'{self.key}: {self.as_str()}'
+    def __repr__(self) -> str: return f'<Desktop entry field \'{self.key}\'>'
+
+
+class Section:
+    def __init__(self, section: SectionProxy, only_accept_keys: list[str] = None):
+        self.section = section
+        self.only_accept_keys = only_accept_keys
+
+    def section_name(self) -> str: 
+        return self.section.name
+
+    def __getattr__(self, name) -> 'Field':
+        if self.only_accept_keys == None or name in self.only_accept_keys:
+            return Field(name, self.section)
+
+    def keys(self): return self.as_dict().keys()
+    def items(self): return self.as_dict().items()
+    def values(self): return self.as_dict().values()
+    def as_dict(self): return dict(self.section)
+
+class AppSection(Section):
+    NAME = 'Desktop Entry'
+    RECOGNIZED_KEYS = [
+        'NoDisplay',
+        'Hidden',
+        'DBusActivatable',
+        'Terminal',
+        'StartupNotify',
+        'PrefersNonDefaultGPU',
+        'SingleMainWindow',
+        'Type',
+        'Exec',
+        'Icon',
+        'Version',
+        'TryExec',
+        'Path',
+        'StartupWMClass',
+        'URL',
+        'OnlyShowIn',
+        'NotShowIn',
+        'Actions',
+        'MimeType',
+        'Categories',
+        'Implements',
+        'Name',
+        'GenericName',
+        'Comment',
+        'Keywords',]
+
+    @classmethod
+    def from_parser(self, parser: ConfigParser) -> 'AppSection':
+        if self.NAME not in parser.sections():
+            parser.add_section(self.NAME)
+        
+        return AppSection(parser[self.NAME])
+
+    def __init__(self, section: SectionProxy):
+        super().__init__(section)
+
+    def is_recognized(self, key: str):
+        return key in self.RECOGNIZED_KEYS
+
+class ActionSection(Section):
+    PREFIX = 'Desktop Action'
+    RECOGNIZED_KEYS = [
+        'Name',
+        'Exec',]
+
+    @classmethod
+    def list_from_parser(self, parser: ConfigParser) -> list['ActionSection']:
+        return [
+            ActionSection(parser[section_name]) \
+            for section_name in parser.sections() \
+            if section_name.startswith(self.PREFIX)]
+
+    @classmethod
+    def dict_from_parser(self, parser: ConfigParser) -> dict[str, 'ActionSection']:
+        return {
+            action_section.action_name(): action_section \
+            for action_section in ActionSection.list_from_parser(parser)}
+
+    def __init__(self, section: SectionProxy) -> None:
+        super().__init__(section, self.RECOGNIZED_KEYS)
+
+    def action_name(self) -> str: 
+        return self.section_name().removeprefix(self.PREFIX).strip()
+
+
+class DesktopFile:
+    '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
+
+    @staticmethod
+    def new(path: 'str | Path') -> 'DesktopFile':
+        Path(path).touch(exist_ok=True)
+        return DesktopFile(path)
+
+
+    def __init__(self, path: 'str | Path') -> None:
+        self.path = Path(path)
+        if not (self.path.is_file() or self.path.suffix == '.desktop'):
+            raise ValueError(f'Path {self.path} is not a .desktop file')
+        
+        self.parser = ConfigParser(interpolation=None)
+        self.load()
+
+    @property
+    def appsection(self) -> 'AppSection': 
+        return AppSection.from_parser(self.parser)
+    @property
+    def actionsections(self) -> dict[str, 'ActionSection']:
+        return ActionSection.dict_from_parser(self.parser)
+
+    # File properties
+    @property
+    def filename(self) -> str: return self.path.name
+    @property
+    def parent(self) -> str: return self.path.parent
+    @property
+    def basename(self) -> str: return self.path.stem
+    @property
+    def extension(self) -> str: return self.path.suffix
+
+    def load(self):
+        return self.parser.read(self.path)
+
+    def save(self) -> None:
+        '''Saves the file'''
+        with open(self.path, 'w') as f:
+            self.parser.write(f)
 
 class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
@@ -55,117 +367,3 @@ class DesktopFileFolder():
         ]
 
         return self.files
-
-class DesktopFile(ConfigParser):
-    '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
-    APP_SECTION = 'Desktop Entry'
-
-    # Common keys
-    CATEGORIES_KEY = 'Categories'
-    APP_NAME_KEY = 'Name'
-    COMMENT_KEY = 'Comment'
-    EXEC_KEY = 'Exec'
-    ICON_KEY = 'Icon'
-    TYPE_KEY = 'Type'
-
-    # Booleans
-    IS_TERMINAL_KEY = 'Terminal'
-    NO_DISPLAY_KEY = 'NoDisplay'
-    TRUE_VALUE = 'true'
-    FALSE_VALUE = 'false'
-
-
-    def __init__(self, path) -> None:
-        self.path = Path(path)
-        if not (self.path.is_file() or self.path.suffix == '.desktop'):
-            raise ValueError(f'Path {self.path} is not a .desktop file')
-
-        super().__init__(interpolation=None,)
-        self.load()
-        if self.APP_SECTION not in self.sections():
-            self.add_section(self.APP_SECTION)
-
-    # File properties
-    @property
-    def filename(self) -> str: return self.path.name
-    @property
-    def parent(self) -> str: return self.path.parent
-    @property
-    def basename(self) -> str: return self.path.stem
-    @property
-    def extension(self) -> str: return self.path.suffix
-
-    # Desktop file specific properties
-    @property
-    def app_dict(self) -> dict: return self[self.APP_SECTION]
-    @property
-    def bool_items(self) -> dict: return dict(filter(lambda i: self.is_bool(i[0]), self.app_dict.items()))
-    @property
-    def float_items(self) -> dict: return dict(filter(lambda i: self.is_int(i[0]), self.app_dict.items()))
-    @property
-    def string_items(self) -> dict:
-        '''All the values except numbers (float or int), booleans and categories'''
-        return dict(filter(
-            lambda i: not (
-                self.is_int(i[0]) or 
-                self.is_bool(i[0]) or 
-                self.is_float(i[0]) or 
-                self.is_categories(i[0])),
-            self.app_dict.items()))
-    
-    def is_bool(self, key: str):
-        try:
-            self.getboolean(self.APP_SECTION, key)
-        except (ValueError, NoOptionError):
-            return False
-        else:
-            return True
-    def is_int(self, key: str):
-        try:
-            self.getint(self.APP_SECTION, key)
-        except (ValueError, NoOptionError):
-            return False
-        else:
-            return True
-    def is_float(self, key: str):
-        try:
-            self.getfloat(self.APP_SECTION, key)
-        except (ValueError, NoOptionError):
-            return False
-        else:
-            return True
-    def is_categories(self, key: str):
-        return key.title() == self.CATEGORIES_KEY
-
-    @property
-    def app_name(self) -> str: return self.app_dict.get(self.APP_NAME_KEY)
-    @property
-    def comment(self) -> str: return self.app_dict.get(self.COMMENT_KEY)
-    @property
-    def icon_name(self) -> str: return self.app_dict.get(self.ICON_KEY)
-    @property
-    def executable_path(self) -> str: return self.app_dict.get(self.EXEC_KEY)
-    @property
-    def app_type(self) -> str: return self.app_dict.get(self.TYPE_KEY)
-    @property
-    def is_terminal(self) -> str: return self.app_dict.get(self.IS_TERMINAL_KEY)
-    @property
-    def is_no_display(self) -> str: return self.app_dict.get(self.NO_DISPLAY_KEY)
-
-    def get_categories(self) -> list: 
-        if self.CATEGORIES_KEY in self.app_dict:
-            return [c for c in self.app_dict[self.CATEGORIES_KEY].split(';') if c]
-        else:
-            return []
-    
-    def set_categories(self, new_categories: list):
-        '''Sets the categories of the desktop file'''
-        self.set(self.APP_SECTION, self.CATEGORIES_KEY, ';'.join(new_categories))
-
-    def load(self):
-        return self.read(self.path)
-
-    def save(self) -> None:
-        '''Saves the file'''
-        with open(self.path, 'w') as f:
-            self.write(f)

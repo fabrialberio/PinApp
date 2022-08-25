@@ -12,7 +12,7 @@ class FileView(Gtk.Box):
 
     app_icon = Gtk.Template.Child('app_icon')
     app_name_entry = Gtk.Template.Child('app_name')
-    app_comment = Gtk.Template.Child('app_comment')
+    app_comment_entry = Gtk.Template.Child('app_comment')
 
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
@@ -21,9 +21,6 @@ class FileView(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
 
         self.file = None
-
-        self.app_name_buffer = Gtk.EntryBuffer()
-        self.app_comment_buffer = Gtk.EntryBuffer()
 
         GObject.type_register(FileView)
         GObject.signal_new('file-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
@@ -43,12 +40,10 @@ class FileView(Gtk.Box):
         self.file = file
 
         self.app_icon.set_from_icon_name(self.file.icon_name)
-        self._update_buffer(self.app_name_buffer, self.file.app_name)
-        self._update_buffer(self.app_comment_buffer, self.file.comment)
+        self.app_name_entry.set_text(self.file.app_name or '')
+        self.app_comment_entry.set_text(self.file.comment or '')
 
         file_items = self.file.items()
-        
-
 
         string_rows = [StringRow(title=k, default_value=v) for k, v in self.file.string_items.items()]
         self._update_preferences_group(self.strings_group, string_rows)
@@ -60,16 +55,8 @@ class FileView(Gtk.Box):
 
 
     def build_ui(self):
-        self.app_name_entry.set_buffer(self.app_name_buffer)
-        self.app_comment.set_buffer(self.app_comment_buffer)
+        ...
 
-    @classmethod
-    def _update_buffer(self, buffer: Gtk.EntryBuffer, text: str):
-        '''Updates a text buffer with a given text, handling exceptions'''
-        try:
-            buffer.set_text(text, len(text))
-        except TypeError:
-            buffer.set_text('', 0)
 
     @classmethod
     def _update_preferences_group(self, preferences_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], max_children = 10000):
@@ -104,12 +91,11 @@ class StringRow(Adw.EntryRow):
             default_value: str,
             monospace: bool = False,) -> None:
 
-        self._buffer = Gtk.EntryBuffer()
-        self._buffer.set_text(default_value, len(default_value))
-
         super().__init__(
             title=title.capitalize(),
             css_classes = ['monospace'] if monospace else None,)
+
+        self.set_text(default_value)
 
 class BoolRow(Adw.ActionRow):
     def __init__(

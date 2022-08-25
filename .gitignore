@@ -6,8 +6,11 @@
 # Test files
 test*
 mocks/
+*.ipynb
+*.desktop
 
 # Build dirs/files
+*/__pycache__
 app/
 app_build/
 _build/
