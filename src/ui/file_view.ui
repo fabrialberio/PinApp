@@ -66,7 +66,6 @@
                         <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
                         <property name='valign'>GTK_ALIGN_CENTER</property>
                         <property name='hexpand'>true</property>
-                        <property name='spacing'>6</property>
                         <child>
                           <!-- Application name -->
                           <object class='AdwEntryRow' id='app_name'>

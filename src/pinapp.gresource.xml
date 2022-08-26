@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/fabrialberio/pinapp">
-    <file>about.ui</file>
-    <file>window.ui</file>
-    <file>apps_view.ui</file>
-    <file>file_view.ui</file>
-    <file>gtk/help-overlay.ui</file>
   </gresource>
 </gresources>

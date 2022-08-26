@@ -25,6 +25,8 @@ configure_file(
   install_dir: get_option('bindir')
 )
 
+subdir('ui')
+
 pinapp_sources = [
   '__init__.py',
   'apps_view.py',
