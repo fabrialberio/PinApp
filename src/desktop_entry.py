@@ -183,7 +183,7 @@ class Field:
     def __int__(self) -> int: return self.as_int(strict=True)
     def __float__(self) -> float: return self.as_float(strict=True)
     def __list__(self) -> list: return self.as_str_list(strict=True)
-    def __str__(self) -> str: return f'{self.key}: {self.as_str()}'
+    def __str__(self) -> str: return self.as_str()
     def __repr__(self) -> str: return f'<Desktop entry field \'{self.key}\'>'
 
 
@@ -202,7 +202,7 @@ class Section:
     def keys(self): return self.as_dict().keys()
     def items(self): return self.as_dict().items()
     def values(self): return self.as_dict().values()
-    def as_dict(self): return dict(self.section)
+    def as_dict(self): return {k: Field(v, self.section) for k, v in self.section.items()}
 
 class AppSection(Section):
     NAME = 'Desktop Entry'

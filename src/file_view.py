@@ -39,16 +39,16 @@ class FileView(Gtk.Box):
     def load_file(self, file: DesktopFile):
         self.file = file
 
-        self.app_icon.set_from_icon_name(self.file.icon_name)
-        self.app_name_entry.set_text(self.file.app_name or '')
-        self.app_comment_entry.set_text(self.file.comment or '')
+        self.app_icon.set_from_icon_name(self.file.appsection.Icon.get())
+        self.app_name_entry.set_text(self.file.appsection.Name.get() or '')
+        self.app_comment_entry.set_text(self.file.appsection.Comment.get() or '')
 
-        file_items = self.file.items()
+        file_items = self.file.appsection.items()
 
-        string_rows = [StringRow(title=k, default_value=v) for k, v in self.file.string_items.items()]
+        string_rows = [StringRow(title=k, default_value=v.get()) for k, v in file_items if type(v.get()) == str]
         self._update_preferences_group(self.strings_group, string_rows)
 
-        bool_rows = [BoolRow(title=k, default_state=v) for k, v in self.file.bool_items.items()]
+        bool_rows = [BoolRow(title=k, default_state=v.get()) for k, v in file_items if type(v.get()) == bool]
         self._update_preferences_group(self.bools_group, bool_rows)
 
         self.save_button.set_sensitive(True)

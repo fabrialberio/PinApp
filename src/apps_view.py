@@ -74,12 +74,12 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopFile):
         super().__init__(
-            title = file.app_name,
-            subtitle = file.comment,
+            title = file.appsection.Name.get(),
+            subtitle = file.appsection.Comment.get(),
             activatable = True,)
 
         self.add_prefix(Gtk.Image(
-            icon_name = file.icon_name or 'image-missing',
+            icon_name = file.appsection.Icon.exists() or 'image-missing',
             css_classes=['icon-dropshadow'],))
 
         self.add_suffix(Gtk.Image(
