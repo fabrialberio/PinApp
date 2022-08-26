@@ -233,6 +233,32 @@ class AppSection(Section):
         'Comment',
         'Keywords',]
 
+    NoDisplay: Field
+    Hidden: Field
+    DBusActivatable: Field
+    Terminal: Field
+    StartupNotify: Field
+    PrefersNonDefaultGPU: Field
+    SingleMainWindow: Field
+    Type: Field
+    Exec: Field
+    Icon: Field
+    Version: Field
+    TryExec: Field
+    Path: Field
+    StartupWMClass: Field
+    URL: Field
+    OnlyShowIn: Field
+    NotShowIn: Field
+    Actions: Field
+    MimeType: Field
+    Categories: Field
+    Implements: Field
+    Name: Field
+    GenericName: Field
+    Comment: Field
+    Keywords: Field
+
     @classmethod
     def from_parser(self, parser: ConfigParser) -> 'AppSection':
         if self.NAME not in parser.sections():
@@ -251,6 +277,9 @@ class ActionSection(Section):
     RECOGNIZED_KEYS = [
         'Name',
         'Exec',]
+
+    Name: Field
+    Exec: Field
 
     @classmethod
     def list_from_parser(self, parser: ConfigParser) -> list['ActionSection']:
