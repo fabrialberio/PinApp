@@ -13,6 +13,12 @@
             <property name='visible'>true</property>
           </object>
         </child>
+        <child type='start'>
+          <object class='GtkButton' id='open_file_button'>
+            <property name='icon-name'>folder-open-symbolic</property>
+            <property name='visible'>true</property>
+          </object>
+        </child>
         <!-- Title (PinApp) -->
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>

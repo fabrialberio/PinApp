@@ -6,6 +6,7 @@ from .desktop_entry import DesktopFile, DesktopFileFolder
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
+    open_file_button = Gtk.Template.Child('open_file_button')
     new_file_button = Gtk.Template.Child('new_file_button')
     main_view = Gtk.Template.Child('main_clamp')
 
