@@ -1,0 +1,8 @@
+row {
+    color: red !important;
+    padding: 200px !important;
+}
+
+.app_title_entry>entry {
+    color: blue !important;
+}

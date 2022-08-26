@@ -64,6 +64,10 @@ class Field:
         self.key = key
         self.section = section
 
+        self.unlocalized_key: str = self.key.split('[')[0]
+        self.locale: str = self.key.split('[')[1].removesuffix(']') if '[' in self.key else None
+
+
     @staticmethod
     def list_from_section(section: SectionProxy) -> list['Field']:
         unlocalized_keys = list(filter(
@@ -91,7 +95,7 @@ class Field:
         elif field.as_str_list() != None: return field.as_str_list()
         else: return field.as_str()
 
-    def set(self, new_value: 'bool | int | float | list[str] | str'):
+    def set(self, new_value: 'bool | int | float | list[str] | str', create_non_existing_key = True):
         if isinstance(new_value, bool):
             new_str_value = 'true' if new_value else 'false'
         elif isinstance(new_value, list):
@@ -100,38 +104,54 @@ class Field:
         else:
             new_str_value = str(new_value)
 
-        self.section.parser.set(self.section.name, self.key, new_str_value)
+        if self.key in self.section.keys() or create_non_existing_key:
+            self.section.parser.set(self.section.name, self.key, new_str_value)
+        else:
+            raise KeyError('Cannot set a non existing key')
 
-    def localize(self, locale_str: str = None, strict = False) -> 'Field':
+    def remove(self):
+        self.section.parser.remove_option(self.section.name, self.key)
+
+
+    def localize(self, 
+        locale: str = None, 
+        strict = False, 
+        auto_localize_if_no_locale = True,
+        return_unlocalized_as_fallback = True,
+        return_non_existing_key_as_fallback = False) -> 'Field':
         '''If the field has localizations, returns the most similar one. If not given, returns the system locale.'''
 
+        if strict:
+            auto_localize_if_no_locale = False
+            return_unlocalized_as_fallback = False
+            return_non_existing_key_as_fallback = False
+
         # If locale is not given, gets the system locale
-        if locale_str == None:
-            if strict:
-                raise TypeError(f'Localization string cannot be None')
+        if locale == None:
+            if auto_localize_if_no_locale:
+                locale = getlocale()[0]
             else:
-                locale_str = LocaleString(getlocale()[0])
-        else:
-            locale_str = LocaleString(str(locale_str))
-    
+                raise TypeError(f'Localization string cannot be None')
+        
         # Finds the closest locale to the one specified from the localizations
-        unlocalized_key = self.key.split('[')[0]
         key_locales: list[str] = [
             LocaleString(
-                k.removeprefix(unlocalized_key).removeprefix('[').removesuffix(']'))\
+                k.removeprefix(self.unlocalized_key).removeprefix('[').removesuffix(']'))\
             for k in self.section.keys() \
-            if k.startswith(unlocalized_key) \
-            and k != unlocalized_key]
+            if k.startswith(self.unlocalized_key) \
+            and k != self.unlocalized_key]
         
-        closest_locale = locale_str.find_closest(key_locales)
+        closest_locale = LocaleString(locale).find_closest(key_locales)
 
         # If no close locale is found, returns the unlocalized version of itself
         if closest_locale != None:
-            return Field(f'{unlocalized_key}[{closest_locale}]', self.section)
-        elif strict:
-            raise ValueError(f'{self.__repr__()} cannot be localized as \'{locale_str}\'')
+            return Field(f'{self.unlocalized_key}[{closest_locale}]', self.section)
+        elif return_unlocalized_as_fallback:
+            return Field(self.unlocalized_key, self.section)
+        elif return_non_existing_key_as_fallback:
+            return Field(f'{self.unlocalized_key}[{locale}]', self.section)
         else:
-            return Field(unlocalized_key, self.section)
+            raise ValueError(f'{self.__repr__()} cannot be localized as \'{locale}\'')
     
     def exists(self):
         return self._value != None
@@ -177,7 +197,8 @@ class Field:
             raise ValueError(f'{None} cannot be converted to str')
 
     def __getitem__(self, value: str):
-        return self.localize(locale_str=value, strict=True)
+        return self.localize(locale=value, return_unlocalized_as_fallback=False, return_non_existing_key_as_fallback=True)
+
 
     def __bool__(self) -> bool: return self.as_bool(strict=True)
     def __int__(self) -> int: return self.as_int(strict=True)
@@ -188,16 +209,14 @@ class Field:
 
 
 class Section:
-    def __init__(self, section: SectionProxy, only_accept_keys: list[str] = None):
+    def __init__(self, section: SectionProxy):
         self.section = section
-        self.only_accept_keys = only_accept_keys
 
     def section_name(self) -> str: 
         return self.section.name
 
     def __getattr__(self, name) -> 'Field':
-        if self.only_accept_keys == None or name in self.only_accept_keys:
-            return Field(name, self.section)
+        return Field(name, self.section)
 
     def keys(self): return self.as_dict().keys()
     def items(self): return self.as_dict().items()
@@ -295,7 +314,7 @@ class ActionSection(Section):
             for action_section in ActionSection.list_from_parser(parser)}
 
     def __init__(self, section: SectionProxy) -> None:
-        super().__init__(section, self.RECOGNIZED_KEYS)
+        super().__init__(section)
 
     def action_name(self) -> str: 
         return self.section_name().removeprefix(self.PREFIX).strip()
@@ -315,7 +334,8 @@ class DesktopFile:
         if not (self.path.is_file() or self.path.suffix == '.desktop'):
             raise ValueError(f'Path {self.path} is not a .desktop file')
         
-        self.parser = ConfigParser(interpolation=None)
+        self.parser = ConfigParser(interpolation=None, )
+        self.parser.optionxform=str
         self.load()
 
     @property

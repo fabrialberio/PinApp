@@ -71,7 +71,7 @@
                           <object class='AdwEntryRow' id='app_name'>
                             <property name='title' translatable='yes'>Name</property>
                             <style>
-                              <class name='title-1'/>
+                              <class name='app_title_entry'/>
                             </style>
                           </object>
                         </child>
