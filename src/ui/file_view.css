@@ -1,8 +1,11 @@
 row {
-    color: red !important;
-    padding: 200px !important;
+    background: yellow !important;
 }
 
-.app_title_entry>entry {
-    color: blue !important;
+.app_title_entry {
+    background: blue !important;
+}
+
+.app_comment_entry {
+    background: red !important;
 }

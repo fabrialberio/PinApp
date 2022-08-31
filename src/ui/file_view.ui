@@ -81,6 +81,9 @@
                             <property name='title' translatable='yes'>Comment</property>
                           </object>
                         </child>
+                        <style>
+                          <class name='app_comment_entry'/>
+                        </style>
                       </object>
                     </child>
                   </object>
