@@ -18,6 +18,7 @@
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>
             <property name='title' translatable='yes'>PinApp</property>
+            <!-- Subtitle is file name -->
           </object>
         </property>
         <!-- Save button -->
@@ -42,13 +43,14 @@
               <object class='GtkBox' id='main_box'>
                 <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
                 <property name='spacing'>12</property>
+                <property name='margin-bottom'>24</property>
+                <property name='margin-top'>24</property>
+                <property name='margin-start'>12</property>
+                <property name='margin-end'>12</property>
                 <child>
                   <!-- Application banner -->
                   <object class='GtkBox' id='app_banner'>
                     <property name='orientation'>GTK_ORIENTATION_HORIZONTAL</property>
-                    <property name='margin-start'>12</property>
-                    <property name='margin-end'>12</property>
-                    <property name='margin-top'>24</property>
                     <property name='margin-bottom'>24</property>
                     <property name='spacing'>12</property>
                     <child>
@@ -62,30 +64,19 @@
                       </object>
                     </child>
                     <child>
-                      <object class='GtkBox'>
+                      <object class='GtkBox' id='name_comment_box'>
                         <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
                         <property name='valign'>GTK_ALIGN_CENTER</property>
                         <property name='hexpand'>true</property>
-                        <child>
-                          <!-- Application name -->
-                          <object class='AdwEntryRow' id='app_name'>
-                            <property name='title' translatable='yes'>Name</property>
-                            <style>
-                              <class name='app_title_entry'/>
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <!-- Application description -->
-                          <object class='AdwEntryRow' id='app_comment'>
-                            <property name='title' translatable='yes'>Comment</property>
-                          </object>
-                        </child>
-                        <style>
-                          <class name='app_comment_entry'/>
-                        </style>
                       </object>
                     </child>
+                  </object>
+                </child>
+                <child>
+                  <!-- Localized values group -->
+                  <object class='AdwPreferencesGroup' id='localized_group'>
+                    <property name='title' translatable='yes'>Localized values</property>
+                    <property name='visible'>False</property>
                   </object>
                 </child>
                 <child>

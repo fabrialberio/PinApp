@@ -16,12 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import gi
+from gi import require_version
 
-gi.require_version('GObject', '2.0')
-gi.require_version('Gio', '2.0')
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+require_version('GObject', '2.0')
+require_version('Gio', '2.0')
+require_version('Gtk', '4.0')
+require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
 from .window import PinAppWindow

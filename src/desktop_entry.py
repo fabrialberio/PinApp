@@ -2,7 +2,7 @@ from pathlib import Path
 from configparser import ConfigParser, SectionProxy
 
 from locale import getlocale
-
+from os import getenv
 
 
 class LocaleString:
@@ -67,7 +67,6 @@ class Field:
         self.unlocalized_key: str = self.key.split('[')[0]
         self.locale: str = self.key.split('[')[1].removesuffix(']') if '[' in self.key else None
 
-
     @staticmethod
     def list_from_section(section: SectionProxy) -> list['Field']:
         unlocalized_keys = list(filter(
@@ -85,6 +84,14 @@ class Field:
 
     @property
     def _value(self) -> str: return self.section.get(self.key)
+
+    @property
+    def localized_fields(self) -> list['Field']:
+        return [
+            Field(k, self.section) \
+            for k in self.section.keys() \
+            if k.startswith(self.unlocalized_key) \
+            and k != self.unlocalized_key]
 
     def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
         field = self.localize(locale) if locale != None else self
@@ -112,7 +119,6 @@ class Field:
     def remove(self):
         self.section.parser.remove_option(self.section.name, self.key)
 
-
     def localize(self, 
         locale: str = None, 
         strict = False, 
@@ -136,10 +142,8 @@ class Field:
         # Finds the closest locale to the one specified from the localizations
         key_locales: list[str] = [
             LocaleString(
-                k.removeprefix(self.unlocalized_key).removeprefix('[').removesuffix(']'))\
-            for k in self.section.keys() \
-            if k.startswith(self.unlocalized_key) \
-            and k != self.unlocalized_key]
+                f.key.removeprefix(self.unlocalized_key).removeprefix('[').removesuffix(']'))\
+            for f in self.localized_fields]
         
         closest_locale = LocaleString(locale).find_closest(key_locales)
 
@@ -153,9 +157,8 @@ class Field:
         else:
             raise ValueError(f'{self.__repr__()} cannot be localized as \'{locale}\'')
     
-    def exists(self):
+    def exists(self) -> bool:
         return self._value != None
-
 
     def as_bool(self, strict = False) -> 'bool | None':
         if self.exists():
@@ -204,7 +207,7 @@ class Field:
     def __int__(self) -> int: return self.as_int(strict=True)
     def __float__(self) -> float: return self.as_float(strict=True)
     def __list__(self) -> list: return self.as_str_list(strict=True)
-    def __str__(self) -> str: return self.as_str()
+    def __str__(self) -> str: return self.as_str() or str(None)
     def __repr__(self) -> str: return f'<Desktop entry field \'{self.key}\'>'
 
 
@@ -215,13 +218,16 @@ class Section:
     def section_name(self) -> str: 
         return self.section.name
 
+    def add_entry(self, key, value):
+        Field(key, self.section).set(value)
+
     def __getattr__(self, name) -> 'Field':
         return Field(name, self.section)
 
     def keys(self): return self.as_dict().keys()
     def items(self): return self.as_dict().items()
     def values(self): return self.as_dict().values()
-    def as_dict(self): return {k: Field(v, self.section) for k, v in self.section.items()}
+    def as_dict(self): return {k: Field(k, self.section) for k, v in self.section.items()}
 
 class AppSection(Section):
     NAME = 'Desktop Entry'
@@ -324,9 +330,23 @@ class DesktopFile:
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
 
     @staticmethod
-    def new(path: 'str | Path') -> 'DesktopFile':
-        Path(path).touch(exist_ok=True)
-        return DesktopFile(path)
+    def new_with_defaults(path: 'str | Path') -> 'DesktopFile':
+        valid_path = DesktopFile.validate_path(str(path))
+        desktop_file = DesktopFile(valid_path)
+
+        desktop_file.appsection.Exec.set('')
+        desktop_file.appsection.Type.set('Application')
+        desktop_file.appsection.Terminal.set(False)
+
+        return desktop_file
+
+    @staticmethod
+    def validate_path(path: str) -> str:
+        # Sets the exstension to .desktop
+        if not path.endswith('.desktop'):
+            path += '.desktop'
+        
+        return path
 
 
     def __init__(self, path: 'str | Path') -> None:
@@ -365,10 +385,20 @@ class DesktopFile:
 
 class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
-    
+
+    RECOGNIZED_FOLDERS = [
+        f'{getenv("HOME")}/.local/share/applications',
+        f'/usr/share/applications'
+    ]
+
+    @staticmethod
+    def list_from_recognized() -> list['DesktopFileFolder']:
+        return [
+            DesktopFileFolder(p) for p in \
+            DesktopFileFolder.RECOGNIZED_FOLDERS]
+
     def __init__(self, path: Path):
         self.path = Path(path)
-        self.path = self.path.expanduser()
         if not self.path.is_dir():
             raise ValueError(f'Path "{self.path} is not a directory"')
 

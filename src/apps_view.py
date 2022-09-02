@@ -6,17 +6,12 @@ from .desktop_entry import DesktopFile, DesktopFileFolder
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
-    open_file_button = Gtk.Template.Child('open_file_button')
     new_file_button = Gtk.Template.Child('new_file_button')
     main_view = Gtk.Template.Child('main_clamp')
 
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
-        self.folders = {
-            'User': DesktopFileFolder('~/.local/share/applications/'),
-            'System': DesktopFileFolder('/usr/share/applications/'),
-            #'Local System': '/usr/local/share/applications/',
-        }
+        self.folders = DesktopFileFolder.list_from_recognized()
 
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
 
@@ -39,11 +34,10 @@ class AppsView(Gtk.Box):
             margin_bottom = 24,
             margin_start = 12,
             margin_end = 12,
-            spacing = 12,
-        )
+            spacing = 24,)
 
-        for title, folder in self.folders.items():
-            apps_group = AppsGroup(folder, title)
+        for folder in self.folders:
+            apps_group = AppsGroup(folder)
             apps_group.connect('file-open', lambda _, file: self.emit('file-open', file))
             box.append(apps_group)
 
@@ -53,11 +47,8 @@ class AppsView(Gtk.Box):
 class AppsGroup(Adw.PreferencesGroup):
     __gtype_name__ = 'AppsGroup'
 
-    def __init__(self, folder: DesktopFileFolder, title: str = None):        
-        super().__init__(
-            title = title,
-            description = folder.path,
-        )
+    def __init__(self, folder: DesktopFileFolder):        
+        super().__init__(description = folder.path)
 
         self.folder = folder
         self.folder.get_files()
@@ -79,7 +70,7 @@ class AppRow(Adw.ActionRow):
             activatable = True,)
 
         self.add_prefix(Gtk.Image(
-            icon_name = file.appsection.Icon.exists() or 'image-missing',
+            icon_name = file.appsection.Icon.get() or 'image-missing',
             css_classes=['icon-dropshadow'],))
 
         self.add_suffix(Gtk.Image(
