@@ -1,5 +1,7 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 
+from pathlib import Path
+
 from .desktop_entry import DesktopFile, Field
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/file_view.ui')
@@ -65,7 +67,15 @@ class FileView(Gtk.Box):
     def update_file(self):
         file_dict: dict = self.file.appsection.as_dict()
 
-        self.app_icon.set_from_icon_name(self.file.appsection.Icon.get() or 'image-missing')
+        icon_name = self.file.appsection.Icon.get()
+        if icon_name == None:
+            self.app_icon.set_from_icon_name('image-missing')
+        elif Path(icon_name).exists():
+            self.app_icon.set_from_file(icon_name)
+        else:
+            self.app_icon.set_from_icon_name(icon_name)
+
+
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
 

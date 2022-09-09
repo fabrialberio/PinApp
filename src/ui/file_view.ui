@@ -69,7 +69,7 @@
                         <property name='icon-name'>image-missing</property>
                         <property name='pixel-size'>128</property>
                         <style>
-                          <class name='icon'/>
+                          <class name='icon-dropshadow'/>
                         </style>
                       </object>
                     </child>

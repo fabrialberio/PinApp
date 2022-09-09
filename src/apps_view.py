@@ -1,4 +1,5 @@
 from gi.repository import Gtk, Gio, Adw, GObject
+from pathlib import Path
 
 from .desktop_entry import DesktopFile, DesktopFileFolder
 
@@ -77,9 +78,21 @@ class AppRow(Adw.ActionRow):
             subtitle = file.appsection.Comment.get(),
             activatable = True,)
 
-        self.add_prefix(Gtk.Image(
-            icon_name = file.appsection.Icon.get() or 'image-missing',
-            css_classes=['icon-dropshadow'],))
+        icon = Gtk.Image(
+            pixel_size=32,
+            margin_top=6,
+            margin_bottom=6,
+            css_classes=['icon-dropshadow'])
+        
+        icon_name = file.appsection.Icon.get()
+        if icon_name == None:
+            icon.set_from_icon_name('image-missing')
+        elif Path(icon_name).exists():
+            icon.set_from_file(icon_name)
+        else:
+            icon.set_from_icon_name(icon_name)
+
+        self.add_prefix(icon)
 
         self.add_suffix(Gtk.Image(
             icon_name='go-next-symbolic',
