@@ -1,6 +1,7 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 
 from pathlib import Path
+from subprocess import call
 
 from .desktop_entry import DesktopFileFolder, DesktopFile, Field
 
@@ -211,6 +212,17 @@ class StringRow(Adw.EntryRow):
         super().__init__(title=field.key.capitalize())
         self.set_text(field.as_str() or '')
         self.connect('changed', self.on_changed)
+        
+    def add_action(self, icon_name: str, tooltip: str, callback):
+        button = Gtk.Button(
+                icon_name=icon_name,
+                tooltip_text=tooltip,
+                valign=Gtk.Align.CENTER,
+                css_classes=['flat'])
+
+        button.connect('clicked', callback)
+        self.add_suffix(button)
+
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
