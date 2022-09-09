@@ -1,7 +1,7 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 
 from pathlib import Path
-from subprocess import call
+from os import access, W_OK
 
 from .desktop_entry import DesktopFileFolder, DesktopFile, Field
 
@@ -38,8 +38,8 @@ class FileView(Gtk.Box):
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
         self.delete_button.connect('clicked', lambda _: self.emit('file-delete'))
-        self.strings_group.get_header_suffix().connect('clicked', lambda _: self._show_add_key_dialog())
-        self.bools_group.get_header_suffix().connect('clicked', lambda _: self._show_add_key_dialog(is_bool=True))
+        self.strings_group.get_header_suffix().connect('clicked', lambda _: self.add_key())
+        self.bools_group.get_header_suffix().connect('clicked', lambda _: self.add_key(is_bool=True))
 
     def load_file(self, file: DesktopFile, is_new = False):
         self.file = file
@@ -58,10 +58,10 @@ class FileView(Gtk.Box):
         self.window_title.set_subtitle(self.file.filename)
         self.save_button.set_sensitive(True)
 
-        if is_new:
-            self.delete_button.set_visible(False)
-        else:
+        if access(self.file.path, W_OK):
             self.delete_button.set_visible(True)
+        else:
+            self.delete_button.set_visible(False)
 
         self.update_file()
 
@@ -80,7 +80,7 @@ class FileView(Gtk.Box):
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
 
-        localized_rows = LocaleStringRow.list_from_field_list(self.file.appsection.values())
+        localized_rows = LocaleStringRow.list_from_field_list(list(self.file.appsection.values()))
         self._update_preferences_group(self.localized_group, localized_rows)
 
         string_rows = StringRow.list_from_field_list(file_dict.values())
@@ -95,14 +95,9 @@ class FileView(Gtk.Box):
             self.localized_group.set_visible(False)
 
     def save_to_user_folder(self, on_success_callback):
-        dialog = Adw.MessageDialog(
-            heading=_('Save changes to user folder?'),
-            body=_(f'Saving to "{self.file.parent}" is not permitted. Do you want to save to "{DesktopFileFolder.USER_APPLICATIONS}" instead?'),
-            body_use_markup=True,
-            close_response='cancel')
-        dialog.add_response('cancel', _('Cancel'))
-        dialog.add_response('yes', _('Yes'))
-        dialog.set_response_appearance('yes', Adw.ResponseAppearance.SUGGESTED)
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
+        
+        dialog = builder.get_object('save_local_dialog')
 
         def callback(widget, resp):
             if resp == 'yes':
@@ -113,49 +108,24 @@ class FileView(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.present()
 
-    def _show_add_key_dialog(self, is_bool=False):
-        add_key_dialog = Adw.MessageDialog(
-            width_request=400,
-            heading=_('Add new key'),
-            default_response='add',
-            close_response='cancel')
-        add_key_dialog.add_response('cancel', _('Cancel'))
-        add_key_dialog.add_response('add', _('Add'))
-        add_key_dialog.set_response_enabled('add', False)
-        add_key_dialog.set_response_appearance('add', Adw.ResponseAppearance.SUGGESTED)
+    def add_key(self, is_bool=False):
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
 
-        key_row = Adw.EntryRow(title=_('Key'))
-        key_row.connect('changed', lambda _: add_key_dialog.set_response_enabled(
+        add_key_dialog = builder.get_object('add_key_dialog')
+        key_entry = builder.get_object('key_entry')
+
+        key_entry.connect('changed', lambda _: add_key_dialog.set_response_enabled(
             'add', 
-            bool(key_row.get_text())))
+            bool(key_entry.get_text())))
 
-        if is_bool:
-            switch = Gtk.Switch(valign=Gtk.Align.CENTER)
-            value_row = Adw.ActionRow(
-                title=_('Value'),
-                activatable_widget=switch)
-            value_row.add_suffix(switch)
-        else:
-            value_row = Adw.EntryRow(title=_('Value'))
+        def callback(widget, resp):
+            if resp == 'add':
+                self.file.appsection.add_entry(key_entry.get_text(), False if is_bool else '')
+                self.update_file()
 
-        group = Adw.PreferencesGroup()
-        group.add(key_row)
-        group.add(value_row)
-
-        add_key_dialog.set_extra_child(group)
-        add_key_dialog.connect('response', lambda _, resp: \
-            self.add_key(
-                key_row.get_text(),
-                switch.get_state() if is_bool else value_row.get_text(),
-                is_bool) \
-            if resp == 'add' \
-            else ...)
+        add_key_dialog.connect('response', callback)
         add_key_dialog.set_transient_for(self.get_root())
         add_key_dialog.present()
-
-    def add_key(self, key, value, is_bool: bool):
-        self.file.appsection.add_entry(key, value)
-        self.update_file()
 
 
     @classmethod
@@ -253,7 +223,15 @@ class LocaleStringRow(Adw.EntryRow):
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
-        return [LocaleStringRow(f) for f in fields if f.localized_fields and not f.locale]
+        # Assumes that all keys are in the same section
+        section = fields[0].section
+        
+        # All keys that have a locale, but stripped of it
+        localized_keys = [f.unlocalized_key for f in fields if f.localized_fields]
+        # Remove duplicates
+        localized_keys = list(dict.fromkeys(localized_keys))
+
+        return [LocaleStringRow(Field(k, section)) for k in localized_keys]
 
     @property
     def selected_locale(self):
