@@ -13,6 +13,8 @@ class FileView(Gtk.Box):
     back_button = Gtk.Template.Child('back_button')
     save_button = Gtk.Template.Child('save_button')
     delete_button = Gtk.Template.Child('delete_button')
+
+    scrolled_window = Gtk.Template.Child('scrolled_window')
     main_view = Gtk.Template.Child('main_box')
 
     app_icon = Gtk.Template.Child('app_icon')
@@ -44,6 +46,8 @@ class FileView(Gtk.Box):
     def load_file(self, file: DesktopFile, is_new = False):
         self.file = file
         self.file.load()
+
+        self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
         while self.banner_box.get_first_child():
             self.banner_box.remove(self.banner_box.get_first_child())
