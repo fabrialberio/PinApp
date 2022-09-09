@@ -336,7 +336,7 @@ class DesktopFile:
     @staticmethod
     def new_from_random_name() -> 'DesktopFile':
         random_string = ''.join(choice(ascii_letters) for i in range(12))
-        path = f'{DesktopFileFolder.USER_APPLICATIONS}/pinapp-{random_string}'
+        path = f'{DesktopFolder.USER_APPLICATIONS}/pinapp-{random_string}'
         return DesktopFile.new_with_defaults(path)
 
     @staticmethod
@@ -392,9 +392,10 @@ class DesktopFile:
     def load(self):
         return self.parser.read(self.path)
 
-    def save(self) -> None:
+    def save(self, path=None) -> None:
         '''Saves the file'''
-        with open(self.path, 'w') as f:
+        if path == None: path = self.path
+        with open(path, 'w') as f:
             self.parser.write(f)
 
     def delete(self, missing_ok=True) -> None:
@@ -402,22 +403,27 @@ class DesktopFile:
 
     def __lt__(self, __o: object) -> bool:
         if isinstance(__o, DesktopFile):
-            return self.appsection.Name.get() < __o.appsection.Name.get()
+            try:
+                return self.appsection.Name.get() < __o.appsection.Name.get()
+            except TypeError:
+                return False
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
 
-class DesktopFileFolder():
+class DesktopFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
     USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
     SYSTEM_APPLICATIONS = '/usr/share/applications'
+    FLATPAK_SYSTEM_APPLICATIONS = '/var/lib/flatpak/exports/share/applications'
 
     @staticmethod
-    def list_from_recognized() -> list['DesktopFileFolder']:
+    def list_from_recognized() -> list['DesktopFolder']:
         return [
-            DesktopFileFolder(p) for p in [
-                DesktopFileFolder.USER_APPLICATIONS,
-                DesktopFileFolder.SYSTEM_APPLICATIONS]]
+            DesktopFolder(p) for p in [
+                DesktopFolder.USER_APPLICATIONS,
+                DesktopFolder.SYSTEM_APPLICATIONS,
+                DesktopFolder.FLATPAK_SYSTEM_APPLICATIONS]]
 
     def __init__(self, path: Path):
         self.path = Path(path)

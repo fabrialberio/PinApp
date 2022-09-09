@@ -2,7 +2,7 @@ from gi.repository import Gtk, Gio, Adw, GObject
 
 from pathlib import Path
 
-from .desktop_entry import DesktopFile, Field
+from .desktop_entry import DesktopFileFolder, DesktopFile, Field
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Gtk.Box):
@@ -93,6 +93,24 @@ class FileView(Gtk.Box):
         else:
             self.localized_group.set_visible(False)
 
+    def save_to_user_folder(self, on_success_callback):
+        dialog = Adw.MessageDialog(
+            heading=_('Save changes to user folder?'),
+            body=_(f'Saving to "{self.file.parent}" is not permitted. Do you want to save to "{DesktopFileFolder.USER_APPLICATIONS}" instead?'),
+            body_use_markup=True,
+            close_response='cancel')
+        dialog.add_response('cancel', _('Cancel'))
+        dialog.add_response('yes', _('Yes'))
+        dialog.set_response_appearance('yes', Adw.ResponseAppearance.SUGGESTED)
+
+        def callback(widget, resp):
+            if resp == 'yes':
+                self.file.save(Path(DesktopFileFolder.USER_APPLICATIONS)/self.file.filename)
+                on_success_callback()
+
+        dialog.connect('response', callback)
+        dialog.set_transient_for(self.get_root())
+        dialog.present()
 
     def _show_add_key_dialog(self, is_bool=False):
         add_key_dialog = Adw.MessageDialog(
