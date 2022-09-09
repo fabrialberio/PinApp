@@ -336,7 +336,7 @@ class DesktopFile:
     @staticmethod
     def new_from_random_name() -> 'DesktopFile':
         random_string = ''.join(choice(ascii_letters) for i in range(12))
-        path = f'{DesktopFolder.USER_APPLICATIONS}/pinapp-{random_string}'
+        path = f'{DesktopFileFolder.USER_APPLICATIONS}/pinapp-{random_string}'
         return DesktopFile.new_with_defaults(path)
 
     @staticmethod
@@ -410,7 +410,7 @@ class DesktopFile:
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
 
-class DesktopFolder():
+class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
     USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
@@ -418,12 +418,12 @@ class DesktopFolder():
     FLATPAK_SYSTEM_APPLICATIONS = '/var/lib/flatpak/exports/share/applications'
 
     @staticmethod
-    def list_from_recognized() -> list['DesktopFolder']:
+    def list_from_recognized() -> list['DesktopFileFolder']:
         return [
-            DesktopFolder(p) for p in [
-                DesktopFolder.USER_APPLICATIONS,
-                DesktopFolder.SYSTEM_APPLICATIONS,
-                DesktopFolder.FLATPAK_SYSTEM_APPLICATIONS]]
+            DesktopFileFolder(p) for p in [
+                DesktopFileFolder.USER_APPLICATIONS,
+                DesktopFileFolder.SYSTEM_APPLICATIONS,
+                DesktopFileFolder.FLATPAK_SYSTEM_APPLICATIONS]]
 
     def __init__(self, path: Path):
         self.path = Path(path)

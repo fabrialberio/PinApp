@@ -12,7 +12,7 @@ finish-args:
   - --filesystem=host
   - --filesystem=home
   - --filesystem=xdg-data/applications:rw
-  - --filesystem=/var/lib/flatpak/exports/share/applications:rw
+  - --filesystem=/var/lib/flatpak/exports/share/applications:ro
   - --filesystem=/usr/share/applications:ro
   - --filesystem=xdg-data/icons:ro
 
