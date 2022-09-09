@@ -390,6 +390,7 @@ class DesktopFile:
     def extension(self) -> str: return self.path.suffix
 
     def load(self):
+        self.parser.clear()
         return self.parser.read(self.path)
 
     def save(self, path=None) -> None:
