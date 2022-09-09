@@ -9,11 +9,17 @@ class AppsView(Gtk.Box):
     new_file_button = Gtk.Template.Child('new_file_button')
     main_view = Gtk.Template.Child('main_clamp')
 
+    search_button = Gtk.Template.Child('search_button')
+    search_bar = Gtk.Template.Child('search_bar')
+    search_entry = Gtk.Template.Child('search_entry')
+
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
         self.folders = DesktopFileFolder.list_from_recognized()
 
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
+        self.search_bar.set_key_capture_widget(self.get_root())
+        self.search_bar.connect_entry(self.search_entry)
 
         GObject.type_register(AppsView)
         GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
@@ -25,16 +31,18 @@ class AppsView(Gtk.Box):
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self.build_ui()
+        self.update_apps()
 
-    def build_ui(self):
+    def update_apps(self):
+        self.search_bar.set_search_mode(False)
+
         box = Gtk.Box(
             orientation = Gtk.Orientation.VERTICAL,
             margin_top = 24,
             margin_bottom = 24,
             margin_start = 12,
             margin_end = 12,
-            spacing = 24,)
+            spacing = 24)
 
         for folder in self.folders:
             apps_group = AppsGroup(folder)

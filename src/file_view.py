@@ -60,9 +60,9 @@ class FileView(Gtk.Box):
         else:
             self.delete_button.set_visible(True)
 
-        self.build_ui()
+        self.update_file()
 
-    def build_ui(self):
+    def update_file(self):
         file_dict: dict = self.file.appsection.as_dict()
 
         self.app_icon.set_from_icon_name(self.file.appsection.Icon.get() or 'image-missing')
@@ -126,7 +126,7 @@ class FileView(Gtk.Box):
 
     def add_key(self, key, value, is_bool: bool):
         self.file.appsection.add_entry(key, value)
-        self.build_ui()
+        self.update_file()
 
 
     @classmethod
