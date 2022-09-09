@@ -33,12 +33,17 @@ class PinAppApplication(Adw.Application):
     def __init__(self):
         super().__init__(application_id='com.github.fabrialberio.pinapp',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
-        Gtk.init_check()
 
-        self.create_action('quit', self.quit, ['<primary>q'])
+        self.create_action('quit', lambda a, v: self.quit(), ['<primary>q'])
         self.create_action('about', self.show_about_window)
-        self.create_action('preferences', self.on_preferences_action)
+        
+        self.create_action('search', self.on_search, ['<primary>f'])
+        self.create_action('new-file', self.on_new_file, ['<primary>n'])
+        
+        self.create_action('exit', self.on_back, ['Escape'])
+        self.create_action('save', self.on_save, ['<primary>s'])
 
+        self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
         self.window = None
 
     def do_activate(self):
@@ -50,26 +55,28 @@ class PinAppApplication(Adw.Application):
         self.window = self.props.active_window
         if not self.window:
             self.window = PinAppWindow(application=self)
+
         self.window.present()
 
-    def show_about_window(self, widget, _):
+    def on_save(self, action, *args):
+        self.window.file_view.emit('file-save')
+
+    def on_new_file(self, action, *args):
+        self.window.apps_view.emit('file-new')
+
+    def on_back(self, action, *args):
+        self.window.file_view.emit('file-back')
+
+    def on_search(self, action, *args):
+        if self.window.is_visible(self.window.apps_view):
+            self.window.apps_view.search_bar.set_search_mode(True)
+
+    def show_about_window(self, action, *args):
         """Callback for the app.about action."""
         # I'm not shure this is the best way, but it works perfectly fine for now
         self.window.show_about_window()
 
-    def on_preferences_action(self, widget, _):
-        """Callback for the app.preferences action."""
-        print('app.preferences action activated')
-
     def create_action(self, name, callback, shortcuts=None):
-        """Add an application action.
-
-        Args:
-            name: the name of the action
-            callback: the function to be called when the action is
-              activated
-            shortcuts: an optional list of accelerators
-        """
         action = Gio.SimpleAction.new(name, None)
         action.connect("activate", callback)
         self.add_action(action)

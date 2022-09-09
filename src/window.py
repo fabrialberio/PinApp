@@ -45,26 +45,37 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_view.connect('file-delete', self.on_file_delete)
         self.leaflet.append(self.file_view)
 
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/help-overlay.ui')
+        help_overlay = builder.get_object('help_overlay')
+        help_overlay.set_transient_for(self)
+
+        self.set_help_overlay(help_overlay)
+
     def on_new_file(self, apps_view):        
-        self.file_view.load_file(DesktopFile.new_from_random_name(), is_new=True)
-        self.leaflet.set_visible_child(self.file_view)
+        if self.is_visible(self.apps_view):
+            self.file_view.load_file(DesktopFile.new_from_random_name(), is_new=True)
+            self.leaflet.set_visible_child(self.file_view)
 
     def on_file_back(self, file_view):
         self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_save(self, file_view: FileView):
-        file_view.file.save()
-        self.apps_view.build_ui()
-        self.leaflet.set_visible_child(self.apps_view)
+        if self.is_visible(self.file_view):
+            file_view.file.save()
+            self.apps_view.update_apps()
+            self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_delete(self, file_view: FileView):
         file_view.file.delete()
-        self.apps_view.build_ui()
+        self.apps_view.update_apps()
         self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_open(self, file_view, file):
         self.file_view.load_file(file)
         self.leaflet.set_visible_child(self.file_view)
+
+    def is_visible(self, view):
+        return self.leaflet.get_visible_child() == view
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/about.ui')

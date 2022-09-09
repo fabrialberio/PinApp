@@ -2,9 +2,10 @@
 <gresources>
   <gresource prefix="/com/github/fabrialberio/pinapp">
     <file>file_view.css</file>
-    <file>about.ui</file>
     <file>window.ui</file>
     <file>apps_view.ui</file>
     <file>file_view.ui</file>
+    <file>help-overlay.ui</file>
+    <file>about.ui</file>
   </gresource>
 </gresources>
