@@ -400,6 +400,12 @@ class DesktopFile:
     def delete(self, missing_ok=True) -> None:
         self.path.unlink(missing_ok=True)
 
+    def __lt__(self, __o: object) -> bool:
+        if isinstance(__o, DesktopFile):
+            return self.appsection.Name.get() < __o.appsection.Name.get()
+        else:
+            raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
+
 class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
@@ -453,12 +459,18 @@ class DesktopFileFolder():
         settings.set(Settings.APP_FOLDERS_KEY, paths)
     '''
 
-    def get_files(self, recursive=False):
+    def get_files(self, recursive=True, sort=True):
         '''Returns a list of DesktopFile objects rapresenting the .desktop files'''
+        pattern = '*.desktop'
+        
         self.files = [
             DesktopFile(p) for p in (
-                self.path.rglob('*.desktop') if recursive else self.path.glob('*.desktop') 
+                self.path.rglob(pattern) \
+                if recursive \
+                else self.path.glob(pattern) 
             )
         ]
+
+        if sort: self.files = sorted(self.files)
 
         return self.files
