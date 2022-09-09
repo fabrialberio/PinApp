@@ -4,6 +4,10 @@ from configparser import ConfigParser, SectionProxy
 from locale import getlocale
 from os import getenv
 
+from string import ascii_letters
+from random import seed, choice
+from time import time
+
 
 class LocaleString:
     def __init__(self, raw_string: str):
@@ -330,22 +334,30 @@ class DesktopFile:
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
 
     @staticmethod
+    def new_from_random_name() -> 'DesktopFile':
+        random_string = ''.join(choice(ascii_letters) for i in range(12))
+        path = f'{DesktopFileFolder.USER_APPLICATIONS}/pinapp-{random_string}'
+        return DesktopFile.new_with_defaults(path)
+
+    @staticmethod
     def new_with_defaults(path: 'str | Path') -> 'DesktopFile':
         valid_path = DesktopFile.validate_path(str(path))
         desktop_file = DesktopFile(valid_path)
 
         desktop_file.appsection.Exec.set('')
+        desktop_file.appsection.Icon.set('')
         desktop_file.appsection.Type.set('Application')
         desktop_file.appsection.Terminal.set(False)
 
         return desktop_file
 
     @staticmethod
-    def validate_path(path: str) -> str:
+    def validate_path(_path: (str)) -> str:
+        path = Path(_path)
+
         # Sets the exstension to .desktop
-        if not path.endswith('.desktop'):
-            path += '.desktop'
-        
+        if not path.suffix == '.desktop':
+            path = Path(str(path) + '.desktop')
         return path
 
 
@@ -357,6 +369,8 @@ class DesktopFile:
         self.parser = ConfigParser(interpolation=None, )
         self.parser.optionxform=str
         self.load()
+
+        seed(time())
 
     @property
     def appsection(self) -> 'AppSection': 
@@ -386,16 +400,15 @@ class DesktopFile:
 class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
-    RECOGNIZED_FOLDERS = [
-        f'{getenv("HOME")}/.local/share/applications',
-        f'/usr/share/applications'
-    ]
+    USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
+    SYSTEM_APPLICATIONS = '/usr/share/applications'
 
     @staticmethod
     def list_from_recognized() -> list['DesktopFileFolder']:
         return [
-            DesktopFileFolder(p) for p in \
-            DesktopFileFolder.RECOGNIZED_FOLDERS]
+            DesktopFileFolder(p) for p in [
+                DesktopFileFolder.USER_APPLICATIONS,
+                DesktopFileFolder.SYSTEM_APPLICATIONS]]
 
     def __init__(self, path: Path):
         self.path = Path(path)
