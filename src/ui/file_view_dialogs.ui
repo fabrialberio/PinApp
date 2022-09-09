@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <object class='AdwMessageDialog' id='add_key_dialog'>
+    <property name='width-request'>400</property>
+    <property name='heading' translatable='yes'>Add new key</property>
+    <property name='default-response'>add</property>
+    <property name='close-response'>cancel</property>
+    <property name='extra-child'>
+      <object class='AdwPreferencesGroup'>
+        <child>
+          <object class='AdwEntryRow' id='key_entry'>
+            <property name='title' translatable='yes'>Key name</property>
+          </object>
+        </child>
+      </object>
+    </property>
+    <responses>
+      <response id='cancel' translatable='yes'>_Cancel</response>
+      <response id='add' appearance='suggested' enabled='false' translatable='yes'>_Add</response>
+    </responses>
+  </object>
+  
+  <object class='AdwMessageDialog' id='save_local_dialog'>
+    <property name='heading' translatable='yes'>Save changes to user folder?</property>
+    <property name='body' translatable='yes'>Saving to this folder is not permitted. Do you want to save to the user folder instead?</property>
+    <property name='default-response'>yes</property>
+    <property name='close-response'>cancel</property>
+    <responses>
+      <response id='cancel' translatable='yes'>_Cancel</response>
+      <response id='yes' appearance='suggested' translatable='yes'>_Yes</response>
+    </responses>
+  </object>
+</interface>

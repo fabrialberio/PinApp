@@ -4,8 +4,8 @@
     <file>file_view.css</file>
     <file>window.ui</file>
     <file>apps_view.ui</file>
+    <file>apps_view_dialogs.ui</file>
     <file>file_view.ui</file>
-    <file>help-overlay.ui</file>
-    <file>about.ui</file>
+    <file>file_view_dialogs.ui</file>
   </gresource>
 </gresources>

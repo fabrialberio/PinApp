@@ -45,7 +45,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_view.connect('file-delete', self.on_file_delete)
         self.leaflet.append(self.file_view)
 
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/help-overlay.ui')
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         help_overlay = builder.get_object('help_overlay')
         help_overlay.set_transient_for(self)
 
@@ -86,7 +86,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         return self.leaflet.get_visible_child() == view
 
     def show_about_window(self):
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/about.ui')
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         about_window = builder.get_object('about_window')
         about_window.set_transient_for(self)
         about_window.present()
