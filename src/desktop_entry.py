@@ -397,6 +397,9 @@ class DesktopFile:
         with open(self.path, 'w') as f:
             self.parser.write(f)
 
+    def delete(self, missing_ok=True) -> None:
+        self.path.unlink(missing_ok=True)
+
 class DesktopFileFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 

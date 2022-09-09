@@ -42,6 +42,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_view = FileView()
         self.file_view.connect('file-back', self.on_file_back)
         self.file_view.connect('file-save', self.on_file_save)
+        self.file_view.connect('file-delete', self.on_file_delete)
         self.leaflet.append(self.file_view)
 
     def on_new_file(self, apps_view):        
@@ -53,6 +54,11 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_file_save(self, file_view: FileView):
         file_view.file.save()
+        self.apps_view.build_ui()
+        self.leaflet.set_visible_child(self.apps_view)
+
+    def on_file_delete(self, file_view: FileView):
+        file_view.file.delete()
         self.apps_view.build_ui()
         self.leaflet.set_visible_child(self.apps_view)
 

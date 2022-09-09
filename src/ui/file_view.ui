@@ -25,9 +25,18 @@
         <child type='end'>
           <object class='GtkButton' id='save_button'>
             <property name='label' translatable='yes'>Save</property>
-            <property name='sensitive' translatable='yes'>false</property>
+            <property name='sensitive'>false</property>
             <style>
               <class name='suggested-action'/>
+            </style>
+          </object>
+        </child>
+        <!-- Delete button -->
+        <child type='end'>
+          <object class='GtkButton' id='delete_button'>
+            <property name='label' translatable='yes'>Delete</property>
+            <style>
+              <class name='destructive-action'/>
             </style>
           </object>
         </child>

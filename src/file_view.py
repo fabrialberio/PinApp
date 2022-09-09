@@ -9,6 +9,7 @@ class FileView(Gtk.Box):
     window_title = Gtk.Template.Child('title_widget')
     back_button = Gtk.Template.Child('back_button')
     save_button = Gtk.Template.Child('save_button')
+    delete_button = Gtk.Template.Child('delete_button')
     main_view = Gtk.Template.Child('main_box')
 
     app_icon = Gtk.Template.Child('app_icon')
@@ -26,12 +27,14 @@ class FileView(Gtk.Box):
         GObject.type_register(FileView)
         GObject.signal_new('file-back', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-save', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+        GObject.signal_new('file-delete', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-edit', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('add-string-field', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('add-bool-field', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
+        self.delete_button.connect('clicked', lambda _: self.emit('file-delete'))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._show_add_key_dialog())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._show_add_key_dialog(is_bool=True))
 
@@ -51,6 +54,11 @@ class FileView(Gtk.Box):
 
         self.window_title.set_subtitle(self.file.filename)
         self.save_button.set_sensitive(True)
+
+        if is_new:
+            self.delete_button.set_visible(False)
+        else:
+            self.delete_button.set_visible(True)
 
         self.build_ui()
 
