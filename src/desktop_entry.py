@@ -426,7 +426,8 @@ class DesktopFileFolder():
             DesktopFileFolder(p) for p in [
                 DesktopFileFolder.USER_APPLICATIONS,
                 DesktopFileFolder.SYSTEM_APPLICATIONS,
-                DesktopFileFolder.FLATPAK_SYSTEM_APPLICATIONS]]
+                DesktopFileFolder.FLATPAK_SYSTEM_APPLICATIONS] \
+            if Path(p).is_dir()]
 
     def __init__(self, path: Path):
         self.path = Path(path)
