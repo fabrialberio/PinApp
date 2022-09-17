@@ -11,12 +11,20 @@ finish-args:
   - --socket=wayland
   - --filesystem=host
   - --filesystem=home
-  - --filesystem=xdg-data/icons:ro
+
+    # System application files
   - --filesystem=xdg-data/applications:rw
   - --filesystem=/usr/share/applications:ro
-  - --filesystem=/var/lib/flatpak/exports/share/applications:ro
-  - --filesystem=/var/lib/flatpak/exports/share/icons:ro
-  - --filesystem=/var/lib/flatpak/app:ro
+
+    # System app icons
+  - --filesystem=xdg-data/icons:ro
+  - --filesystem=/usr/share/icons:ro
+  
+    # Workaround for missing flatpak app icons
+  - --filesystem=/var/lib/flatpak:ro
+  - --filesystem=xdg-data/flatpak:ro
+  - --env=XDG_DATA_DIRS=/var/lib/flatpak/exports/share:/app/share:/usr/share:/usr/share/runtime/share:/run/host/user-share:/run/host/share
+  
 
 cleanup:
   - /include
