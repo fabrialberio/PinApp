@@ -22,7 +22,7 @@ from gi.repository import Gtk, Adw, Gio
 from .apps_view import AppsView
 from .file_view import FileView
 
-from .desktop_entry import DesktopFile
+from .desktop_entry import DesktopEntry
 from pathlib import Path
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/window.ui')
@@ -53,7 +53,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_new_file(self, apps_view):        
         if self.is_visible(self.apps_view):
-            self.file_view.load_file(DesktopFile.new_from_random_name(), is_new=True)
+            self.file_view.load_file(DesktopEntry.new_from_random_name(), is_new=True)
             self.leaflet.set_visible_child(self.file_view)
 
     def on_file_back(self, file_view):

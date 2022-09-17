@@ -1,7 +1,7 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 
-from .desktop_entry import DesktopFile, DesktopFileFolder
+from .desktop_entry import DesktopEntry, DesktopFileFolder
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
@@ -72,7 +72,7 @@ class AppsGroup(Adw.PreferencesGroup):
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
-    def __init__(self, file: DesktopFile):
+    def __init__(self, file: DesktopEntry):
         super().__init__(
             title = file.appsection.Name.get(),
             subtitle = file.appsection.Comment.get(),

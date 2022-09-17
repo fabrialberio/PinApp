@@ -330,19 +330,47 @@ class ActionSection(Section):
         return self.section_name().removeprefix(self.PREFIX).strip()
 
 
-class DesktopFile:
+class IniFile:
+    def __init__(self, path: 'str | Path') -> None:
+        self.path = Path(path)
+        if not self.path.is_file():
+            print(self.path.read_text())
+
+            raise ValueError(f'Path {self.path} is not a file')
+        
+        self.parser = ConfigParser(interpolation=None, )
+        self.parser.optionxform=str
+        self.load()
+
+    @property
+    def filename(self) -> str: return self.path.name
+
+    def load(self):
+        self.parser.clear()
+        return self.parser.read(self.path)
+
+    def save(self, path=None) -> None:
+        '''Saves the file'''
+        if path == None: path = self.path
+        with open(path, 'w') as f:
+            self.parser.write(f)
+
+    def delete(self, missing_ok=True) -> None:
+        self.path.unlink(missing_ok=missing_ok)
+
+class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
 
     @staticmethod
-    def new_from_random_name() -> 'DesktopFile':
+    def new_from_random_name() -> 'DesktopEntry':
         random_string = ''.join(choice(ascii_letters) for i in range(12))
         path = f'{DesktopFileFolder.USER_APPLICATIONS}/pinapp-{random_string}'
-        return DesktopFile.new_with_defaults(path)
+        return DesktopEntry.new_with_defaults(path)
 
     @staticmethod
-    def new_with_defaults(path: 'str | Path') -> 'DesktopFile':
-        valid_path = DesktopFile.validate_path(str(path))
-        desktop_file = DesktopFile(valid_path)
+    def new_with_defaults(path: 'str | Path') -> 'DesktopEntry':
+        valid_path = DesktopEntry.validate_path(str(path))
+        desktop_file = DesktopEntry(valid_path)
 
         desktop_file.appsection.Exec.set('')
         desktop_file.appsection.Icon.set('')
@@ -362,13 +390,10 @@ class DesktopFile:
 
 
     def __init__(self, path: 'str | Path') -> None:
-        self.path = Path(path)
-        if not (self.path.is_file() or self.path.suffix == '.desktop'):
+        super().__init__(path)
+
+        if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
-        
-        self.parser = ConfigParser(interpolation=None, )
-        self.parser.optionxform=str
-        self.load()
 
         seed(time())
 
@@ -379,31 +404,8 @@ class DesktopFile:
     def actionsections(self) -> dict[str, 'ActionSection']:
         return ActionSection.dict_from_parser(self.parser)
 
-    # File properties
-    @property
-    def filename(self) -> str: return self.path.name
-    @property
-    def parent(self) -> str: return self.path.parent
-    @property
-    def basename(self) -> str: return self.path.stem
-    @property
-    def extension(self) -> str: return self.path.suffix
-
-    def load(self):
-        self.parser.clear()
-        return self.parser.read(self.path)
-
-    def save(self, path=None) -> None:
-        '''Saves the file'''
-        if path == None: path = self.path
-        with open(path, 'w') as f:
-            self.parser.write(f)
-
-    def delete(self, missing_ok=True) -> None:
-        self.path.unlink(missing_ok=True)
-
     def __lt__(self, __o: object) -> bool:
-        if isinstance(__o, DesktopFile):
+        if isinstance(__o, DesktopEntry):
             try:
                 return self.appsection.Name.get() < __o.appsection.Name.get()
             except TypeError:
@@ -433,45 +435,12 @@ class DesktopFileFolder():
 
         self.files = []
 
-    '''
-    @classmethod
-    def new(cls, path: Path):
-        """Returns a new DesktopFileFolder object"""
-        settings = Settings.new()
-        paths = list(settings.get_value(Settings.APP_FOLDERS_KEY))
-
-        if path not in paths:
-            paths.append(path)
-
-        settings.set(Settings.APP_FOLDERS_KEY, paths)
-
-        return cls(path)
-
-    @classmethod
-    def get_folders(cls):
-        """Returns a list of DesktopFileFolder objects corresponding to the folders in the settings"""
-        settings = Settings.new()
-        paths = list(settings.get_value(Settings.APP_FOLDERS_KEY))
-
-        return [cls(p) for p in paths]
-
-
-    def remove(self):
-        settings = Settings.new()
-        paths = list(settings.get_value(Settings.APP_FOLDERS_KEY))
-
-        if self.path in paths:
-            paths.remove(self.path)
-
-        settings.set(Settings.APP_FOLDERS_KEY, paths)
-    '''
-
     def get_files(self, recursive=True, sort=True):
         '''Returns a list of DesktopFile objects rapresenting the .desktop files'''
         pattern = '*.desktop'
         
         self.files = [
-            DesktopFile(p) for p in (
+            DesktopEntry(p) for p in (
                 self.path.rglob(pattern) \
                 if recursive \
                 else self.path.glob(pattern) 

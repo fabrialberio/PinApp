@@ -3,7 +3,7 @@ from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 from os import access, W_OK
 
-from .desktop_entry import DesktopFileFolder, DesktopFile, Field
+from .desktop_entry import DesktopFileFolder, DesktopEntry, Field
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Gtk.Box):
@@ -43,9 +43,10 @@ class FileView(Gtk.Box):
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self.add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self.add_key(is_bool=True))
 
-    def load_file(self, file: DesktopFile, is_new = False):
+    def load_file(self, file: DesktopEntry, is_new = False):
         self.file = file
-        self.file.load()
+        
+        if not is_new: self.file.load()
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
@@ -227,15 +228,18 @@ class LocaleStringRow(Adw.EntryRow):
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
-        # Assumes that all keys are in the same section
-        section = fields[0].section
-        
-        # All keys that have a locale, but stripped of it
-        localized_keys = [f.unlocalized_key for f in fields if f.localized_fields]
-        # Remove duplicates
-        localized_keys = list(dict.fromkeys(localized_keys))
+        if len(fields) > 0:
+            # Assumes that all keys are in the same section
+            section = fields[0].section
+            
+            # All keys that have a locale, but stripped of it
+            localized_keys = [f.unlocalized_key for f in fields if f.localized_fields]
+            # Remove duplicates
+            localized_keys = list(dict.fromkeys(localized_keys))
 
-        return [LocaleStringRow(Field(k, section)) for k in localized_keys]
+            return [LocaleStringRow(Field(k, section)) for k in localized_keys]
+        else:
+            return []
 
     @property
     def selected_locale(self):
