@@ -40,9 +40,9 @@
     </child>
     <child>
       <object class='GtkBox'>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="orientation">vertical</property>
+        <property name='hexpand'>True</property>
+        <property name='vexpand'>True</property>
+        <property name='orientation'>vertical</property>
         <!-- Search bar -->
         <child>
           <object class='GtkSearchBar' id='search_bar'>
@@ -55,11 +55,66 @@
         </child>
         <child>
           <object class='GtkScrolledWindow'>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
+            <property name='hexpand'>True</property>
+            <property name='vexpand'>True</property>
             <child>
-              <object class='AdwClamp' id='main_clamp'>
-                <!-- Main box with list of apps goes here -->
+              <object class='AdwClamp'>
+                <property name='margin-top'>24</property>
+                <property name='margin-bottom'>24</property>
+                <property name='margin-start'>12</property>
+                <property name='margin-end'>12</property>
+                <child>
+                  <object class='AdwPreferencesGroup'>
+                    <child>
+                      <object class='GtkBox' id='folder-chooser-box'>
+                        <property name='homogeneous'>True</property>
+                        <property name='margin_bottom'>12</property>
+                        <style>
+                          <class name='linked'/>
+                        </style>
+                        <child>
+                          <object class='GtkToggleButton' id='user_button'>
+                            <property name='label' translatable='yes'>User</property>
+                            <property name='tooltip-text' translatable='yes'>User applications folder</property>
+                            <property name='active'>true</property> <!-- This is because user group is active by default -->
+                            <property name='active' bind-source='user_group' bind-property='visible' bind-flags='bidirectional'/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class='GtkToggleButton' id='system_button'>
+                            <property name='label' translatable='yes'>System</property>
+                            <property name='tooltip-text' translatable='yes'>System applications folder</property>
+                            <property name='active' bind-source='system_group' bind-property='visible' bind-flags='bidirectional'/>
+                            <property name='group'>user_button</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class='GtkToggleButton' id='flatpak_button'>
+                            <property name='label' translatable='yes'>Flatpak</property>
+                            <property name='tooltip-text' translatable='yes'>Flatpak applications folder</property>
+                            <property name='active' bind-source='flatpak_group' bind-property='visible' bind-flags='bidirectional'/>
+                            <property name='group'>user_button</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='AdwPreferencesGroup' id='user_group'>
+                        <property name='visible'>false</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='AdwPreferencesGroup' id='system_group'>
+                        <property name='visible'>false</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='AdwPreferencesGroup' id='flatpak_group'>
+                        <property name='visible'>false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

@@ -8,19 +8,31 @@ class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
     new_file_button = Gtk.Template.Child('new_file_button')
-    main_view = Gtk.Template.Child('main_clamp')
 
     search_button = Gtk.Template.Child('search_button')
     search_bar = Gtk.Template.Child('search_bar')
     search_entry = Gtk.Template.Child('search_entry')
 
+    user_button = Gtk.Template.Child('user_button')
+    system_button = Gtk.Template.Child('system_button')
+    flatpak_button = Gtk.Template.Child('flatpak_button')
+    user_group = Gtk.Template.Child('user_group')
+    system_group = Gtk.Template.Child('system_group')
+    flatpak_group = Gtk.Template.Child('flatpak_group')
+
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
-        self.folders = DesktopEntryFolder.list_from_recognized()
 
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
         self.search_bar.set_key_capture_widget(self.get_root())
         self.search_bar.connect_entry(self.search_entry)
+
+        self.user_button.connect('toggled', lambda _: self.update_apps())
+        self.system_button.connect('toggled', lambda _: self.update_apps())
+        self.flatpak_button.connect('toggled', lambda _: self.update_apps())
+
+        self.user_button.set_active(True)
+        self.user_group.set_visible(True)
 
         GObject.type_register(AppsView)
         GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
@@ -37,21 +49,42 @@ class AppsView(Gtk.Box):
     def update_apps(self):
         self.search_bar.set_search_mode(False)
 
-        box = Gtk.Box(
-            orientation = Gtk.Orientation.VERTICAL,
-            margin_top = 24,
-            margin_bottom = 24,
-            margin_start = 12,
-            margin_end = 12,
-            spacing = 24)
+        if self.user_button.get_active() == True:
+            self._update_group(
+                self.user_group, 
+                DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS))
+        if self.system_button.get_active() == True:
+            self._update_group(
+                self.system_group, 
+                DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS))
+        if self.flatpak_button.get_active() == True:
+            self._update_group(
+                self.flatpak_group, 
+                DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS))
 
-        for folder in self.folders:
-            apps_group = AppsGroup(folder)
-            apps_group.connect('file-open', lambda _, file: self.emit('file-open', file))
-            box.append(apps_group)
 
-        self.main_view.set_child(box)
+    def _update_group(self, preferences_group: Adw.PreferencesGroup, folder: DesktopEntryFolder):
+        listbox = (
+            preferences_group
+            .get_first_child()  # Main group GtkBox
+            .get_last_child()   # GtkBox containing the listbox
+            .get_first_child()) # GtkListbox
 
+        old_children: list[Gtk.Widget] = []
+
+        i = 0
+        while listbox.get_row_at_index(i) is not None:
+            old_children.append(listbox.get_row_at_index(i))
+            i += 1
+
+        for c in old_children:
+            preferences_group.remove(c)
+
+        folder.get_files()
+        for file in folder.files:
+            app_row = AppRow(file)
+            app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
+            preferences_group.add(app_row)
 
 class AppsGroup(Adw.PreferencesGroup):
     __gtype_name__ = 'AppsGroup'
