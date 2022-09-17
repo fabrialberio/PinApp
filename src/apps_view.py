@@ -1,7 +1,7 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 
-from .desktop_entry import DesktopEntry, DesktopFileFolder
+from .desktop_entry import DesktopEntry, DesktopEntryFolder
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
@@ -16,7 +16,7 @@ class AppsView(Gtk.Box):
 
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
-        self.folders = DesktopFileFolder.list_from_recognized()
+        self.folders = DesktopEntryFolder.list_from_recognized()
 
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
         self.search_bar.set_key_capture_widget(self.get_root())
@@ -56,7 +56,7 @@ class AppsView(Gtk.Box):
 class AppsGroup(Adw.PreferencesGroup):
     __gtype_name__ = 'AppsGroup'
 
-    def __init__(self, folder: DesktopFileFolder):        
+    def __init__(self, folder: DesktopEntryFolder):        
         super().__init__(description = folder.path)
 
         self.folder = folder

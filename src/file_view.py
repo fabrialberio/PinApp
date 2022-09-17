@@ -3,7 +3,7 @@ from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 from os import access, W_OK
 
-from .desktop_entry import DesktopFileFolder, DesktopEntry, Field
+from .desktop_entry import DesktopEntryFolder, DesktopEntry, Field
 
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Gtk.Box):
@@ -106,7 +106,7 @@ class FileView(Gtk.Box):
 
         def callback(widget, resp):
             if resp == 'yes':
-                self.file.save(Path(DesktopFileFolder.USER_APPLICATIONS)/self.file.filename)
+                self.file.save(Path(DesktopEntryFolder.USER_APPLICATIONS)/self.file.filename)
                 on_success_callback()
 
         dialog.connect('response', callback)

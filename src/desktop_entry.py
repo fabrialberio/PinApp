@@ -364,7 +364,7 @@ class DesktopEntry(IniFile):
     @staticmethod
     def new_from_random_name() -> 'DesktopEntry':
         random_string = ''.join(choice(ascii_letters) for i in range(12))
-        path = f'{DesktopFileFolder.USER_APPLICATIONS}/pinapp-{random_string}'
+        path = f'{DesktopEntryFolder.USER_APPLICATIONS}/pinapp-{random_string}'
         return DesktopEntry.new_with_defaults(path)
 
     @staticmethod
@@ -413,7 +413,7 @@ class DesktopEntry(IniFile):
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
 
-class DesktopFileFolder():
+class DesktopEntryFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
     USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
@@ -421,12 +421,12 @@ class DesktopFileFolder():
     FLATPAK_SYSTEM_APPLICATIONS = '/var/lib/flatpak/exports/share/applications'
 
     @staticmethod
-    def list_from_recognized() -> list['DesktopFileFolder']:
+    def list_from_recognized() -> list['DesktopEntryFolder']:
         return [
-            DesktopFileFolder(p) for p in [
-                DesktopFileFolder.USER_APPLICATIONS,
-                DesktopFileFolder.SYSTEM_APPLICATIONS,
-                DesktopFileFolder.FLATPAK_SYSTEM_APPLICATIONS] \
+            DesktopEntryFolder(p) for p in [
+                DesktopEntryFolder.USER_APPLICATIONS,
+                DesktopEntryFolder.SYSTEM_APPLICATIONS,
+                DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS] \
             if Path(p).is_dir()]
 
     def __init__(self, path: Path):
