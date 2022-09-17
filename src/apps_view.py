@@ -27,9 +27,13 @@ class AppsView(Gtk.Box):
         self.search_bar.set_key_capture_widget(self.get_root())
         self.search_bar.connect_entry(self.search_entry)
 
-        self.user_button.connect('toggled', lambda _: self.update_apps())
-        self.system_button.connect('toggled', lambda _: self.update_apps())
-        self.flatpak_button.connect('toggled', lambda _: self.update_apps())
+        def update_if_active(button: Gtk.ToggleButton):
+            if button.get_active() == True:
+                self.update_apps()
+
+        self.user_button.connect('toggled', update_if_active)
+        self.system_button.connect('toggled', update_if_active)
+        self.flatpak_button.connect('toggled', update_if_active)
 
         self.user_button.set_active(True)
         self.user_group.set_visible(True)
