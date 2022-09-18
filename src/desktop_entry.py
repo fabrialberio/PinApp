@@ -94,7 +94,7 @@ class Field:
         return [
             Field(k, self.section) \
             for k in self.section.keys() \
-            if k.startswith(self.unlocalized_key) \
+            if k.startswith(f'{self.unlocalized_key}[') \
             and k != self.unlocalized_key]
 
     def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
