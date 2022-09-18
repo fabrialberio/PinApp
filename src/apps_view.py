@@ -14,8 +14,6 @@ class AppsView(Gtk.Box):
     search_entry = Gtk.Template.Child('search_entry')
 
     user_button = Gtk.Template.Child('user_button')
-    system_button = Gtk.Template.Child('system_button')
-    flatpak_button = Gtk.Template.Child('flatpak_button')
     user_group = Gtk.Template.Child('user_group')
     system_group = Gtk.Template.Child('system_group')
     flatpak_group = Gtk.Template.Child('flatpak_group')
@@ -27,14 +25,7 @@ class AppsView(Gtk.Box):
         self.search_bar.set_key_capture_widget(self.get_root())
         self.search_bar.connect_entry(self.search_entry)
 
-        def update_if_active(button: Gtk.ToggleButton):
-            if button.get_active() == True:
-                self.update_apps()
-
-        self.user_button.connect('toggled', update_if_active)
-        self.system_button.connect('toggled', update_if_active)
-        self.flatpak_button.connect('toggled', update_if_active)
-
+        self.user_button.connect('toggled', self._on_user_button_toggled)
         self.user_button.set_active(True)
         self.user_group.set_visible(True)
 
@@ -48,23 +39,29 @@ class AppsView(Gtk.Box):
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self.update_apps()
+        self._update_group(
+            self.user_group, 
+            DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS))
+        self._update_group(
+            self.system_group, 
+            DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS))
+        self._update_group(
+            self.flatpak_group, 
+            DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS))
 
-    def update_apps(self):
+
+    def update_user_group(self):
         self.search_bar.set_search_mode(False)
 
         if self.user_button.get_active() == True:
             self._update_group(
                 self.user_group, 
                 DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS))
-        if self.system_button.get_active() == True:
-            self._update_group(
-                self.system_group, 
-                DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS))
-        if self.flatpak_button.get_active() == True:
-            self._update_group(
-                self.flatpak_group, 
-                DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS))
+
+    def _on_user_button_toggled(self, button):
+        if self.user_button.get_active() == True:
+            self.update_user_group()
+
 
 
     def _update_group(self, preferences_group: Adw.PreferencesGroup, folder: DesktopEntryFolder):

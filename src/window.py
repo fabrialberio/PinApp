@@ -61,7 +61,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_file_save(self, file_view: FileView):
         def on_success(*args):
-            self.apps_view.update_apps()
+            self.apps_view.update_user_group()
             self.leaflet.set_visible_child(self.apps_view)
 
         if self.is_visible(self.file_view):
@@ -75,7 +75,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def on_file_delete(self, file_view: FileView):
         file_view.file.delete()
-        self.apps_view.update_apps()
+        self.apps_view.update_user_group()
         self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_open(self, file_view, file):
