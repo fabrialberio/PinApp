@@ -419,14 +419,14 @@ class DesktopEntryFolder():
     USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
     SYSTEM_APPLICATIONS = '/usr/share/applications'
     FLATPAK_SYSTEM_APPLICATIONS = '/var/lib/flatpak/exports/share/applications'
+    
+    recognized_folders = [USER_APPLICATIONS, SYSTEM_APPLICATIONS, FLATPAK_SYSTEM_APPLICATIONS]
 
     @staticmethod
     def list_from_recognized() -> list['DesktopEntryFolder']:
         return [
-            DesktopEntryFolder(p) for p in [
-                DesktopEntryFolder.USER_APPLICATIONS,
-                DesktopEntryFolder.SYSTEM_APPLICATIONS,
-                DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS] \
+            DesktopEntryFolder(p) \
+            for p in DesktopEntryFolder.recognized_folders \
             if Path(p).is_dir()]
 
     def __init__(self, path: Path):
