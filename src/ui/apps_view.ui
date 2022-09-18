@@ -48,6 +48,7 @@
           <object class='GtkSearchBar' id='search_bar'>
             <child>
               <object class='GtkSearchEntry' id='search_entry'>
+                <property name='width-request'>320</property>
                 <property name='placeholder-text' translatable='yes'>Search your apps</property>
               </object>
             </child>
