@@ -201,7 +201,7 @@ class StringRow(Adw.EntryRow):
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
-        return [StringRow(f) for f in fields if type(f.get()) == str and not f.locale]
+        return [StringRow(f) for f in fields if ((t := type(f.get())) == str or t == list) and not f.locale]
 
     def on_changed(self, widget):
         self.field.set(self.get_text())
