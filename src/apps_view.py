@@ -62,8 +62,6 @@ class AppsView(Gtk.Box):
         if self.user_button.get_active() == True:
             self.update_user_group()
 
-
-
     def _update_group(self, preferences_group: Adw.PreferencesGroup, folder: DesktopEntryFolder):
         listbox = (
             preferences_group
@@ -71,15 +69,8 @@ class AppsView(Gtk.Box):
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
 
-        old_children: list[Gtk.Widget] = []
-
-        i = 0
-        while listbox.get_row_at_index(i) is not None:
-            old_children.append(listbox.get_row_at_index(i))
-            i += 1
-
-        for c in old_children:
-            preferences_group.remove(c)
+        while (row := listbox.get_first_child()) != None:
+            preferences_group.remove(row)
 
         folder.get_files()
         for file in folder.files:
