@@ -168,7 +168,7 @@ class BoolRow(Adw.ActionRow):
         self.switch.connect('state-set', self.on_state_set)
 
         super().__init__(
-            title=field.key.capitalize(),
+            title=field.key,
             activatable_widget=self.switch,
         )
         self.add_suffix(self.switch)
@@ -184,7 +184,7 @@ class StringRow(Adw.EntryRow):
     def __init__(self, field: Field) -> None:
         self.field = field
         
-        super().__init__(title=field.key.capitalize())
+        super().__init__(title=field.key)
         self.set_text(field.as_str() or '')
         self.connect('changed', self.on_changed)
         
@@ -211,20 +211,13 @@ class LocaleStringRow(Adw.EntryRow):
         self.field = field
 
         locales = [f.locale for f in self.field.localized_fields]
-        self.dropdown = Gtk.DropDown.new_from_strings(locales)
+        self.dropdown = Gtk.DropDown.new_from_strings(sorted(locales))
         self.dropdown.set_valign(Gtk.Align.CENTER)
-        self.dropdown.connect('notify', self.on_dropdown_notify)
-        try:
-            self.dropdown.set_selected(locales.index(self.field.localize(
-                auto_localize_if_no_locale=True, 
-                return_unlocalized_as_fallback=False, 
-                return_non_existing_key_as_fallback=False).locale))
-        except ValueError:
-            ...
+        self.dropdown.connect('notify', self._on_dropdown_notify)
 
         super().__init__(title=field.key.capitalize())
         self.add_suffix(self.dropdown)
-        self.connect('changed', self.on_changed)
+        self.connect('changed', self._on_changed)
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
@@ -245,9 +238,8 @@ class LocaleStringRow(Adw.EntryRow):
     def selected_locale(self):
         return self.dropdown.get_selected_item().get_string()
 
-    def on_dropdown_notify(self, widget, value):
-        dropdown_value: str = self.selected_locale
+    def _on_dropdown_notify(self, widget, value):
         self.set_text(self.field.localize(self.selected_locale).as_str())
 
-    def on_changed(self, widget):
+    def _on_changed(self, widget):
         self.field.localize(self.selected_locale).set(self.get_text())
