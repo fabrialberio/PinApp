@@ -2,7 +2,6 @@ from pathlib import Path
 from configparser import ConfigParser, SectionProxy
 
 from locale import getlocale
-from os import getenv
 
 from string import ascii_letters
 from random import seed, choice
