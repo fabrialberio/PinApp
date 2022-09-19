@@ -81,7 +81,6 @@ class FileView(Gtk.Box):
         else:
             self.app_icon.set_from_icon_name(icon_name)
 
-
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
 
@@ -89,10 +88,18 @@ class FileView(Gtk.Box):
         self._update_preferences_group(self.localized_group, localized_rows)
 
         string_rows = StringRow.list_from_field_list(file_dict.values())
-        self._update_preferences_group(self.strings_group, string_rows)
+        self._update_preferences_group(self.strings_group, string_rows, Adw.ActionRow(
+            title=_('No string values present'),
+            title_lines=1,
+            css_classes=['dim-label'],
+            halign=Gtk.Align.CENTER))
 
         bool_rows = BoolRow.list_from_field_list(file_dict.values())
-        self._update_preferences_group(self.bools_group, bool_rows)
+        self._update_preferences_group(self.bools_group, bool_rows, Adw.ActionRow(
+            title=_('No boolean values present'),
+            title_lines=1,
+            css_classes=['dim-label'],
+            halign=Gtk.Align.CENTER))
 
         if localized_rows:
             self.localized_group.set_visible(True)
@@ -133,8 +140,7 @@ class FileView(Gtk.Box):
         add_key_dialog.present()
 
 
-    @classmethod
-    def _update_preferences_group(self, preferences_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget]):
+    def _update_preferences_group(self, preferences_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_state: Gtk.Widget = None):
         '''Removes all present children of the group and adds the new ones'''
 
         listbox = (
@@ -143,18 +149,14 @@ class FileView(Gtk.Box):
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
 
-        old_children: list[Gtk.Widget] = []
+        while (row := listbox.get_first_child()) != None:
+            preferences_group.remove(row)
 
-        i = 0
-        while listbox.get_row_at_index(i) is not None:
-            old_children.append(listbox.get_row_at_index(i))
-            i += 1
-
-        for c in old_children:
-            preferences_group.remove(c)
-
-        for c in new_children:
-            preferences_group.add(c)
+        if len(new_children) > 0:
+            for c in new_children:
+                preferences_group.add(c)
+        elif empty_state != None:
+            preferences_group.add(empty_state)
 
 
 class BoolRow(Adw.ActionRow):
