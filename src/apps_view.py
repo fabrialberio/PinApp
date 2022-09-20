@@ -13,7 +13,10 @@ class AppsView(Gtk.Box):
     search_bar = Gtk.Template.Child('search_bar')
     search_entry = Gtk.Template.Child('search_entry')
 
+    folder_chooser_box = Gtk.Template.Child('folder_chooser_box')
     user_button = Gtk.Template.Child('user_button')
+    spinner_button = Gtk.Template.Child('spinner_button')
+
     user_group = Gtk.Template.Child('user_group')
     system_group = Gtk.Template.Child('system_group')
     flatpak_group = Gtk.Template.Child('flatpak_group')
@@ -21,78 +24,60 @@ class AppsView(Gtk.Box):
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
 
-        self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
-        self.search_bar.set_key_capture_widget(self.get_root())
-        self.search_bar.connect_entry(self.search_entry)
-
-        self.user_button.connect('toggled', self._on_user_button_toggled)
-        self.user_button.set_active(True)
-        self.user_group.set_visible(True)
-
         GObject.type_register(AppsView)
         GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        GObject.type_register(AppsGroup)
-        GObject.signal_new('file-open', AppsGroup, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self._update_group(
-            self.user_group, 
-            DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS))
-        self._update_group(
-            self.system_group, 
-            DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS))
-        self._update_group(
+
+        self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
+        self.search_bar.set_key_capture_widget(self.get_root())
+        self.search_bar.connect_entry(self.search_entry)
+
+        self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
+        self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
+        self.flatpak_folder = DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS)
+
+        self._update_apps(
             self.flatpak_group, 
-            DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS))
+            self.flatpak_folder)
+        self._update_apps(
+            self.system_group, 
+            self.system_folder)
+        self._update_apps(
+            self.user_group, 
+            self.user_folder)
 
+    def update_user_apps(self):
+        """Exposed function used by other classes"""
+        self._update_apps(self.user_group, self.user_folder)
 
-    def update_user_group(self):
-        self.search_bar.set_search_mode(False)
+    def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
 
-        if self.user_button.get_active() == True:
-            self._update_group(
-                self.user_group, 
-                DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS))
+        self.spinner_button.set_active(True)
+        self.folder_chooser_box.set_sensitive(False)
 
-    def _on_user_button_toggled(self, button):
-        if self.user_button.get_active() == True:
-            self.update_user_group()
-
-    def _update_group(self, preferences_group: Adw.PreferencesGroup, folder: DesktopEntryFolder):
         listbox = (
             preferences_group
             .get_first_child()  # Main group GtkBox
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
-
+        
         while (row := listbox.get_first_child()) != None:
             preferences_group.remove(row)
 
-        folder.get_files()
-        for file in folder.files:
-            app_row = AppRow(file)
-            app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
-            preferences_group.add(app_row)
+        def update():
+            for file in folder.files:
+                app_row = AppRow(file)
+                app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
+                preferences_group.add(app_row)
+            
+            self.user_group.set_visible(True)
+            self.folder_chooser_box.set_sensitive(True)
 
-class AppsGroup(Adw.PreferencesGroup):
-    __gtype_name__ = 'AppsGroup'
-
-    def __init__(self, folder: DesktopEntryFolder):        
-        super().__init__(description = folder.path)
-
-        self.folder = folder
-        self.folder.get_files()
-
-        for file in self.folder.files:
-            app_row = AppRow(file)
-            app_row.connect('file-open', lambda _, f: self.emit('file-open', f))
-
-            self.add(app_row)
-
+        folder.get_files_async(callback=update)
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'

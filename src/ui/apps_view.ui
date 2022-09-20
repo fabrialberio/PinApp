@@ -67,7 +67,7 @@
                 <child>
                   <object class='AdwPreferencesGroup'>
                     <child>
-                      <object class='GtkBox' id='folder-chooser-box'>
+                      <object class='GtkBox' id='folder_chooser_box'>
                         <property name='homogeneous'>True</property>
                         <property name='margin_bottom'>12</property>
                         <style>
@@ -97,6 +97,15 @@
                             <property name='group'>user_button</property>
                           </object>
                         </child>
+                        <child>
+                          <!-- Hidden button binded to spinner visibility, 
+                            to ensure it is not shown together with a group -->
+                          <object class='GtkToggleButton' id='spinner_button'>
+                            <property name='active' bind-source='spinner' bind-property='visible' bind-flags='bidirectional'/>
+                            <property name='group'>user_button</property>
+                            <property name='visible'>false</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -112,6 +121,13 @@
                     <child>
                       <object class='AdwPreferencesGroup' id='flatpak_group'>
                         <property name='visible'>false</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='GtkSpinner' id='spinner'>
+                        <property name='spinning'>true</property>
+                        <property name='width-request'>32</property>
+                        <property name='height-request'>32</property>
                       </object>
                     </child>
                   </object>
