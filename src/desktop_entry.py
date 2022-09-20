@@ -2,6 +2,7 @@ from pathlib import Path
 from configparser import ConfigParser, SectionProxy
 
 from locale import getlocale
+from threading import Thread
 
 from string import ascii_letters
 from random import seed, choice
@@ -435,18 +436,17 @@ class DesktopEntryFolder():
 
         self.files = []
 
-    def get_files(self, recursive=True, sort=True):
+    def get_files(self, sort=True):
         '''Returns a list of DesktopFile objects rapresenting the .desktop files'''
         pattern = '*.desktop'
         
-        self.files = [
-            DesktopEntry(p) for p in (
-                self.path.rglob(pattern) \
-                if recursive \
-                else self.path.glob(pattern) 
-            )
-        ]
-
+        self.files = [DesktopEntry(p) for p in (self.path.rglob(pattern))]
         if sort: self.files = sorted(self.files)
 
-        return self.files
+    def get_files_async(self, callback: callable = None):
+        def target():
+            self.get_files()
+            callback()
+
+        t = Thread(target=target)
+        t.start()
