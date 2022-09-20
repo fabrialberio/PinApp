@@ -40,24 +40,24 @@ class AppsView(Gtk.Box):
         self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
         self.flatpak_folder = DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS)
 
-        self._update_apps(
-            self.flatpak_group, 
-            self.flatpak_folder)
-        self._update_apps(
-            self.system_group, 
-            self.system_folder)
-        self._update_apps(
-            self.user_group, 
-            self.user_folder)
+        self.is_loading = False
+        self.update_all_apps()
 
     def update_user_apps(self):
         """Exposed function used by other classes"""
         self._update_apps(self.user_group, self.user_folder)
 
-    def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
+    def update_all_apps(self):
+        self.update_user_apps()
+        self._update_apps(
+            self.system_group, 
+            self.system_folder)
+        self._update_apps(
+            self.flatpak_group, 
+            self.flatpak_folder)
 
-        self.spinner_button.set_active(True)
-        self.folder_chooser_box.set_sensitive(False)
+    def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
+        self._set_loading(True)
 
         listbox = (
             preferences_group
@@ -68,16 +68,25 @@ class AppsView(Gtk.Box):
         while (row := listbox.get_first_child()) != None:
             preferences_group.remove(row)
 
-        def update():
+        def fill_group():
             for file in folder.files:
                 app_row = AppRow(file)
                 app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
                 preferences_group.add(app_row)
             
-            self.user_group.set_visible(True)
-            self.folder_chooser_box.set_sensitive(True)
+            self._set_loading(False)
 
-        folder.get_files_async(callback=update)
+        folder.get_files_async(callback=fill_group)
+
+    def _set_loading(self, state: bool):
+        if state:
+            self.spinner_button.set_active(True)
+            self.folder_chooser_box.set_sensitive(False)
+            self.is_loading = True
+        else:
+            self.folder_chooser_box.set_sensitive(True)
+            self.user_button.set_active(True)
+            self.is_loading = False
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
