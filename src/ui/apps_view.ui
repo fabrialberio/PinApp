@@ -144,6 +144,10 @@
   <menu id='primary_menu'>
     <section>
       <item>
+        <attribute name='label' translatable='yes'>_Refresh</attribute>
+        <attribute name='action'>app.refresh</attribute>
+      </item>
+      <item>
         <attribute name='label' translatable='yes'>_Keyboard Shortcuts</attribute>
         <attribute name='action'>win.show-help-overlay</attribute>
       </item>

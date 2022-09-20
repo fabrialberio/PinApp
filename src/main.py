@@ -37,6 +37,7 @@ class PinAppApplication(Adw.Application):
         self.create_action('quit', lambda a, v: self.quit(), ['<primary>q'])
         self.create_action('about', self.show_about_window)
         
+        self.create_action('refresh', self.on_refresh)
         self.create_action('search', self.on_search, ['<primary>f'])
         self.create_action('new-file', self.on_new_file, ['<primary>n'])
         
@@ -57,6 +58,9 @@ class PinAppApplication(Adw.Application):
             self.window = PinAppWindow(application=self)
 
         self.window.present()
+
+    def on_refresh(self, action, *args):
+        self.window.apps_view.update_all_apps()
 
     def on_save(self, action, *args):
         self.window.file_view.emit('file-save')
