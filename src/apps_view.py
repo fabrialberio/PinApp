@@ -69,9 +69,13 @@ class AppsView(Gtk.Box):
             preferences_group.remove(row)
 
         def fill_group():
+            app_rows = []
             for file in folder.files:
                 app_row = AppRow(file)
                 app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
+                app_rows.append(app_row)
+    
+            for app_row in app_rows:
                 preferences_group.add(app_row)
             
             self._set_loading(False)
