@@ -38,7 +38,6 @@ class PinAppApplication(Adw.Application):
         self.create_action('about', self.show_about_window)
         
         self.create_action('refresh', self.on_refresh)
-        self.create_action('search', self.on_search, ['<primary>f'])
         self.create_action('new-file', self.on_new_file, ['<primary>n'])
         
         self.create_action('exit', self.on_back, ['Escape'])
@@ -71,10 +70,6 @@ class PinAppApplication(Adw.Application):
 
     def on_back(self, action, *args):
         self.window.file_view.emit('file-back')
-
-    def on_search(self, action, *args):
-        if self.window.is_visible(self.window.apps_view):
-            self.window.apps_view.search_bar.set_search_mode(True)
 
     def show_about_window(self, action, *args):
         """Callback for the app.about action."""

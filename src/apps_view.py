@@ -9,12 +9,10 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopEntry):
         self.file = file
-        self.title = self.file.appsection.Name.get()
-        self.comment = self.file.appsection.Comment.get()
-
+        
         super().__init__(
-            title = self.title,
-            subtitle = self.comment,
+            title = self.file.appsection.Name.get(),
+            subtitle = self.file.appsection.Comment.get(),
             activatable = True,)
 
         icon = Gtk.Image(
@@ -39,22 +37,11 @@ class AppRow(Adw.ActionRow):
 
         self.connect('activated', lambda _: self.emit('file-open', file))
 
-    def is_result_for(self, query: str) -> bool:
-        content = [v.as_str() for v in self.file.appsection.values() if v.as_bool() == None]
-        content = '\n'.join(content).lower()
-
-        if query.lower() in content: return True
-        else: return False
-
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
     new_file_button = Gtk.Template.Child('new_file_button')
-
-    search_button = Gtk.Template.Child('search_button')
-    search_bar = Gtk.Template.Child('search_bar')
-    search_entry = Gtk.Template.Child('search_entry')
 
     folder_chooser_box = Gtk.Template.Child('folder_chooser_box')
     user_button = Gtk.Template.Child('user_button')
@@ -74,11 +61,7 @@ class AppsView(Gtk.Box):
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
-        self.search_bar.set_key_capture_widget(self.get_root())
-        self.search_bar.connect_entry(self.search_entry)
-        self.search_entry.connect('search-changed', lambda _: self._update_for_search())
 
         self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
         self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
@@ -86,13 +69,6 @@ class AppsView(Gtk.Box):
 
         self.is_loading = False
         self.update_all_apps()
-
-    def get_active_group(self) -> 'Adw.PreferencesGroup | None':
-        for g in [self.user_group, self.system_group, self.flatpak_group]:
-            if g.get_visible() == True:
-                return g
-
-        return None
 
     def update_user_apps(self):
         """Exposed function used by other classes"""
@@ -109,23 +85,26 @@ class AppsView(Gtk.Box):
 
     def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
         self._set_loading(True)
-
+        self._clear_preferences_group(preferences_group)
 
         def fill_group():
             app_rows = []
             for file in folder.files:
-                app_row = AppRow(file)
-                app_row.connect('file_open', lambda _, f: self.emit('file-open', f))
-                app_rows.append(app_row)
+                row = AppRow(file)
+                row.connect('file_open', lambda _, f: self.emit('file-open', f))
+                app_rows.append(row)
     
-            for app_row in app_rows:
-                preferences_group.add(app_row)
-            
+            for row in app_rows:
+                preferences_group.add(row)
+
             self._set_loading(False)
 
         folder.get_files_async(callback=fill_group)
 
     def _set_loading(self, state: bool):
+        if self.is_loading == state:
+            return
+
         if state:
             self.spinner_button.set_active(True)
             self.folder_chooser_box.set_sensitive(False)
@@ -135,23 +114,13 @@ class AppsView(Gtk.Box):
             self.user_button.set_active(True)
             self.is_loading = False
 
-    def _update_for_search(self):
-        query = self.search_entry.get_text()
-        preferences_group = self.get_active_group()
-
+    def _clear_preferences_group(self, preferences_group):
         listbox = (
             preferences_group
             .get_first_child()  # Main group GtkBox
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
+    
         
-        i = 0
-        while (row := listbox.get_row_at_index(i)) != None:
-            if row.is_result_for(query) or not query:
-                row.set_visible(True)
-            else:
-                row.set_visible(False)
-            i += 1
-
-
-
+        while (row := listbox.get_first_child()) != None:
+            preferences_group.remove(row)

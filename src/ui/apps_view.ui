@@ -28,108 +28,83 @@
             <property name='visible'>true</property>
           </object>
         </child>
-        <!-- Search button -->
-        <child type='end'>
-          <object class='GtkToggleButton' id='search_button'>
-            <property name='active' bind-source='search_bar' bind-property='search-mode-enabled' bind-flags='bidirectional'/>
-            <property name='tooltip-text' translatable='yes'>Search</property>
-            <property name='icon-name'>system-search-symbolic</property>
-          </object>
-        </child>
       </object>
     </child>
     <child>
-      <object class='GtkBox'>
+      <object class='GtkScrolledWindow'>
         <property name='hexpand'>True</property>
         <property name='vexpand'>True</property>
-        <property name='orientation'>vertical</property>
-        <!-- Search bar -->
         <child>
-          <object class='GtkSearchBar' id='search_bar'>
+          <object class='AdwClamp'>
+            <property name='margin-top'>24</property>
+            <property name='margin-bottom'>24</property>
+            <property name='margin-start'>12</property>
+            <property name='margin-end'>12</property>
             <child>
-              <object class='GtkSearchEntry' id='search_entry'>
-                <property name='width-request'>320</property>
-                <property name='placeholder-text' translatable='yes'>Search your apps</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class='GtkScrolledWindow'>
-            <property name='hexpand'>True</property>
-            <property name='vexpand'>True</property>
-            <child>
-              <object class='AdwClamp'>
-                <property name='margin-top'>24</property>
-                <property name='margin-bottom'>24</property>
-                <property name='margin-start'>12</property>
-                <property name='margin-end'>12</property>
+              <object class='AdwPreferencesGroup'>
                 <child>
-                  <object class='AdwPreferencesGroup'>
+                  <object class='GtkBox' id='folder_chooser_box'>
+                    <property name='homogeneous'>True</property>
+                    <property name='margin_bottom'>12</property>
+                    <style>
+                      <class name='linked'/>
+                    </style>
                     <child>
-                      <object class='GtkBox' id='folder_chooser_box'>
-                        <property name='homogeneous'>True</property>
-                        <property name='margin_bottom'>12</property>
-                        <style>
-                          <class name='linked'/>
-                        </style>
-                        <child>
-                          <object class='GtkToggleButton' id='user_button'>
-                            <property name='label' translatable='yes'>User</property>
-                            <property name='tooltip-text' translatable='yes'>User applications folder</property>
-                            <property name='active'>true</property> <!-- This is because user group is active by default -->
-                            <property name='active' bind-source='user_group' bind-property='visible' bind-flags='bidirectional'/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class='GtkToggleButton' id='system_button'>
-                            <property name='label' translatable='yes'>System</property>
-                            <property name='tooltip-text' translatable='yes'>System applications folder</property>
-                            <property name='active' bind-source='system_group' bind-property='visible' bind-flags='bidirectional'/>
-                            <property name='group'>user_button</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class='GtkToggleButton' id='flatpak_button'>
-                            <property name='label' translatable='yes'>Flatpak</property>
-                            <property name='tooltip-text' translatable='yes'>Flatpak applications folder</property>
-                            <property name='active' bind-source='flatpak_group' bind-property='visible' bind-flags='bidirectional'/>
-                            <property name='group'>user_button</property>
-                          </object>
-                        </child>
-                        <child>
-                          <!-- Hidden button binded to spinner visibility, 
-                            to ensure it is not shown together with a group -->
-                          <object class='GtkToggleButton' id='spinner_button'>
-                            <property name='active' bind-source='spinner' bind-property='visible' bind-flags='bidirectional'/>
-                            <property name='group'>user_button</property>
-                            <property name='visible'>false</property>
-                          </object>
-                        </child>
+                      <object class='GtkToggleButton' id='user_button'>
+                        <property name='label' translatable='yes'>User</property>
+                        <property name='tooltip-text' translatable='yes'>User applications folder</property>
+                        <property name='active'>true</property> <!-- This is because user group is active by default -->
+                        <property name='active' bind-source='user_group' bind-property='visible' bind-flags='bidirectional'/>
                       </object>
                     </child>
                     <child>
-                      <object class='AdwPreferencesGroup' id='user_group'>
+                      <object class='GtkToggleButton' id='system_button'>
+                        <property name='label' translatable='yes'>System</property>
+                        <property name='tooltip-text' translatable='yes'>System applications folder</property>
+                        <property name='active' bind-source='system_group' bind-property='visible' bind-flags='bidirectional'/>
+                        <property name='group'>user_button</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='GtkToggleButton' id='flatpak_button'>
+                        <property name='label' translatable='yes'>Flatpak</property>
+                        <property name='tooltip-text' translatable='yes'>Flatpak applications folder</property>
+                        <property name='active' bind-source='flatpak_group' bind-property='visible' bind-flags='bidirectional'/>
+                        <property name='group'>user_button</property>
+                      </object>
+                    </child>
+                    <child>
+                      <!-- Hidden button bound to spinner visibility, 
+                        to ensure it is not shown together with a group -->
+                      <object class='GtkToggleButton' id='spinner_button'>
+                        <property name='active' bind-source='spinner' bind-property='visible' bind-flags='bidirectional'/>
+                        <property name='group'>user_button</property>
                         <property name='visible'>false</property>
                       </object>
                     </child>
-                    <child>
-                      <object class='AdwPreferencesGroup' id='system_group'>
-                        <property name='visible'>false</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class='AdwPreferencesGroup' id='flatpak_group'>
-                        <property name='visible'>false</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class='GtkSpinner' id='spinner'>
-                        <property name='spinning'>true</property>
-                        <property name='width-request'>32</property>
-                        <property name='height-request'>32</property>
-                      </object>
-                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class='AdwPreferencesGroup' id='user_group'>
+                    <property name='visible'>false</property>
+                  </object>
+                </child>
+                <child>
+                  <object class='AdwPreferencesGroup' id='system_group'>
+                    <property name='visible'>false</property>
+                  </object>
+                </child>
+                <child>
+                  <object class='AdwPreferencesGroup' id='flatpak_group'>
+                    <property name='visible'>false</property>
+                  </object>
+                </child>
+                <child>
+                  <!-- Spinner shown when loading apps -->
+                  <object class='GtkSpinner' id='spinner'>
+                    <property name='spinning'>true</property>
+                    <property name='width-request'>32</property>
+                    <property name='height-request'>32</property>
                   </object>
                 </child>
               </object>

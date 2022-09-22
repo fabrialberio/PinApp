@@ -38,12 +38,6 @@
             <property name="title" translatable="yes" context="shortcut window">App list</property>
             <child>
               <object class="GtkShortcutsShortcut">
-                <property name="title" translatable="yes" context="shortcut window">Search</property>
-                <property name="action-name">app.search</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Create new file</property>
                 <property name="action-name">app.new-file</property>
               </object>
