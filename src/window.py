@@ -79,6 +79,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.leaflet.set_visible_child(self.apps_view)
 
     def on_file_open(self, file_view, file):
+        self.apps_view.search_bar.set_search_mode(False)
         self.file_view.load_file(file)
         self.leaflet.set_visible_child(self.file_view)
 
