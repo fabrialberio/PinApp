@@ -3,6 +3,49 @@ from pathlib import Path
 
 from .desktop_entry import DesktopEntry, DesktopEntryFolder
 
+
+class AppRow(Adw.ActionRow):
+    __gtype_name__ = 'AppRow'
+
+    def __init__(self, file: DesktopEntry):
+        self.file = file
+        self.title = self.file.appsection.Name.get()
+        self.comment = self.file.appsection.Comment.get()
+
+        super().__init__(
+            title = self.title,
+            subtitle = self.comment,
+            activatable = True,)
+
+        icon = Gtk.Image(
+            pixel_size=32,
+            margin_top=6,
+            margin_bottom=6,
+            css_classes=['icon-dropshadow'])
+        
+        icon_name = file.appsection.Icon.get()
+        if icon_name == None:
+            icon.set_from_icon_name('image-missing')
+        elif Path(icon_name).exists():
+            icon.set_from_file(icon_name)
+        else:
+            icon.set_from_icon_name(icon_name)
+
+        self.add_prefix(icon)
+
+        self.add_suffix(Gtk.Image(
+            icon_name='go-next-symbolic',
+            opacity=.6))
+
+        self.connect('activated', lambda _: self.emit('file-open', file))
+
+    def is_result_for(self, query: str) -> bool:
+        content = [v.as_str() for v in self.file.appsection.values() if v.as_bool() == None]
+        content = '\n'.join(content).lower()
+
+        if query.lower() in content: return True
+        else: return False
+
 @Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
@@ -35,6 +78,7 @@ class AppsView(Gtk.Box):
         self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
         self.search_bar.set_key_capture_widget(self.get_root())
         self.search_bar.connect_entry(self.search_entry)
+        self.search_entry.connect('search-changed', lambda _: self._update_for_search())
 
         self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
         self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
@@ -42,6 +86,13 @@ class AppsView(Gtk.Box):
 
         self.is_loading = False
         self.update_all_apps()
+
+    def get_active_group(self) -> 'Adw.PreferencesGroup | None':
+        for g in [self.user_group, self.system_group, self.flatpak_group]:
+            if g.get_visible() == True:
+                return g
+
+        return None
 
     def update_user_apps(self):
         """Exposed function used by other classes"""
@@ -59,14 +110,6 @@ class AppsView(Gtk.Box):
     def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
         self._set_loading(True)
 
-        listbox = (
-            preferences_group
-            .get_first_child()  # Main group GtkBox
-            .get_last_child()   # GtkBox containing the listbox
-            .get_first_child()) # GtkListbox
-        
-        while (row := listbox.get_first_child()) != None:
-            preferences_group.remove(row)
 
         def fill_group():
             app_rows = []
@@ -92,33 +135,23 @@ class AppsView(Gtk.Box):
             self.user_button.set_active(True)
             self.is_loading = False
 
-class AppRow(Adw.ActionRow):
-    __gtype_name__ = 'AppRow'
+    def _update_for_search(self):
+        query = self.search_entry.get_text()
+        preferences_group = self.get_active_group()
 
-    def __init__(self, file: DesktopEntry):
-        super().__init__(
-            title = file.appsection.Name.get(),
-            subtitle = file.appsection.Comment.get(),
-            activatable = True,)
-
-        icon = Gtk.Image(
-            pixel_size=32,
-            margin_top=6,
-            margin_bottom=6,
-            css_classes=['icon-dropshadow'])
+        listbox = (
+            preferences_group
+            .get_first_child()  # Main group GtkBox
+            .get_last_child()   # GtkBox containing the listbox
+            .get_first_child()) # GtkListbox
         
-        icon_name = file.appsection.Icon.get()
-        if icon_name == None:
-            icon.set_from_icon_name('image-missing')
-        elif Path(icon_name).exists():
-            icon.set_from_file(icon_name)
-        else:
-            icon.set_from_icon_name(icon_name)
+        i = 0
+        while (row := listbox.get_row_at_index(i)) != None:
+            if row.is_result_for(query) or not query:
+                row.set_visible(True)
+            else:
+                row.set_visible(False)
+            i += 1
 
-        self.add_prefix(icon)
 
-        self.add_suffix(Gtk.Image(
-            icon_name='go-next-symbolic',
-            opacity=.6))
 
-        self.connect('activated', lambda _: self.emit('file-open', file))
