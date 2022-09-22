@@ -60,7 +60,8 @@ class PinAppApplication(Adw.Application):
         self.window.present()
 
     def on_refresh(self, action, *args):
-        self.window.apps_view.update_all_apps()
+        if not self.window.apps_view.is_loading:
+            self.window.apps_view.update_all_apps()
 
     def on_save(self, action, *args):
         self.window.file_view.emit('file-save')
