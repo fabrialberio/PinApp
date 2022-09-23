@@ -10,6 +10,14 @@
         <child>
           <object class='AdwEntryRow' id='name_entry'>
             <property name='title' translatable='yes'>File name</property>
+            <child type='suffix'>
+              <object class='GtkLabel'>
+                <property name='label'>.desktop</property>
+                <style>
+                  <class name='dim-label'/>
+                </style>
+              </object>
+            </child>
           </object>
         </child>
       </object>
