@@ -39,9 +39,24 @@ class FileView(Gtk.Box):
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.save_button.connect('clicked', lambda _: self.emit('file-save'))
-        self.delete_button.connect('clicked', lambda _: self.emit('file-delete'))
+        self.delete_button.connect('clicked', lambda _: self.delete_file())
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self.add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self.add_key(is_bool=True))
+
+    def delete_file(self):
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
+        
+        dialog = builder.get_object('confirm_delete_dialog')
+
+        def callback(widget, resp):
+            if resp == 'delete':
+                self.file.delete()
+                self.emit('file-delete')
+
+        dialog.connect('response', callback)
+        dialog.set_transient_for(self.get_root())
+        dialog.present()
+
 
     def load_file(self, file: DesktopEntry, is_new = False):
         self.file = file

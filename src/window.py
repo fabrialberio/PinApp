@@ -66,7 +66,6 @@ class PinAppWindow(Adw.ApplicationWindow):
                 file_view.save_to_user_folder(on_success)
 
     def on_file_delete(self, file_view: FileView):
-        file_view.file.delete()
         self.apps_view.update_user_apps()
         self.leaflet.set_visible_child(self.apps_view)
 

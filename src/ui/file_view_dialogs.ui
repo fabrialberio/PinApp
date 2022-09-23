@@ -30,4 +30,15 @@
       <response id='yes' appearance='suggested' translatable='yes'>_Yes</response>
     </responses>
   </object>
+
+  <object class='AdwMessageDialog' id='confirm_delete_dialog'>
+    <property name='heading' translatable='yes'>Delete this file?</property>
+    <property name='body' translatable='yes'>If you delete this file it will be lost forever</property>
+    <property name='default-response'>cancel</property>
+    <property name='close-response'>cancel</property>
+    <responses>
+      <response id='cancel' translatable='yes'>_Cancel</response>
+      <response id='delete' appearance='destructive' translatable='yes'>_Delete</response>
+    </responses>
+  </object>
 </interface>
