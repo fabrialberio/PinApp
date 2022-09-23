@@ -38,10 +38,13 @@ class FileView(Gtk.Box):
         GObject.signal_new('add-bool-field', FileView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
-        self.save_button.connect('clicked', lambda _: self.emit('file-save'))
+        self.save_button.connect('clicked', lambda _: self.save_file())
         self.delete_button.connect('clicked', lambda _: self.delete_file())
-        self.strings_group.get_header_suffix().connect('clicked', lambda _: self.add_key())
-        self.bools_group.get_header_suffix().connect('clicked', lambda _: self.add_key(is_bool=True))
+        self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
+        self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
+
+    def is_visible(self):
+        return isinstance(self.get_parent().get_visible_child(), FileView)
 
     def delete_file(self):
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
@@ -57,8 +60,7 @@ class FileView(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.present()
 
-
-    def load_file(self, file: DesktopEntry, is_new = False):
+    def load_file(self, file: DesktopEntry):
         self.file = file
         
         if self.file.path.exists():
@@ -122,7 +124,21 @@ class FileView(Gtk.Box):
         else:
             self.localized_group.set_visible(False)
 
-    def save_to_user_folder(self, on_success_callback):
+    def save_file(self):
+        if not self.is_visible(): 
+            return
+
+        def callback():
+            self.emit('file-save')
+
+        try:
+            self.file.save()
+            callback()
+        except OSError:
+            self._save_to_user_folder(callback)
+
+
+    def _save_to_user_folder(self, on_success_callback: callable):
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
         
         dialog = builder.get_object('save_local_dialog')
@@ -136,7 +152,7 @@ class FileView(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.present()
 
-    def add_key(self, is_bool=False):
+    def _add_key(self, is_bool=False):
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
 
         add_key_dialog = builder.get_object('add_key_dialog')

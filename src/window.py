@@ -35,13 +35,13 @@ class PinAppWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.apps_view = AppsView()
-        self.apps_view.connect('file-open', self.on_file_open)
+        self.apps_view.connect('file-open', lambda _, f: self.open_file(f))
         self.leaflet.append(self.apps_view)
 
         self.file_view = FileView()
-        self.file_view.connect('file-back', self.on_file_back)
-        self.file_view.connect('file-save', self.on_file_save)
-        self.file_view.connect('file-delete', self.on_file_delete)
+        self.file_view.connect('file-back', lambda _: self.show_apps())
+        self.file_view.connect('file-save', lambda _: self.show_and_update_apps())
+        self.file_view.connect('file-delete', lambda _: self.show_and_update_apps())
         self.leaflet.append(self.file_view)
 
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
@@ -50,31 +50,16 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.set_help_overlay(help_overlay)
 
-    def on_file_back(self, file_view):
-        self.leaflet.set_visible_child(self.apps_view)
-
-    def on_file_save(self, file_view: FileView):
-        def on_success(*args):
-            self.apps_view.update_user_apps()
-            self.leaflet.set_visible_child(self.apps_view)
-
-        if self.is_visible(self.file_view):
-            try:
-                file_view.file.save()
-                on_success()
-            except OSError:
-                file_view.save_to_user_folder(on_success)
-
-    def on_file_delete(self, file_view: FileView):
-        self.apps_view.update_user_apps()
-        self.leaflet.set_visible_child(self.apps_view)
-
-    def on_file_open(self, file_view, file):
+    def open_file(self, file):
         self.file_view.load_file(file)
         self.leaflet.set_visible_child(self.file_view)
 
-    def is_visible(self, view):
-        return self.leaflet.get_visible_child() == view
+    def show_apps(self):
+        self.leaflet.set_visible_child(self.apps_view)
+
+    def show_and_update_apps(self):
+        self.show_apps()
+        self.apps_view.update_user_apps()
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')

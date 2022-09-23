@@ -61,7 +61,7 @@ class AppsView(Gtk.Box):
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self.new_file_button.connect('clicked', lambda _: self.on_new_file())
+        self.new_file_button.connect('clicked', lambda _: self.new_file())
 
         self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
         self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
@@ -70,7 +70,13 @@ class AppsView(Gtk.Box):
         self.is_loading = False
         self.update_all_apps()
 
-    def on_new_file(self):
+    def is_visible(self):
+        return isinstance(self.get_parent().get_visible_child(), AppsView)
+
+    def new_file(self):
+        if not self.is_visible():
+            return
+
         builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         dialog = builder.get_object('filename_dialog')
         name_entry = builder.get_object('name_entry')

@@ -34,14 +34,14 @@ class PinAppApplication(Adw.Application):
         super().__init__(application_id='com.github.fabrialberio.pinapp',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
-        self.create_action('quit', lambda a, v: self.quit(), ['<primary>q'])
+        self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
         self.create_action('about', self.show_about_window)
         
         self.create_action('refresh', self.on_refresh)
-        self.create_action('new-file', self.on_new_file, ['<primary>n'])
+        self.create_action('new-file', lambda a, _: self.window.apps_view.new_file(), ['<primary>n'])
         
-        self.create_action('exit', self.on_back, ['Escape'])
-        self.create_action('save', self.on_save, ['<primary>s'])
+        self.create_action('exit', lambda a, _: self.window.show_apps(), ['Escape'])
+        self.create_action('save', lambda a, _: self.window.file_view.save_file(), ['<primary>s'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
         self.window = None
@@ -61,15 +61,6 @@ class PinAppApplication(Adw.Application):
     def on_refresh(self, action, *args):
         if not self.window.apps_view.is_loading:
             self.window.apps_view.update_all_apps()
-
-    def on_save(self, action, *args):
-        self.window.file_view.emit('file-save')
-
-    def on_new_file(self, action, *args):
-        self.window.apps_view.on_new_file()
-
-    def on_back(self, action, *args):
-        self.window.file_view.emit('file-back')
 
     def show_about_window(self, action, *args):
         """Callback for the app.about action."""
