@@ -19,7 +19,7 @@
       <response id='add' appearance='suggested' enabled='false' translatable='yes'>_Add</response>
     </responses>
   </object>
-  
+
   <object class='AdwMessageDialog' id='save_local_dialog'>
     <property name='heading' translatable='yes'>Save changes to user folder?</property>
     <property name='body' translatable='yes'>Saving to this folder is not permitted. Do you want to save to the user folder instead? The changes will still be visible bacause the user folder is prioritized</property>

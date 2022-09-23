@@ -35,7 +35,6 @@ class PinAppWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.apps_view = AppsView()
-        self.apps_view.connect('file-new', self.on_new_file)
         self.apps_view.connect('file-open', self.on_file_open)
         self.leaflet.append(self.apps_view)
 
@@ -51,11 +50,6 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.set_help_overlay(help_overlay)
 
-    def on_new_file(self, apps_view):        
-        if self.is_visible(self.apps_view):
-            self.file_view.load_file(DesktopEntry.new_from_random_name(), is_new=True)
-            self.leaflet.set_visible_child(self.file_view)
-
     def on_file_back(self, file_view):
         self.leaflet.set_visible_child(self.apps_view)
 
@@ -70,8 +64,6 @@ class PinAppWindow(Adw.ApplicationWindow):
                 on_success()
             except OSError:
                 file_view.save_to_user_folder(on_success)
-
-
 
     def on_file_delete(self, file_view: FileView):
         file_view.file.delete()

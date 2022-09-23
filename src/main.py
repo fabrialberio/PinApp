@@ -66,7 +66,7 @@ class PinAppApplication(Adw.Application):
         self.window.file_view.emit('file-save')
 
     def on_new_file(self, action, *args):
-        self.window.apps_view.emit('file-new')
+        self.window.apps_view.on_new_file()
 
     def on_back(self, action, *args):
         self.window.file_view.emit('file-back')

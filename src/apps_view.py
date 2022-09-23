@@ -9,6 +9,7 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, file: DesktopEntry):
         self.file = file
+        self.file.load()
         
         super().__init__(
             title = self.file.appsection.Name.get(),
@@ -55,13 +56,12 @@ class AppsView(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
 
         GObject.type_register(AppsView)
-        GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
         GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-        self.new_file_button.connect('clicked', lambda _: self.emit('file-new'))
+        self.new_file_button.connect('clicked', lambda _: self.on_new_file())
 
         self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
         self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
@@ -69,6 +69,33 @@ class AppsView(Gtk.Box):
 
         self.is_loading = False
         self.update_all_apps()
+
+    def on_new_file(self):
+        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
+        dialog = builder.get_object('filename_dialog')
+        name_entry = builder.get_object('name_entry')
+
+        def path_is_valid() -> bool:
+            path = name_entry.get_text()
+            if '/' in path:
+                return False
+            else:
+                return True
+
+        name_entry.connect('changed', lambda _: dialog.set_response_enabled(
+            'create',
+            path_is_valid()))
+
+        def callback(widget, resp):
+            if resp == 'create':
+                path = DesktopEntryFolder.USER_APPLICATIONS / Path(f'{Path(name_entry.get_text())}.desktop')
+                file = DesktopEntry.new_with_defaults(path)
+
+                self.emit('file-open', file)
+
+        dialog.connect('response', callback)
+        dialog.set_transient_for(self.get_root())
+        dialog.show()
 
     def update_user_apps(self):
         """Exposed function used by other classes"""

@@ -46,7 +46,8 @@ class FileView(Gtk.Box):
     def load_file(self, file: DesktopEntry, is_new = False):
         self.file = file
         
-        if not is_new: self.file.load()
+        if self.file.path.exists():
+            self.file.load()
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 

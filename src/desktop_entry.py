@@ -333,21 +333,18 @@ class ActionSection(Section):
 class IniFile:
     def __init__(self, path: 'str | Path') -> None:
         self.path = Path(path)
-        if not self.path.is_file():
-            print(self.path.read_text())
+        self.is_loaded = False
 
-            raise ValueError(f'Path {self.path} is not a file')
-        
         self.parser = ConfigParser(interpolation=None, )
         self.parser.optionxform=str
-        self.load()
 
     @property
     def filename(self) -> str: return self.path.name
 
     def load(self):
         self.parser.clear()
-        return self.parser.read(self.path)
+        self.parser.read(self.path)
+        self.is_loaded = True
 
     def save(self, path=None) -> None:
         '''Saves the file'''
@@ -380,7 +377,7 @@ class DesktopEntry(IniFile):
         return desktop_file
 
     @staticmethod
-    def validate_path(_path: (str)) -> str:
+    def validate_path(_path: (str)) -> Path:
         path = Path(_path)
 
         # Sets the exstension to .desktop
@@ -405,6 +402,9 @@ class DesktopEntry(IniFile):
         return ActionSection.dict_from_parser(self.parser)
 
     def __lt__(self, __o: object) -> bool:
+        if not self.is_loaded:
+            self.load()
+
         if isinstance(__o, DesktopEntry):
             try:
                 return self.appsection.Name.get() < __o.appsection.Name.get()

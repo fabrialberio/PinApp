@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <object class='AdwMessageDialog' id='filename_dialog'>
+    <property name='width-request'>400</property>
+    <property name='heading' translatable='yes'>Create new file</property>
+    <property name='default-response'>create</property>
+    <property name='close-response'>cancel</property>
+    <property name='extra-child'>
+      <object class='AdwPreferencesGroup'>
+        <child>
+          <object class='AdwEntryRow' id='name_entry'>
+            <property name='title' translatable='yes'>File name</property>
+          </object>
+        </child>
+      </object>
+    </property>
+    <responses>
+      <response id='cancel' translatable='yes'>_Cancel</response>
+      <response id='create' appearance='suggested' enabled='false' translatable='yes'>_Create</response>
+    </responses>
+  </object>
+
   <object class="AdwAboutWindow" id="about_window">
     <property name="application-name">PinApp</property>
     <property name="modal">True</property>
