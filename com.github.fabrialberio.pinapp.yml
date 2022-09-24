@@ -12,11 +12,11 @@ finish-args:
   - --filesystem=host
   - --filesystem=home
 
-    # System application files
+    # Application files
   - --filesystem=xdg-data/applications:rw
   - --filesystem=/usr/share/applications:ro
 
-    # System app icons
+    # App icons
   - --filesystem=xdg-data/icons:ro
   - --filesystem=/usr/share/icons:ro
   
@@ -36,3 +36,11 @@ cleanup:
   - /share/pkgconfig
   - "*.la"
   - "*.a"
+
+modules:
+  - name: PinApp
+    builddir: true
+    buildsystem: meson
+    sources:
+    - type: git
+      url: https://github.com/fabrialberio/PinApp
