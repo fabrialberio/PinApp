@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">PinApp</name>
+  <shortdesc xml:lang="en">Create your own application shortcuts</shortdesc>
+  <description xml:lang="en">
+    With PinApp, you can easily create and edit application shortcuts for all your applications.
+  </description>
+  <homepage rdf:resource="https://github.com/fabrialberio/PinApp" />
+  <bug-database rdf:resource="https://github.com/fabrialberio/PinApp/issues" />
+
+  <programming-language>Python</programming-language>
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Fabrizio Alberio</foaf:name>
+    </foaf:Person>
+  </maintainer>
+</Project>
