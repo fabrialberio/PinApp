@@ -72,7 +72,13 @@ class FileView(Gtk.Box):
             self.banner_box.remove(self.banner_box.get_first_child())
 
         app_name_row = StringRow(self.file.appsection.Name)
-        app_name_row.add_css_class('title-2')
+        # Style the text
+        (app_name_row
+            .get_first_child() # GtkBox containing the header
+            .observe_children() # List of all children
+            .get_item(1) # Get second child (editable area)
+            .get_last_child() # GtkText
+            .add_css_class('title-1'))
         app_comment_row = StringRow(self.file.appsection.Comment)
         
         self.banner_box.append(app_name_row)
