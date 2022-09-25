@@ -97,13 +97,7 @@ class FileView(Gtk.Box):
     def update_file(self):
         file_dict: dict = self.file.appsection.as_dict()
 
-        icon_name = self.file.appsection.Icon.get()
-        if icon_name == None:
-            self.app_icon.set_from_icon_name('image-missing')
-        elif Path(icon_name).exists():
-            self.app_icon.set_from_file(icon_name)
-        else:
-            self.app_icon.set_from_icon_name(icon_name)
+        self._update_icon()
 
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
@@ -111,7 +105,13 @@ class FileView(Gtk.Box):
         localized_rows = LocaleStringRow.list_from_field_list(list(self.file.appsection.values()))
         self._update_preferences_group(self.localized_group, localized_rows)
 
-        string_rows = StringRow.list_from_field_list(file_dict.values())
+        if (icon_field := file_dict.get('Icon', None)) != None:
+            icon_row = StringRow(icon_field)
+            icon_row.connect('changed', lambda _: self._update_icon())
+            string_rows = [icon_row]
+        else:
+            string_rows = []
+        string_rows += StringRow.list_from_field_list(file_dict.values())
         self._update_preferences_group(self.strings_group, string_rows, Adw.ActionRow(
             title=_('No string values present'),
             title_lines=1,
@@ -129,6 +129,15 @@ class FileView(Gtk.Box):
             self.localized_group.set_visible(True)
         else:
             self.localized_group.set_visible(False)
+
+    def _update_icon(self):
+        icon_name = self.file.appsection.Icon.get()
+        if icon_name == None:
+            self.app_icon.set_from_icon_name('image-missing')
+        elif Path(icon_name).exists():
+            self.app_icon.set_from_file(icon_name)
+        else:
+            self.app_icon.set_from_icon_name(icon_name)
 
     def save_file(self):
         if not self.is_visible(): 
