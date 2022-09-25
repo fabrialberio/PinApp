@@ -3,7 +3,18 @@
 	<id>com.github.fabrialberio.pinapp.desktop</id>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
+	<name>PinApp</name>
+	<summary>Create your own application shortcuts</summary>
+    <developer_name translatable="no">Fabrizio Alberio</developer_name>
 	<description>
-	  <p>No description</p>
+	  <p>Easily create and edit application shortcuts with PinApp</p>
 	</description>
+    <content_rating type="oars-1.1"/>
+	<url type="homepage">https://github.com/fabrialberio/PinApp</url>
+    <url type="bugtracker">https://github.com/fabrialberio/PinApp/issues</url>
+    <recommends>
+		<control>pointing</control>
+		<control>keyboard</control>
+		<control>touch</control>
+	</recommends>
 </component>
