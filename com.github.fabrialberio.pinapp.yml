@@ -9,21 +9,15 @@ finish-args:
   - --device=dri
   - --socket=fallback-x11
   - --socket=wayland
-  - --filesystem=host
-  - --filesystem=home
 
-    # Application files
-  - --filesystem=xdg-data/applications:rw
-  - --filesystem=/usr/share/applications:ro
+  - --env=XDG_DATA_DIRS=/var/lib/flatpak/exports/share:/app/share:/usr/share:/usr/share/runtime/share:/run/host/user-share:/run/host/share:/var/lib
 
     # App icons
   - --filesystem=xdg-data/icons:ro
-  - --filesystem=/usr/share/icons:ro
   
-    # Workaround for missing flatpak app icons
+    # Applications
   - --filesystem=/var/lib/flatpak:ro
   - --filesystem=xdg-data/flatpak:ro
-  - --env=XDG_DATA_DIRS=/var/lib/flatpak/exports/share:/app/share:/usr/share:/usr/share/runtime/share:/run/host/user-share:/run/host/share
   
 
 cleanup:
