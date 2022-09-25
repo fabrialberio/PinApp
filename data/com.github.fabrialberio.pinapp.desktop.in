@@ -1,8 +1,10 @@
 [Desktop Entry]
 Name=PinApp
+Comment=Create your own application shortcuts
 Exec=pinapp
 Icon=com.github.fabrialberio.pinapp
 Terminal=false
 Type=Application
-Categories=GTK;
+Categories=GTK;Utility;GNOME;
+Keywords=GNOME;GTK;Apps;
 StartupNotify=true
