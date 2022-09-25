@@ -9,17 +9,16 @@ finish-args:
   - --device=dri
   - --socket=fallback-x11
   - --socket=wayland
-  
+
   - --env=XDG_DATA_DIRS=/var/lib/flatpak/exports/share:/app/share:/usr/share:/usr/share/runtime/share:/run/host/user-share:/run/host/share
 
-    # App icons
+    # Icons
   - --filesystem=xdg-data/icons:ro
-  
+
     # Applications
   - --filesystem=xdg-data/applications:rw
   - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
-  
 
 cleanup:
   - /include
