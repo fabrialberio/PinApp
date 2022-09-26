@@ -106,6 +106,7 @@ class FileView(Gtk.Box):
         self._update_preferences_group(self.localized_group, localized_rows)
 
         if (icon_field := file_dict.get('Icon', None)) != None:
+            file_dict.pop('Icon', '')
             icon_row = StringRow(icon_field)
             icon_row.connect('changed', lambda _: self._update_icon())
             string_rows = [icon_row]
