@@ -9,6 +9,14 @@
 	<description>
 	  <p>Easily create and edit application shortcuts with PinApp</p>
 	</description>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/Screenshot-1.png</image>
+		</screenshot>
+		<screenshot>
+			<image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/Screenshot-2.png</image>
+		</screenshot>
+	</screenshots>
     <content_rating type="oars-1.1"/>
 	<url type="homepage">https://github.com/fabrialberio/PinApp</url>
     <url type="bugtracker">https://github.com/fabrialberio/PinApp/issues</url>
@@ -17,4 +25,10 @@
 		<control>keyboard</control>
 		<control>touch</control>
 	</recommends>
+	<releases>
+		<release version="1.0.0" date="2022-09-26">
+			<description>
+			</description>
+		</release>
+	</releases>
 </component>
