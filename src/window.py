@@ -25,7 +25,7 @@ from .file_view import FileView
 from .desktop_entry import DesktopEntry
 from pathlib import Path
 
-@Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/window.ui')
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'PinAppWindow'
 
@@ -44,7 +44,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_view.connect('file-delete', lambda _: self.show_and_update_apps())
         self.leaflet.append(self.file_view)
 
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         help_overlay = builder.get_object('help_overlay')
         help_overlay.set_transient_for(self)
 
@@ -62,7 +62,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.apps_view.update_user_apps()
 
     def show_about_window(self):
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         about_window = builder.get_object('about_window')
         about_window.set_transient_for(self)
         about_window.present()

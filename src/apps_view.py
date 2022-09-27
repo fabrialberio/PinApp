@@ -38,7 +38,7 @@ class AppRow(Adw.ActionRow):
 
         self.connect('activated', lambda _: self.emit('file-open', file))
 
-@Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/apps_view.ui')
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
@@ -77,7 +77,7 @@ class AppsView(Gtk.Box):
         if not self.is_visible():
             return
 
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/apps_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_view_dialogs.ui')
         dialog = builder.get_object('filename_dialog')
         name_entry = builder.get_object('name_entry')
 
@@ -107,7 +107,7 @@ class AppsView(Gtk.Box):
         """Exposed function used by other classes"""
         self._update_apps(self.user_group, self.user_folder)
 
-    def update_all_apps(self):
+    def update_all_apps(self):        
         self.update_user_apps()
         self._update_apps(
             self.system_group, 

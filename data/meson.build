@@ -1,6 +1,6 @@
 desktop_file = i18n.merge_file(
-  input: 'com.github.fabrialberio.pinapp.desktop.in',
-  output: 'com.github.fabrialberio.pinapp.desktop',
+  input: 'io.github.fabrialberio.pinapp.desktop.in',
+  output: 'io.github.fabrialberio.pinapp.desktop',
   type: 'desktop',
   po_dir: '../po',
   install: true,
@@ -15,8 +15,8 @@ if desktop_utils.found()
 endif
 
 appstream_file = i18n.merge_file(
-  input: 'com.github.fabrialberio.pinapp.appdata.xml.in',
-  output: 'com.github.fabrialberio.pinapp.appdata.xml',
+  input: 'io.github.fabrialberio.pinapp.appdata.xml.in',
+  output: 'io.github.fabrialberio.pinapp.appdata.xml',
   po_dir: '../po',
   install: true,
   install_dir: join_paths(get_option('datadir'), 'appdata')
@@ -29,7 +29,7 @@ if appstream_util.found()
   )
 endif
 
-install_data('com.github.fabrialberio.pinapp.gschema.xml',
+install_data('io.github.fabrialberio.pinapp.gschema.xml',
   install_dir: join_paths(get_option('datadir'), 'glib-2.0/schemas')
 )
 

@@ -1,4 +1,4 @@
-application_id = 'com.github.fabrialberio.pinapp'
+application_id = 'io.github.fabrialberio.pinapp'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(

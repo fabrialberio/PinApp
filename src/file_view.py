@@ -5,7 +5,7 @@ from os import access, W_OK
 
 from .desktop_entry import DesktopEntryFolder, DesktopEntry, Field
 
-@Gtk.Template(resource_path='/com/github/fabrialberio/pinapp/file_view.ui')
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Gtk.Box):
     __gtype_name__ = 'FileView'
 
@@ -47,7 +47,7 @@ class FileView(Gtk.Box):
         return isinstance(self.get_parent().get_visible_child(), FileView)
 
     def delete_file(self):
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_view_dialogs.ui')
         
         dialog = builder.get_object('confirm_delete_dialog')
 
@@ -155,7 +155,7 @@ class FileView(Gtk.Box):
 
 
     def _save_to_user_folder(self, on_success_callback: callable):
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_view_dialogs.ui')
         
         dialog = builder.get_object('save_local_dialog')
 
@@ -169,7 +169,7 @@ class FileView(Gtk.Box):
         dialog.present()
 
     def _add_key(self, is_bool=False):
-        builder = Gtk.Builder.new_from_resource('/com/github/fabrialberio/pinapp/file_view_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_view_dialogs.ui')
 
         add_key_dialog = builder.get_object('add_key_dialog')
         key_entry = builder.get_object('key_entry')

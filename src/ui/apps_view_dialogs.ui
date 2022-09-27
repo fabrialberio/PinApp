@@ -34,7 +34,7 @@
     <property name="version">0.1.0</property>
     <property name="copyright" translatable="yes">© 2022 Fabrizio Alberio</property>
     <property name="comments" translatable="yes">Create your own application shortcuts</property>
-    <property name="application-icon">com.github.fabrialberio.pinapp</property>
+    <property name="application-icon">io.github.fabrialberio.pinapp</property>
     <property name="developer-name">Fabrizio Alberio</property>
   </object>
 

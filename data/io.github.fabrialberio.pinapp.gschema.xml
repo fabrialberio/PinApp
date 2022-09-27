@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="pinapp">
-	<schema id="com.github.fabrialberio.pinapp" path="/com/github/fabrialberio/pinapp/">
+	<schema id="io.github.fabrialberio.pinapp" path="/io/github/fabrialberio/pinapp/">
 	</schema>
 </schemalist>

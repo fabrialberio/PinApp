@@ -2,7 +2,7 @@
 Name=PinApp
 Comment=Create your own application shortcuts
 Exec=pinapp
-Icon=com.github.fabrialberio.pinapp
+Icon=io.github.fabrialberio.pinapp
 Terminal=false
 Type=Application
 Categories=GTK;Utility;GNOME;

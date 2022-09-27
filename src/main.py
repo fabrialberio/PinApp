@@ -31,7 +31,7 @@ class PinAppApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='com.github.fabrialberio.pinapp',
+        super().__init__(application_id='io.github.fabrialberio.pinapp',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
