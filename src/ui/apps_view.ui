@@ -41,7 +41,8 @@
             <property name='margin-start'>12</property>
             <property name='margin-end'>12</property>
             <child>
-              <object class='AdwPreferencesGroup'>
+              <object class='GtkBox'>
+                <property name='orientation'>vertical</property>
                 <child>
                   <object class='GtkBox' id='folder_chooser_box'>
                     <property name='homogeneous'>True</property>
@@ -85,18 +86,21 @@
                   </object>
                 </child>
                 <child>
-                  <object class='AdwPreferencesGroup' id='user_group'>
+                  <object class='GtkBox' id='user_group'>
                     <property name='visible'>false</property>
+                    <property name='orientation'>vertical</property>
                   </object>
                 </child>
                 <child>
-                  <object class='AdwPreferencesGroup' id='system_group'>
+                  <object class='GtkBox' id='system_group'>
                     <property name='visible'>false</property>
+                    <property name='orientation'>vertical</property>
                   </object>
                 </child>
                 <child>
-                  <object class='AdwPreferencesGroup' id='flatpak_group'>
+                  <object class='GtkBox' id='flatpak_group'>
                     <property name='visible'>false</property>
+                    <property name='orientation'>vertical</property>
                   </object>
                 </child>
                 <child>

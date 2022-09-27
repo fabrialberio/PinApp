@@ -48,9 +48,9 @@ class AppsView(Gtk.Box):
     user_button = Gtk.Template.Child('user_button')
     spinner_button = Gtk.Template.Child('spinner_button')
 
-    user_group = Gtk.Template.Child('user_group')
-    system_group = Gtk.Template.Child('system_group')
-    flatpak_group = Gtk.Template.Child('flatpak_group')
+    user_box = Gtk.Template.Child('user_group')
+    system_box = Gtk.Template.Child('system_group')
+    flatpak_box = Gtk.Template.Child('flatpak_group')
 
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
@@ -105,30 +105,65 @@ class AppsView(Gtk.Box):
 
     def update_user_apps(self):
         """Exposed function used by other classes"""
-        self._update_apps(self.user_group, self.user_folder)
+        self._update_apps(self.user_box, self.user_folder)
 
     def update_all_apps(self):        
         self.update_user_apps()
         self._update_apps(
-            self.system_group, 
+            self.system_box, 
             self.system_folder)
         self._update_apps(
-            self.flatpak_group, 
+            self.flatpak_box, 
             self.flatpak_folder)
 
-    def _update_apps(self, preferences_group, folder: DesktopEntryFolder):
+    def _update_apps(self, box, folder: DesktopEntryFolder):
         self._set_loading(True)
-        self._clear_preferences_group(preferences_group)
+
+        if (child := box.get_first_child()) != None:
+            box.remove(child)
+
 
         def fill_group():
-            app_rows = []
-            for file in folder.files:
-                row = AppRow(file)
-                row.connect('file_open', lambda _, f: self.emit('file-open', f))
-                app_rows.append(row)
-    
-            for row in app_rows:
-                preferences_group.add(row)
+            listbox = Gtk.ListBox(
+                selection_mode=Gtk.SelectionMode.NONE,
+                css_classes=['boxed-list'])
+
+            if len(folder.files) > 0 and folder.exists():
+                app_rows = []
+                for file in folder.files:
+                    row = AppRow(file)
+                    row.connect('file_open', lambda _, f: self.emit('file-open', f))
+                    app_rows.append(row)
+        
+                for row in app_rows:
+                    listbox.append(row)
+                box.append(listbox)
+            else:
+                status_page = Adw.StatusPage(
+                    vexpand=True,
+                    hexpand=True)
+
+                if not folder.exists():
+                    status_page.set_title(_('This folder does not exist'))
+                    status_page.set_description(_('This probably means your desktop environment is not supported'))
+                    status_page.set_icon_name('dialog-error-symbolic')
+                    box.append(status_page)
+                elif len(folder.files) == 0:
+                    status_page.set_title(_('This folder is empty'))
+                    status_page.set_icon_name('folder-open-symbolic')
+                    
+                    if box == self.user_box:
+                        button = Gtk.Button(
+                            halign=Gtk.Align.CENTER,
+                            css_classes=['suggested-action', 'pill'],
+                            child=Adw.ButtonContent(
+                                label=_('New app'),
+                                icon_name='list-add-symbolic'))
+                        
+                        button.connect('clicked', lambda _: self.new_file())
+                        status_page.set_child(button)
+                        
+                    box.append(status_page)
 
             self._set_loading(False)
 
@@ -146,14 +181,3 @@ class AppsView(Gtk.Box):
             self.folder_chooser_box.set_sensitive(True)
             self.user_button.set_active(True)
             self.is_loading = False
-
-    def _clear_preferences_group(self, preferences_group):
-        listbox = (
-            preferences_group
-            .get_first_child()  # Main group GtkBox
-            .get_last_child()   # GtkBox containing the listbox
-            .get_first_child()) # GtkListbox
-    
-        
-        while (row := listbox.get_first_child()) != None:
-            preferences_group.remove(row)
