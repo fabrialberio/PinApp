@@ -2,7 +2,7 @@
 <interface>
   <object class='AdwMessageDialog' id='filename_dialog'>
     <property name='width-request'>400</property>
-    <property name='heading' translatable='yes'>Create new file</property>
+    <property name='heading' translatable='yes'>Create new app</property>
     <property name='default-response'>create</property>
     <property name='close-response'>cancel</property>
     <property name='extra-child'>
