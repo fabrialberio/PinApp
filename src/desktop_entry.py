@@ -431,9 +431,6 @@ class DesktopEntryFolder():
 
     def __init__(self, path: Path):
         self.path = Path(path)
-        if not self.path.is_dir():
-            raise ValueError(f'Path "{self.path} is not a directory"')
-
         self.files = []
 
     def get_files(self, sort=True):
@@ -450,3 +447,6 @@ class DesktopEntryFolder():
 
         t = Thread(target=target)
         t.start()
+    
+    def exists(self):
+        return self.path.is_dir()
