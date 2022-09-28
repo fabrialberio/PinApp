@@ -157,11 +157,13 @@ class AppsView(Gtk.Box):
                             halign=Gtk.Align.CENTER,
                             css_classes=['suggested-action', 'pill'],
                             child=Adw.ButtonContent(
-                                label=_('New app'),
+                                label=_('Add new app'),
                                 icon_name='list-add-symbolic'))
                         
                         button.connect('clicked', lambda _: self.new_file())
                         status_page.set_child(button)
+                    else:
+                        status_page.set_description(_('Applications you install will appear here'))
                         
                     box.append(status_page)
 
