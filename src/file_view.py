@@ -161,7 +161,7 @@ class FileView(Gtk.Box):
 
         def callback(widget, resp):
             if resp == 'yes':
-                self.file.save(Path(DesktopEntryFolder.USER_APPLICATIONS)/self.file.filename)
+                self.file.save(Path(DesktopEntryFolder.USER)/self.file.filename)
                 on_success_callback()
 
         dialog.connect('response', callback)

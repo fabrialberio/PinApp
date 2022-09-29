@@ -63,9 +63,9 @@ class AppsView(Gtk.Box):
 
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
-        self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER_APPLICATIONS)
-        self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM_APPLICATIONS)
-        self.flatpak_folder = DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM_APPLICATIONS)
+        self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER)
+        self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM)
+        self.flatpak_folder = DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM)
 
         self.is_loading = False
         self.update_all_apps()
@@ -94,7 +94,7 @@ class AppsView(Gtk.Box):
 
         def callback(widget, resp):
             if resp == 'create':
-                path = DesktopEntryFolder.USER_APPLICATIONS / Path(f'{Path(name_entry.get_text())}.desktop')
+                path = DesktopEntryFolder.USER / Path(f'{Path(name_entry.get_text())}.desktop')
                 file = DesktopEntry.new_with_defaults(path)
 
                 self.emit('file-open', file)

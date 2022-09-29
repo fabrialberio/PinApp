@@ -361,7 +361,7 @@ class DesktopEntry(IniFile):
     @staticmethod
     def new_from_random_name() -> 'DesktopEntry':
         random_string = ''.join(choice(ascii_letters) for i in range(12))
-        path = f'{DesktopEntryFolder.USER_APPLICATIONS}/pinapp-{random_string}'
+        path = f'{DesktopEntryFolder.USER}/pinapp-{random_string}'
         return DesktopEntry.new_with_defaults(path)
 
     @staticmethod
@@ -416,11 +416,13 @@ class DesktopEntry(IniFile):
 class DesktopEntryFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
 
-    USER_APPLICATIONS = f'{Path.home()}/.local/share/applications'
-    SYSTEM_APPLICATIONS = '/usr/share/applications'
-    FLATPAK_SYSTEM_APPLICATIONS = '/var/lib/flatpak/exports/share/applications'
+    USER = f'{Path.home()}/.local/share/applications'
+    FLATPAK_USER = f'{Path.home()}/.local/share/flatpak/exports/share'
+    SYSTEM = '/usr/share/applications'
+    FLATPAK_SYSTEM = '/var/lib/flatpak/exports/share/applications'
     
-    recognized_folders = [USER_APPLICATIONS, SYSTEM_APPLICATIONS, FLATPAK_SYSTEM_APPLICATIONS]
+    writable_folder = USER # Has to be only one for the app to work
+    recognized_folders = [USER, SYSTEM, FLATPAK_SYSTEM]
 
     @staticmethod
     def list_from_recognized() -> list['DesktopEntryFolder']:
