@@ -52,63 +52,29 @@
                     </style>
                     <child>
                       <object class='GtkToggleButton' id='user_button'>
-                        <property name='label' translatable='yes'>User</property>
+                        <property name='label' translatable='yes'>Your apps</property>
                         <property name='tooltip-text' translatable='yes'>User applications folder</property>
+                        <property name='active' bind-source='user_bin' bind-property='visible' bind-flags='bidirectional'/>
                         <property name='active'>true</property> <!-- This is because user group is active by default -->
-                        <property name='active' bind-source='user_group' bind-property='visible' bind-flags='bidirectional'/>
                       </object>
                     </child>
                     <child>
                       <object class='GtkToggleButton' id='system_button'>
-                        <property name='label' translatable='yes'>System</property>
+                        <property name='label' translatable='yes'>System apps</property>
                         <property name='tooltip-text' translatable='yes'>System applications folder</property>
-                        <property name='active' bind-source='system_group' bind-property='visible' bind-flags='bidirectional'/>
+                        <property name='active' bind-source='system_bin' bind-property='visible' bind-flags='bidirectional'/>
                         <property name='group'>user_button</property>
                       </object>
                     </child>
-                    <child>
-                      <object class='GtkToggleButton' id='flatpak_button'>
-                        <property name='label' translatable='yes'>Flatpak</property>
-                        <property name='tooltip-text' translatable='yes'>Flatpak applications folder</property>
-                        <property name='active' bind-source='flatpak_group' bind-property='visible' bind-flags='bidirectional'/>
-                        <property name='group'>user_button</property>
-                      </object>
-                    </child>
-                    <child>
-                      <!-- Hidden button bound to spinner visibility, 
-                        to ensure it is not shown together with a group -->
-                      <object class='GtkToggleButton' id='spinner_button'>
-                        <property name='active' bind-source='spinner' bind-property='visible' bind-flags='bidirectional'/>
-                        <property name='group'>user_button</property>
-                        <property name='visible'>false</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class='GtkBox' id='user_group'>
+                  <object class='AdwBin' id='user_bin'>
+                  </object>
+                </child>
+                <child>
+                  <object class='AdwBin' id='system_bin'>
                     <property name='visible'>false</property>
-                    <property name='orientation'>vertical</property>
-                  </object>
-                </child>
-                <child>
-                  <object class='GtkBox' id='system_group'>
-                    <property name='visible'>false</property>
-                    <property name='orientation'>vertical</property>
-                  </object>
-                </child>
-                <child>
-                  <object class='GtkBox' id='flatpak_group'>
-                    <property name='visible'>false</property>
-                    <property name='orientation'>vertical</property>
-                  </object>
-                </child>
-                <child>
-                  <!-- Spinner shown when loading apps -->
-                  <object class='GtkSpinner' id='spinner'>
-                    <property name='spinning'>true</property>
-                    <property name='width-request'>32</property>
-                    <property name='height-request'>32</property>
                   </object>
                 </child>
               </object>
