@@ -41,11 +41,19 @@ class AppRow(Adw.ActionRow):
 class AppCategory(Adw.Bin):
     __gtype_name__ = 'AppCategory'
 
+    class State:
+        FILLED = 0
+        EMPTY = 1
+        ERROR = 2
+        LOADING = 3
+
     def __init__(self, folders: FolderGroup) -> None:
         super().__init__()
 
         self.folders = folders
-        self.loading = False
+        self.state = self.State.LOADING
+
+        self.listbox: Gtk.ListBox
 
         self.empty_page = Adw.StatusPage(
             vexpand=True,
@@ -93,29 +101,38 @@ class AppCategory(Adw.Bin):
     
     def update_apps(self):
         if self.folders.exists:
-            self.set_child(self.loading_page)
-            self.loading = True
+            self._set_state(self.State.LOADING)
 
             def fill_group():
                 if not self.folders.empty:
-                    listbox = Gtk.ListBox(
+                    self.listbox = Gtk.ListBox(
                         selection_mode=Gtk.SelectionMode.NONE,
                         css_classes=['boxed-list'])
                 
                     for file in self.folders.files:
                         row = AppRow(file)
                         row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                        listbox.append(row)
+                        self.listbox.append(row)
             
-                    self.set_child(listbox)
+                    self._set_state(self.State.FILLED)
                 else:
-                    self.set_child(self.empty_page)
-                self.loading = False
+                    self._set_state(self.State.EMPTY)
 
             self.folders.get_files_async(callback=fill_group)
         else:
-            self.set_child(self.error_page)
+            self._set_state(self.State.ERROR)
 
+    def _set_state(self, state: 'AppCategory.State'):
+        if state == self.State.FILLED:
+            self.set_child(self.listbox)
+        elif state == self.State.EMPTY:
+            self.set_child(self.empty_page)
+        elif state == self.State.ERROR:
+            self.set_child(self.error_page)
+        elif state == self.State.LOADING:
+            self.set_child(self.loading_page)
+        
+        self.state = state
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/apps_view.ui')
@@ -156,7 +173,9 @@ class AppsView(Gtk.Box):
 
     @property
     def loading(self):
-        return any([self.user_apps.loading, self.system_apps.loading])
+        return any(map(
+            lambda a: a.state == AppCategory.State.LOADING,
+            (self.user_apps, self.system_apps)))
 
     @property
     def visible(self):
