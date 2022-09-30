@@ -10,17 +10,14 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
 
-    # Custom xdg-data variable to include Flatpak applications
-  - --env=XDG_DATA_DIRS=/usr/share:~/.local/share:/var/lib/flatpak/exports/share:~/.local/share/flatpak/exports/share
- 
+  - --env=XDG_DATA_DIRS=/var/lib/flatpak/exports/share:/usr/share
+
     # Icons
   - --filesystem=xdg-data/icons:ro
 
-    # Desktop files
-  - --filesystem=xdg-data/applications:ro
-  - --filesystem=~/.local/share/applications:rw
-
-    # Flatpak applications
+    # Applications
+  - --filesystem=xdg-data/applications:rw
+  - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
   - --filesystem=~/.local/share/flatpak:ro
 
@@ -42,4 +39,4 @@ modules:
     sources:
     - type: git
       url: https://github.com/fabrialberio/PinApp
-    #  commit: e98ee68fdf1a17a0101ff40136919864cff06275
+      commit: e98ee68fdf1a17a0101ff40136919864cff06275
