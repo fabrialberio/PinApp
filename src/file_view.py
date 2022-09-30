@@ -3,8 +3,7 @@ from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 from os import access, W_OK
 
-from .folders import DesktopEntryFolder
-from .desktop_entry import DesktopEntry, Field
+from .desktop_entry import DesktopEntryFolder, DesktopEntry, Field
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Gtk.Box):

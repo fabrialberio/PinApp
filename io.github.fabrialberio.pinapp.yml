@@ -19,7 +19,6 @@ finish-args:
   - --filesystem=xdg-data/applications:rw
   - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
-  - --filesystem=~/.local/share/flatpak:ro
 
 cleanup:
   - /include

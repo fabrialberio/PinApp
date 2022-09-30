@@ -1,7 +1,11 @@
+from pathlib import Path
 from configparser import ConfigParser, SectionProxy
 
 from locale import getlocale
-from pathlib import Path
+from threading import Thread
+
+from string import ascii_letters
+from random import seed, choice
 from time import time
 
 
@@ -353,6 +357,13 @@ class IniFile:
 
 class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
+
+    @staticmethod
+    def new_from_random_name() -> 'DesktopEntry':
+        random_string = ''.join(choice(ascii_letters) for i in range(12))
+        path = f'{DesktopEntryFolder.USER}/pinapp-{random_string}'
+        return DesktopEntry.new_with_defaults(path)
+
     @staticmethod
     def new_with_defaults(path: 'str | Path') -> 'DesktopEntry':
         valid_path = DesktopEntry.validate_path(str(path))
@@ -381,6 +392,8 @@ class DesktopEntry(IniFile):
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
+        seed(time())
+
     @property
     def appsection(self) -> 'AppSection': 
         return AppSection.from_parser(self.parser)
@@ -399,3 +412,43 @@ class DesktopEntry(IniFile):
                 return False
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
+
+class DesktopEntryFolder():
+    '''Folder containing a list of DesktopFiles and managing related settings'''
+
+    USER = f'{Path.home()}/.local/share/applications'
+    FLATPAK_USER = f'{Path.home()}/.local/share/flatpak/exports/share'
+    SYSTEM = '/usr/share/applications'
+    FLATPAK_SYSTEM = '/var/lib/flatpak/exports/share/applications'
+    
+    writable_folder = USER # Has to be only one for the app to work
+    recognized_folders = [USER, SYSTEM, FLATPAK_SYSTEM]
+
+    @staticmethod
+    def list_from_recognized() -> list['DesktopEntryFolder']:
+        return [
+            DesktopEntryFolder(p) \
+            for p in DesktopEntryFolder.recognized_folders \
+            if Path(p).is_dir()]
+
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        self.files = []
+
+    def get_files(self, sort=True):
+        '''Returns a list of DesktopFile objects rapresenting the .desktop files'''
+        pattern = '*.desktop'
+        
+        self.files = [DesktopEntry(p) for p in (self.path.rglob(pattern))]
+        if sort: self.files = sorted(self.files)
+
+    def get_files_async(self, callback: callable = None):
+        def target():
+            self.get_files()
+            callback()
+
+        t = Thread(target=target)
+        t.start()
+    
+    def exists(self):
+        return self.path.is_dir()

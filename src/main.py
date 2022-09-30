@@ -59,7 +59,7 @@ class PinAppApplication(Adw.Application):
         self.window.present()
 
     def on_refresh(self, action, *args):
-        if not self.window.apps_view.loading:
+        if not self.window.apps_view.is_loading:
             self.window.apps_view.update_all_apps()
 
     def show_about_window(self, action, *args):
