@@ -1,8 +1,8 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 from pathlib import Path
 
-from .desktop_entry import DesktopEntry, DesktopEntryFolder
-
+from .desktop_entry import DesktopEntry
+from .folders import UserFolders, SystemFolders, FolderGroup, DesktopEntryFolder
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
@@ -38,19 +38,95 @@ class AppRow(Adw.ActionRow):
 
         self.connect('activated', lambda _: self.emit('file-open', file))
 
+class AppCategory(Adw.Bin):
+    __gtype_name__ = 'AppCategory'
+
+    def __init__(self, folders: FolderGroup) -> None:
+        super().__init__()
+
+        self.folders = folders
+        self.loading = False
+
+        self.empty_page = Adw.StatusPage(
+            vexpand=True,
+            hexpand=True,
+            title=_('This folder is empty'),
+            icon_name='folder-open-symbolic'
+        )
+        if self.folders.writable:
+            button = Gtk.Button(
+                halign=Gtk.Align.CENTER,
+                css_classes=['suggested-action', 'pill'],
+                child=Adw.ButtonContent(
+                    label=_('Add new app'),
+                    icon_name='list-add-symbolic'))
+            
+            button.connect('clicked', lambda _: self.emit('file-new'))
+            self.empty_page.set_child(button)
+        else:
+            self.empty_page.set_description(_('Applications you install will appear here'))
+
+        self.error_page = Adw.StatusPage(
+            vexpand=True,
+            hexpand=True,
+            title=_('Error loading apps'),
+            icon_name='dialog-error-symbolic'
+        )
+
+        self.loading_page = Adw.StatusPage(
+            vexpand=True,
+            hexpand=True,
+            title=_('Loading apps...'),
+            icon_name='go-back-symbolic')
+        box = (self.loading_page
+            .get_first_child() # GtkScrolledWindow
+            .get_first_child() # GtkWiewport
+            .get_first_child() # GtkBox
+            .get_first_child() # AdwClamp
+            .get_first_child()) # GtkBox
+        box.remove(box.get_first_child()) # Removes the GtkImage with the icon
+        box.prepend(Gtk.Spinner(
+            width_request=32,
+            height_request=32,
+            opacity=.8,
+            spinning=True)) # Replaces it with a spinner
+    
+    def update_apps(self):
+        if self.folders.exists:
+            self.set_child(self.loading_page)
+            self.loading = True
+
+            def fill_group():
+                if not self.folders.empty:
+                    listbox = Gtk.ListBox(
+                        selection_mode=Gtk.SelectionMode.NONE,
+                        css_classes=['boxed-list'])
+                
+                    for file in self.folders.files:
+                        row = AppRow(file)
+                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
+                        listbox.append(row)
+            
+                    self.set_child(listbox)
+                else:
+                    self.set_child(self.empty_page)
+                self.loading = False
+
+            self.folders.get_files_async(callback=fill_group)
+        else:
+            self.set_child(self.error_page)
+
+
+
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/apps_view.ui')
 class AppsView(Gtk.Box):
     __gtype_name__ = 'AppsView'
 
     new_file_button = Gtk.Template.Child('new_file_button')
 
-    folder_chooser_box = Gtk.Template.Child('folder_chooser_box')
     user_button = Gtk.Template.Child('user_button')
-    spinner_button = Gtk.Template.Child('spinner_button')
-
-    user_box = Gtk.Template.Child('user_group')
-    system_box = Gtk.Template.Child('system_group')
-    flatpak_box = Gtk.Template.Child('flatpak_group')
+    user_bin = Gtk.Template.Child('user_bin')
+    system_bin = Gtk.Template.Child('system_bin')
 
     def __init__(self, **kwargs):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
@@ -61,20 +137,33 @@ class AppsView(Gtk.Box):
         GObject.type_register(AppRow)
         GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
+        GObject.type_register(AppCategory)
+        GObject.signal_new('file-open', AppCategory, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new('file-new', AppCategory, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+
+        self.user_apps = AppCategory(UserFolders())
+        self.system_apps = AppCategory(SystemFolders())
+        self.user_bin.set_child(self.user_apps)
+        self.system_bin.set_child(self.system_apps)
+
+        self.user_apps.connect('file-new', lambda _: self.new_file())
         self.new_file_button.connect('clicked', lambda _: self.new_file())
+        
+        self.user_apps.connect('file-open', lambda _, f: self.emit('file-open', f))
+        self.system_apps.connect('file-open', lambda _, f: self.emit('file-open', f))
 
-        self.user_folder = DesktopEntryFolder(DesktopEntryFolder.USER)
-        self.system_folder = DesktopEntryFolder(DesktopEntryFolder.SYSTEM)
-        self.flatpak_folder = DesktopEntryFolder(DesktopEntryFolder.FLATPAK_SYSTEM)
-
-        self.is_loading = False
         self.update_all_apps()
 
-    def is_visible(self):
+    @property
+    def loading(self):
+        return any([self.user_apps.loading, self.system_apps.loading])
+
+    @property
+    def visible(self):
         return isinstance(self.get_parent().get_visible_child(), AppsView)
 
     def new_file(self):
-        if not self.is_visible():
+        if not self.visible:
             return
 
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_view_dialogs.ui')
@@ -104,82 +193,8 @@ class AppsView(Gtk.Box):
         dialog.show()
 
     def update_user_apps(self):
-        """Exposed function used by other classes"""
-        self._update_apps(self.user_box, self.user_folder)
+        self.user_apps.update_apps()
 
-    def update_all_apps(self):        
-        self.update_user_apps()
-        self._update_apps(
-            self.system_box, 
-            self.system_folder)
-        self._update_apps(
-            self.flatpak_box, 
-            self.flatpak_folder)
-
-    def _update_apps(self, box, folder: DesktopEntryFolder):
-        self._set_loading(True)
-
-        if (child := box.get_first_child()) != None:
-            box.remove(child)
-
-
-        def fill_group():
-            listbox = Gtk.ListBox(
-                selection_mode=Gtk.SelectionMode.NONE,
-                css_classes=['boxed-list'])
-
-            if len(folder.files) > 0 and folder.exists():
-                app_rows = []
-                for file in folder.files:
-                    row = AppRow(file)
-                    row.connect('file_open', lambda _, f: self.emit('file-open', f))
-                    app_rows.append(row)
-        
-                for row in app_rows:
-                    listbox.append(row)
-                box.append(listbox)
-            else:
-                status_page = Adw.StatusPage(
-                    vexpand=True,
-                    hexpand=True)
-
-                if not folder.exists():
-                    status_page.set_title(_('This folder does not exist'))
-                    status_page.set_description(_('This probably means your desktop environment is not supported'))
-                    status_page.set_icon_name('dialog-error-symbolic')
-                    box.append(status_page)
-                elif len(folder.files) == 0:
-                    status_page.set_title(_('This folder is empty'))
-                    status_page.set_icon_name('folder-open-symbolic')
-                    
-                    if box == self.user_box:
-                        button = Gtk.Button(
-                            halign=Gtk.Align.CENTER,
-                            css_classes=['suggested-action', 'pill'],
-                            child=Adw.ButtonContent(
-                                label=_('Add new app'),
-                                icon_name='list-add-symbolic'))
-                        
-                        button.connect('clicked', lambda _: self.new_file())
-                        status_page.set_child(button)
-                    else:
-                        status_page.set_description(_('Applications you install will appear here'))
-                        
-                    box.append(status_page)
-
-            self._set_loading(False)
-
-        folder.get_files_async(callback=fill_group)
-
-    def _set_loading(self, state: bool):
-        if self.is_loading == state:
-            return
-
-        if state:
-            self.spinner_button.set_active(True)
-            self.folder_chooser_box.set_sensitive(False)
-            self.is_loading = True
-        else:
-            self.folder_chooser_box.set_sensitive(True)
-            self.user_button.set_active(True)
-            self.is_loading = False
+    def update_all_apps(self):
+        self.user_apps.update_apps()
+        self.system_apps.update_apps()
