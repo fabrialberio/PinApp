@@ -85,11 +85,8 @@ class AppsPage(Adw.Bin):
             self._set_state(self.State.ERROR)
 
     def _init_widgets(self):
-        self.listbox: Gtk.ListBox
-
         self.empty_page = Adw.StatusPage(
             vexpand=True,
-            hexpand=True,
             title=_('No apps found'),
             icon_name='folder-open-symbolic'
         )
@@ -108,14 +105,12 @@ class AppsPage(Adw.Bin):
 
         self.error_page = Adw.StatusPage(
             vexpand=True,
-            hexpand=True,
             title=_('Error loading apps'),
             icon_name='dialog-error-symbolic'
         )
 
         self.loading_page = Adw.StatusPage(
             vexpand=True,
-            hexpand=True,
             title=_('Loading apps...'),
             icon_name='go-back-symbolic')
         box = (self.loading_page
@@ -134,14 +129,19 @@ class AppsPage(Adw.Bin):
     def _set_state(self, state: 'AppsPage.State'):
 
         if state == self.State.FILLED:
+            box = Gtk.Box(
+                orientation=Gtk.Orientation.VERTICAL)
+            box.append(self.listbox)
+
             self.set_child(
                 Gtk.ScrolledWindow(
+                    vexpand=True,
                     child=Adw.Clamp(
                         margin_top=24,
                         margin_bottom=24,
                         margin_start=12,
                         margin_end=12,
-                        child = self.listbox)))
+                        child = box)))
         elif state == self.State.EMPTY:
             self.set_child(self.empty_page)
         elif state == self.State.ERROR:
