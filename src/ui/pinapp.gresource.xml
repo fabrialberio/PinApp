@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/io/github/fabrialberio/pinapp">
-    <file>window.ui</file>
-    <file>apps_view.ui</file>
-    <file>apps_view_dialogs.ui</file>
-    <file>file_view.ui</file>
-    <file>file_view_dialogs.ui</file>
+    <file preprocess="xml-stripblanks">apps_page_dialogs.ui</file>
+    <file preprocess="xml-stripblanks">file_page.ui</file>
+    <file preprocess="xml-stripblanks">file_page_dialogs.ui</file>
+    <file preprocess="xml-stripblanks">window.ui</file>
   </gresource>
 </gresources>
