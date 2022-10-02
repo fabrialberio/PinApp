@@ -45,7 +45,6 @@
             </child>
             <child>
               <object class='AdwViewStack' id='view_stack'>
-                <property name='vexpand'>true</property>
                 <child>
                   <object class='AdwViewStackPage'>
                     <property name='icon-name'>view-pin-symbolic</property>

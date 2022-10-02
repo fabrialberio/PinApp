@@ -44,7 +44,6 @@
     <child>
       <object class='GtkScrolledWindow' id='scrolled_window'>
         <property name='vexpand'>true</property>
-        <property name='hexpand'>true</property>
         <child>
           <object class='AdwClamp' id='main_clamp'>
             <child>
