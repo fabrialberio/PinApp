@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=PinApp
-Comment=Create your own application shortcuts
+Comment=Create and edit application shortcuts
 Exec=pinapp
 Icon=io.github.fabrialberio.pinapp
 Terminal=false
