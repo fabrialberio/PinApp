@@ -16,12 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-from gi import require_version
-
-require_version('GObject', '2.0')
-require_version('Gio', '2.0')
-require_version('Gtk', '4.0')
-require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
 from .window import PinAppWindow
@@ -37,11 +31,11 @@ class PinAppApplication(Adw.Application):
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
         self.create_action('about', self.show_about_window)
         
-        self.create_action('refresh', self.on_refresh)
+        self.create_action('reload', lambda a, _: self.window.show_and_reload_apps())
         self.create_action('new-file', lambda a, _: self.window.apps_view.new_file(), ['<primary>n'])
         
         self.create_action('exit', lambda a, _: self.window.show_apps(), ['Escape'])
-        self.create_action('save', lambda a, _: self.window.file_view.save_file(), ['<primary>s'])
+        self.create_action('save', lambda a, _: self.window.file_page.save_file(), ['<primary>s'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
         self.window = None
@@ -57,10 +51,6 @@ class PinAppApplication(Adw.Application):
             self.window = PinAppWindow(application=self)
 
         self.window.present()
-
-    def on_refresh(self, action, *args):
-        if not self.window.apps_view.loading:
-            self.window.apps_view.update_all_apps()
 
     def show_about_window(self, action, *args):
         """Callback for the app.about action."""
