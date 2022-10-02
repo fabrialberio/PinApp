@@ -11,12 +11,9 @@
 ## Features
 - Easily change an app icon that doesn't fit in
 - Create custom shortcuts to websites
-- Hide unwanted apps
-- Change properties in .desktop files with a simple and intuitive UI
+- Hide apps you don't want to see
+- Change properties in .desktop files
 - GTK4 & libadwaita
 
 ## Supported platforms
-Should work as long as your desktop environment is GNOME
-
-## Work in progress
-Support for KDE desktop environment
+Should work on any distro as long as the desktop environment is GNOME
