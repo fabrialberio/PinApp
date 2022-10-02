@@ -40,20 +40,20 @@ class DesktopEntryFolder():
 class FolderGroup():
     '''A group of DesktopEntryFolders sharing common properties'''
     def __init__(self, paths: list[Path | str]) -> None:
-        self.files = None
+        self.files: list[DesktopEntry] = None
         self.folders = [DesktopEntryFolder(p) for p in paths]
         self.writable = None
 
-    def get_files(self, sort=True):
+    def get_files(self, sort=True) -> list[DesktopEntry]:
         self.files = []
         for d in self.folders:
             if d.exists:
                 d.get_files(sort=False)
                 self.files += d.files
-        
+
         if sort: self.files = sorted(self.files)
 
-    def get_files_async(self, sort=True, callback: callable = None):
+    def get_files_async(self, sort=True, callback: callable = None) -> None:
         def target():
             self.get_files(sort)
             callback()
