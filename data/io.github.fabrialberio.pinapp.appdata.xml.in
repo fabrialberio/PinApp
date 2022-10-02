@@ -16,6 +16,9 @@
 		<screenshot>
 			<image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/2.png</image>
 		</screenshot>
+		<screenshot>
+			<image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/3.png</image>
+		</screenshot>
 	</screenshots>
     <content_rating type="oars-1.1"/>
 	<url type="homepage">https://github.com/fabrialberio/PinApp</url>
@@ -28,11 +31,11 @@
 	<releases>
 		<release version="1.1.0" date="2022-10-02">
 			<description>
-				<p>
-					What's changed
+				<p>What's changed</p>
+				<ul>
 					<li>Simplified app navigation with Adw.ViewSwitcher</li>
 					<li>Responsive navigation with Adw.ViewSwitcherBar</li>
-				</p>
+				</ul>
 			</description>
 		</release>
 	</releases>
