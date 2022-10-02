@@ -7,13 +7,97 @@
     <property name='default-height'>560</property>
     <property name='default-width'>800</property>
     <property name='height-request'>400</property>
-    <property name='width-request'>400</property>
+    <property name='width-request'>320</property>
     <child type='content'>
       <!-- Main leaflet -->
       <object class='AdwLeaflet' id='main_leaflet'>
         <property name='can-navigate-forward'>false</property>
         <property name='can-unfold'>false</property>
+
+        <child>
+          <object class='GtkBox' id='apps_page'>
+            <property name='orientation'>vertical</property>
+            <child>
+              <object class='AdwHeaderBar' id='header_bar'>
+                <property name='centering-policy'>strict</property>
+                <!-- View Switcher -->
+                <property name='title-widget'>
+                  <object class='AdwViewSwitcherTitle' id='view_switcher'>
+                    <property name='stack'>view_stack</property>
+                  </object>
+                </property>
+                <!-- New file button -->
+                <child type='start'>
+                  <object class='GtkButton' id='new_file_button'>
+                    <property name='icon-name'>list-add-symbolic</property>
+                    <property name='tooltip-text' translatable='yes'>New app</property>
+                  </object>
+                </child>
+                <!-- Menu button -->
+                <child type='end'>
+                  <object class='GtkMenuButton' id='menu_button'>
+                    <property name='tooltip-text' translatable='yes'>Show menu</property>
+                    <property name='icon-name'>open-menu-symbolic</property>
+                    <property name='menu-model'>primary_menu</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class='AdwViewStack' id='view_stack'>
+                <property name='vexpand'>true</property>
+                <child>
+                  <object class='AdwViewStackPage'>
+                    <property name='icon-name'>view-pin-symbolic</property>
+                    <property name='title' translatable='yes'>Your pins</property>
+                    <property name='name'>pins_view</property>
+                    <property name='child'>
+                      <object class='PinsView' id='pins_view'/>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class='AdwViewStackPage'>
+                    <property name='icon-name'>folder-download-symbolic</property>
+                    <property name='title' translatable='yes'>Installed</property>
+                    <property name='name'>installed_view</property>
+                    <property name='child'>
+                      <object class='InstalledView' id='installed_view'/>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class='AdwViewSwitcherBar'>
+                <property name='stack'>view_stack</property>
+                <property name='reveal' bind-source='view_switcher' bind-property='title-visible' bind-flags='default'/> 
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class='FilePage' id='file_page'/>
+        </child>
       </object>
     </child>
   </template>
+
+  <!-- Primary menu model -->
+  <menu id='primary_menu'>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Reload</attribute>
+        <attribute name='action'>app.reload</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Keyboard Shortcuts</attribute>
+        <attribute name='action'>win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_About PinApp</attribute>
+        <attribute name='action'>app.about</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>
