@@ -47,8 +47,9 @@ class FolderGroup():
     def get_files(self, sort=True):
         self.files = []
         for d in self.folders:
-            d.get_files(sort=False)
-            self.files += d.files
+            if d.exists:
+                d.get_files(sort=False)
+                self.files += d.files
         
         if sort: self.files = sorted(self.files)
 
@@ -65,7 +66,11 @@ class FolderGroup():
         return self.files == []
 
     @property
-    def exists(self):
+    def any_exists(self):
+        return any([d.exists for d in self.folders])
+
+    @property
+    def all_exist(self):
         return all([d.exists for d in self.folders])
 
 
