@@ -4,10 +4,16 @@
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
 	<name>PinApp</name>
-	<summary>Create your own application shortcuts</summary>
+	<summary>Create and edit application shortcuts</summary>
     <developer_name translatable="no">Fabrizio Alberio</developer_name>
 	<description>
-	  <p>Easily create and edit application shortcuts with PinApp</p>
+	  <p>With PinApp you can:</p>
+	  <ul>
+		<li>Easily change an app icon that doesn't fit in with your theme</li>
+		<li>Create custom shortcuts to websites</li>
+		<li>Hide apps you don't want to see</li>
+		<li>Change properties in .desktop files</li>
+	  </ul>
 	</description>
 	<screenshots>
 		<screenshot type="default">
@@ -29,12 +35,16 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="1.1.0" date="2022-10-02">
+		<release version="1.1.1" date="2022-10-02">
 			<description>
 				<p>What's changed</p>
 				<ul>
 					<li>Simplified app navigation with Adw.ViewSwitcher</li>
 					<li>Responsive navigation with Adw.ViewSwitcherBar</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>The listbox containing applications had styling issues</li>
 				</ul>
 			</description>
 		</release>
