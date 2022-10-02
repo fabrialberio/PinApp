@@ -26,8 +26,13 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="1.1.0" date="2022-09-26">
+		<release version="1.1.0" date="2022-10-02">
 			<description>
+				<p>
+					News
+					<li>Simplified app navigation with Adw.ViewSwitcher</li>
+					<li>Responsive navigation with Adw.ViewSwitcherBar</li>
+				</p>
 			</description>
 		</release>
 	</releases>
