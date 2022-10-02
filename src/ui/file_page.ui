@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <!-- Main window -->
-  <template class='FileView' parent='GtkBox'>
+  <template class='FilePage' parent='GtkBox'>
     <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
     <child>
       <!-- HeaderBar -->
