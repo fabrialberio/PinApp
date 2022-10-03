@@ -19,7 +19,7 @@ class FilePage(Gtk.Box):
     main_view = Gtk.Template.Child('main_box')
 
     app_icon = Gtk.Template.Child('app_icon')
-    banner_box = Gtk.Template.Child('name_comment_box')
+    banner_box = Gtk.Template.Child('name_comment_listbox')
     
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
@@ -62,8 +62,8 @@ class FilePage(Gtk.Box):
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
-        while self.banner_box.get_first_child():
-            self.banner_box.remove(self.banner_box.get_first_child())
+        while (row := self.banner_box.get_row_at_index(0)) != None:
+            self.banner_box.remove(row)
 
         app_name_row = StringRow(self.file.appsection.Name)
         # Style the text
@@ -73,6 +73,8 @@ class FilePage(Gtk.Box):
             .get_item(1) # Get second child (editable area)
             .get_last_child() # GtkText
             .add_css_class('title-1'))
+        app_name_row.set_margin_bottom(4)
+        app_name_row.set_size_request(64, 64)
         app_comment_row = StringRow(self.file.appsection.Comment)
         
         self.banner_box.append(app_name_row)
