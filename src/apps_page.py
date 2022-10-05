@@ -22,6 +22,7 @@ class AppRow(Adw.ActionRow):
             pixel_size=32,
             margin_top=6,
             margin_bottom=6,
+            opacity=.2 if file.appsection.NoDisplay.get() == True else 1,
             css_classes=['icon-dropshadow'])
         
         icon_name = file.appsection.Icon.get()
