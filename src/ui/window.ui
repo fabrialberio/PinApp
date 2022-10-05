@@ -24,6 +24,7 @@
                 <property name='title-widget'>
                   <object class='AdwViewSwitcherTitle' id='view_switcher'>
                     <property name='stack'>view_stack</property>
+                    <property name="title" translatable="no">PinApp</property>
                   </object>
                 </property>
                 <!-- New file button -->
