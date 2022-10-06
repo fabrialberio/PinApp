@@ -25,7 +25,7 @@
           <object class='GtkButton' id='pin_button'>
             <property name='child'>
               <object class='AdwButtonContent'>
-                <property name='label' translatable='yes'>Pin</property>
+                <property name='label' translatable='yes'>Add pin</property>
                 <property name='icon-name'>view-pin-symbolic</property>
               </object>
             </property>

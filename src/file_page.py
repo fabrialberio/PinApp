@@ -41,12 +41,6 @@ class FilePage(Gtk.Box):
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
 
-        model = Gtk.StringList()
-        for i in range(10):
-            model.append(str(i))
-
-        self.locale_combo_row.set_model(model)
-
     @property
     def visible(self):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
@@ -93,10 +87,9 @@ class FilePage(Gtk.Box):
 
         self.window_title.set_subtitle(self.file.filename)
 
-        writable = self.file.writable
-        self.save_button.set_visible(writable)
-        self.unpin_button.set_visible(writable)
-        self.pin_button.set_visible(not writable)
+        self.save_button.set_visible(self.file.writable)
+        self.unpin_button.set_visible(self.file.writable)
+        self.pin_button.set_visible(not self.file.writable)
 
         self.update_file()
 
