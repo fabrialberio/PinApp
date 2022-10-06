@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class='AdwMessageDialog' id='filename_dialog'>
-    <property name='width-request'>320</property>
+    <property name='width-request'>400</property>
     <property name='heading' translatable='yes'>Add new app</property>
     <property name='default-response'>create</property>
     <property name='close-response'>cancel</property>
