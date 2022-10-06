@@ -12,18 +12,21 @@ class FilePage(Gtk.Box):
 
     window_title = Gtk.Template.Child('title_widget')
     back_button = Gtk.Template.Child('back_button')
+    unpin_button = Gtk.Template.Child('unpin_button')
     save_button = Gtk.Template.Child('save_button')
-    delete_button = Gtk.Template.Child('delete_button')
+    pin_button = Gtk.Template.Child('pin_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
     main_view = Gtk.Template.Child('main_box')
 
     app_icon = Gtk.Template.Child('app_icon')
     banner_box = Gtk.Template.Child('name_comment_listbox')
-    
+
+    locale_combo_row = Gtk.Template.Child('locale_combo_row')
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
+
 
     def __init__(self):
         super().__init__()
@@ -31,10 +34,18 @@ class FilePage(Gtk.Box):
         self.file = None
 
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
+        self.back_button.connect('clicked', lambda _: self.emit('file-back'))
+        self.unpin_button.connect('clicked', lambda _: self.delete_file())
         self.save_button.connect('clicked', lambda _: self.save_file())
-        self.delete_button.connect('clicked', lambda _: self.delete_file())
+        self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
+
+        model = Gtk.StringList()
+        for i in range(10):
+            model.append(str(i))
+
+        self.locale_combo_row.set_model(model)
 
     @property
     def visible(self):
@@ -81,12 +92,11 @@ class FilePage(Gtk.Box):
         self.banner_box.append(app_comment_row)
 
         self.window_title.set_subtitle(self.file.filename)
-        self.save_button.set_sensitive(True)
 
-        if access(self.file.path, W_OK):
-            self.delete_button.set_visible(True)
-        else:
-            self.delete_button.set_visible(False)
+        writable = self.file.writable
+        self.save_button.set_visible(writable)
+        self.unpin_button.set_visible(writable)
+        self.pin_button.set_visible(not writable)
 
         self.update_file()
 
@@ -99,7 +109,7 @@ class FilePage(Gtk.Box):
         file_dict.pop('Comment', '')
 
         localized_rows = LocaleStringRow.list_from_field_list(list(self.file.appsection.values()))
-        self._update_preferences_group(self.localized_group, localized_rows)
+        self._update_pref_group(self.localized_group, localized_rows)
 
         if (icon_field := file_dict.get('Icon', None)) != None:
             file_dict.pop('Icon', '')
@@ -109,14 +119,14 @@ class FilePage(Gtk.Box):
         else:
             string_rows = []
         string_rows += StringRow.list_from_field_list(file_dict.values())
-        self._update_preferences_group(self.strings_group, string_rows, Adw.ActionRow(
+        self._update_pref_group(self.strings_group, string_rows, Adw.ActionRow(
             title=_('No string values present'),
             title_lines=1,
             css_classes=['dim-label'],
             halign=Gtk.Align.CENTER))
 
         bool_rows = BoolRow.list_from_field_list(file_dict.values())
-        self._update_preferences_group(self.bools_group, bool_rows, Adw.ActionRow(
+        self._update_pref_group(self.bools_group, bool_rows, Adw.ActionRow(
             title=_('No boolean values present'),
             title_lines=1,
             css_classes=['dim-label'],
@@ -140,29 +150,15 @@ class FilePage(Gtk.Box):
         if not self.visible: 
             return
 
-        def callback():
-            self.emit('file-save')
+        self.file.save()
+        self.emit('file-save')
 
-        try:
-            self.file.save()
-            callback()
-        except OSError:
-            self._save_to_user_folder(callback)
+    def pin_file(self):
+        if not self.visible:
+            return
 
-
-    def _save_to_user_folder(self, on_success_callback: callable):
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
-        
-        dialog = builder.get_object('save_local_dialog')
-
-        def callback(widget, resp):
-            if resp == 'yes':
-                self.file.save(Path(DesktopEntryFolder.USER)/self.file.filename)
-                on_success_callback()
-
-        dialog.connect('response', callback)
-        dialog.set_transient_for(self.get_root())
-        dialog.present()
+        self.file.save(Path(DesktopEntryFolder.USER)/self.file.filename)
+        self.emit('file-save')
 
     def _add_key(self, is_bool=False):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
@@ -184,23 +180,23 @@ class FilePage(Gtk.Box):
         add_key_dialog.present()
 
 
-    def _update_preferences_group(self, preferences_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_state: Gtk.Widget = None):
+    def _update_pref_group(self, pref_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_state: Gtk.Widget = None):
         '''Removes all present children of the group and adds the new ones'''
 
         listbox = (
-            preferences_group
+            pref_group
             .get_first_child()  # Main group GtkBox
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
 
         while (row := listbox.get_first_child()) != None:
-            preferences_group.remove(row)
+            pref_group.remove(row)
 
         if len(new_children) > 0:
             for c in new_children:
-                preferences_group.add(c)
+                pref_group.add(c)
         elif empty_state != None:
-            preferences_group.add(empty_state)
+            pref_group.add(empty_state)
 
 
 class BoolRow(Adw.ActionRow):
