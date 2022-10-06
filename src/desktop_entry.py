@@ -378,6 +378,8 @@ class DesktopEntry(IniFile):
     def __init__(self, path: 'str | Path') -> None:
         super().__init__(path)
 
+        self.writable = access(self.path, W_OK)
+
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
@@ -387,10 +389,6 @@ class DesktopEntry(IniFile):
     @property
     def actionsections(self) -> dict[str, 'ActionSection']:
         return ActionSection.dict_from_parser(self.parser)
-
-    @property
-    def writable(self) -> bool:
-        return access(self.path, W_OK)
 
     def __lt__(self, __o: object) -> bool:
         if not self.is_loaded:
