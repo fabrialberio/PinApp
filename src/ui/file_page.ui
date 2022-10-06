@@ -20,20 +20,34 @@
             <!-- Subtitle is file name -->
           </object>
         </property>
-        <!-- Save button -->
+        <!-- Pin button -->
         <child type='end'>
-          <object class='GtkButton' id='save_button'>
-            <property name='label' translatable='yes'>Save</property>
-            <property name='sensitive'>false</property>
+          <object class='GtkButton' id='pin_button'>
+            <property name='child'>
+              <object class='AdwButtonContent'>
+                <property name='label' translatable='yes'>Pin</property>
+                <property name='icon-name'>view-pin-symbolic</property>
+              </object>
+            </property>
+            <property name='visible'>false</property>
             <style>
               <class name='suggested-action'/>
             </style>
           </object>
         </child>
-        <!-- Delete button -->
+        <!-- Save button -->
         <child type='end'>
-          <object class='GtkButton' id='delete_button'>
-            <property name='label' translatable='yes'>Delete</property>
+          <object class='GtkButton' id='save_button'>
+            <property name='label' translatable='yes'>Save</property>
+            <style>
+              <class name='suggested-action'/>
+            </style>
+          </object>
+        </child>
+        <!-- Unpin button -->
+        <child type='end'>
+          <object class='GtkButton' id='unpin_button'>
+            <property name='label' translatable='yes'>Unpin</property>
             <style>
               <class name='destructive-action'/>
             </style>
@@ -78,6 +92,20 @@
                         <style>
                           <class name='navigation-sidebar'/>
                         </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class='GtkListBox'>
+                    <property name='selection-mode'>GTK_SELECTION_NONE</property>
+                    <style>
+                      <class name='boxed-list'/>
+                    </style>
+                    <child>
+                      <object class='AdwComboRow' id='locale_combo_row'>
+                        <property name='title' translatable='yes'>Locale</property>
+                        <property name='subtitle' translatable='yes'>The locale rows are shown as</property>
                       </object>
                     </child>
                   </object>
