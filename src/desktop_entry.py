@@ -2,7 +2,7 @@ from configparser import ConfigParser, SectionProxy
 
 from locale import getlocale
 from pathlib import Path
-from time import time
+from os import access, W_OK
 
 
 class LocaleString:
@@ -387,6 +387,10 @@ class DesktopEntry(IniFile):
     @property
     def actionsections(self) -> dict[str, 'ActionSection']:
         return ActionSection.dict_from_parser(self.parser)
+
+    @property
+    def writable(self) -> bool:
+        return access(self.path, W_OK)
 
     def __lt__(self, __o: object) -> bool:
         if not self.is_loaded:
