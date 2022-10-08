@@ -97,20 +97,6 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkListBox'>
-                    <property name='selection-mode'>GTK_SELECTION_NONE</property>
-                    <style>
-                      <class name='boxed-list'/>
-                    </style>
-                    <child>
-                      <object class='AdwComboRow' id='locale_combo_row'>
-                        <property name='title' translatable='yes'>Locale</property>
-                        <property name='subtitle' translatable='yes'>The locale rows are shown as</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
                   <!-- Localized values group -->
                   <object class='AdwPreferencesGroup' id='localized_group'>
                     <property name='title' translatable='yes'>Localized values</property>
