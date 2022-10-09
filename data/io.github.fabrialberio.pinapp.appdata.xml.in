@@ -35,6 +35,21 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="1.1.2" date="2022-10-09">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>Better wording in various dialogs and buttons</li>
+					<li>Improved file viewing ui</li>
+					<li>It is now possible to add a new localized value</li>
+					<li>Simplified display of localized values</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>Empty values are no longer written to file after saving</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.1.1" date="2022-10-02">
 			<description>
 				<p>What's changed</p>
