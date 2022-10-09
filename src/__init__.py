@@ -8,13 +8,14 @@ require_version('Adw', '1')
 from gi.repository import GObject
 
 from .apps_page import AppRow, AppsPage, PinsView, InstalledView
-from .file_page import FilePage
+from .file_page import FilePage, LocaleChooserRow
 from .window import PinAppWindow
 
 GObject.type_register(AppRow)
 GObject.type_register(AppsPage)
 GObject.type_register(PinsView)
 GObject.type_register(InstalledView)
+GObject.type_register(LocaleChooserRow)
 GObject.type_register(FilePage)
 GObject.type_register(PinAppWindow)
 
