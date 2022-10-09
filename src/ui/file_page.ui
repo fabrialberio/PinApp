@@ -100,6 +100,19 @@
                   <!-- Localized values group -->
                   <object class='AdwPreferencesGroup' id='localized_group'>
                     <property name='title' translatable='yes'>Localized values</property>
+                    <property name='header-suffix'>
+                      <object class='GtkButton' id='add_localized_button'>
+                        <style>
+                          <class name='flat'/>
+                        </style>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='label' translatable='yes'>Add</property>
+                            <property name='icon-name'>list-add</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
                     <property name='visible'>False</property>
                   </object>
                 </child>
@@ -109,6 +122,9 @@
                     <property name='title' translatable='yes'>String values</property>
                     <property name='header-suffix'>
                       <object class='GtkButton' id='add_string_button'>
+                        <style>
+                          <class name='flat'/>
+                        </style>
                         <child>
                           <object class='AdwButtonContent'>
                             <property name='label' translatable='yes'>Add</property>
@@ -125,6 +141,9 @@
                     <property name='title' translatable='yes'>Boolean values</property>
                     <property name='header-suffix'>
                       <object class='GtkButton' id='add_bool_button'>
+                        <style>
+                          <class name='flat'/>
+                        </style>
                         <child>
                           <object class='AdwButtonContent'>
                             <property name='label' translatable='yes'>Add</property>
