@@ -5,7 +5,7 @@
 </div>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/3.png">
+  <img src="https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/1.png">
 </div>
 
 ## Features
