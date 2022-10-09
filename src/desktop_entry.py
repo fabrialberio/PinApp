@@ -140,10 +140,7 @@ class Field:
                 raise TypeError(f'Localization string cannot be None')
         
         # Finds the closest locale to the one specified from the localizations
-        key_locales: list[str] = [
-            LocaleString(
-                f.key.removeprefix(self.unlocalized_key).removeprefix('[').removesuffix(']'))\
-            for f in self.localized_fields]
+        key_locales: list[str] = [LocaleString(f.locale) for f in self.localized_fields]
         
         closest_locale = LocaleString(locale).find_closest(key_locales)
 
@@ -220,6 +217,9 @@ class Section:
 
     def add_entry(self, key, value):
         Field(key, self.section).set(value)
+
+    def add_field(self, field: Field):
+        self.add_entry(field.key, field._value)
 
     def __getattr__(self, name) -> 'Field':
         return Field(name, self.section)
@@ -342,8 +342,14 @@ class IniFile:
         self.parser.read(self.path)
         self.is_loaded = True
 
-    def save(self, path=None) -> None:
+    def save(self, path=None, remove_empty_options=True) -> None:
         '''Saves the file'''
+        if remove_empty_options:
+            for section_name, section in self.parser.items():
+                for k, v in section.items():
+                    if not v:
+                        self.parser.remove_option(section_name, k)
+
         if path == None: path = self.path
         with open(path, 'w') as f:
             self.parser.write(f)
