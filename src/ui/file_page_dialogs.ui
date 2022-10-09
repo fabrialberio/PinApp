@@ -8,6 +8,12 @@
     <property name='extra-child'>
       <object class='AdwPreferencesGroup'>
         <child>
+          <object class='AdwEntryRow' id='locale_entry'>
+            <property name='title' translatable='yes'>Locale</property>
+            <property name='visible'>false</property>
+          </object>
+        </child>
+        <child>
           <object class='AdwEntryRow' id='key_entry'>
             <property name='title' translatable='yes'>Key name</property>
           </object>
