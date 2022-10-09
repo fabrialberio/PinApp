@@ -1,7 +1,6 @@
 from gi.repository import Gtk, Gio, Adw, GObject
 
 from pathlib import Path
-from os import access, W_OK
 
 from .folders import DesktopEntryFolder
 from .desktop_entry import DesktopEntry, Field
@@ -22,7 +21,6 @@ class FilePage(Gtk.Box):
     app_icon = Gtk.Template.Child('app_icon')
     banner_box = Gtk.Template.Child('name_comment_listbox')
 
-    locale_combo_row = Gtk.Template.Child('locale_combo_row')
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
@@ -38,6 +36,7 @@ class FilePage(Gtk.Box):
         self.unpin_button.connect('clicked', lambda _: self.delete_file())
         self.save_button.connect('clicked', lambda _: self.save_file())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
+        self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
 
@@ -46,6 +45,7 @@ class FilePage(Gtk.Box):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
     def delete_file(self):
+        '''Deletes a file. It is used when the file has write access.'''
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
         
         dialog = builder.get_object('confirm_delete_dialog')
@@ -101,8 +101,7 @@ class FilePage(Gtk.Box):
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
 
-        localized_rows = LocaleStringRow.list_from_field_list(list(self.file.appsection.values()))
-        self._update_pref_group(self.localized_group, localized_rows)
+        self._update_locale()
 
         if (icon_field := file_dict.get('Icon', None)) != None:
             file_dict.pop('Icon', '')
@@ -125,11 +124,6 @@ class FilePage(Gtk.Box):
             css_classes=['dim-label'],
             halign=Gtk.Align.CENTER))
 
-        if localized_rows:
-            self.localized_group.set_visible(True)
-        else:
-            self.localized_group.set_visible(False)
-
     def _update_icon(self):
         icon_name = self.file.appsection.Icon.get()
         if icon_name == None:
@@ -140,6 +134,7 @@ class FilePage(Gtk.Box):
             self.app_icon.set_from_icon_name(icon_name)
 
     def save_file(self):
+        '''Saves a file to its current folder.'''
         if not self.visible: 
             return
 
@@ -147,17 +142,49 @@ class FilePage(Gtk.Box):
         self.emit('file-save')
 
     def pin_file(self):
+        '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
         if not self.visible:
             return
 
         self.file.save(Path(DesktopEntryFolder.USER)/self.file.filename)
         self.emit('file-save')
 
-    def _add_key(self, is_bool=False):
+
+    def _update_locale(self):
+        all_locales = set()
+        localized_rows: list[LocaleStringRow] = []
+        added_keys = [] # This list is used to avoid duplicates in a performance-efficient way
+        for field in self.file.appsection.values():
+            if field.locale:
+                all_locales = all_locales | {f.locale for f in field.localized_fields}
+                if (k := field.unlocalized_key) not in added_keys:
+                    localized_rows.append(LocaleStringRow(field))
+                    added_keys.append(k)
+
+        all_locales = list(all_locales)
+        self.locale_chooser_row = LocaleChooserRow(sorted(all_locales))
+
+        def update_row_locales(*args):
+            for row in localized_rows:
+                row.set_locale(self.locale_chooser_row.get_selected_item().get_string())
+
+            # TODO: What signal do I use here? I'm confused (maybe I just didn't sleep enough)
+        self.locale_chooser_row.connect('notify', update_row_locales)
+
+        self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
+        self.localized_group.set_visible(len(localized_rows) > 1)
+
+    def _add_key(self, is_bool=False, is_localized=False):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
 
         add_key_dialog = builder.get_object('add_key_dialog')
+        locale_entry = builder.get_object('locale_entry')
         key_entry = builder.get_object('key_entry')
+
+        if is_localized:
+            locale = self.locale_chooser_row.get_selected_item().get_string()
+            locale_entry.set_visible(True)
+            locale_entry.set_text(locale)
 
         key_entry.connect('changed', lambda _: add_key_dialog.set_response_enabled(
             'add', 
@@ -165,7 +192,17 @@ class FilePage(Gtk.Box):
 
         def callback(widget, resp):
             if resp == 'add':
-                self.file.appsection.add_entry(key_entry.get_text(), False if is_bool else '')
+                key = key_entry.get_text()
+                value = False if is_bool else ''
+                
+                field = Field(key, self.file.appsection.section)
+                if is_localized and (locale := locale_entry.get_text()): 
+                    field = field.localize(
+                        locale,
+                        return_non_existing_key_as_fallback=True,
+                        return_unlocalized_as_fallback=False)
+                field.set(value)
+
                 self.update_file()
 
         add_key_dialog.connect('response', callback)
@@ -200,7 +237,7 @@ class BoolRow(Adw.ActionRow):
             active=field.as_bool(),
             valign=Gtk.Align.CENTER,
         )
-        self.switch.connect('state-set', self.on_state_set)
+        self.switch.connect('state-set', self._on_state_set)
 
         super().__init__(
             title=field.key,
@@ -212,7 +249,7 @@ class BoolRow(Adw.ActionRow):
     def list_from_field_list(fields: list[Field]):
         return [BoolRow(f) for f in fields if type(f.get()) == bool]
 
-    def on_state_set(self, widget, value):
+    def _on_state_set(self, widget, value):
         self.field.set(value)
 
 class StringRow(Adw.EntryRow):
@@ -221,60 +258,49 @@ class StringRow(Adw.EntryRow):
         
         super().__init__(title=field.key)
         self.set_text(field.as_str() or '')
-        self.connect('changed', self.on_changed)
-        
-    def add_action(self, icon_name: str, tooltip: str, callback):
-        button = Gtk.Button(
-                icon_name=icon_name,
-                tooltip_text=tooltip,
-                valign=Gtk.Align.CENTER,
-                css_classes=['flat'])
-
-        button.connect('clicked', callback)
-        self.add_suffix(button)
+        self.connect('changed', self._on_changed)
 
 
     @staticmethod
     def list_from_field_list(fields: list[Field]):
         return [StringRow(f) for f in fields if ((t := type(f.get())) == str or t == list) and not f.locale]
 
-    def on_changed(self, widget):
-        self.field.set(self.get_text())
+    def _on_changed(self, widget):
+        if (text := self.get_text()):
+            self.field.set(text)
 
-class LocaleStringRow(Adw.EntryRow):
-    def __init__(self, field: Field) -> None:
-        self.field = field
+class LocaleStringRow(StringRow):
+    def __init__(self, field: Field, locale: str = None) -> None:
+        super().__init__(field=field)
+        self.locale = None
 
-        locales = [f.locale for f in self.field.localized_fields]
-        self.dropdown = Gtk.DropDown.new_from_strings(sorted(locales))
-        self.dropdown.set_valign(Gtk.Align.CENTER)
-        self.dropdown.connect('notify', self._on_dropdown_notify)
+    def set_locale(self, locale: str):
+        self.locale = locale
+        self.field = self.field.localize(
+            self.locale, 
+            return_non_existing_key_as_fallback=True, 
+            return_unlocalized_as_fallback=False)
 
-        super().__init__(title=field.key.capitalize())
-        self.add_suffix(self.dropdown)
-        self.connect('changed', self._on_changed)
-
-    @staticmethod
-    def list_from_field_list(fields: list[Field]):
-        if len(fields) > 0:
-            # Assumes that all keys are in the same section
-            section = fields[0].section
-            
-            # All keys that have a locale, but stripped of it
-            localized_keys = [f.unlocalized_key for f in fields if f.localized_fields]
-            # Remove duplicates
-            localized_keys = list(dict.fromkeys(localized_keys))
-
-            return [LocaleStringRow(Field(k, section)) for k in localized_keys]
-        else:
-            return []
-
-    @property
-    def selected_locale(self):
-        return self.dropdown.get_selected_item().get_string()
-
-    def _on_dropdown_notify(self, widget, value):
-        self.set_text(self.field.localize(self.selected_locale).as_str())
+        self.set_title(self.field.unlocalized_key)
+        self.set_text(self.field.as_str() or '')
 
     def _on_changed(self, widget):
-        self.field.localize(self.selected_locale).set(self.get_text())
+        self.field.set(self.get_text())
+
+class LocaleChooserRow(Adw.ComboRow):
+    __gtype_name__ = 'LocaleChooserRow'
+
+    def __init__(self, locale_list: list[str]) -> None:
+        self.locales = locale_list
+
+        model = Gtk.StringList()
+        for l in self.locales:
+            model.append(l)
+        
+        super().__init__(
+            title = _('Locale'),
+            model = model)
+
+    def set_locale(self, locale):
+        if locale in self.locales:
+            self.set_selected(locale)
