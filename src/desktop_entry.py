@@ -4,6 +4,8 @@ from locale import getlocale
 from pathlib import Path
 from os import access, W_OK
 
+from xml.sax.saxutils import escape
+
 
 class LocaleString:
     def __init__(self, raw_string: str):
@@ -93,14 +95,18 @@ class Field:
             if k.startswith(f'{self.unlocalized_key}[') \
             and k != self.unlocalized_key]
 
-    def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
+    def get(self, locale: str = None, escape_xml = False) -> 'bool | int | float | list[str] | str | None':
         field = self.localize(locale) if locale != None else self
         
         if field.as_bool() != None: return field.as_bool()
         elif field.as_int() != None: return field.as_int()
         elif field.as_float() != None: return field.as_float()
         elif field.as_str_list() != None: return field.as_str_list()
-        else: return field.as_str()
+        else: 
+            if escape_xml:
+                return escape(field.as_str() or '')
+            else:
+                return field.as_str()
 
     def set(self, new_value: 'bool | int | float | list[str] | str', create_non_existing_key = True):
         if isinstance(new_value, bool):

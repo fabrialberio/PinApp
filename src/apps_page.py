@@ -13,8 +13,8 @@ class AppRow(Adw.ActionRow):
         self.file.load()
         
         super().__init__(
-            title = self.file.appsection.Name.get(),
-            subtitle = self.file.appsection.Comment.get(),
+            title = self.file.appsection.Name.get(escape_xml=True),
+            subtitle = self.file.appsection.Comment.get(escape_xml=True),
             subtitle_lines = 2,
             activatable = True,)
 
