@@ -14,9 +14,12 @@ class AppRow(Adw.ActionRow):
         
         super().__init__(
             title = self.file.appsection.Name.get(),
-            subtitle = self.file.appsection.Comment.get(),
             subtitle_lines = 2,
             activatable = True,)
+
+        if self.file.appsection.Comment.get():
+            self.set_subtitle(self.file.appsection.Comment.get().replace('&', '&amp;'))
+
 
         icon = Gtk.Image(
             pixel_size=32,
