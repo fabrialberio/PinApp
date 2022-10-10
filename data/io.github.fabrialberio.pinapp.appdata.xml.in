@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-	<id>io.github.fabrialberio.pinapp.desktop</id>
+	<id>io.github.fabrialberio.pinapp</id>
+	<launchable type="desktop-id">io.github.fabrialberio.pinapp.desktop</launchable>	<name translatable='no'>PinApp</name>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
-	<name>PinApp</name>
+	<name translatable='no'>PinApp</name>
 	<summary>Create and edit application shortcuts</summary>
     <developer_name translatable="no">Fabrizio Alberio</developer_name>
 	<description>
-	  <p>With PinApp you can:</p>
+	  <p>PinApp is a simple application that lets you customize your app list.</p>
+	  <p>Some of the possible uses are</p>
 	  <ul>
-		<li>Easily change an app icon that doesn't fit in with your theme</li>
-		<li>Create custom shortcuts to websites</li>
-		<li>Hide apps you don't want to see</li>
-		<li>Change properties in .desktop files</li>
+		<li>Changing an app icon that doesn't fit in with your theme</li>
+		<li>Creating custom shortcuts to websites</li>
+		<li>Hiding apps you don't want to see</li>
+		<li>Editing properties in .desktop files</li>
 	  </ul>
 	</description>
 	<screenshots>
