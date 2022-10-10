@@ -1,11 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/icons/hicolor/scalable/apps/io.github.fabrialberio.pinapp.svg" width="64">
-  <h1 align="center">PinApp</h1>
-  <p align="center">Create and edit application shortcuts</p>
-</div>
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/1.png">
+  <img src="https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/3.png">
 </div>
 
 ## Features
