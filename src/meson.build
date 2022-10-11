@@ -26,6 +26,7 @@ pinapp_sources = [
   'file_page.py',
   'folders.py',
   'main.py',
+  'utils.py',
   'window.py',
 ]
 
