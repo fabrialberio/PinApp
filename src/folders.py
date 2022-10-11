@@ -3,24 +3,10 @@ from threading import Thread
 
 from .desktop_entry import DesktopEntry
 
+from .utils import FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS, SYSTEM_APPS, USER_APPS
 
 class DesktopEntryFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
-
-    USER = f'{Path.home()}/.local/share/applications'
-    FLATPAK_USER = f'{Path.home()}/.local/share/flatpak/exports/share'
-    SYSTEM = '/usr/share/applications'
-    FLATPAK_SYSTEM = '/var/lib/flatpak/exports/share/applications'
-    
-    recognized_folders = [USER, SYSTEM, FLATPAK_SYSTEM]
-
-    @staticmethod
-    def list_from_recognized() -> list['DesktopEntryFolder']:
-        return [
-            DesktopEntryFolder(p) \
-            for p in DesktopEntryFolder.recognized_folders \
-            if Path(p).is_dir()]
-
     def __init__(self, path: Path):
         self.path = Path(path)
         self.files = []
@@ -77,15 +63,15 @@ class FolderGroup():
 class UserFolders(FolderGroup):
     def __init__(self) -> None:
         super().__init__([
-            DesktopEntryFolder.USER])
+            USER_APPS])
 
         self.writable = True
 
 class SystemFolders(FolderGroup):
     def __init__(self) -> None:
         super().__init__([
-            DesktopEntryFolder.SYSTEM,
-            DesktopEntryFolder.FLATPAK_USER, # TODO: Make this work
-            DesktopEntryFolder.FLATPAK_SYSTEM])
+            SYSTEM_APPS,
+            FLATPAK_USER_APPS, # TODO: Make this work
+            FLATPAK_SYSTEM_APPS])
 
         self.writable = False
