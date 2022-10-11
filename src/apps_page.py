@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
+from .utils import escape_xml, update_icon
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
@@ -13,8 +14,8 @@ class AppRow(Adw.ActionRow):
         self.file.load()
         
         super().__init__(
-            title = self.file.appsection.Name.get(escape_xml=True),
-            subtitle = self.file.appsection.Comment.get(escape_xml=True),
+            title = escape_xml(self.file.appsection.Name.as_str()),
+            subtitle = escape_xml(self.file.appsection.Comment.as_str()),
             subtitle_lines = 2,
             activatable = True,)
 
@@ -24,14 +25,8 @@ class AppRow(Adw.ActionRow):
             margin_bottom=6,
             opacity=.2 if file.appsection.NoDisplay.get() == True else 1,
             css_classes=['icon-dropshadow'])
-        
-        icon_name = file.appsection.Icon.get()
-        if icon_name == None:
-            icon.set_from_icon_name('image-missing')
-        elif Path(icon_name).exists():
-            icon.set_from_file(icon_name)
-        else:
-            icon.set_from_icon_name(icon_name)
+        icon = update_icon(icon, file.appsection.Icon.get())
+
 
         self.add_prefix(icon)
 
