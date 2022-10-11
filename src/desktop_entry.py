@@ -4,8 +4,6 @@ from locale import getlocale
 from pathlib import Path
 from os import access, W_OK
 
-from xml.sax.saxutils import escape
-
 
 class LocaleString:
     def __init__(self, raw_string: str):
@@ -95,7 +93,7 @@ class Field:
             if k.startswith(f'{self.unlocalized_key}[') \
             and k != self.unlocalized_key]
 
-    def get(self, locale: str = None, escape_xml = False) -> 'bool | int | float | list[str] | str | None':
+    def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
         field = self.localize(locale) if locale != None else self
         
         if field.as_bool() != None: return field.as_bool()
@@ -103,12 +101,11 @@ class Field:
         elif field.as_float() != None: return field.as_float()
         elif field.as_str_list() != None: return field.as_str_list()
         else: 
-            if escape_xml:
-                return escape(field.as_str() or '')
-            else:
-                return field.as_str()
+            return field.as_str()
 
     def set(self, new_value: 'bool | int | float | list[str] | str', create_non_existing_key = True):
+        print(f'Setting {self.key} to {new_value}')
+
         if isinstance(new_value, bool):
             new_str_value = 'true' if new_value else 'false'
         elif isinstance(new_value, list):
@@ -120,7 +117,7 @@ class Field:
         if self.key in self.section.keys() or create_non_existing_key:
             self.section.parser.set(self.section.name, self.key, new_str_value)
         else:
-            raise KeyError('Cannot set a non existing key')
+            raise KeyError('Cannot set a non-existing key')
 
     def remove(self):
         self.section.parser.remove_option(self.section.name, self.key)
@@ -348,14 +345,21 @@ class IniFile:
         self.parser.read(self.path)
         self.is_loaded = True
 
-    def save(self, path=None, remove_empty_options=True) -> None:
-        '''Saves the file'''
-        if remove_empty_options:
-            for section_name, section in self.parser.items():
+    def filter(self, filter: callable) -> None:
+        '''Applies `filter()` to all values of the file, and only keeps values for wich it returns True'''
+        for section_name, section in self.parser.items():
                 for k, v in section.items():
-                    if not v:
-                        self.parser.remove_option(section_name, k)
+                    if not filter(v):
+                        self.parser.remove_option(section_name, k) 
+    
+    def filter_items(self, filter: callable) -> None:
+        '''Applies filter() to all (key, value) pairs of the file, and only keeps values for wich it returns True'''
+        for section_name, section in self.parser.items():
+                for k, v in section.items():
+                    if not filter(k, v):
+                        self.parser.remove_option(section_name, k) 
 
+    def save(self, path=None) -> None:
         if path == None: path = self.path
         with open(path, 'w') as f:
             self.parser.write(f)
