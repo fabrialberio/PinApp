@@ -77,7 +77,7 @@
                       <!-- Application icon -->
                       <object class='GtkImage' id='app_icon'>
                         <property name='tooltip-text' translatable='yes'>Application icon</property>
-                        <property name='icon-name'>image-missing</property>
+                        <property name='icon-name'>application-x-executable</property>
                         <property name='pixel-size'>128</property>
                         <style>
                           <class name='icon-dropshadow'/>
