@@ -5,6 +5,7 @@ from pathlib import Path
 from .folders import DesktopEntryFolder
 from .desktop_entry import DesktopEntry, Field
 
+from .utils import update_icon
 
 class BoolRow(Adw.ActionRow):
     @staticmethod
@@ -42,8 +43,7 @@ class StringRow(Adw.EntryRow):
         self.connect('changed', self._on_changed)
 
     def _on_changed(self, widget):
-        if (text := self.get_text()):
-            self.field.set(text)
+        self.field.set(self.get_text())
 
 class LocaleStringRow(StringRow):
     def __init__(self, field: Field, locale: str = None) -> None:
@@ -121,6 +121,9 @@ class FilePage(Gtk.Box):
         '''Saves a file to its current folder.'''
         if not self.visible: 
             return
+
+        # Removes all empty localized fields (to clean up the file)
+        self.file.filter_items(lambda k, v: False if '[' in k and not v else True)
 
         self.file.save()
         self.emit('file-save')
@@ -218,13 +221,8 @@ class FilePage(Gtk.Box):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
     def _update_icon(self):
-        icon_name = self.file.appsection.Icon.get()
-        if icon_name == None:
-            self.app_icon.set_from_icon_name('image-missing')
-        elif Path(icon_name).exists():
-            self.app_icon.set_from_file(icon_name)
-        else:
-            self.app_icon.set_from_icon_name(icon_name)
+        icon_name = self.file.appsection.Icon.as_str()
+        self.app_icon = update_icon(self.app_icon, icon_name)
 
     def _update_locale(self):
         all_locales = set()
