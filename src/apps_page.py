@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
-from .utils import escape_xml, update_icon
+from .utils import escape_xml, set_icon_from_name
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
@@ -25,7 +25,7 @@ class AppRow(Adw.ActionRow):
             margin_bottom=6,
             opacity=.2 if file.appsection.NoDisplay.get() == True else 1,
             css_classes=['icon-dropshadow'])
-        icon = update_icon(icon, file.appsection.Icon.get())
+        icon = set_icon_from_name(icon, file.appsection.Icon.get())
 
 
         self.add_prefix(icon)

@@ -104,8 +104,6 @@ class Field:
             return field.as_str()
 
     def set(self, new_value: 'bool | int | float | list[str] | str', create_non_existing_key = True):
-        print(f'Setting {self.key} to {new_value}')
-
         if isinstance(new_value, bool):
             new_str_value = 'true' if new_value else 'false'
         elif isinstance(new_value, list):

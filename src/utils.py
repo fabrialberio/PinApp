@@ -23,7 +23,7 @@ FLATPAK_SYSTEM_ICONS = FLATPAK_SYSTEM / 'exports/share/icons'
 def escape_xml(string: str) -> str:
     return escape(string or '')
 
-def update_icon(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
+def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
     if icon_name == None:
         icon.set_from_icon_name('application-x-executable')
     elif Path(icon_name).exists():
