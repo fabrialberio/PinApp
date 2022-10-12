@@ -5,7 +5,7 @@ from pathlib import Path
 from .folders import DesktopEntryFolder
 from .desktop_entry import DesktopEntry, Field
 
-from .utils import update_icon
+from .utils import set_icon_from_name
 
 class BoolRow(Adw.ActionRow):
     @staticmethod
@@ -96,7 +96,7 @@ class FilePage(Gtk.Box):
     main_view = Gtk.Template.Child('main_box')
 
     app_icon = Gtk.Template.Child('app_icon')
-    banner_box = Gtk.Template.Child('name_comment_listbox')
+    banner_listbox = Gtk.Template.Child('name_comment_listbox')
 
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
@@ -159,11 +159,11 @@ class FilePage(Gtk.Box):
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
-        while (row := self.banner_box.get_row_at_index(0)) != None:
-            self.banner_box.remove(row)
+        while (row := self.banner_listbox.get_row_at_index(0)) != None:
+            self.banner_listbox.remove(row)
 
         app_name_row = StringRow(self.file.appsection.Name)
-        # Style the text
+        # Style app name
         (app_name_row
             .get_first_child() # GtkBox containing the header
             .observe_children() # List of all children
@@ -174,8 +174,8 @@ class FilePage(Gtk.Box):
         app_name_row.set_size_request(64, 64)
         app_comment_row = StringRow(self.file.appsection.Comment)
         
-        self.banner_box.append(app_name_row)
-        self.banner_box.append(app_comment_row)
+        self.banner_listbox.append(app_name_row)
+        self.banner_listbox.append(app_comment_row)
 
         self.window_title.set_subtitle(self.file.filename)
 
@@ -187,42 +187,47 @@ class FilePage(Gtk.Box):
 
     def update_file(self):
         file_dict: dict = self.file.appsection.as_dict()
-
-        self._update_icon()
-
         file_dict.pop('Name', '')
         file_dict.pop('Comment', '')
+        file_dict.pop('Icon', '')
 
         self._update_locale()
+        icon_row = self._update_icon()
 
-        if (icon_field := file_dict.get('Icon', None)) != None:
-            file_dict.pop('Icon', '')
-            icon_row = StringRow(icon_field)
-            icon_row.connect('changed', lambda _: self._update_icon())
-            string_rows = [icon_row]
-        else:
-            string_rows = []
-        string_rows += StringRow.list_from_field_list(file_dict.values())
-        self._update_pref_group(self.strings_group, string_rows, Adw.ActionRow(
-            title=_('No string values present'),
-            title_lines=1,
-            css_classes=['dim-label'],
-            halign=Gtk.Align.CENTER))
+        string_rows = [icon_row] + StringRow.list_from_field_list(file_dict.values())
+        self._update_pref_group(
+            pref_group=self.strings_group,
+            new_children=string_rows, 
+            empty_state=Adw.ActionRow(
+                title=_('No string values present'),
+                title_lines=1,
+                css_classes=['dim-label'],
+                halign=Gtk.Align.CENTER))
 
         bool_rows = BoolRow.list_from_field_list(file_dict.values())
-        self._update_pref_group(self.bools_group, bool_rows, Adw.ActionRow(
-            title=_('No boolean values present'),
-            title_lines=1,
-            css_classes=['dim-label'],
-            halign=Gtk.Align.CENTER))
+        self._update_pref_group(
+            pref_group=self.bools_group, 
+            new_children=bool_rows, 
+            empty_state=Adw.ActionRow(
+                title=_('No boolean values present'),
+                title_lines=1,
+                css_classes=['dim-label'],
+                halign=Gtk.Align.CENTER))
 
     @property
     def visible(self):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
-    def _update_icon(self):
-        icon_name = self.file.appsection.Icon.as_str()
-        self.app_icon = update_icon(self.app_icon, icon_name)
+    def _update_icon(self) -> StringRow:
+        icon_field = self.file.appsection.Icon
+        icon_name = icon_field.as_str()
+        
+        icon_row = StringRow(icon_field)
+        icon_row.connect('changed', lambda _: self._update_icon())
+
+        self.app_icon = set_icon_from_name(self.app_icon, icon_name)
+
+        return icon_row
 
     def _update_locale(self):
         all_locales = set()
@@ -237,16 +242,19 @@ class FilePage(Gtk.Box):
 
         all_locales = list(all_locales)
         self.locale_chooser_row = LocaleChooserRow(sorted(all_locales))
+        
+        if all_locales:
+            def update_row_locales(*args):
+                for row in localized_rows:
+                    row.set_locale(self.locale_chooser_row.get_selected_item().get_string())
 
-        def update_row_locales(*args):
-            for row in localized_rows:
-                row.set_locale(self.locale_chooser_row.get_selected_item().get_string())
+                # TODO: What signal do I use here? I'm confused (maybe I just didn't sleep enough)
+            self.locale_chooser_row.connect('notify', update_row_locales)
 
-            # TODO: What signal do I use here? I'm confused (maybe I just didn't sleep enough)
-        self.locale_chooser_row.connect('notify', update_row_locales)
-
-        self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
-        self.localized_group.set_visible(len(localized_rows) > 1)
+            self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
+            self.localized_group.set_visible(True)
+        else:
+            self.localized_group.set_visible(False)
 
     def _add_key(self, is_bool=False, is_localized=False):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
