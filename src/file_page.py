@@ -95,9 +95,32 @@ class FilePage(Gtk.Box):
     scrolled_window = Gtk.Template.Child('scrolled_window')
     main_view = Gtk.Template.Child('main_box')
 
-    app_icon = Gtk.Template.Child('app_icon')
-    banner_listbox = Gtk.Template.Child('name_comment_listbox')
+    banner_squeezer = Gtk.Template.Child('banner_squeezer')
+    banner_box_l = Gtk.Template.Child('banner_box_l')
+    
+    icon_s = Gtk.Template.Child('icon_s')
+    banner_listbox_s = Gtk.Template.Child('banner_listbox_s')
+    icon_l = Gtk.Template.Child('icon_l')
+    banner_listbox_l = Gtk.Template.Child('banner_listbox_l')
 
+    @property
+    def banner_expanded(self) -> bool:
+        return self.banner_squeezer.get_visible_child() == self.banner_box_l
+    
+    @property
+    def app_icon(self):
+        return self.icon_l if self.banner_expanded else self.icon_s
+    @app_icon.setter
+    def app_icon(self, value: Gtk.Image):
+        if self.banner_expanded:
+            self.icon_l = value
+        else:
+            self.icon_s = value
+
+    @property
+    def banner_listbox(self):
+        return self.banner_listbox_l if self.banner_expanded else self.banner_listbox_s
+    
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
@@ -108,6 +131,7 @@ class FilePage(Gtk.Box):
 
         self.file = None
 
+        self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.unpin_button.connect('clicked', lambda _: self.delete_file())
@@ -157,27 +181,10 @@ class FilePage(Gtk.Box):
         if self.file.path.exists():
             self.file.load()
 
+        self._update_app_banner()
+        #self.window_title.set_subtitle(self.file.filename)
+
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
-
-        while (row := self.banner_listbox.get_row_at_index(0)) != None:
-            self.banner_listbox.remove(row)
-
-        app_name_row = StringRow(self.file.appsection.Name)
-        # Style app name
-        (app_name_row
-            .get_first_child() # GtkBox containing the header
-            .observe_children() # List of all children
-            .get_item(1) # Get second child (editable area)
-            .get_last_child() # GtkText
-            .add_css_class('title-1'))
-        app_name_row.set_margin_bottom(4)
-        app_name_row.set_size_request(64, 64)
-        app_comment_row = StringRow(self.file.appsection.Comment)
-        
-        self.banner_listbox.append(app_name_row)
-        self.banner_listbox.append(app_comment_row)
-
-        self.window_title.set_subtitle(self.file.filename)
 
         self.save_button.set_visible(self.file.writable)
         self.unpin_button.set_visible(self.file.writable)
@@ -228,6 +235,31 @@ class FilePage(Gtk.Box):
         self.app_icon = set_icon_from_name(self.app_icon, icon_name)
 
         return icon_row
+
+    def _update_app_banner(self):
+        while (row := self.banner_listbox.get_row_at_index(0)) != None:
+            self.banner_listbox.remove(row)
+
+        app_name_row = StringRow(self.file.appsection.Name)
+        # Style app name
+        app_name_text = (app_name_row
+            .get_first_child() # GtkBox containing the header
+            .observe_children() # List of all children
+            .get_item(1) # Get second child (editable area)
+            .get_last_child()) # GtkText
+        app_name_row.set_margin_bottom(4)
+
+        if self.banner_expanded:
+            app_name_row.set_size_request(0, 64)
+            app_name_text.add_css_class('title-1')
+        else:
+            app_name_text.add_css_class('title-2')
+
+        app_comment_row = StringRow(self.file.appsection.Comment)
+        
+        self.banner_listbox.append(app_name_row)
+        self.banner_listbox.append(app_comment_row)
+        self._update_icon()
 
     def _update_locale(self):
         all_locales = set()
