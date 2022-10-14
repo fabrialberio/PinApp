@@ -2,10 +2,9 @@ from gi.repository import Gtk, Adw, Gio
 
 from pathlib import Path
 
-from .folders import DesktopEntryFolder
 from .desktop_entry import DesktopEntry, Field
 
-from .utils import set_icon_from_name
+from .utils import set_icon_from_name, USER_APPS
 
 class BoolRow(Adw.ActionRow):
     @staticmethod
@@ -159,6 +158,10 @@ class FilePage(Gtk.Box):
         if not self.visible: 
             return
 
+        if not self.file.writable:
+            self.pin_file()
+            return
+
         # Removes all empty localized fields (to clean up the file)
         self.file.filter_items(lambda k, v: False if '[' in k and not v else True)
 
@@ -170,7 +173,7 @@ class FilePage(Gtk.Box):
         if not self.visible:
             return
 
-        self.file.save(Path(DesktopEntryFolder.USER)/self.file.filename)
+        self.file.save(USER_APPS / self.file.filename)
         self.emit('file-save')
 
     def delete_file(self):

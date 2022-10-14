@@ -19,6 +19,8 @@
 
 from gi.repository import Gtk, Adw, Gio
 
+from .utils import USER_APPS
+
 from .file_page import FilePage
 from .apps_page import PinsView, InstalledView
 
@@ -85,7 +87,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         def callback(widget, resp):
             if resp == 'create':
-                path = DesktopEntryFolder.USER / Path(f'{Path(name_entry.get_text())}.desktop')
+                path = USER_APPS / Path(f'{Path(name_entry.get_text())}.desktop')
                 file = DesktopEntry.new_with_defaults(path)
 
                 self.file_page.load_file(file)
