@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Gio, Adw, GObject
+from gi.repository import Gtk, Gdk
 from pathlib import Path
 
 from xml.sax.saxutils import escape
@@ -24,11 +24,13 @@ def escape_xml(string: str) -> str:
     return escape(string or '')
 
 def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
-    if icon_name == None:
-        icon.set_from_icon_name('application-x-executable')
-    elif Path(icon_name).exists():
-        icon.set_from_file(icon_name)
-    else:
-        icon.set_from_icon_name(icon_name)
+    theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+
+    icon.set_from_icon_name('application-x-executable')
+    if icon_name != None:
+        if Path(icon_name).exists():
+            icon.set_from_file(icon_name)
+        elif theme.has_icon(icon_name) or theme.has_icon(f'{icon_name}-symbolic'): # Have to specify symbolic icons because they still show up
+            icon.set_from_icon_name(icon_name)
 
     return icon
