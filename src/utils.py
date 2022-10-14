@@ -28,7 +28,7 @@ def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
 
     icon.set_from_icon_name('application-x-executable')
     if icon_name != None:
-        if Path(icon_name).exists():
+        if Path(icon_name).is_file():
             icon.set_from_file(icon_name)
         elif theme.has_icon(icon_name) or theme.has_icon(f'{icon_name}-symbolic'): # Have to specify symbolic icons because they still show up
             icon.set_from_icon_name(icon_name)
