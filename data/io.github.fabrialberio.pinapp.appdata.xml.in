@@ -44,7 +44,20 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="1.1.3" date="2022-10-09">
+		<release version="1.1.4" date="2022-10-14">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>More consinstent app icon behaviour for non-existing paths or names</li>
+					<li>Improved application banner styling with custom CSS</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>Previous release broke file saving in some occasions, now fixed</li>
+				</ul>
+			</description>
+		</release>
+		<release version="1.1.3" date="2022-10-14">
 			<description>
 				<p>What's changed</p>
 				<ul>
