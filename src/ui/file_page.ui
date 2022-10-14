@@ -81,8 +81,7 @@
                         <child>
                           <!-- App icon -->
                           <object class='GtkImage' id='icon_l'>
-                            <property name='margin-top'>4</property>
-                            <property name='margin-bottom'>4</property>
+                            <property name='margin-end'>6</property>
                             <property name='tooltip-text' translatable='yes'>Application icon</property>
                             <property name='icon-name'>application-x-executable</property>
                             <property name='pixel-size'>128</property>
@@ -98,7 +97,7 @@
                             <property name='hexpand'>true</property>
                             <property name='selection-mode'>none</property>
                             <style>
-                              <class name='navigation-sidebar'/>
+                              <class name='app-banner-listbox'/>
                             </style>
                           </object>
                         </child>
@@ -111,8 +110,7 @@
                         <child>
                           <!-- App icon -->
                           <object class='GtkImage' id='icon_s'>
-                            <property name='margin-top'>4</property>
-                            <property name='margin-bottom'>4</property>
+                            <property name='margin-bottom'>24</property>
                             <property name='tooltip-text' translatable='yes'>Application icon</property>
                             <property name='icon-name'>application-x-executable</property>
                             <property name='pixel-size'>96</property>
@@ -128,7 +126,7 @@
                             <property name='hexpand'>true</property>
                             <property name='selection-mode'>none</property>
                             <style>
-                              <class name='navigation-sidebar'/>
+                              <class name='app-banner-listbox'/>
                             </style>
                           </object>
                         </child>

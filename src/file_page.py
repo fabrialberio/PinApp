@@ -286,7 +286,8 @@ class FilePage(Gtk.Box):
             .observe_children() # List of all children
             .get_item(1) # Get second child (editable area)
             .get_last_child()) # GtkText
-        app_name_row.set_margin_bottom(4)
+        app_name_row.set_margin_bottom(6)
+        app_name_row.add_css_class('app-banner-entry')
 
         if self.banner_expanded:
             app_name_row.set_size_request(0, 64)
@@ -295,7 +296,8 @@ class FilePage(Gtk.Box):
             app_name_text.add_css_class('title-2')
 
         app_comment_row = StringRow(self.file.appsection.Comment)
-        
+        app_comment_row.add_css_class('app-banner-entry')
+
         self.banner_listbox.append(app_name_row)
         self.banner_listbox.append(app_comment_row)
         self._update_icon()
