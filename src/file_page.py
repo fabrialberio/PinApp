@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Gio, Adw, GObject
+from gi.repository import Gtk, Adw, Gio
 
 from pathlib import Path
 
@@ -31,6 +31,8 @@ class BoolRow(Adw.ActionRow):
         self.field.set(value)
 
 class StringRow(Adw.EntryRow):
+    __gtype_name__='StringRow'
+
     @staticmethod
     def list_from_field_list(fields: list[Field]):
         return [StringRow(f) for f in fields if ((t := type(f.get())) == str or t == list) and not f.locale]
@@ -42,10 +44,21 @@ class StringRow(Adw.EntryRow):
         self.set_text(field.as_str() or '')
         self.connect('changed', self._on_changed)
 
+    def add_action(self, icon_name: str, callback: callable):
+        button = Gtk.Button(
+            valign=Gtk.Align.CENTER,
+            icon_name=icon_name,
+            css_classes=['flat']
+        )
+        button.connect('clicked', callback)
+        self.add_suffix(button)
+
     def _on_changed(self, widget):
         self.field.set(self.get_text())
 
 class LocaleStringRow(StringRow):
+    __gtype_name__='LocaleStringRow'
+
     def __init__(self, field: Field, locale: str = None) -> None:
         super().__init__(field=field)
         self.locale = None
@@ -225,16 +238,39 @@ class FilePage(Gtk.Box):
     def visible(self):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
-    def _update_icon(self) -> StringRow:
+    def _update_icon(self, value: str=None) -> StringRow:
         icon_field = self.file.appsection.Icon
-        icon_name = icon_field.as_str()
+        if value != None:
+            icon_field.set(value)
         
         icon_row = StringRow(icon_field)
+        icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
         icon_row.connect('changed', lambda _: self._update_icon())
 
-        self.app_icon = set_icon_from_name(self.app_icon, icon_name)
+        self.app_icon = set_icon_from_name(self.app_icon, icon_field.as_str())
 
         return icon_row
+
+    def _upload_icon(self):
+        def callback(dialog, response):
+            if response == Gtk.ResponseType.ACCEPT:
+                path = dialog.get_file().get_path()
+                self._update_icon(path)
+                self.update_file()
+
+        dialog = Gtk.FileChooserNative(
+            title=_('Upload icon'),
+            action=Gtk.FileChooserAction.OPEN,
+            accept_label=_('Open'),
+            cancel_label=_('Cancel'))
+
+        if (path := Path(self.file.appsection.Icon.as_str())).exists():
+            dialog.set_current_folder(Gio.File.new_for_path(str(path.parent)))
+
+        dialog.connect('response', callback)
+        dialog.set_modal(True)
+        dialog.set_transient_for(self.get_root())
+        dialog.show()
 
     def _update_app_banner(self):
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
