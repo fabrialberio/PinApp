@@ -102,6 +102,8 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def show_and_reload_apps(self):
         self.show_apps()
+        self.view_stack.set_visible_child(self.pins_view)
+
         self.pins_view.load_apps(loading_ok=False)
         self.installed_view.load_apps(loading_ok=False)
 
