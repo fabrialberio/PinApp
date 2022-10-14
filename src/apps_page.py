@@ -1,10 +1,8 @@
-from gi.repository import Gtk, Gio, Adw, GObject
-
-from pathlib import Path
+from gi.repository import Gtk, Adw, Pango
 
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
-from .utils import escape_xml, set_icon_from_name
+from .utils import *
 
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
@@ -15,6 +13,7 @@ class AppRow(Adw.ActionRow):
         
         super().__init__(
             title = escape_xml(self.file.appsection.Name.as_str()),
+            title_lines = 1,
             subtitle = escape_xml(self.file.appsection.Comment.as_str()),
             subtitle_lines = 2,
             activatable = True,)
@@ -35,6 +34,28 @@ class AppRow(Adw.ActionRow):
             opacity=.6))
 
         self.connect('activated', lambda _: self.emit('file-open', file))
+
+    def add_chip(self, icon_name: str, color_css_class: str):
+        chip = Gtk.Box(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            valign=Gtk.Align.CENTER,
+            spacing=4,
+            css_classes=['origin-box', color_css_class],
+        )
+        chip.append(
+            Gtk.Image(
+                pixel_size=16,
+                margin_start=4,
+                margin_end=4,
+                icon_name=icon_name))
+
+        label_attrs = Pango.AttrList()
+        font_desc = Pango.FontDescription()
+        font_desc.set_weight(Pango.Weight.BOLD)
+        font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
+        label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
+        
+        self.add_suffix(chip)
 
 class AppsPage(Adw.Bin):
     __gtype_name__ = 'AppsPage'

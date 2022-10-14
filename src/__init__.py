@@ -5,6 +5,7 @@ require_version('Gio', '2.0')
 require_version('Gtk', '4.0')
 require_version('Gdk', '4.0')
 require_version('Adw', '1')
+require_version('Pango', '1.0')
 
 from gi.repository import GObject, Gtk, Gdk
 
