@@ -1,0 +1,17 @@
+.origin-box {
+	background-color: alpha(currentColor, .15);
+	border-radius: 999px;
+	padding: 4px;
+}
+
+.origin-blue {
+	color: @blue_3;
+}
+
+.app-banner-listbox {
+	background-color: transparent;
+}
+
+.app-banner-entry {
+	border-radius: 12px;
+}

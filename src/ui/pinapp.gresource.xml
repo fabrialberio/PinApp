@@ -5,5 +5,8 @@
     <file preprocess="xml-stripblanks">file_page_dialogs.ui</file>
     <file preprocess="xml-stripblanks">file_page.ui</file>
     <file preprocess="xml-stripblanks">window.ui</file>
+    <file>style-dark.css</file>
+    <file>style-hc.css</file>
+    <file>style.css</file>
   </gresource>
 </gresources>
