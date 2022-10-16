@@ -1,7 +1,0 @@
-data/io.github.fabrialberio.pinapp.desktop.in
-data/io.github.fabrialberio.pinapp.appdata.xml.in
-data/io.github.fabrialberio.pinapp.gschema.xml
-src/window.ui
-src/main.py
-src/window.py
-
