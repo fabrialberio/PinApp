@@ -9,9 +9,9 @@ finish-args:
   - --device=dri
   - --socket=fallback-x11
   - --socket=wayland
-    
+  
     # Applications
-  - --filesystem=xdg-data/applications:rw
+  - --filesystem=host
   - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
 
