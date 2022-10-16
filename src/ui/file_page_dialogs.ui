@@ -21,8 +21,8 @@
       </object>
     </property>
     <responses>
-      <response id='cancel' translatable='yes'>_Cancel</response>
-      <response id='add' appearance='suggested' enabled='false' translatable='yes'>_Add</response>
+      <response id='cancel' translatable='yes'>Cancel</response>
+      <response id='add' appearance='suggested' enabled='false' translatable='yes'>Add</response>
     </responses>
   </object>
 
@@ -32,8 +32,8 @@
     <property name='default-response'>cancel</property>
     <property name='close-response'>cancel</property>
     <responses>
-      <response id='cancel' translatable='yes'>_Cancel</response>
-      <response id='delete' appearance='destructive' translatable='yes'>_Unpin</response>
+      <response id='cancel' translatable='yes'>Cancel</response>
+      <response id='delete' appearance='destructive' translatable='yes'>Unpin</response>
     </responses>
   </object>
 </interface>

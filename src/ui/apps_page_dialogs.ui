@@ -23,8 +23,8 @@
       </object>
     </property>
     <responses>
-      <response id='cancel' translatable='yes'>_Cancel</response>
-      <response id='create' appearance='suggested' enabled='false' translatable='yes'>_Create</response>
+      <response id='cancel' translatable='yes'>Cancel</response>
+      <response id='create' appearance='suggested' enabled='false' translatable='yes'>Create</response>
     </responses>
   </object>
 
@@ -32,8 +32,8 @@
     <property name="application-name">PinApp</property>
     <property name="modal">True</property>
     <property name="version">1.1.4</property>
-    <property name="copyright" translatable="yes">© 2022 Fabrizio Alberio</property>
-    <property name="comments" translatable="yes">Create your own application shortcuts</property>
+    <property name="copyright" translatable="no">© 2022 Fabrizio Alberio</property>
+    <property name="comments" translatable="yes">Create and edit application shortcuts</property>
     <property name="application-icon">io.github.fabrialberio.pinapp</property>
     <property name="developer-name">Fabrizio Alberio</property>
   </object>
@@ -66,7 +66,7 @@
             <property name="title" translatable="yes" context="shortcut window">App list</property>
             <child>
               <object class="GtkShortcutsShortcut">
-                <property name="title" translatable="yes" context="shortcut window">Create new file</property>
+                <property name="title" translatable="yes" context="shortcut window">Add new app</property>
                 <property name="action-name">app.new-file</property>
               </object>
             </child>

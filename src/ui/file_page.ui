@@ -16,7 +16,7 @@
         <!-- Title (PinApp) -->
         <property name='title-widget'>
           <object class='AdwWindowTitle' id='title_widget'>
-            <property name='title' translatable='yes'>PinApp</property>
+            <property name='title' translatable='no'>PinApp</property>
             <!-- Subtitle is file name -->
           </object>
         </property>

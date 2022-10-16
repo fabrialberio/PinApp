@@ -31,7 +31,7 @@
                 <child type='start'>
                   <object class='GtkButton' id='new_file_button'>
                     <property name='icon-name'>list-add-symbolic</property>
-                    <property name='tooltip-text' translatable='yes'>New app</property>
+                    <property name='tooltip-text' translatable='yes'>Add new app</property>
                   </object>
                 </child>
                 <!-- Menu button -->
@@ -87,15 +87,15 @@
   <menu id='primary_menu'>
     <section>
       <item>
-        <attribute name='label' translatable='yes'>_Reload apps</attribute>
+        <attribute name='label' translatable='yes'>Reload apps</attribute>
         <attribute name='action'>app.reload</attribute>
       </item>
       <item>
-        <attribute name='label' translatable='yes'>_Keyboard Shortcuts</attribute>
+        <attribute name='label' translatable='yes'>Keyboard Shortcuts</attribute>
         <attribute name='action'>win.show-help-overlay</attribute>
       </item>
       <item>
-        <attribute name='label' translatable='yes'>_About PinApp</attribute>
+        <attribute name='label' translatable='yes'>About PinApp</attribute>
         <attribute name='action'>app.about</attribute>
       </item>
     </section>

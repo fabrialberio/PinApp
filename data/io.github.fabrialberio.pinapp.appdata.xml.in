@@ -5,9 +5,9 @@
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
 	<name translatable='no'>PinApp</name>
-	<summary>Create and edit application shortcuts</summary>
+	<summary translatable='yes'>Create and edit application shortcuts</summary>
     <developer_name translatable="no">Fabrizio Alberio</developer_name>
-	<description>
+	<description translatable='yes'>
 	  <p>PinApp is a simple application that lets you customize your app list.</p>
 	  <p>Some of the possible uses are</p>
 	  <ul>
