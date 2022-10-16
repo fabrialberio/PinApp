@@ -1,0 +1,199 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Fabrizio Alberio <fabrizio.alberio@gmail.com>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pinapp\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-16 11:32+0200\n"
+"PO-Revision-Date: 2022-10-16 11:43+0200\n"
+"Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
+"Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Generator: Gtranslator 42.0\n"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
+#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgid "Create and edit application shortcuts"
+msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;"
+msgstr "GNOME;GTK;Applicazioni;"
+
+#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/apps_page.py:123 ../src/ui/window.ui.h:1
+msgid "Add new app"
+msgstr "Aggiungi applicazione"
+
+#: ../src/ui/apps_page_dialogs.ui.h:2
+msgid "File name"
+msgstr "Nome file"
+
+#: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
+#: ../src/file_page.py:268
+msgid "Cancel"
+msgstr "Annulla"
+
+#: ../src/ui/apps_page_dialogs.ui.h:4
+msgid "Create"
+msgstr "Crea"
+
+#: ../src/ui/apps_page_dialogs.ui.h:6
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Generale"
+
+#: ../src/ui/apps_page_dialogs.ui.h:7
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Scorciatoie"
+
+#: ../src/ui/apps_page_dialogs.ui.h:8
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Chiude la finestra"
+
+#: ../src/ui/apps_page_dialogs.ui.h:9
+msgctxt "shortcut window"
+msgid "App list"
+msgstr "Applicazioni"
+
+#: ../src/ui/apps_page_dialogs.ui.h:10
+msgctxt "shortcut window"
+msgid "Add new app"
+msgstr "Aggiunge una nuova applicazione"
+
+#: ../src/ui/apps_page_dialogs.ui.h:11
+msgctxt "shortcut window"
+msgid "App editing"
+msgstr "Modifica"
+
+#: ../src/ui/apps_page_dialogs.ui.h:12
+msgctxt "shortcut window"
+msgid "Close"
+msgstr "Chiudi"
+
+#: ../src/ui/apps_page_dialogs.ui.h:13
+msgctxt "shortcut window"
+msgid "Save and close"
+msgstr "Salva e chiudi"
+
+#: ../src/ui/file_page_dialogs.ui.h:1
+msgid "Add new key"
+msgstr "Aggiungi chiave"
+
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:89
+msgid "Locale"
+msgstr "Località"
+
+#: ../src/ui/file_page_dialogs.ui.h:3
+msgid "Key name"
+msgstr "Nome della chiave"
+
+#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:6
+msgid "Add"
+msgstr "Aggiungi"
+
+#: ../src/ui/file_page_dialogs.ui.h:6
+msgid "Unpin this app?"
+msgstr "Rimuovere l'applicazione?"
+
+#: ../src/ui/file_page_dialogs.ui.h:7
+msgid "If you unpin this app, it will be deleted forever."
+msgstr "Se rimuovi questa applicazione, sarà persa per sempre."
+
+#: ../src/ui/file_page_dialogs.ui.h:8 ../src/ui/file_page.ui.h:3
+msgid "Unpin"
+msgstr "Rimuovi"
+
+#: ../src/ui/file_page.ui.h:1
+msgid "Add pin"
+msgstr "Appunta"
+
+#: ../src/ui/file_page.ui.h:2
+msgid "Save"
+msgstr "Salva"
+
+#: ../src/ui/file_page.ui.h:4
+msgid "Application icon"
+msgstr "Icona dell'applicazione"
+
+#: ../src/ui/file_page.ui.h:5
+msgid "Localized values"
+msgstr "Valori con località"
+
+#: ../src/ui/file_page.ui.h:7
+msgid "String values"
+msgstr "Valori di testo"
+
+#: ../src/ui/file_page.ui.h:8
+msgid "Boolean values"
+msgstr "Valori booleani"
+
+#: ../src/ui/window.ui.h:1
+msgid "New app"
+msgstr "Aggiungere applicazione"
+
+#: ../src/ui/window.ui.h:2
+msgid "Show menu"
+msgstr "Mostra menu"
+
+#: ../src/ui/window.ui.h:3
+msgid "Your pins"
+msgstr "Appuntate"
+
+#: ../src/ui/window.ui.h:4
+msgid "Installed"
+msgstr "Installate"
+
+#: ../src/ui/window.ui.h:5
+msgid "Reload apps"
+msgstr "Ricarica applicazioni"
+
+#: ../src/ui/window.ui.h:6
+msgid "Keyboard Shortcuts"
+msgstr "Scorciatoie da tastiera"
+
+#: ../src/ui/window.ui.h:7
+msgid "About PinApp"
+msgstr "Informazioni su PinApp"
+
+#: ../src/apps_page.py:115
+msgid "No apps found"
+msgstr "Nessuna applicazione trovata"
+
+#: ../src/apps_page.py:129
+msgid "Applications you install will appear here"
+msgstr "Le applicazioni installate appariranno qui"
+
+#: ../src/apps_page.py:133
+msgid "Error loading apps"
+msgstr "Errore caricamento applicazioni"
+
+#: ../src/apps_page.py:139
+msgid "Loading apps..."
+msgstr "Caricamento applicazioni..."
+
+#: ../src/file_page.py:225
+msgid "No string values present"
+msgstr "Nessun valore di testo presente"
+
+#: ../src/file_page.py:235
+msgid "No boolean values present"
+msgstr "Nessun valore booleano presente"
+
+#: ../src/file_page.py:265
+msgid "Upload icon"
+msgstr "Carica icona"
+
+#: ../src/file_page.py:267
+msgid "Open"
+msgstr "Apri"
