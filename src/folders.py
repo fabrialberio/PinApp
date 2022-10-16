@@ -3,7 +3,7 @@ from threading import Thread
 
 from .desktop_entry import DesktopEntry
 
-from .utils import FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS, SYSTEM_APPS, USER_APPS
+from .utils import *
 
 class DesktopEntryFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
@@ -70,8 +70,9 @@ class UserFolders(FolderGroup):
 class SystemFolders(FolderGroup):
     def __init__(self) -> None:
         super().__init__([
+            HOST_APPS,
             SYSTEM_APPS,
-            FLATPAK_USER_APPS, # TODO: Make this work
+            FLATPAK_USER_APPS,
             FLATPAK_SYSTEM_APPS])
 
         self.writable = False

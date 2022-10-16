@@ -7,9 +7,13 @@ USER_DATA = Path.home() / '.local/share'
 USER_APPS = USER_DATA / 'applications'
 USER_ICONS = USER_DATA / 'icons'
 
-SYSTEM_DATA = Path('/run/host/usr/share')
+SYSTEM_DATA = Path('/usr/share')
 SYSTEM_APPS = SYSTEM_DATA / 'applications'
 SYSTEM_ICONS = SYSTEM_DATA / 'icons'
+
+HOST_DATA = Path('/run/host/usr/share')
+HOST_APPS = HOST_DATA / 'applications'
+HOST_ICONS = HOST_DATA / 'icons'
 
 FLATPAK_USER = Path.home() / '.local/share/flatpak'
 FLATPAK_USER_APPS = FLATPAK_USER / 'exports/share/applications'

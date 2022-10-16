@@ -10,12 +10,13 @@ require_version('Pango', '1.0')
 from gi.repository import GObject, Gtk, Gdk
 
 # Set icon search paths
-from .utils import USER_ICONS, SYSTEM_ICONS, FLATPAK_USER_ICONS, FLATPAK_SYSTEM_ICONS
+from .utils import *
 
 theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 paths = theme.get_search_path()
 paths += [
     str(USER_ICONS),
+    str(HOST_ICONS),
     str(SYSTEM_ICONS),
     str(FLATPAK_USER_ICONS),
     str(FLATPAK_SYSTEM_ICONS)]
