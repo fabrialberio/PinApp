@@ -22,10 +22,8 @@ class AppRow(Adw.ActionRow):
             pixel_size=32,
             margin_top=6,
             margin_bottom=6,
-            opacity=.2 if file.appsection.NoDisplay.get() == True else 1,
             css_classes=['icon-dropshadow'])
-        icon = set_icon_from_name(icon, file.appsection.Icon.get())
-
+        icon = set_icon_from_name(icon, file.appsection.Icon.as_str())
 
         self.add_prefix(icon)
 
@@ -35,26 +33,29 @@ class AppRow(Adw.ActionRow):
 
         self.connect('activated', lambda _: self.emit('file-open', file))
 
-    def add_chip(self, icon_name: str, color_css_class: str):
+    def add_chip(self, icon_name: str = None, label: str=None, color_css='chip-gray'):
         chip = Gtk.Box(
             orientation=Gtk.Orientation.HORIZONTAL,
             valign=Gtk.Align.CENTER,
-            spacing=4,
-            css_classes=['origin-box', color_css_class],
+            spacing=8,
+            css_classes=['chip-box', color_css],
         )
-        chip.append(
-            Gtk.Image(
+        if icon_name != None:
+            chip.append(Gtk.Image(
                 pixel_size=16,
-                margin_start=4,
-                margin_end=4,
                 icon_name=icon_name))
 
-        label_attrs = Pango.AttrList()
-        font_desc = Pango.FontDescription()
-        font_desc.set_weight(Pango.Weight.BOLD)
-        font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
-        label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
-        
+        if label != None:
+            label_attrs = Pango.AttrList()
+            font_desc = Pango.FontDescription()
+            font_desc.set_weight(Pango.Weight.BOLD)
+            font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
+            label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
+
+            chip.append(Gtk.Label(
+                label=label,
+                attributes=label_attrs))
+
         self.add_suffix(chip)
 
 class AppsPage(Adw.Bin):

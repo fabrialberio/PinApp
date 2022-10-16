@@ -1,12 +1,23 @@
-.origin-box {
+.chip-box {
 	background-color: alpha(currentColor, .15);
 	border-radius: 999px;
-	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-top: 4px;
+	padding-bottom: 4px;
 }
 
-.origin-blue {
+.chip-blue {
 	color: @blue_3;
 }
+
+.chip-red {
+	color: @yellow_5;
+}
+
+.chip-gray {
+}
+
 
 .app-banner-listbox {
 	background-color: transparent;

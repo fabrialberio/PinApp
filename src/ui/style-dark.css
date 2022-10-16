@@ -1,3 +1,10 @@
-.origin-blue {
+.chip-blue {
 	color: @blue_1;
+}
+
+.chip-red {
+	color: @yellow_2;
+}
+
+.chip-gray {
 }
