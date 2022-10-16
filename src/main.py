@@ -20,10 +20,11 @@ import sys
 from gi.repository import Gtk, Gio, Adw
 from .window import PinAppWindow
 
-import locale
+from locale import bindtextdomain, textdomain
+from .utils import LOCALE_DIR
 
-locale.textdomain('pinapp')
-locale.setlocale(locale.LC_ALL, 'it_IT')
+bindtextdomain('pinapp', LOCALE_DIR)
+textdomain('pinapp')
 
 class PinAppApplication(Adw.Application):
     """The main application singleton class."""

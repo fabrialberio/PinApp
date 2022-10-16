@@ -1,7 +1,13 @@
 from gi.repository import Gtk, Gdk
 from pathlib import Path
+from sys import prefix
 
 from xml.sax.saxutils import escape
+
+
+class RunningAs:
+    DEFAULT = 'default'
+    FLATPAK = 'flatpak'
 
 USER_DATA = Path.home() / '.local/share'
 USER_APPS = USER_DATA / 'applications'
@@ -23,8 +29,14 @@ FLATPAK_SYSTEM = Path('/var/lib/flatpak')
 FLATPAK_SYSTEM_APPS = FLATPAK_SYSTEM / 'exports/share/applications'
 FLATPAK_SYSTEM_ICONS = FLATPAK_SYSTEM / 'exports/share/icons'
 
-LOCALE_DIR = SYSTEM_DATA / 'locale'
+RUNNING_AS = RunningAs.DEFAULT
+LOCALE_DIR = Path(prefix) / 'share' / 'locale'
 
+if Path('/.flatpak-info').exists():
+    RUNNING_AS = RunningAs.FLATPAK
+    LOCALE_DIR = Path('/app/share/locale')
+
+print(RUNNING_AS)
 
 def escape_xml(string: str) -> str:
     return escape(string or '')
