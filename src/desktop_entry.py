@@ -405,12 +405,13 @@ class DesktopEntry(IniFile):
         return ActionSection.dict_from_parser(self.parser)
 
     def __lt__(self, __o: object) -> bool:
-        if not self.is_loaded:
-            self.load()
 
         if isinstance(__o, DesktopEntry):
+            self.load()
+            __o.load()
+
             try:
-                return self.appsection.Name.get() < __o.appsection.Name.get()
+                return self.appsection.Name.as_str().lower() < __o.appsection.Name.as_str().lower()
             except TypeError:
                 return False
         else:
