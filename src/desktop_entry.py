@@ -407,12 +407,15 @@ class DesktopEntry(IniFile):
     def __lt__(self, __o: object) -> bool:
 
         if isinstance(__o, DesktopEntry):
-            self.load()
-            __o.load()
+            if not self.is_loaded:
+                self.load()
+            if not __o.is_loaded:
+                __o.load()
 
             try:
                 return self.appsection.Name.as_str().lower() < __o.appsection.Name.as_str().lower()
-            except TypeError:
-                return False
+            except (TypeError, AttributeError):
+                # If the app doesn't have a name, it should go to the top of the list
+                return True
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")
