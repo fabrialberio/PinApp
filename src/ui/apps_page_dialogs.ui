@@ -31,7 +31,7 @@
   <object class="AdwAboutWindow" id="about_window">
     <property name="application-name">PinApp</property>
     <property name="modal">True</property>
-    <property name="version">1.1.4</property>
+    <property name="version">1.1.5</property>
     <property name="copyright" translatable="no">© 2022 Fabrizio Alberio</property>
     <property name="comments" translatable="yes">Create and edit application shortcuts</property>
     <property name="application-icon">io.github.fabrialberio.pinapp</property>
