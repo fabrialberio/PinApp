@@ -44,6 +44,21 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="1.1.5" date="2022-10-22">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>Added translation template</li>
+					<li>Localized rows use the current locale by default</li>
+					<li>Added italian translation</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>Not all system apps were loaded, fixed by accessing them trough the host filesystem path</li>
+					<li>Applications were not completely sorted alphabetically</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.1.4" date="2022-10-14">
 			<description>
 				<p>What's changed</p>
