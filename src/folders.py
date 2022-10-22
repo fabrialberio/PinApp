@@ -30,12 +30,17 @@ class FolderGroup():
         self.folders = [DesktopEntryFolder(p) for p in paths]
         self.writable = None
 
-    def get_files(self, sort=True) -> list[DesktopEntry]:
+    def get_files(self, remove_duplicates=True, sort=True) -> list[DesktopEntry]:
         self.files = []
         for d in self.folders:
             if d.exists:
                 d.get_files(sort=False)
                 self.files += d.files
+
+        if remove_duplicates:
+            paths = [f.path for f in self.files]
+            paths = list(set(paths))
+            self.files = [DesktopEntry(p) for p in paths]
 
         if sort: self.files = sorted(self.files)
 

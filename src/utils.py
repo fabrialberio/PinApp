@@ -9,6 +9,11 @@ class RunningAs:
     DEFAULT = 'default'
     FLATPAK = 'flatpak'
 
+RUNNING_AS = RunningAs.DEFAULT
+
+if Path('/.flatpak-info').exists():
+    RUNNING_AS = RunningAs.DEFAULT
+
 USER_DATA = Path.home() / '.local/share'
 USER_APPS = USER_DATA / 'applications'
 USER_ICONS = USER_DATA / 'icons'
@@ -16,10 +21,6 @@ USER_ICONS = USER_DATA / 'icons'
 SYSTEM_DATA = Path('/usr/share')
 SYSTEM_APPS = SYSTEM_DATA / 'applications'
 SYSTEM_ICONS = SYSTEM_DATA / 'icons'
-
-HOST_DATA = Path('/run/host/usr/share')
-HOST_APPS = HOST_DATA / 'applications'
-HOST_ICONS = HOST_DATA / 'icons'
 
 FLATPAK_USER = Path.home() / '.local/share/flatpak'
 FLATPAK_USER_APPS = FLATPAK_USER / 'exports/share/applications'
@@ -29,12 +30,19 @@ FLATPAK_SYSTEM = Path('/var/lib/flatpak')
 FLATPAK_SYSTEM_APPS = FLATPAK_SYSTEM / 'exports/share/applications'
 FLATPAK_SYSTEM_ICONS = FLATPAK_SYSTEM / 'exports/share/icons'
 
-RUNNING_AS = RunningAs.DEFAULT
-LOCALE_DIR = Path(prefix) / 'share' / 'locale'
-
-if Path('/.flatpak-info').exists():
-    RUNNING_AS = RunningAs.FLATPAK
+# Flatpak-specific variables
+if RUNNING_AS == RunningAs.FLATPAK:
     LOCALE_DIR = Path('/app/share/locale')
+
+    HOST_DATA = Path('/run/host/usr/share')
+    HOST_APPS = HOST_DATA / 'applications'
+    HOST_ICONS = HOST_DATA / 'icons'
+else:
+    LOCALE_DIR = Path(prefix) / 'share' / 'locale'
+
+    HOST_DATA = SYSTEM_DATA
+    HOST_APPS = SYSTEM_APPS
+    HOST_ICONS = SYSTEM_ICONS
 
 print(RUNNING_AS)
 
