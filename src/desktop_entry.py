@@ -1,58 +1,70 @@
 from configparser import ConfigParser, SectionProxy
 
-from locale import getlocale
+from dataclasses import dataclass
+from locale import getlocale, LC_ALL
 from pathlib import Path
 from os import access, W_OK
 
 
+@dataclass
 class LocaleString:
-    def __init__(self, raw_string: str):
-        split_by_mod = raw_string.split('@')
-        self.modifier = split_by_mod[1] if len(split_by_mod) > 1 else None
+    lang: str
+    country: str = None
+    modifier: str = None
+
+    @classmethod
+    def parse(cls, locale_str: str) -> 'LocaleString':
+        split_by_mod = locale_str.split('@')
         split_by_cnt = split_by_mod[0].split('_')
-        self.country = split_by_cnt[1] if len(split_by_cnt) > 1 else None
-        self.lang = split_by_cnt[0]
+    
+        lang = split_by_cnt[0]
+        if len(split_by_cnt) > 1: country = split_by_cnt[1]
+        else: country = None
+        if len(split_by_mod) > 1: modifier = split_by_mod[1]
+        else: modifier = None
 
-        if not self.lang:
-            raise ValueError('LocaleString must contain a language to be defined')
+        return cls(lang, country, modifier)
 
-    def find_closest(self, candidates: list['LocaleString']) -> 'LocaleString':
-        if len(candidates) > 0:
-            closeness: list[int] = [0 for _ in candidates] # Higher is better
-
-            for i, l in enumerate(candidates):
-                not_valid_flag = False
-
-                if l.lang:
-                    if self.lang == l.lang:
-                        closeness[i] += 1
-                    else:
-                        not_valid_flag = True
-                if l.country:
-                    if self.country == l.country:
-                        closeness[i] += 4
-                    else:
-                        not_valid_flag = True
-                if l.modifier:
-                    if self.modifier == l.modifier:
-                        closeness[i] += 2
-                    else:
-                        not_valid_flag = True
-
-                if not_valid_flag:
-                    closeness[i] = 0
-            
-            if max(closeness) > 0:
-                return candidates[closeness.index(max(closeness))]
+    @classmethod
+    def current(cls, category = LC_ALL) -> 'LocaleString':
+        return cls.parse(getlocale(category)[0])
 
 
-    def __str__(self):
-        return self.lang + \
-            (f'_{self.country}' if self.country else '') + \
-            (f'@{self.modifier}' if self.modifier else '')
+    def ispartof(self, other: 'LocaleString', ignore_modifier = False) -> bool:
+        '''True it self is contained in other, e.g. `en_US` in `en`'''
+        if other.lang == self.lang:
+            if other.country == None or other.country == self.country:
+                if other.modifier == None or other.modifier == self.modifier or ignore_modifier:
+                    return True
 
-    def __repr__(self):
-        return f'<LocaleString {self.__str__()}>'
+        return False
+
+    def similarity(self, other: 'LocaleString') -> float:
+        '''Returns a value between 0 and 1 representing the similarity between two localestrings'''
+        if not self.ispartof(other, ignore_modifier=True):
+            return 0
+
+        similarity = 0
+        if other.lang == self.lang:
+            similarity += 4/7
+        if other.country == self.country:
+            similarity += 2/7
+        if other.modifier == self.modifier:
+            similarity -= 1/7
+
+        return similarity
+
+    def closest(self, candidates: list['LocaleString']) -> 'LocaleString | None':
+        similarities = [self.similarity(c) for c in candidates]
+        if (max_sim := max(similarities)) > 0:
+            return candidates[similarities.index(max_sim)]
+
+    def __str__(self) -> str:
+        locale_str = self.lang
+        if self.country != None: locale_str += f'_{self.country}'
+        if self.modifier != None: locale_str += f'@{self.modifier}'
+
+        return locale_str
 
 class Field:
     '''
@@ -123,27 +135,21 @@ class Field:
     def localize(self, 
         locale: str = None, 
         strict = False, 
-        auto_localize_if_no_locale = True,
         return_unlocalized_as_fallback = True,
         return_non_existing_key_as_fallback = False) -> 'Field':
         '''If the field has localizations, returns the most similar one. If not given, returns the system locale.'''
 
         if strict:
-            auto_localize_if_no_locale = False
             return_unlocalized_as_fallback = False
             return_non_existing_key_as_fallback = False
 
         # If locale is not given, gets the system locale
         if locale == None:
-            if auto_localize_if_no_locale:
-                locale = getlocale()[0]
-            else:
-                raise TypeError(f'Localization string cannot be None')
+            raise TypeError(f'Localization string cannot be None')
         
         # Finds the closest locale to the one specified from the localizations
-        key_locales: list[str] = [LocaleString(f.locale) for f in self.localized_fields]
-        
-        closest_locale = LocaleString(locale).find_closest(key_locales)
+        key_locales: list[str] = [LocaleString.parse(f.as_str()) for f in self.localized_fields]
+        closest_locale = LocaleString.parse(locale).closest(key_locales)
 
         # If no close locale is found, returns the unlocalized version of itself
         if closest_locale != None:
