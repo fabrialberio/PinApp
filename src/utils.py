@@ -12,7 +12,7 @@ class RunningAs:
 RUNNING_AS = RunningAs.DEFAULT
 
 if Path('/.flatpak-info').exists():
-    RUNNING_AS = RunningAs.DEFAULT
+    RUNNING_AS = RunningAs.FLATPAK
 
 USER_DATA = Path.home() / '.local/share'
 USER_APPS = USER_DATA / 'applications'
