@@ -25,6 +25,13 @@ class AppRow(Adw.ActionRow):
             css_classes=['icon-dropshadow'])
         icon = set_icon_from_name(icon, file.appsection.Icon.as_str())
 
+        if self.file.path.parent in [FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS]:
+            self.add_chip(icon_name='flatpak-symbolic', color_css='chip-blue')
+        if self.file.appsection.NoDisplay.as_bool() == True:
+            icon.set_opacity(.2)
+        if self.file.appsection.Terminal.as_bool() == True:
+            self.add_chip(icon_name='utilities-terminal-symbolic', color_css='chip-gray')
+            
         self.add_prefix(icon)
 
         self.add_suffix(Gtk.Image(
