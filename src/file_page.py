@@ -2,7 +2,7 @@ from gi.repository import Gtk, Adw, Gio
 
 from pathlib import Path
 
-from .desktop_entry import DesktopEntry, Field
+from .desktop_entry import DesktopEntry, Field, LocaleString
 
 from .utils import set_icon_from_name, USER_APPS
 
@@ -91,7 +91,7 @@ class LocaleChooserRow(Adw.ComboRow):
 
     def set_locale(self, locale):
         if locale in self.locales:
-            self.set_selected(locale)
+            self.set_selected(self.locales.index(locale))
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
@@ -323,6 +323,9 @@ class FilePage(Gtk.Box):
 
                 # TODO: What signal do I use here? I'm confused (maybe I just didn't sleep enough)
             self.locale_chooser_row.connect('notify', update_row_locales)
+            self.locale_chooser_row.set_locale(
+                str(LocaleString.current().closest(
+                    [LocaleString.parse(l) for l in all_locales])))
 
             self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
             self.localized_group.set_visible(True)
