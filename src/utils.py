@@ -1,11 +1,12 @@
 from gi.repository import Gtk, Gdk
 from pathlib import Path
+from enum import Enum
 from sys import prefix
 
 from xml.sax.saxutils import escape
 
 
-class RunningAs:
+class RunningAs(Enum):
     DEFAULT = 'default'
     FLATPAK = 'flatpak'
 

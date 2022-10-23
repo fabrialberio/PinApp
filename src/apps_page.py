@@ -1,5 +1,7 @@
 from gi.repository import Gtk, Adw, Pango
 
+from enum import Enum
+
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
 from .utils import *
@@ -68,7 +70,7 @@ class AppRow(Adw.ActionRow):
 class AppsView(Adw.Bin):
     __gtype_name__ = 'AppsPage'
 
-    class State:
+    class State(Enum):
         FILLED = 'filled'
         EMPTY = 'empty'
         ERROR = 'error'
