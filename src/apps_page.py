@@ -10,7 +10,7 @@ class AppRow(Adw.ActionRow):
     def __init__(self, file: DesktopEntry):
         self.file = file
         self.file.load()
-        
+
         super().__init__(
             title = escape_xml(self.file.appsection.Name.as_str()),
             title_lines = 1,
@@ -65,7 +65,7 @@ class AppRow(Adw.ActionRow):
 
         self.add_suffix(chip)
 
-class AppsPage(Adw.Bin):
+class AppsView(Adw.Bin):
     __gtype_name__ = 'AppsPage'
 
     class State:
@@ -78,7 +78,7 @@ class AppsPage(Adw.Bin):
         super().__init__()
 
         self.folder_group = folder_group
-        self.state: AppsPage.State
+        self.state: AppsView.State
 
         self._init_widgets()
         self._set_state(self.State.EMPTY)
@@ -151,7 +151,7 @@ class AppsPage(Adw.Bin):
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
 
-    def _set_state(self, state: 'AppsPage.State'):
+    def _set_state(self, state: 'AppsView.State'):
 
         if state == self.State.FILLED:
             box = Gtk.Box(
@@ -177,7 +177,7 @@ class AppsPage(Adw.Bin):
         self.state = state
 
 
-class PinsView(AppsPage):
+class PinsView(AppsView):
     __gtype_name__ = 'PinsView'
 
     def __init__(self) -> None:
@@ -185,7 +185,7 @@ class PinsView(AppsPage):
 
         self.load_apps()
 
-class InstalledView(AppsPage):
+class InstalledView(AppsView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:

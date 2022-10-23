@@ -55,7 +55,7 @@ class StringRow(Adw.EntryRow):
     def _on_changed(self, widget):
         self.field.set(self.get_text())
 
-class LocaleStringRow(StringRow):
+class LocalizedRow(StringRow):
     __gtype_name__='LocaleStringRow'
 
     def __init__(self, field: Field, locale: str = None) -> None:
@@ -304,13 +304,13 @@ class FilePage(Gtk.Box):
 
     def _update_locale(self):
         all_locales = set()
-        localized_rows: list[LocaleStringRow] = []
+        localized_rows: list[LocalizedRow] = []
         added_keys = [] # This list is used to avoid duplicates in a performance-efficient way
         for field in self.file.appsection.values():
             if field.locale:
                 all_locales = all_locales | {f.locale for f in field.localized_fields}
                 if (k := field.unlocalized_key) not in added_keys:
-                    localized_rows.append(LocaleStringRow(field))
+                    localized_rows.append(LocalizedRow(field))
                     added_keys.append(k)
 
         all_locales = list(all_locales)
@@ -321,7 +321,6 @@ class FilePage(Gtk.Box):
                 for row in localized_rows:
                     row.set_locale(self.locale_chooser_row.get_selected_item().get_string())
 
-                # TODO: What signal do I use here? I'm confused (maybe I just didn't sleep enough)
             self.locale_chooser_row.connect('notify', update_row_locales)
             self.locale_chooser_row.set_locale(
                 str(LocaleString.current().closest(

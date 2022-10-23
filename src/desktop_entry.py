@@ -55,9 +55,10 @@ class LocaleString:
         return similarity
 
     def closest(self, candidates: list['LocaleString']) -> 'LocaleString | None':
-        similarities = [self.similarity(c) for c in candidates]
-        if (max_sim := max(similarities)) > 0:
-            return candidates[similarities.index(max_sim)]
+        if candidates:
+            similarities = [self.similarity(c) for c in candidates]
+            if (max_sim := max(similarities)) > 0:
+                return candidates[similarities.index(max_sim)]
 
     def __str__(self) -> str:
         locale_str = self.lang
@@ -105,15 +106,13 @@ class Field:
             if k.startswith(f'{self.unlocalized_key}[') \
             and k != self.unlocalized_key]
 
-    def get(self, locale: str = None) -> 'bool | int | float | list[str] | str | None':
-        field = self.localize(locale) if locale != None else self
-        
-        if field.as_bool() != None: return field.as_bool()
-        elif field.as_int() != None: return field.as_int()
-        elif field.as_float() != None: return field.as_float()
-        elif field.as_str_list() != None: return field.as_str_list()
+    def get(self) -> 'bool | int | float | list[str] | str | None':
+        if self.as_bool() != None: return self.as_bool()
+        elif self.as_int() != None: return self.as_int()
+        elif self.as_float() != None: return self.as_float()
+        elif self.as_str_list() != None: return self.as_str_list()
         else: 
-            return field.as_str()
+            return self.as_str()
 
     def set(self, new_value: 'bool | int | float | list[str] | str', create_non_existing_key = True):
         if isinstance(new_value, bool):
@@ -137,7 +136,7 @@ class Field:
         strict = False, 
         return_unlocalized_as_fallback = True,
         return_non_existing_key_as_fallback = False) -> 'Field':
-        '''If the field has localizations, returns the most similar one. If not given, returns the system locale.'''
+        '''If the field has localizations, returns the most similar one.'''
 
         if strict:
             return_unlocalized_as_fallback = False
