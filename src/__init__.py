@@ -24,12 +24,12 @@ paths += [
 theme.set_search_path(paths)
 
 # Register all GOBject types
-from .apps_page import AppRow, AppsPage, PinsView, InstalledView
+from .apps_page import AppRow, AppsView, PinsView, InstalledView
 from .file_page import FilePage, LocaleChooserRow, StringRow
 from .window import PinAppWindow
 
 GObject.type_register(AppRow)
-GObject.type_register(AppsPage)
+GObject.type_register(AppsView)
 GObject.type_register(PinsView)
 GObject.type_register(InstalledView)
 GObject.type_register(StringRow)
@@ -38,8 +38,8 @@ GObject.type_register(FilePage)
 GObject.type_register(PinAppWindow)
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-open', AppsPage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-new', AppsPage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
 GObject.signal_new('file-back', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-save', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
