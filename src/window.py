@@ -21,10 +21,6 @@ from gi.repository import Gtk, Adw, Gio
 
 from .utils import USER_APPS
 
-from .file_page import FilePage
-from .apps_page import PinsView, InstalledView
-
-from .folders import DesktopEntryFolder
 from .desktop_entry import DesktopEntry
 from pathlib import Path
 
