@@ -1,0 +1,207 @@
+# Turkish translation for io.github.fabrialberio.pinapp
+# Copyright (C) 2022 io.github.fabrialberio.pinapp's COPYRIGHT HOLDER
+# This file is distributed under the same license as the io.github.fabrialberio.pinapp package.
+#
+# Sabri Ünal <libreajans@gmail.com>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: io.github.fabrialberio.pinapp\n"
+"Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
+"POT-Creation-Date: 2022-11-16 19:58+0300\n"
+"PO-Revision-Date: 2022-11-16 20:19+0300\n"
+"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
+"Language-Team: Turkish <gnome-turk@gnome.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.1.1\n"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
+#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgid "Create and edit application shortcuts"
+msgstr "Uygulama kısayollarını oluştur ve düzenle"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;"
+msgstr "Gnome;GTK;Uygulamalar;Programlar;"
+
+#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/apps_page.py:123
+#: ../src/ui/window.ui.h:1
+msgid "Add new app"
+msgstr "Yeni uygulama ekle"
+
+#: ../src/ui/apps_page_dialogs.ui.h:2
+msgid "File name"
+msgstr "Dosya adı"
+
+#: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
+#: ../src/file_page.py:268
+msgid "Cancel"
+msgstr "İptal Et"
+
+#: ../src/ui/apps_page_dialogs.ui.h:4
+msgid "Create"
+msgstr "Oluştur"
+
+#: ../src/ui/apps_page_dialogs.ui.h:6
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Genel"
+
+#: ../src/ui/apps_page_dialogs.ui.h:7
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Kısayolları Göster"
+
+#: ../src/ui/apps_page_dialogs.ui.h:8
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Çık"
+
+# Kısayol sayfasında Başlık Düzeni tercih et
+#: ../src/ui/apps_page_dialogs.ui.h:9
+msgctxt "shortcut window"
+msgid "App list"
+msgstr "Uygulama Listesi"
+
+# Kısayol sayfasında Başlık Düzeni tercih et
+#: ../src/ui/apps_page_dialogs.ui.h:10
+msgctxt "shortcut window"
+msgid "Add new app"
+msgstr "Yeni Uygulama Ekle"
+
+# Kısayol sayfasında Başlık Düzeni tercih et
+#: ../src/ui/apps_page_dialogs.ui.h:11
+msgctxt "shortcut window"
+msgid "App editing"
+msgstr "Uygulama Düzenleme"
+
+#: ../src/ui/apps_page_dialogs.ui.h:12
+msgctxt "shortcut window"
+msgid "Close"
+msgstr "Kapat"
+
+# Kısayol sayfasında Başlık Düzeni tercih et
+#: ../src/ui/apps_page_dialogs.ui.h:13
+msgctxt "shortcut window"
+msgid "Save and close"
+msgstr "Kaydet ve Kapat"
+
+#: ../src/ui/file_page_dialogs.ui.h:1
+msgid "Add new key"
+msgstr "Yeni anahtar ekle"
+
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:89
+msgid "Locale"
+msgstr "Yerel"
+
+#: ../src/ui/file_page_dialogs.ui.h:3
+msgid "Key name"
+msgstr "Anahtar adı"
+
+#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:6
+msgid "Add"
+msgstr "Ekle"
+
+#: ../src/ui/file_page_dialogs.ui.h:6
+msgid "Unpin this app?"
+msgstr "Bu uygulamanın sabitlemesi kaldırılsın mı?"
+
+#: ../src/ui/file_page_dialogs.ui.h:7
+msgid "If you unpin this app, it will be deleted forever."
+msgstr "Bu uygulamanın sabitlemesini kaldırırsanız, sonsuza kadar silinecektir."
+
+# Düğme olduğu için başlık düzeni tercih edildi
+#: ../src/ui/file_page_dialogs.ui.h:8 ../src/ui/file_page.ui.h:3
+msgid "Unpin"
+msgstr "Sabitlemesini Kaldır"
+
+# Düğmelerde başlık düzeni tercih et
+#: ../src/ui/file_page.ui.h:1
+msgid "Add pin"
+msgstr "Pin Ekle"
+
+#: ../src/ui/file_page.ui.h:2
+msgid "Save"
+msgstr "Kaydet"
+
+# Başlık Düzeni tercih edildi.
+#: ../src/ui/file_page.ui.h:4
+msgid "Application icon"
+msgstr "Uygulama Simgesi"
+
+# Başlık Düzeni tercih edildi.
+#: ../src/ui/file_page.ui.h:5
+msgid "Localized values"
+msgstr "Yerelleştirilmiş Değerler"
+
+# Başlık Düzeni tercih edildi.
+#: ../src/ui/file_page.ui.h:7
+msgid "String values"
+msgstr "Dizge Değerleri"
+
+# Başlık Düzeni tercih edildi.
+#: ../src/ui/file_page.ui.h:8
+msgid "Boolean values"
+msgstr "Mantıksal Değerler"
+
+#: ../src/ui/window.ui.h:2
+msgid "Show menu"
+msgstr "Menüyü göster"
+
+#: ../src/ui/window.ui.h:3
+msgid "Your pins"
+msgstr "Sabitlemeleriniz"
+
+#: ../src/ui/window.ui.h:4
+msgid "Installed"
+msgstr "Kurulu"
+
+# Menü düğmesi olduğu için Başlık Düzeni tercih edildi
+#: ../src/ui/window.ui.h:5
+msgid "Reload apps"
+msgstr "Uygulamaları Yeniden Yükle"
+
+#: ../src/ui/window.ui.h:6
+msgid "Keyboard Shortcuts"
+msgstr "Klavye Kısayolları"
+
+#: ../src/ui/window.ui.h:7
+msgid "About PinApp"
+msgstr "PinApp Hakkında"
+
+#: ../src/apps_page.py:115
+msgid "No apps found"
+msgstr "Hiçbir uygulama bulunamadı"
+
+#: ../src/apps_page.py:129
+msgid "Applications you install will appear here"
+msgstr "Kurduğunuz uygulamalar burada görünür"
+
+#: ../src/apps_page.py:133
+msgid "Error loading apps"
+msgstr "Uygulamalar yüklenemedi"
+
+#: ../src/apps_page.py:139
+msgid "Loading apps..."
+msgstr "Uygulamalar yükleniyor..."
+
+#: ../src/file_page.py:225
+msgid "No string values present"
+msgstr "Dizge değeri yok"
+
+#: ../src/file_page.py:235
+msgid "No boolean values present"
+msgstr "Mantıksal değer yok"
+
+#: ../src/file_page.py:265
+msgid "Upload icon"
+msgstr "Simge yükle"
+
+#: ../src/file_page.py:267
+msgid "Open"
+msgstr "Aç"
