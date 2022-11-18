@@ -215,7 +215,7 @@ class FilePage(Gtk.Box):
         file_dict.pop('Icon', '')
 
         self._update_locale()
-        icon_row = self._update_icon()
+        icon_row = self._get_icon_row()
 
         string_rows = [icon_row] + StringRow.list_from_field_list(file_dict.values())
         self._update_pref_group(
@@ -241,14 +241,14 @@ class FilePage(Gtk.Box):
     def visible(self):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
-    def _update_icon(self, value: str=None) -> StringRow:
+    def _get_icon_row(self, value: str=None) -> StringRow:
         icon_field = self.file.appsection.Icon
         if value != None:
             icon_field.set(value)
         
         icon_row = StringRow(icon_field)
         icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
-        icon_row.connect('changed', lambda _: self._update_icon())
+        icon_row.connect('changed', lambda _: self._get_icon_row())
 
         self.app_icon = set_icon_from_name(self.app_icon, icon_field.as_str())
 
@@ -258,7 +258,7 @@ class FilePage(Gtk.Box):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
                 path = dialog.get_file().get_path()
-                self._update_icon(path)
+                self._get_icon_row(path)
                 self.update_file()
 
         dialog = Gtk.FileChooserNative(
@@ -300,7 +300,7 @@ class FilePage(Gtk.Box):
 
         self.banner_listbox.append(app_name_row)
         self.banner_listbox.append(app_comment_row)
-        self._update_icon()
+        self._get_icon_row()
 
     def _update_locale(self):
         all_locales = set()
