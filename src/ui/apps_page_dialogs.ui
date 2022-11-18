@@ -36,7 +36,9 @@
     <property name="comments" translatable="yes">Create and edit application shortcuts</property>
     <property name="application-icon">io.github.fabrialberio.pinapp</property>
     <property name="developer-name">Fabrizio Alberio</property>
-    <property name="translator-credits">Fabrizio Alberio https://github.com/fabrialberio</property>
+    <property name="translator-credits">Fabrizio Alberio https://github.com/fabrialberio
+      Irénée Thirion &lt;irenee.thirion@e.email&gt;
+      Sabri Ünal &lt;libreajans@gmail.com&gt;</property>
   </object>
 
   <object class="GtkShortcutsWindow" id="help_overlay">
