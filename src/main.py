@@ -36,10 +36,10 @@ class PinAppApplication(Adw.Application):
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
         self.create_action('about', self.show_about_window)
         
-        self.create_action('reload', lambda a, _: self.window.show_and_reload_apps())
+        self.create_action('reload', lambda a, _: self.window.reload_apps())
         self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])
         
-        self.create_action('exit', lambda a, _: self.window.show_apps(), ['Escape'])
+        self.create_action('exit', lambda a, _: self.window.set_page(self.window.apps_page), ['Escape'])
         self.create_action('save', lambda a, _: self.window.file_page.save_file(), ['<primary>s'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
