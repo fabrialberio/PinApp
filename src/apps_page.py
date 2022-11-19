@@ -74,42 +74,24 @@ class State(Enum):
     LOADING = 'loading'
 
 class AppsView(Adw.Bin):
+    '''A widget that handles status pages for states'''
     __gtype_name__ = 'AppsPage'
 
-    def __init__(self, folder_group: FolderGroup) -> None:
+    writable: bool
+    state: State
+
+    empty_page: Adw.StatusPage
+    error_page: Adw.StatusPage
+    loading_page: Adw.StatusPage
+    filled_page: Gtk.Widget
+
+    def __init__(self, writable: bool) -> None:
         super().__init__()
 
-        self.folder_group = folder_group
-        self.state: AppsView.State
+        self.writable = writable
 
         self._init_widgets()
         self._set_state(State.EMPTY)
-
-    def load_apps(self, loading_ok=True):
-        if self.state == State.LOADING or loading_ok:
-            return
-
-        if self.folder_group.any_exists:
-            self._set_state(State.LOADING)
-
-            def fill_group():
-                if not self.folder_group.empty:
-                    self.listbox = Gtk.ListBox(
-                        selection_mode=Gtk.SelectionMode.NONE,
-                        css_classes=['boxed-list'])
-                
-                    for file in self.folder_group.files:
-                        row = AppRow(file)
-                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                        self.listbox.append(row)
-            
-                    self._set_state(State.FILLED)
-                else:
-                    self._set_state(State.EMPTY)
-
-            self.folder_group.get_files_async(callback=fill_group)
-        else:
-            self._set_state(State.ERROR)
 
     def _init_widgets(self):
         self.empty_page = Adw.StatusPage(
@@ -117,7 +99,7 @@ class AppsView(Adw.Bin):
             title=_('No apps found'),
             icon_name='folder-open-symbolic'
         )
-        if self.folder_group.writable:
+        if self.writable:
             button = Gtk.Button(
                 halign=Gtk.Align.CENTER,
                 css_classes=['suggested-action', 'pill'],
@@ -154,21 +136,8 @@ class AppsView(Adw.Bin):
             spinning=True)) # Replaces it with a spinner
 
     def _set_state(self, state: 'AppsView.State'):
-
         if state == State.FILLED:
-            box = Gtk.Box(
-                orientation=Gtk.Orientation.VERTICAL)
-            box.append(self.listbox)
-
-            self.set_child(
-                Gtk.ScrolledWindow(
-                    vexpand=True,
-                    child=Adw.Clamp(
-                        margin_top=24,
-                        margin_bottom=24,
-                        margin_start=12,
-                        margin_end=12,
-                        child = box)))
+            self.set_child(self.filled_page)
         elif state == State.EMPTY:
             self.set_child(self.empty_page)
         elif state == State.ERROR:
@@ -178,7 +147,52 @@ class AppsView(Adw.Bin):
         
         self.state = state
 
-class PinsView(AppsView):
+class FolderGroupView(AppsView):
+    '''A widget that handles status pages for states and represents apps in a FolderGroup'''
+    __gtype_name__ = 'FolderView'
+
+    def __init__(self, folder_group: FolderGroup) -> None:
+        self.folder_group = folder_group
+        super().__init__(self.folder_group.writable)
+
+    def load_apps(self, loading_ok=True):
+        if self.state == State.LOADING or loading_ok:
+            return
+
+        if self.folder_group.any_exists:
+            self._set_state(State.LOADING)
+
+            def fill_group():
+                if not self.folder_group.empty:
+                    listbox = Gtk.ListBox(
+                        selection_mode=Gtk.SelectionMode.NONE,
+                        css_classes=['boxed-list'])
+                
+                    for file in self.folder_group.files:
+                        row = AppRow(file)
+                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
+                        listbox.append(row)
+
+                    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                    box.append(listbox)
+
+                    self.filled_page = Gtk.ScrolledWindow(
+                        vexpand=True,
+                        child=Adw.Clamp(
+                            margin_top=24,
+                            margin_bottom=24,
+                            margin_start=12,
+                            margin_end=12,
+                            child = box))
+                    self._set_state(State.FILLED)
+                else:
+                    self._set_state(State.EMPTY)
+
+            self.folder_group.get_files_async(callback=fill_group)
+        else:
+            self._set_state(State.ERROR)
+
+class PinsView(FolderGroupView):
     __gtype_name__ = 'PinsView'
 
     def __init__(self) -> None:
@@ -186,7 +200,7 @@ class PinsView(AppsView):
 
         self.load_apps()
 
-class InstalledView(AppsView):
+class InstalledView(FolderGroupView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:
