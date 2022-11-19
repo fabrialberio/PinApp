@@ -24,7 +24,7 @@ paths += [
 theme.set_search_path(paths)
 
 # Register all GOBject types
-from .apps_page import AppRow, AppsView, PinsView, InstalledView
+from .apps_page import AppRow, AppsView, PinsView, InstalledView, FolderGroupView
 from .file_page import FilePage, LocaleChooserRow, StringRow
 from .window import PinAppWindow
 
@@ -32,6 +32,7 @@ GObject.type_register(AppRow)
 GObject.type_register(AppsView)
 GObject.type_register(PinsView)
 GObject.type_register(InstalledView)
+GObject.type_register(FolderGroupView)
 GObject.type_register(StringRow)
 GObject.type_register(LocaleChooserRow)
 GObject.type_register(FilePage)
