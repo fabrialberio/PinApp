@@ -67,14 +67,14 @@ class AppRow(Adw.ActionRow):
 
         self.add_suffix(chip)
 
+class State(Enum):
+    FILLED = 'filled'
+    EMPTY = 'empty'
+    ERROR = 'error'
+    LOADING = 'loading'
+
 class AppsView(Adw.Bin):
     __gtype_name__ = 'AppsPage'
-
-    class State(Enum):
-        FILLED = 'filled'
-        EMPTY = 'empty'
-        ERROR = 'error'
-        LOADING = 'loading'
 
     def __init__(self, folder_group: FolderGroup) -> None:
         super().__init__()
@@ -83,14 +83,14 @@ class AppsView(Adw.Bin):
         self.state: AppsView.State
 
         self._init_widgets()
-        self._set_state(self.State.EMPTY)
+        self._set_state(State.EMPTY)
 
     def load_apps(self, loading_ok=True):
-        if self.state == self.State.LOADING or loading_ok:
+        if self.state == State.LOADING or loading_ok:
             return
 
         if self.folder_group.any_exists:
-            self._set_state(self.State.LOADING)
+            self._set_state(State.LOADING)
 
             def fill_group():
                 if not self.folder_group.empty:
@@ -103,13 +103,13 @@ class AppsView(Adw.Bin):
                         row.connect('file-open', lambda _, f: self.emit('file-open', f))
                         self.listbox.append(row)
             
-                    self._set_state(self.State.FILLED)
+                    self._set_state(State.FILLED)
                 else:
-                    self._set_state(self.State.EMPTY)
+                    self._set_state(State.EMPTY)
 
             self.folder_group.get_files_async(callback=fill_group)
         else:
-            self._set_state(self.State.ERROR)
+            self._set_state(State.ERROR)
 
     def _init_widgets(self):
         self.empty_page = Adw.StatusPage(
@@ -155,7 +155,7 @@ class AppsView(Adw.Bin):
 
     def _set_state(self, state: 'AppsView.State'):
 
-        if state == self.State.FILLED:
+        if state == State.FILLED:
             box = Gtk.Box(
                 orientation=Gtk.Orientation.VERTICAL)
             box.append(self.listbox)
@@ -169,15 +169,14 @@ class AppsView(Adw.Bin):
                         margin_start=12,
                         margin_end=12,
                         child = box)))
-        elif state == self.State.EMPTY:
+        elif state == State.EMPTY:
             self.set_child(self.empty_page)
-        elif state == self.State.ERROR:
+        elif state == State.ERROR:
             self.set_child(self.error_page)
-        elif state == self.State.LOADING:
+        elif state == State.LOADING:
             self.set_child(self.loading_page)
         
         self.state = state
-
 
 class PinsView(AppsView):
     __gtype_name__ = 'PinsView'
