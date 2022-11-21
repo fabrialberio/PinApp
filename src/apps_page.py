@@ -147,6 +147,9 @@ class AppsView(Adw.Bin):
         
         self.state = state
 
+    def load_apps(self, loading_ok=True):
+        raise NotImplementedError
+
 class FolderGroupView(AppsView):
     '''A widget that handles status pages for states and represents apps in a FolderGroup'''
     __gtype_name__ = 'FolderView'
@@ -191,6 +194,20 @@ class FolderGroupView(AppsView):
             self.folder_group.get_files_async(callback=fill_group)
         else:
             self._set_state(State.ERROR)
+
+class SearchView(AppsView):
+    __gtype_name__ = 'SearchView'
+
+    def __init__(self) -> None:
+        super().__init__(writable=False)
+
+    def load_apps(self, loading_ok=True):
+        if self.state == State.LOADING or loading_ok:
+            ...
+
+
+    def search(self, query: str):
+        ...
 
 class PinsView(FolderGroupView):
     __gtype_name__ = 'PinsView'
