@@ -91,7 +91,7 @@ class AppsView(Adw.Bin):
         self.writable = writable
 
         self._init_widgets()
-        self._set_state(State.EMPTY)
+        self.set_state(State.EMPTY)
 
     def _init_widgets(self):
         self.empty_page = Adw.StatusPage(
@@ -135,7 +135,27 @@ class AppsView(Adw.Bin):
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
 
-    def _set_state(self, state: 'AppsView.State'):
+    def update_filled_page(self, rows: list[Gtk.ListBoxRow]):
+        listbox = Gtk.ListBox(
+            selection_mode=Gtk.SelectionMode.NONE,
+            css_classes=['boxed-list'])
+
+        for row in rows:
+            listbox.append(row)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.append(listbox)
+
+        self.filled_page = Gtk.ScrolledWindow(
+            vexpand=True,
+            child=Adw.Clamp(
+                margin_top=24,
+                margin_bottom=24,
+                margin_start=12,
+                margin_end=12,
+                child = box))
+
+    def set_state(self, state: 'AppsView.State'):
         if state == State.FILLED:
             self.set_child(self.filled_page)
         elif state == State.EMPTY:
@@ -144,11 +164,8 @@ class AppsView(Adw.Bin):
             self.set_child(self.error_page)
         elif state == State.LOADING:
             self.set_child(self.loading_page)
-        
-        self.state = state
 
-    def load_apps(self, loading_ok=True):
-        raise NotImplementedError
+        self.state = state
 
 class FolderGroupView(AppsView):
     '''A widget that handles status pages for states and represents apps in a FolderGroup'''
@@ -158,56 +175,32 @@ class FolderGroupView(AppsView):
         self.folder_group = folder_group
         super().__init__(self.folder_group.writable)
 
+    def get_rows(self) -> list[AppRow]:
+        rows = []
+        for file in self.folder_group.files:
+            row = AppRow(file)
+            row.connect('file-open', lambda _, f: self.emit('file-open', f))
+            rows.append(row)
+
+        return rows
+
     def load_apps(self, loading_ok=True):
         if self.state == State.LOADING or loading_ok:
             return
 
         if self.folder_group.any_exists:
-            self._set_state(State.LOADING)
+            self.set_state(State.LOADING)
 
             def fill_group():
                 if not self.folder_group.empty:
-                    listbox = Gtk.ListBox(
-                        selection_mode=Gtk.SelectionMode.NONE,
-                        css_classes=['boxed-list'])
-                
-                    for file in self.folder_group.files:
-                        row = AppRow(file)
-                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                        listbox.append(row)
-
-                    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-                    box.append(listbox)
-
-                    self.filled_page = Gtk.ScrolledWindow(
-                        vexpand=True,
-                        child=Adw.Clamp(
-                            margin_top=24,
-                            margin_bottom=24,
-                            margin_start=12,
-                            margin_end=12,
-                            child = box))
-                    self._set_state(State.FILLED)
+                    self.update_filled_page(self.get_rows())
+                    self.set_state(State.FILLED)
                 else:
-                    self._set_state(State.EMPTY)
+                    self.set_state(State.EMPTY)
 
             self.folder_group.get_files_async(callback=fill_group)
         else:
-            self._set_state(State.ERROR)
-
-class SearchView(AppsView):
-    __gtype_name__ = 'SearchView'
-
-    def __init__(self) -> None:
-        super().__init__(writable=False)
-
-    def load_apps(self, loading_ok=True):
-        if self.state == State.LOADING or loading_ok:
-            ...
-
-
-    def search(self, query: str):
-        ...
+            self.set_state(State.ERROR)
 
 class PinsView(FolderGroupView):
     __gtype_name__ = 'PinsView'
@@ -224,3 +217,16 @@ class InstalledView(FolderGroupView):
         super().__init__(SystemFolders())
 
         self.load_apps()
+
+class SearchView(AppsView):
+    '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
+    __gtype_name__ = 'SearchView'
+
+    def __init__(self) -> None:
+        super().__init__(writable=False)
+
+    def load_apps(self, loading_ok=True):
+        ...
+
+    def search(self, query: str):
+        ...
