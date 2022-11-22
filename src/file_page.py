@@ -276,6 +276,9 @@ class FilePage(Gtk.Box):
         dialog.show()
 
     def _update_app_banner(self):
+        if self.file == None:
+            return
+
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
             self.banner_listbox.remove(row)
 
