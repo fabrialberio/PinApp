@@ -42,6 +42,7 @@ GObject.type_register(PinAppWindow)
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('state-changed', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
 GObject.signal_new('file-back', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-save', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())

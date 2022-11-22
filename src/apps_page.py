@@ -78,7 +78,7 @@ class AppsView(Adw.Bin):
     __gtype_name__ = 'AppsPage'
 
     writable: bool
-    state: State
+    state: State = State.LOADING
 
     empty_page: Adw.StatusPage
     error_page: Adw.StatusPage
@@ -91,7 +91,6 @@ class AppsView(Adw.Bin):
         self.writable = writable
 
         self._init_widgets()
-        self.set_state(State.EMPTY)
 
     def _init_widgets(self):
         self.empty_page = Adw.StatusPage(
@@ -135,7 +134,10 @@ class AppsView(Adw.Bin):
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
 
-    def update_filled_page(self, rows: list[Gtk.ListBoxRow]):
+    def update_filled_page(self, rows: list[Gtk.ListBoxRow], sort=False):
+        if sort and isinstance(rows[0], AppRow):
+            rows = sorted(rows)
+
         listbox = Gtk.ListBox(
             selection_mode=Gtk.SelectionMode.NONE,
             css_classes=['boxed-list'])
@@ -155,7 +157,7 @@ class AppsView(Adw.Bin):
                 margin_end=12,
                 child = box))
 
-    def set_state(self, state: 'AppsView.State'):
+    def set_state(self, state: State):
         if state == State.FILLED:
             self.set_child(self.filled_page)
         elif state == State.EMPTY:
@@ -166,6 +168,7 @@ class AppsView(Adw.Bin):
             self.set_child(self.loading_page)
 
         self.state = state
+        self.emit('state-changed')
 
 class FolderGroupView(AppsView):
     '''A widget that handles status pages for states and represents apps in a FolderGroup'''
@@ -208,15 +211,11 @@ class PinsView(FolderGroupView):
     def __init__(self) -> None:
         super().__init__(UserFolders())
 
-        self.load_apps()
-
 class InstalledView(FolderGroupView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:
         super().__init__(SystemFolders())
-
-        self.load_apps()
 
 class SearchView(AppsView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
