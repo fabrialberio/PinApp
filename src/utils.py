@@ -44,8 +44,6 @@ else:
     HOST_APPS = SYSTEM_APPS
     HOST_ICONS = SYSTEM_ICONS
 
-print(RUNNING_AS)
-
 def escape_xml(string: str) -> str:
     return escape(string or '')
 
