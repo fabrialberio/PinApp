@@ -67,6 +67,13 @@ class AppRow(Adw.ActionRow):
 
         self.add_suffix(chip)
 
+    # Used for sorting apps by name in SearchView
+    def __lt__(self, other) -> bool:
+        if isinstance(other, AppRow):
+            return self.file.__lt__(other.file)
+        else:
+            raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
+
 class State(Enum):
     FILLED = 'filled'
     EMPTY = 'empty'
