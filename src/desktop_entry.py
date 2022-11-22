@@ -372,6 +372,13 @@ class IniFile:
 
 class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
+    path: 'str | Path'
+    writable: bool
+    search_string: str
+
+    appsection: AppSection
+    actionsections: list[ActionSection]
+
     @staticmethod
     def new_with_defaults(path: 'str | Path') -> 'DesktopEntry':
         valid_path = DesktopEntry.validate_path(str(path))
@@ -401,6 +408,11 @@ class DesktopEntry(IniFile):
 
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
+
+    def load(self):
+        super().load()
+
+        self.search_string = '\n'.join(f.get() for f in self.appsection.values())
 
     @property
     def appsection(self) -> 'AppSection': 
