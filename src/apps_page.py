@@ -6,10 +6,66 @@ from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
 from .utils import *
 
+class AppChip(Gtk.Box):
+    __gtype_name__ = 'AppChip'
+
+    class Color(Enum):
+        GRAY = 'chip-gray'
+        BLUE = 'chip-blue'
+        YELLOW = 'chip-yellow'
+
+    @classmethod
+    def Pinned(cls):
+        return cls(
+            icon_name='view-pin-symbolic',
+            color=AppChip.Color.YELLOW)
+
+    @classmethod
+    def Terminal(cls):
+        return cls(icon_name='utilities-terminal-symbolic')
+
+    @classmethod
+    def Flatpak(cls, show_label=False):
+        return cls(
+            icon_name='flatpak-symbolic',
+            label='Flatpak',
+            color=AppChip.Color.BLUE,
+            show_label=show_label)
+
+    def __init__(self,
+            icon_name: str,
+            label: str = None,
+            show_label: bool = True,
+            color: Color = Color.GRAY
+        ) -> None:
+        super().__init__(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            valign=Gtk.Align.CENTER,
+            spacing=8,
+            css_classes=['chip-box', color.value],
+            tooltip_text = label)
+
+        self.append(Gtk.Image(
+            pixel_size=16,
+            icon_name=icon_name))
+
+        if label != None and show_label:
+            label_attrs = Pango.AttrList()
+            font_desc = Pango.FontDescription()
+            font_desc.set_weight(Pango.Weight.BOLD)
+            font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
+            label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
+
+            self.append(Gtk.Label(
+                label=label,
+                attributes=label_attrs))
+
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
-    def __init__(self, file: DesktopEntry):
+    def __init__(self,
+            file: DesktopEntry,
+            chips: list[AppChip] = []):
         self.file = file
         self.file.load()
 
@@ -27,45 +83,31 @@ class AppRow(Adw.ActionRow):
             css_classes=['icon-dropshadow'])
         icon = set_icon_from_name(icon, file.appsection.Icon.as_str())
 
-        if self.file.path.parent in [FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS]:
-            self.add_chip(icon_name='flatpak-symbolic', color_css='chip-blue')
-        if self.file.appsection.NoDisplay.as_bool() == True:
-            icon.set_opacity(.2)
-        if self.file.appsection.Terminal.as_bool() == True:
-            self.add_chip(icon_name='utilities-terminal-symbolic', color_css='chip-gray')
-            
         self.add_prefix(icon)
+
+        self.chip_box = Gtk.Box(spacing=6)
+        self.add_suffix(self.chip_box)
 
         self.add_suffix(Gtk.Image(
             icon_name='go-next-symbolic',
             opacity=.6))
 
+
+        if self.file.appsection.NoDisplay.as_bool() == True:
+            icon.set_opacity(.2)
+        if self.file.path.parent in [FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS]:
+            self.add_chip(AppChip.Flatpak())
+        if self.file.appsection.Terminal.as_bool() == True:
+            self.add_chip(AppChip.Terminal())
+
+        for c in chips:
+            self.add_chip(c)
+
         self.connect('activated', lambda _: self.emit('file-open', file))
 
-    def add_chip(self, icon_name: str = None, label: str=None, color_css='chip-gray'):
-        chip = Gtk.Box(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            valign=Gtk.Align.CENTER,
-            spacing=8,
-            css_classes=['chip-box', color_css],
-        )
-        if icon_name != None:
-            chip.append(Gtk.Image(
-                pixel_size=16,
-                icon_name=icon_name))
+    def add_chip(self, chip: AppChip):
+        self.chip_box.append(chip)
 
-        if label != None:
-            label_attrs = Pango.AttrList()
-            font_desc = Pango.FontDescription()
-            font_desc.set_weight(Pango.Weight.BOLD)
-            font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
-            label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
-
-            chip.append(Gtk.Label(
-                label=label,
-                attributes=label_attrs))
-
-        self.add_suffix(chip)
 
     # Used for sorting apps by name in SearchView
     def __lt__(self, other) -> bool:
@@ -84,18 +126,11 @@ class AppsView(Adw.Bin):
     '''A widget that handles status pages for states'''
     __gtype_name__ = 'AppsPage'
 
-    writable: bool
-    state: State = State.LOADING
-
-    empty_page: Adw.StatusPage
-    error_page: Adw.StatusPage
-    loading_page: Adw.StatusPage
-    filled_page: Gtk.Widget
-
-    def __init__(self, writable: bool) -> None:
+    def __init__(self, show_new_file_button: bool) -> None:
         super().__init__()
 
-        self.writable = writable
+        self.show_new_file_button = show_new_file_button
+        self.state = State.EMPTY
 
         self._init_widgets()
 
@@ -105,7 +140,7 @@ class AppsView(Adw.Bin):
             title=_('No apps found'),
             icon_name='folder-open-symbolic'
         )
-        if self.writable:
+        if self.show_new_file_button:
             button = Gtk.Button(
                 halign=Gtk.Align.CENTER,
                 css_classes=['suggested-action', 'pill'],
@@ -154,7 +189,7 @@ class AppsView(Adw.Bin):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.append(listbox)
-
+        
         self.filled_page = Gtk.ScrolledWindow(
             vexpand=True,
             child=Adw.Clamp(
@@ -165,6 +200,9 @@ class AppsView(Adw.Bin):
                 child = box))
 
     def set_state(self, state: State):
+        if state == self.state:
+            return
+
         if state == State.FILLED:
             self.set_child(self.filled_page)
         elif state == State.EMPTY:
@@ -185,15 +223,6 @@ class FolderGroupView(AppsView):
         self.folder_group = folder_group
         super().__init__(self.folder_group.writable)
 
-    def get_rows(self) -> list[AppRow]:
-        rows = []
-        for file in self.folder_group.files:
-            row = AppRow(file)
-            row.connect('file-open', lambda _, f: self.emit('file-open', f))
-            rows.append(row)
-
-        return rows
-
     def load_apps(self, loading_ok=True):
         if self.state == State.LOADING or loading_ok:
             return
@@ -203,7 +232,13 @@ class FolderGroupView(AppsView):
 
             def fill_group():
                 if not self.folder_group.empty:
-                    self.update_filled_page(self.get_rows())
+                    rows = []
+                    for file in self.folder_group.files:
+                        row = AppRow(file)
+                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
+                        rows.append(row)
+
+                    self.update_filled_page(rows)
                     self.set_state(State.FILLED)
                 else:
                     self.set_state(State.EMPTY)
@@ -228,11 +263,46 @@ class SearchView(AppsView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
-    def __init__(self) -> None:
-        super().__init__(writable=False)
+    source_views: list[AppsView]
+    folder_groups: list[FolderGroup]
 
-    def load_apps(self, loading_ok=True):
-        ...
+    def __init__(self) -> None:
+        super().__init__(show_new_file_button=False)
+
+    def set_source_views(self, source_views: list[FolderGroupView]):
+        self.source_views = source_views
+
+        self.folder_groups = [v.folder_group for v in self.source_views]
+
+        for v in self.source_views:
+            v.connect('state-changed', self.state_changed_cb)
+
+    def state_changed_cb(self, view: FolderGroupView):
+        '''Updates search_map when apps are loaded'''
+        if view.state == State.FILLED:
+            self.load_apps()
+
+    def load_apps(self):
+        self.rows = []
+        for g in self.folder_groups:
+            
+            if g.files:
+                self.set_state(State.LOADING)
+
+            for f in g.files:
+                row = AppRow(f)
+                row.connect('file-open', lambda _, f: self.emit('file-open', f))
+                if isinstance(g, UserFolders):
+                    row.add_chip(AppChip.Pinned())
+
+                self.rows.append(row)
+
+        self.update_filled_page(self.rows, sort=True)
+        self.set_state(State.FILLED)
 
     def search(self, query: str):
-        ...
+        for r in self.rows:
+            if query.lower() in r.file.search_string:
+                r.set_visible(True)
+            else:
+                r.set_visible(False)
