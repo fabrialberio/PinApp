@@ -51,6 +51,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.pins_view.connect('file-open', lambda _, f: self.open_file(f))
         self.pins_view.connect('file-new', lambda _: self.new_file())
         self.installed_view.connect('file-open', lambda _, f: self.open_file(f))
+        self.search_view.connect('file-open', lambda _, f: self.open_file(f))
 
         self.file_page.connect('file-back', lambda _: self.set_page(self.apps_page))
         self.file_page.connect('file-save', lambda _: self.reload_apps())
@@ -67,6 +68,8 @@ class PinAppWindow(Adw.ApplicationWindow):
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.connect_entry(self.search_entry)
+
+        self.search_view.set_source_views([self.pins_view, self.installed_view])
 
         def view_changed_cb(*args):
             '''Disables search mode when the view is changed to something else'''
@@ -159,7 +162,6 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.pins_view.load_apps(loading_ok=False)
         self.installed_view.load_apps(loading_ok=False)
-        self.search_view.load_apps(loading_ok=False)
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
