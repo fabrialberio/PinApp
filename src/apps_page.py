@@ -95,7 +95,7 @@ class AppRow(Adw.ActionRow):
 
         if self.file.appsection.NoDisplay.as_bool() == True:
             icon.set_opacity(.2)
-        if self.file.path.parent in [FLATPAK_SYSTEM_APPS, FLATPAK_USER_APPS]:
+        if self.file.appsection.as_dict().get('X-Flatpak') != None:
             self.add_chip(AppChip.Flatpak())
         if self.file.appsection.Terminal.as_bool() == True:
             self.add_chip(AppChip.Terminal())
@@ -269,6 +269,13 @@ class SearchView(AppsView):
     def __init__(self) -> None:
         super().__init__(show_new_file_button=False)
 
+        # Override empty page with a more appropriate one
+        self.empty_page = Adw.StatusPage(
+            vexpand=True,
+            title=_('No results found'),
+            description=_('Try searching for something else'),
+            icon_name='system-search-symbolic')
+
     def set_source_views(self, source_views: list[FolderGroupView]):
         self.source_views = source_views
 
@@ -278,21 +285,20 @@ class SearchView(AppsView):
             v.connect('state-changed', self.state_changed_cb)
 
     def state_changed_cb(self, view: FolderGroupView):
-        '''Updates search_map when apps are loaded'''
-        if view.state == State.FILLED:
+        '''Updates search_map when all source_views are loaded'''
+        if view.state == State.LOADING:
+            self.set_state(State.LOADING)
+        if all(map(lambda v: v.state == State.FILLED, self.source_views)):
             self.load_apps()
 
     def load_apps(self):
         self.rows = []
+        self.set_state(State.LOADING)
         for g in self.folder_groups:
-            
-            if g.files:
-                self.set_state(State.LOADING)
-
             for f in g.files:
                 row = AppRow(f)
                 row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                if isinstance(g, UserFolders):
+                if g.writable:
                     row.add_chip(AppChip.Pinned())
 
                 self.rows.append(row)
@@ -301,8 +307,19 @@ class SearchView(AppsView):
         self.set_state(State.FILLED)
 
     def search(self, query: str):
+        if self.state == State.LOADING:
+            return
+
+        any_visible = False
+
         for r in self.rows:
             if query.lower() in r.file.search_string:
                 r.set_visible(True)
+                any_visible = True
             else:
                 r.set_visible(False)
+
+        if any_visible:
+            self.set_state(State.FILLED)
+        else:
+            self.set_state(State.EMPTY)
