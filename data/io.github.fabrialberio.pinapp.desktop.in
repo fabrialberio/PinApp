@@ -6,5 +6,5 @@ Icon=io.github.fabrialberio.pinapp
 Terminal=false
 Type=Application
 Categories=GTK;Utility;GNOME;
-_Keywords=GNOME;GTK;Apps;
+_Keywords=GNOME;GTK;Apps;Shortcuts;Icons
 StartupNotify=true
