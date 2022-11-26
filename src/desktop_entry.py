@@ -413,6 +413,7 @@ class DesktopEntry(IniFile):
         super().load()
 
         self.search_string = '\n'.join(f.as_str() for f in self.appsection.values() if not f.as_bool()).lower()
+        self.search_string += '\n'+'\n'.join(f.key for f in self.appsection.values() if f.as_bool() == True).lower()
 
     @property
     def appsection(self) -> 'AppSection': 
