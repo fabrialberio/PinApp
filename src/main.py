@@ -30,11 +30,12 @@ class PinAppApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='io.github.fabrialberio.pinapp',
-                         flags=Gio.ApplicationFlags.FLAGS_NONE)
+        super().__init__(
+            application_id='io.github.fabrialberio.pinapp',
+            flags=Gio.ApplicationFlags.FLAGS_NONE)
 
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
-        self.create_action('about', self.show_about_window)
+        self.create_action('about', lambda a, _: self.window.show_about_window())
         
         self.create_action('reload', lambda a, _: self.window.reload_apps())
         self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])
@@ -56,11 +57,6 @@ class PinAppApplication(Adw.Application):
             self.window = PinAppWindow(application=self)
 
         self.window.present()
-
-    def show_about_window(self, action, *args):
-        """Callback for the app.about action."""
-        # I'm not shure this is the best way, but it works perfectly fine for now
-        self.window.show_about_window()
 
     def on_escape(self, *args):
         if self.window.get_page() == self.window.file_page:
