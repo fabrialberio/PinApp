@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-16 11:32+0200\n"
+"POT-Creation-Date: 2022-11-26 12:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,10 +25,11 @@ msgstr ""
 
 #: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
 #, Do not translate semicolons
-msgid "GNOME;GTK;Apps;"
+msgid "GNOME;GTK;Apps;Shortcuts;Icons"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/apps_page.py:123 ../src/ui/window.ui.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
+#: ../src/apps_page.py:148
 msgid "Add new app"
 msgstr ""
 
@@ -142,39 +143,51 @@ msgid "Show menu"
 msgstr ""
 
 #: ../src/ui/window.ui.h:3
-msgid "Your pins"
+msgid "Search"
 msgstr ""
 
 #: ../src/ui/window.ui.h:4
-msgid "Installed"
+msgid "Your pins"
 msgstr ""
 
 #: ../src/ui/window.ui.h:5
-msgid "Reload apps"
+msgid "Installed"
 msgstr ""
 
 #: ../src/ui/window.ui.h:6
-msgid "Keyboard Shortcuts"
+msgid "Reload apps"
 msgstr ""
 
 #: ../src/ui/window.ui.h:7
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: ../src/ui/window.ui.h:8
 msgid "About PinApp"
 msgstr ""
 
-#: ../src/apps_page.py:115
+#: ../src/apps_page.py:140
 msgid "No apps found"
 msgstr ""
 
-#: ../src/apps_page.py:129
+#: ../src/apps_page.py:154
 msgid "Applications you install will appear here"
 msgstr ""
 
-#: ../src/apps_page.py:133
+#: ../src/apps_page.py:158
 msgid "Error loading apps"
 msgstr ""
 
-#: ../src/apps_page.py:139
+#: ../src/apps_page.py:164
 msgid "Loading apps..."
+msgstr ""
+
+#: ../src/apps_page.py:275
+msgid "No results found"
+msgstr ""
+
+#: ../src/apps_page.py:276
+msgid "Try searching for something else"
 msgstr ""
 
 #: ../src/file_page.py:225
