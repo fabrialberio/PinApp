@@ -43,6 +43,8 @@ class PinAppWindow(Adw.ApplicationWindow):
     search_entry = Gtk.Template.Child('search_entry')
     search_button = Gtk.Template.Child('search_button')
 
+    last_view = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -54,7 +56,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.search_view.connect('file-open', lambda _, f: self.open_file(f))
 
         self.file_page.connect('file-back', lambda _: self.set_page(self.apps_page))
-        self.file_page.connect('file-save', lambda _: self.reload_apps())
+        self.file_page.connect('file-save', lambda _: self.reload_apps(show_pins=True))
         self.file_page.connect('file-delete', lambda _: self.reload_apps())
 
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
@@ -63,7 +65,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_help_overlay(help_overlay)
 
         self._init_search()
-        self.reload_apps()
+        self.reload_apps(show_pins=True)
 
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
@@ -101,7 +103,9 @@ class PinAppWindow(Adw.ApplicationWindow):
                 self.pins_view,
                 self.installed_view,
                 self.search_view]:
-            self.view_stack.set_visible_child(new_view)
+            if new_view != (current_view := self.get_view()):
+                self.last_view = current_view
+                self.view_stack.set_visible_child(new_view)
         else:
             raise ValueError
 
@@ -115,7 +119,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.search_bar.set_search_mode(True)
         else:
             if self.get_view() == self.search_view:
-                self.set_view(self.pins_view)
+                self.set_view(self.last_view)
             self.search_bar.set_search_mode(False)
 
     def open_file(self, file):
@@ -156,9 +160,10 @@ class PinAppWindow(Adw.ApplicationWindow):
     def show_apps(self):
         self.set_page(self.apps_page)
 
-    def reload_apps(self):
+    def reload_apps(self, show_pins=False):
         self.set_page(self.apps_page)
-        self.set_view(self.pins_view)
+        if show_pins:
+            self.set_view(self.pins_view)
 
         self.pins_view.load_apps(loading_ok=False)
         self.installed_view.load_apps(loading_ok=False)

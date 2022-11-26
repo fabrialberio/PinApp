@@ -265,6 +265,7 @@ class SearchView(AppsView):
 
     source_views: list[AppsView]
     folder_groups: list[FolderGroup]
+    rows: list[AppRow] = []
 
     def __init__(self) -> None:
         super().__init__(show_new_file_button=False)
