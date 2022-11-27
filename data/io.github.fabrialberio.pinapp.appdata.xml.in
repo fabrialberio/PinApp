@@ -8,15 +8,15 @@
 	<summary translatable='yes'>Create and edit application shortcuts</summary>
     <developer_name translatable="no">Fabrizio Alberio</developer_name>
 	<description translatable='yes'>
-	  <p>PinApp is a simple application that lets you customize your app list.</p>
-	  <p>Some of the possible uses are</p>
-	  <ul>
-		<li>Changing an app icon that doesn't fit in with your theme</li>
-		<li>Creating custom shortcuts to websites</li>
-		<li>Hiding apps you don't want to see</li>
-		<li>Editing properties in .desktop files</li>
-	  </ul>
-	  <p>The app is made with Libadwaita and GTK4, with consideration for small-screen devices</p>
+		<p>PinApp is a simple application that lets you customize your app list.</p>
+		<p>Some of the possible uses are</p>
+		<ul>
+			<li>Changing an app icon that doesn't fit in with your theme</li>
+			<li>Creating custom shortcuts to websites</li>
+			<li>Hiding apps you don't want to see</li>
+			<li>Editing properties in .desktop files</li>
+		</ul>
+		<p>The app is made with Libadwaita and GTK4, with consideration for small-screen devices</p>
 	</description>
 	<screenshots>
 		<screenshot type="default">
@@ -44,6 +44,20 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="1.1.6" date="2022-11-27">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>Added functionality to search for apps by file content</li>
+					<li>Added french translation thanks to Irénée Thirion</li>
+					<li>Added turkish translation thanks to Sabri Ünal</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>Reloading apps always shows "Your pins"</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.1.5" date="2022-10-22">
 			<description>
 				<p>What's changed</p>

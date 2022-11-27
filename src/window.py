@@ -21,6 +21,7 @@ from gi.repository import Gtk, Adw, Gio
 
 from .utils import USER_APPS
 from .desktop_entry import DesktopEntry
+from .apps_page import State
 
 from pathlib import Path
 
@@ -84,6 +85,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.set_search_mode(True)
 
         self.search_entry.connect('search-changed', search_changed_cb)
+        #self.search_view.connect('state-changed', search_view_state_changed_cb)
         self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', view_changed_cb)
 

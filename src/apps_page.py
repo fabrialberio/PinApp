@@ -313,6 +313,7 @@ class SearchView(AppsView):
 
         any_visible = False
 
+        self.set_state(State.LOADING)
         for r in self.rows:
             if query.lower() in r.file.search_string:
                 r.set_visible(True)
