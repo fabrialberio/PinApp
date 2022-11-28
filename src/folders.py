@@ -25,10 +25,12 @@ class DesktopEntryFolder():
 
 class FolderGroup():
     '''A group of DesktopEntryFolders sharing common properties'''
+    writable: bool
+    files: list[DesktopEntry] = []
+    folders: list[DesktopEntryFolder]
+
     def __init__(self, paths: list[Path | str]) -> None:
-        self.files: list[DesktopEntry] = None
         self.folders = [DesktopEntryFolder(p) for p in paths]
-        self.writable = None
 
     def get_files(self, remove_duplicates=True, sort=True) -> list[DesktopEntry]:
         self.files = []
@@ -66,18 +68,18 @@ class FolderGroup():
 
 
 class UserFolders(FolderGroup):
+    writable = True
+
     def __init__(self) -> None:
         super().__init__([
             USER_APPS])
 
-        self.writable = True
-
 class SystemFolders(FolderGroup):
+    writable = False
+
     def __init__(self) -> None:
         super().__init__([
             HOST_APPS,
             SYSTEM_APPS,
             FLATPAK_USER_APPS,
             FLATPAK_SYSTEM_APPS])
-
-        self.writable = False
