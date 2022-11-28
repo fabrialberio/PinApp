@@ -289,7 +289,7 @@ class SearchView(AppsView):
         '''Updates search_map when all source_views are loaded'''
         if view.state == State.LOADING:
             self.set_state(State.LOADING)
-        if all(map(lambda v: v.state == State.FILLED, self.source_views)):
+        if all(map(lambda v: v.state != State.LOADING, self.source_views)):
             self.load_apps()
 
     def load_apps(self):
