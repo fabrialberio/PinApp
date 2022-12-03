@@ -17,13 +17,12 @@
 
 #from apps_view import AppsView
 
+from pathlib import Path
+
 from gi.repository import Gtk, Adw, Gio
 
 from .utils import USER_APPS
 from .desktop_entry import DesktopEntry
-from .apps_page import State
-
-from pathlib import Path
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
@@ -71,6 +70,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.connect_entry(self.search_entry)
+        self.search_view.connect_entry(self.search_entry)
 
         self.search_view.set_source_views([self.pins_view, self.installed_view])
 
@@ -79,12 +79,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             if self.search_bar.get_search_mode() == True and self.get_view() != self.search_view:
                 self.search_bar.set_search_mode(False)
 
-        def search_changed_cb(*args):
-            '''Enables search mode and searches for the text in search_entry'''
-            self.search_view.search(self.search_entry.get_text())
-            self.set_search_mode(True)
-
-        self.search_entry.connect('search-changed', search_changed_cb)
+        self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
         self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', view_changed_cb)
 
@@ -113,11 +108,13 @@ class PinAppWindow(Adw.ApplicationWindow):
     def get_view(self) -> Gtk.Widget:
         return self.view_stack.get_visible_child()
 
-    def set_search_mode(self, state: bool):
+    def set_search_mode(self, state: bool, reset_entry_text=False):
         '''Shows or hides search view and search bar'''
         if state:
             self.set_view(self.search_view)
             self.search_bar.set_search_mode(True)
+            if reset_entry_text:
+                self.search_entry.set_text('')
         else:
             if self.get_view() == self.search_view:
                 self.set_view(self.last_view)
