@@ -1,10 +1,15 @@
-from gi.repository import Gtk, Adw, Pango
-
 from enum import Enum
 
+from gi.repository import Gtk, Adw, Pango
+from xml.sax.saxutils import escape
+
+from .utils import *
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
-from .utils import *
+
+def escape_xml(string: str) -> str:
+    return escape(string or '')
+
 
 class AppChip(Gtk.Box):
     __gtype_name__ = 'AppChip'
@@ -266,6 +271,7 @@ class SearchView(AppsView):
     source_views: list[AppsView]
     folder_groups: list[FolderGroup]
     rows: list[AppRow] = []
+    search_entry: Gtk.SearchEntry
 
     def __init__(self) -> None:
         super().__init__(show_new_file_button=False)
@@ -277,20 +283,26 @@ class SearchView(AppsView):
             description=_('Try searching for something else'),
             icon_name='system-search-symbolic')
 
+    def connect_entry(self, search_entry: Gtk.SearchEntry):
+        self.search_entry = search_entry
+        self.search_entry.connect('search-changed', lambda e: self.search(e.get_text()))
+
     def set_source_views(self, source_views: list[FolderGroupView]):
         self.source_views = source_views
 
         self.folder_groups = [v.folder_group for v in self.source_views]
 
-        for v in self.source_views:
-            v.connect('state-changed', self.state_changed_cb)
+        def state_changed_cb(view: FolderGroupView):
+            '''Updates search_map when all source_views are loaded'''
+            if view.state == State.LOADING:
+                self.set_state(State.LOADING)
+            if all(map(lambda v: v.state != State.LOADING, self.source_views)):
+                self.load_apps()
+                self.search(self.search_entry.get_text())
 
-    def state_changed_cb(self, view: FolderGroupView):
-        '''Updates search_map when all source_views are loaded'''
-        if view.state == State.LOADING:
-            self.set_state(State.LOADING)
-        if all(map(lambda v: v.state != State.LOADING, self.source_views)):
-            self.load_apps()
+        for v in self.source_views:
+            v.connect('state-changed', state_changed_cb)
+
 
     def load_apps(self):
         self.rows = []
@@ -313,7 +325,6 @@ class SearchView(AppsView):
 
         any_visible = False
 
-        self.set_state(State.LOADING)
         for r in self.rows:
             if query.lower() in r.file.search_string:
                 r.set_visible(True)
