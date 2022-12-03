@@ -7,9 +7,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-26 12:56+0100\n"
-"PO-Revision-Date: 2022-11-26 12:58+0100\n"
+"Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
+"POT-Creation-Date: 2022-12-03 12:59+0100\n"
+"PO-Revision-Date: 2022-12-03 12:57+0100\n"
 "Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
 "Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
 "Language: it\n"
@@ -26,11 +26,11 @@ msgid "Create and edit application shortcuts"
 msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
 
 #: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
-msgid "GNOME;GTK;Apps;Shortcuts;Icons"
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applicazioni;Scorciatoie;Icone"
 
 #: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
-#: ../src/apps_page.py:148
+#: ../src/apps_page.py:153
 msgid "Add new app"
 msgstr "Aggiungi applicazione"
 
@@ -64,13 +64,13 @@ msgstr "Chiude la finestra"
 
 #: ../src/ui/apps_page_dialogs.ui.h:9
 msgctxt "shortcut window"
-msgid "App list"
-msgstr "Applicazioni"
+msgid "Add new app"
+msgstr "Aggiunge una nuova applicazione"
 
 #: ../src/ui/apps_page_dialogs.ui.h:10
 msgctxt "shortcut window"
-msgid "Add new app"
-msgstr "Aggiunge una nuova applicazione"
+msgid "Search"
+msgstr "Cerca"
 
 #: ../src/ui/apps_page_dialogs.ui.h:11
 msgctxt "shortcut window"
@@ -167,27 +167,27 @@ msgstr "Scorciatoie da tastiera"
 msgid "About PinApp"
 msgstr "Informazioni su PinApp"
 
-#: ../src/apps_page.py:140
+#: ../src/apps_page.py:145
 msgid "No apps found"
 msgstr "Nessuna applicazione trovata"
 
-#: ../src/apps_page.py:154
+#: ../src/apps_page.py:159
 msgid "Applications you install will appear here"
 msgstr "Le applicazioni installate appariranno qui"
 
-#: ../src/apps_page.py:158
+#: ../src/apps_page.py:163
 msgid "Error loading apps"
 msgstr "Errore caricamento applicazioni"
 
-#: ../src/apps_page.py:164
+#: ../src/apps_page.py:169
 msgid "Loading apps..."
 msgstr "Caricamento applicazioni..."
 
-#: ../src/apps_page.py:275
+#: ../src/apps_page.py:282
 msgid "No results found"
 msgstr "Nessun risultato trovato"
 
-#: ../src/apps_page.py:276
+#: ../src/apps_page.py:283
 msgid "Try searching for something else"
 msgstr "Prova a cercare qualcos'altro"
 
@@ -206,6 +206,10 @@ msgstr "Carica icona"
 #: ../src/file_page.py:267
 msgid "Open"
 msgstr "Apri"
+
+#~ msgctxt "shortcut window"
+#~ msgid "App list"
+#~ msgstr "Applicazioni"
 
 #~ msgid "New app"
 #~ msgstr "Aggiungere applicazione"

@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-16 11:32+0200\n"
+"Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
+"POT-Creation-Date: 2022-12-03 12:59+0100\n"
 "PO-Revision-Date: 2022-10-23 10:54+0200\n"
 "Last-Translator: Irénée Thirion <irenee.thirion@e.email>\n"
 "Language-Team: French"
@@ -26,11 +26,12 @@ msgid "Create and edit application shortcuts"
 msgstr "Créez et modifiez les raccourcis d’applications"
 
 #: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
-msgid "GNOME;GTK;Apps;"
+#, fuzzy
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applications;Raccourcis;Icônes;"
 
-#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/apps_page.py:123
-#: ../src/ui/window.ui.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
+#: ../src/apps_page.py:153
 msgid "Add new app"
 msgstr "Ajouter une nouvelle application"
 
@@ -64,13 +65,13 @@ msgstr "Quitter"
 
 #: ../src/ui/apps_page_dialogs.ui.h:9
 msgctxt "shortcut window"
-msgid "App list"
-msgstr "Liste des applications"
+msgid "Add new app"
+msgstr "Ajouter une nouvelle application"
 
 #: ../src/ui/apps_page_dialogs.ui.h:10
 msgctxt "shortcut window"
-msgid "Add new app"
-msgstr "Ajouter une nouvelle application"
+msgid "Search"
+msgstr ""
 
 #: ../src/ui/apps_page_dialogs.ui.h:11
 msgctxt "shortcut window"
@@ -139,49 +140,58 @@ msgstr "Valeurs du texte"
 msgid "Boolean values"
 msgstr "Valeurs booléennes"
 
-#: ../src/ui/window.ui.h:1
-msgid "New app"
-msgstr "Nouvelle application"
-
 #: ../src/ui/window.ui.h:2
 msgid "Show menu"
 msgstr "Afficher le menu"
 
 #: ../src/ui/window.ui.h:3
+msgid "Search"
+msgstr ""
+
+#: ../src/ui/window.ui.h:4
 msgid "Your pins"
 msgstr "Épinglées"
 
-#: ../src/ui/window.ui.h:4
+#: ../src/ui/window.ui.h:5
 msgid "Installed"
 msgstr "Installées"
 
-#: ../src/ui/window.ui.h:5
+#: ../src/ui/window.ui.h:6
 msgid "Reload apps"
 msgstr "Actualiser les applications"
 
-#: ../src/ui/window.ui.h:6
+#: ../src/ui/window.ui.h:7
 msgid "Keyboard Shortcuts"
 msgstr "Raccourcis clavier"
 
-#: ../src/ui/window.ui.h:7
+#: ../src/ui/window.ui.h:8
 msgid "About PinApp"
 msgstr "À propos de PinApp"
 
-#: ../src/apps_page.py:115
+#: ../src/apps_page.py:145
 msgid "No apps found"
 msgstr "Aucune application trouvée"
 
-#: ../src/apps_page.py:129
+#: ../src/apps_page.py:159
 msgid "Applications you install will appear here"
 msgstr "Les applications que vous installez apparaîtront ici"
 
-#: ../src/apps_page.py:133
+#: ../src/apps_page.py:163
 msgid "Error loading apps"
 msgstr "Erreur lors du chargement des applications"
 
-#: ../src/apps_page.py:139
+#: ../src/apps_page.py:169
 msgid "Loading apps..."
 msgstr "Chargement des applications..."
+
+#: ../src/apps_page.py:282
+#, fuzzy
+msgid "No results found"
+msgstr "Aucune application trouvée"
+
+#: ../src/apps_page.py:283
+msgid "Try searching for something else"
+msgstr ""
 
 #: ../src/file_page.py:225
 msgid "No string values present"
@@ -198,3 +208,10 @@ msgstr "Charger une icône"
 #: ../src/file_page.py:267
 msgid "Open"
 msgstr "Ouvrir"
+
+#~ msgctxt "shortcut window"
+#~ msgid "App list"
+#~ msgstr "Liste des applications"
+
+#~ msgid "New app"
+#~ msgstr "Nouvelle application"
