@@ -1,16 +1,17 @@
-from configparser import ConfigParser, SectionProxy
-
 from dataclasses import dataclass
-from locale import getlocale, LC_ALL
 from pathlib import Path
+from typing import Callable
+
 from os import access, W_OK
+from locale import getlocale, LC_ALL
+from configparser import ConfigParser, SectionProxy, DuplicateOptionError
 
 
 @dataclass
 class LocaleString:
     lang: str
-    country: str = None
-    modifier: str = None
+    country: 'str | None' = None
+    modifier: 'str | None' = None
 
     @classmethod
     def parse(cls, locale_str: str) -> 'LocaleString':
@@ -78,7 +79,7 @@ class Field:
         self.section = section
 
         self.unlocalized_key: str = self.key.split('[')[0]
-        self.locale: str = self.key.split('[')[1].removesuffix(']') if '[' in self.key else None
+        self.locale: 'str | None' = self.key.split('[')[1].removesuffix(']') if '[' in self.key else None
 
     @staticmethod
     def list_from_section(section: SectionProxy) -> list['Field']:
@@ -132,7 +133,7 @@ class Field:
         self.section.parser.remove_option(self.section.name, self.key)
 
     def localize(self, 
-        locale: str = None, 
+        locale: str, 
         strict = False, 
         return_unlocalized_as_fallback = True,
         return_non_existing_key_as_fallback = False) -> 'Field':
@@ -142,12 +143,11 @@ class Field:
             return_unlocalized_as_fallback = False
             return_non_existing_key_as_fallback = False
 
-        # If locale is not given, gets the system locale
         if locale == None:
             raise TypeError(f'Localization string cannot be None')
-        
+
         # Finds the closest locale to the one specified from the localizations
-        key_locales: list[str] = [LocaleString.parse(f.as_str()) for f in self.localized_fields]
+        key_locales: list[LocaleString] = [LocaleString.parse(f.as_str()) for f in self.localized_fields]
         closest_locale = LocaleString.parse(locale).closest(key_locales)
 
         # If no close locale is found, returns the unlocalized version of itself
@@ -291,11 +291,11 @@ class AppSection(Section):
     Keywords: Field
 
     @classmethod
-    def from_parser(self, parser: ConfigParser) -> 'AppSection':
-        if self.NAME not in parser.sections():
-            parser.add_section(self.NAME)
+    def from_parser(cls, parser: ConfigParser) -> 'AppSection':
+        if cls.NAME not in parser.sections():
+            parser.add_section(cls.NAME)
         
-        return AppSection(parser[self.NAME])
+        return AppSection(parser[cls.NAME])
 
     def __init__(self, section: SectionProxy):
         super().__init__(section)
@@ -313,14 +313,14 @@ class ActionSection(Section):
     Exec: Field
 
     @classmethod
-    def list_from_parser(self, parser: ConfigParser) -> list['ActionSection']:
+    def list_from_parser(cls, parser: ConfigParser) -> list['ActionSection']:
         return [
             ActionSection(parser[section_name]) \
             for section_name in parser.sections() \
-            if section_name.startswith(self.PREFIX)]
+            if section_name.startswith(cls.PREFIX)]
 
     @classmethod
-    def dict_from_parser(self, parser: ConfigParser) -> dict[str, 'ActionSection']:
+    def dict_from_parser(cls, parser: ConfigParser) -> dict[str, 'ActionSection']:
         return {
             action_section.action_name(): action_section \
             for action_section in ActionSection.list_from_parser(parser)}
@@ -337,8 +337,8 @@ class IniFile:
         self.path = Path(path)
         self.is_loaded = False
 
-        self.parser = ConfigParser(interpolation=None, )
-        self.parser.optionxform=str
+        self.parser = ConfigParser(interpolation=None, strict=False)
+        self.parser.optionxform = str
 
     @property
     def filename(self) -> str: return self.path.name
@@ -348,14 +348,14 @@ class IniFile:
         self.parser.read(self.path)
         self.is_loaded = True
 
-    def filter(self, filter: callable) -> None:
+    def filter(self, filter: Callable) -> None:
         '''Applies `filter()` to all values of the file, and only keeps values for wich it returns True'''
         for section_name, section in self.parser.items():
                 for k, v in section.items():
                     if not filter(v):
                         self.parser.remove_option(section_name, k) 
     
-    def filter_items(self, filter: callable) -> None:
+    def filter_items(self, filter: Callable) -> None:
         '''Applies filter() to all (key, value) pairs of the file, and only keeps values for wich it returns True'''
         for section_name, section in self.parser.items():
                 for k, v in section.items():
@@ -372,12 +372,9 @@ class IniFile:
 
 class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
-    path: 'str | Path'
+    path: Path
     writable: bool
     search_string: str
-
-    appsection: AppSection
-    actionsections: list[ActionSection]
 
     @staticmethod
     def new_with_defaults(path: 'str | Path') -> 'DesktopEntry':
@@ -401,7 +398,7 @@ class DesktopEntry(IniFile):
         return path
 
 
-    def __init__(self, path: 'str | Path') -> None:
+    def __init__(self, path: Path) -> None:
         super().__init__(path)
 
         self.writable = access(self.path, W_OK)
