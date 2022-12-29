@@ -1,10 +1,11 @@
+from pathlib import Path
+from typing import Callable
+
 from gi.repository import Gtk, Adw, Gio
 
-from pathlib import Path
-
 from .desktop_entry import DesktopEntry, Field, LocaleString
-
 from .utils import set_icon_from_name, USER_APPS
+
 
 class BoolRow(Adw.ActionRow):
     @staticmethod
@@ -43,7 +44,7 @@ class StringRow(Adw.EntryRow):
         self.set_text(field.as_str() or '')
         self.connect('changed', self._on_changed)
 
-    def add_action(self, icon_name: str, callback: callable):
+    def add_action(self, icon_name: str, callback: Callable):
         button = Gtk.Button(
             valign=Gtk.Align.CENTER,
             icon_name=icon_name,
@@ -58,9 +59,9 @@ class StringRow(Adw.EntryRow):
 class LocalizedRow(StringRow):
     __gtype_name__='LocaleStringRow'
 
-    def __init__(self, field: Field, locale: str = None) -> None:
+    def __init__(self, field: Field, locale: 'str | None' = None) -> None:
         super().__init__(field=field)
-        self.locale = None
+        self.locale = locale
 
     def set_locale(self, locale: str):
         self.locale = locale
@@ -221,21 +222,13 @@ class FilePage(Gtk.Box):
         self._update_pref_group(
             pref_group=self.strings_group,
             new_children=string_rows, 
-            empty_state=Adw.ActionRow(
-                title=_('No string values present'),
-                title_lines=1,
-                css_classes=['dim-label'],
-                halign=Gtk.Align.CENTER))
+            empty_message=_('No string values present'))
 
         bool_rows = BoolRow.list_from_field_list(file_dict.values())
         self._update_pref_group(
             pref_group=self.bools_group, 
             new_children=bool_rows, 
-            empty_state=Adw.ActionRow(
-                title=_('No boolean values present'),
-                title_lines=1,
-                css_classes=['dim-label'],
-                halign=Gtk.Align.CENTER))
+            empty_message=_('No boolean values present'))
 
     @property
     def visible(self):
@@ -369,7 +362,7 @@ class FilePage(Gtk.Box):
         add_key_dialog.set_transient_for(self.get_root())
         add_key_dialog.present()
 
-    def _update_pref_group(self, pref_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_state: Gtk.Widget = None):
+    def _update_pref_group(self, pref_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_message: 'str | None'=None):
         '''Removes all present children of the group and adds the new ones'''
 
         listbox = (
@@ -378,11 +371,17 @@ class FilePage(Gtk.Box):
             .get_last_child()   # GtkBox containing the listbox
             .get_first_child()) # GtkListbox
 
-        while (row := listbox.get_first_child()) != None:
-            pref_group.remove(row)
+        if listbox != None:
+            while (row := listbox.get_first_child()) != None:
+                pref_group.remove(row)
 
         if len(new_children) > 0:
             for c in new_children:
                 pref_group.add(c)
-        elif empty_state != None:
-            pref_group.add(empty_state)
+        elif empty_message != None:
+            pref_group.add(Adw.ActionRow(
+                title=empty_message,
+                title_lines=1,
+                css_classes=['dim-label'],
+                halign=Gtk.Align.CENTER,
+            ))

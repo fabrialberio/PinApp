@@ -1,9 +1,9 @@
 from pathlib import Path
 from threading import Thread
 
+from .utils import *
 from .desktop_entry import DesktopEntry
 
-from .utils import *
 
 class DesktopEntryFolder():
     '''Folder containing a list of DesktopFiles and managing related settings'''
