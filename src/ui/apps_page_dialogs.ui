@@ -38,7 +38,8 @@
     <property name="developer-name">Fabrizio Alberio</property>
     <property name="translator-credits">Fabrizio Alberio https://github.com/fabrialberio
       Irénée Thirion &lt;irenee.thirion@e.email&gt;
-      Sabri Ünal &lt;libreajans@gmail.com&gt;</property>
+      Sabri Ünal &lt;libreajans@gmail.com&gt;
+      Fyodor Sobolev</property>
   </object>
 
   <object class="GtkShortcutsWindow" id="help_overlay">
