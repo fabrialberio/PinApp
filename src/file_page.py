@@ -194,9 +194,6 @@ class FilePage(Gtk.Box):
 
     def load_file(self, file: DesktopEntry):
         self.file = file
-        
-        if self.file.path.exists():
-            self.file.load()
 
         self._update_app_banner()
         #self.window_title.set_subtitle(self.file.filename)

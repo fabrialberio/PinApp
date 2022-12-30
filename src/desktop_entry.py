@@ -4,7 +4,7 @@ from typing import Callable
 
 from os import access, W_OK
 from locale import getlocale, LC_ALL
-from configparser import ConfigParser, SectionProxy, DuplicateOptionError
+from configparser import ConfigParser, SectionProxy, Error as ConfigParserError
 
 
 @dataclass
@@ -406,6 +406,8 @@ class DesktopEntry(IniFile):
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
+        self.load()
+
     def load(self):
         super().load()
 
@@ -422,11 +424,6 @@ class DesktopEntry(IniFile):
     def __lt__(self, __o: object) -> bool:
 
         if isinstance(__o, DesktopEntry):
-            if not self.is_loaded:
-                self.load()
-            if not __o.is_loaded:
-                __o.load()
-
             try:
                 return self.appsection.Name.as_str().lower() < __o.appsection.Name.as_str().lower()
             except (TypeError, AttributeError):

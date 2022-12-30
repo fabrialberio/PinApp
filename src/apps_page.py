@@ -72,7 +72,6 @@ class AppRow(Adw.ActionRow):
             file: DesktopEntry,
             chips: list[AppChip] = []):
         self.file = file
-        self.file.load()
 
         super().__init__(
             title = escape_xml(self.file.appsection.Name.as_str()),
@@ -238,7 +237,8 @@ class FolderGroupView(AppsView):
             def fill_group():
                 if not self.folder_group.empty:
                     rows = []
-                    for file in self.folder_group.files:
+                    files = sorted(self.folder_group.files)
+                    for file in files:
                         row = AppRow(file)
                         row.connect('file-open', lambda _, f: self.emit('file-open', f))
                         rows.append(row)
@@ -248,7 +248,9 @@ class FolderGroupView(AppsView):
                 else:
                     self.set_state(State.EMPTY)
 
-            self.folder_group.get_files_async(callback=fill_group)
+            self.folder_group.get_files_async(
+                callback=fill_group,
+                ignore_parsing_errors=True)
         else:
             self.set_state(State.ERROR)
 

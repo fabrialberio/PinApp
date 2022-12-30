@@ -1,8 +1,10 @@
 from pathlib import Path
+from typing import Callable
+
 from threading import Thread
 
 from .utils import *
-from .desktop_entry import DesktopEntry
+from .desktop_entry import DesktopEntry, ConfigParserError
 
 
 class DesktopEntryFolder():
@@ -11,12 +13,18 @@ class DesktopEntryFolder():
         self.path = Path(path)
         self.files = []
 
-    def get_files(self, sort=True):
+    def get_files(self, ignore_parsing_errors=False):
         '''Returns a list of DesktopFile objects representing the .desktop files'''
         pattern = '*.desktop'
-        
-        self.files = [DesktopEntry(p) for p in (self.path.rglob(pattern))]
-        if sort: self.files = sorted(self.files)
+        files = self.path.rglob(pattern)
+
+        self.files = []
+        for f in files:
+            try:
+                self.files.append(DesktopEntry(f))
+            except ConfigParserError:
+                if not ignore_parsing_errors:
+                    raise
 
     @property
     def exists(self) -> bool:
@@ -32,11 +40,11 @@ class FolderGroup():
     def __init__(self, paths: list[Path | str]) -> None:
         self.folders = [DesktopEntryFolder(p) for p in paths]
 
-    def get_files(self, remove_duplicates=True, sort=True) -> list[DesktopEntry]:
+    def get_files(self, remove_duplicates=True, ignore_parsing_errors=False):
         self.files = []
         for d in self.folders:
             if d.exists:
-                d.get_files(sort=False)
+                d.get_files(ignore_parsing_errors=ignore_parsing_errors)
                 self.files += d.files
 
         if remove_duplicates:
@@ -44,12 +52,14 @@ class FolderGroup():
             paths = list(set(paths))
             self.files = [DesktopEntry(p) for p in paths]
 
-        if sort: self.files = sorted(self.files)
-
-    def get_files_async(self, sort=True, callback: callable = None) -> None:
+    def get_files_async(self,
+            callback: 'Callable | None' = None,
+            remove_duplicates=True,
+            ignore_parsing_errors=False) -> None:
         def target():
-            self.get_files(sort)
-            callback()
+            self.get_files(remove_duplicates=remove_duplicates, ignore_parsing_errors=ignore_parsing_errors)
+            if callback is not None:
+                callback()
 
         t = Thread(target=target)
         t.start()
