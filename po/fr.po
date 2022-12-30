@@ -26,7 +26,6 @@ msgid "Create and edit application shortcuts"
 msgstr "Créez et modifiez les raccourcis d’applications"
 
 #: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
-#, fuzzy
 msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applications;Raccourcis;Icônes;"
 
