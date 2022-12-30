@@ -1,0 +1,204 @@
+# Russian translation for pinapp
+# Copyright (C) 2022 pinapp's COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Fyodor Sobolev, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pinapp\n"
+"Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
+"POT-Creation-Date: 2022-12-03 12:55+0100\n"
+"PO-Revision-Date: 2022-12-30 13:17+0300\n"
+"Last-Translator: Fyodor Sobolev\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
+#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgid "Create and edit application shortcuts"
+msgstr "Создавайте и редактируйте кнопки запуска приложений"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
+msgstr "GNOME;GTK;Приложения;Кнопки запуска;Иконки"
+
+#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
+#: ../src/apps_page.py:153
+msgid "Add new app"
+msgstr "Добавить новое приложение"
+
+#: ../src/ui/apps_page_dialogs.ui.h:2
+msgid "File name"
+msgstr "Имя файла"
+
+#: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
+#: ../src/file_page.py:268
+msgid "Cancel"
+msgstr "Отмена"
+
+#: ../src/ui/apps_page_dialogs.ui.h:4
+msgid "Create"
+msgstr "Создать"
+
+#: ../src/ui/apps_page_dialogs.ui.h:6
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Основное"
+
+#: ../src/ui/apps_page_dialogs.ui.h:7
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Показать сочетания клавиш"
+
+#: ../src/ui/apps_page_dialogs.ui.h:8
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Выход"
+
+#: ../src/ui/apps_page_dialogs.ui.h:9
+msgctxt "shortcut window"
+msgid "Add new app"
+msgstr "Добавить новое приложение"
+
+#: ../src/ui/apps_page_dialogs.ui.h:10
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Поиск"
+
+#: ../src/ui/apps_page_dialogs.ui.h:11
+msgctxt "shortcut window"
+msgid "App editing"
+msgstr "Редактирование приложения"
+
+#: ../src/ui/apps_page_dialogs.ui.h:12
+msgctxt "shortcut window"
+msgid "Close"
+msgstr "Закрыть"
+
+#: ../src/ui/apps_page_dialogs.ui.h:13
+msgctxt "shortcut window"
+msgid "Save and close"
+msgstr "Сохранить и закрыть"
+
+#: ../src/ui/file_page_dialogs.ui.h:1
+msgid "Add new key"
+msgstr "Добавить новый ключ"
+
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:89
+msgid "Locale"
+msgstr "Локаль"
+
+#: ../src/ui/file_page_dialogs.ui.h:3
+msgid "Key name"
+msgstr "Имя ключа"
+
+#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:6
+msgid "Add"
+msgstr "Добавить"
+
+#: ../src/ui/file_page_dialogs.ui.h:6
+msgid "Unpin this app?"
+msgstr "Удалить эту кнопку?"
+
+#: ../src/ui/file_page_dialogs.ui.h:7
+msgid "If you unpin this app, it will be deleted forever."
+msgstr "Кнопка для этого приложения будет удалена навсегда."
+
+#: ../src/ui/file_page_dialogs.ui.h:8 ../src/ui/file_page.ui.h:3
+msgid "Unpin"
+msgstr "Удалить"
+
+#: ../src/ui/file_page.ui.h:1
+msgid "Add pin"
+msgstr "Добавить кнопку"
+
+#: ../src/ui/file_page.ui.h:2
+msgid "Save"
+msgstr "Сохранить"
+
+#: ../src/ui/file_page.ui.h:4
+msgid "Application icon"
+msgstr "Иконка приложения"
+
+#: ../src/ui/file_page.ui.h:5
+msgid "Localized values"
+msgstr "Локализованные значения"
+
+#: ../src/ui/file_page.ui.h:7
+msgid "String values"
+msgstr "Строковые значения"
+
+#: ../src/ui/file_page.ui.h:8
+msgid "Boolean values"
+msgstr "Булевы значения"
+
+#: ../src/ui/window.ui.h:2
+msgid "Show menu"
+msgstr "Показать меню"
+
+#: ../src/ui/window.ui.h:3
+msgid "Search"
+msgstr "Поиск"
+
+#: ../src/ui/window.ui.h:4
+msgid "Your pins"
+msgstr "Ваши кнопки"
+
+#: ../src/ui/window.ui.h:5
+msgid "Installed"
+msgstr "Установленные"
+
+#: ../src/ui/window.ui.h:6
+msgid "Reload apps"
+msgstr "Перезагрузить приложения"
+
+#: ../src/ui/window.ui.h:7
+msgid "Keyboard Shortcuts"
+msgstr "Сочетания клавиш"
+
+#: ../src/ui/window.ui.h:8
+msgid "About PinApp"
+msgstr "О приложении"
+
+#: ../src/apps_page.py:145
+msgid "No apps found"
+msgstr "Не найдено приложений"
+
+#: ../src/apps_page.py:159
+msgid "Applications you install will appear here"
+msgstr "Установленные вами приложения появятся здесь"
+
+#: ../src/apps_page.py:163
+msgid "Error loading apps"
+msgstr "Ошибка при загрузке приложений"
+
+#: ../src/apps_page.py:169
+msgid "Loading apps..."
+msgstr "Загрузка приложений..."
+
+#: ../src/apps_page.py:282
+msgid "No results found"
+msgstr "Нет результатов"
+
+#: ../src/apps_page.py:283
+msgid "Try searching for something else"
+msgstr "Попробуйте поискать что-то другое"
+
+#: ../src/file_page.py:225
+msgid "No string values present"
+msgstr "Нет строковых значений"
+
+#: ../src/file_page.py:235
+msgid "No boolean values present"
+msgstr "Нет булевых значений"
+
+#: ../src/file_page.py:265
+msgid "Upload icon"
+msgstr "Загрузить иконку"
+
+#: ../src/file_page.py:267
+msgid "Open"
+msgstr "Открыть"
