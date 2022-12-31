@@ -9,8 +9,7 @@ finish-args:
   - --device=dri
   - --socket=fallback-x11
   - --socket=wayland
-  
-    # Applications
+
   - --filesystem=xdg-data/applications:rw
   - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
@@ -31,6 +30,5 @@ modules:
     builddir: true
     buildsystem: meson
     sources:
-    - type: git
-      url: https://github.com/fabrialberio/PinApp
-      commit: c3d8b58795353b658be4f8a3744de31244e10d54
+    - type: dir
+      path: .
