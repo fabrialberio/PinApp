@@ -44,6 +44,24 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="1.1.7" date="2022-12-31">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>Added russian translation thanks to @fsobolev</li>
+					<li>Added a keyboard shortcut to open search (Ctrl + F)</li>
+					<li>Various minor improvements in search behaviour</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>App got stuck loading when trying to open files with duplicate keys or other syntax errors</li>
+				</ul>
+				<p>Other</p>
+				<ul>
+					<li>Added .json manifest to the project @fsobolev</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.1.6" date="2022-11-27">
 			<description>
 				<p>What's changed</p>

@@ -31,15 +31,14 @@
   <object class="AdwAboutWindow" id="about_window">
     <property name="application-name">PinApp</property>
     <property name="modal">True</property>
-    <property name="version">1.1.6</property>
+    <property name="version">1.1.7</property>
     <property name="copyright" translatable="no">© 2022 Fabrizio Alberio</property>
     <property name="comments" translatable="yes">Create and edit application shortcuts</property>
     <property name="application-icon">io.github.fabrialberio.pinapp</property>
     <property name="developer-name">Fabrizio Alberio</property>
-    <property name="translator-credits">Fabrizio Alberio https://github.com/fabrialberio
-      Irénée Thirion &lt;irenee.thirion@e.email&gt;
-      Sabri Ünal &lt;libreajans@gmail.com&gt;
-      Fyodor Sobolev</property>
+    <property name="translator-credits">Irénée Thirion (French) &lt;irenee.thirion@e.email&gt;
+      Sabri Ünal (Turkish) &lt;libreajans@gmail.com&gt;
+      Fyodor Sobolev (Russian)</property>
   </object>
 
   <object class="GtkShortcutsWindow" id="help_overlay">
