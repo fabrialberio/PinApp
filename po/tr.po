@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.github.fabrialberio.pinapp\n"
 "Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
-"POT-Creation-Date: 2022-12-03 13:01+0100\n"
+"POT-Creation-Date: 2023-01-01 21:22+0100\n"
 "PO-Revision-Date: 2022-11-16 20:19+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
@@ -30,7 +30,7 @@ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "Gnome;GTK;Uygulamalar;Programlar;"
 
 #: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
-#: ../src/apps_page.py:153
+#: ../src/apps_page.py:152
 msgid "Add new app"
 msgstr "Yeni uygulama ekle"
 
@@ -39,7 +39,7 @@ msgid "File name"
 msgstr "Dosya adı"
 
 #: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
-#: ../src/file_page.py:268
+#: ../src/file_page.py:258
 msgid "Cancel"
 msgstr "İptal Et"
 
@@ -95,7 +95,7 @@ msgstr "Kaydet ve Kapat"
 msgid "Add new key"
 msgstr "Yeni anahtar ekle"
 
-#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:89
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:90
 msgid "Locale"
 msgstr "Yerel"
 
@@ -112,7 +112,8 @@ msgid "Unpin this app?"
 msgstr "Bu uygulamanın sabitlemesi kaldırılsın mı?"
 
 #: ../src/ui/file_page_dialogs.ui.h:7
-msgid "If you unpin this app, it will be deleted forever."
+#, fuzzy
+msgid "If you unpin an app, your changes will be permanently lost."
 msgstr "Bu uygulamanın sabitlemesini kaldırırsanız, sonsuza kadar silinecektir."
 
 # Düğme olduğu için başlık düzeni tercih edildi
@@ -178,44 +179,44 @@ msgstr "Klavye Kısayolları"
 msgid "About PinApp"
 msgstr "PinApp Hakkında"
 
-#: ../src/apps_page.py:145
+#: ../src/apps_page.py:144
 msgid "No apps found"
 msgstr "Hiçbir uygulama bulunamadı"
 
-#: ../src/apps_page.py:159
+#: ../src/apps_page.py:158
 msgid "Applications you install will appear here"
 msgstr "Kurduğunuz uygulamalar burada görünür"
 
-#: ../src/apps_page.py:163
+#: ../src/apps_page.py:162
 msgid "Error loading apps"
 msgstr "Uygulamalar yüklenemedi"
 
-#: ../src/apps_page.py:169
+#: ../src/apps_page.py:168
 msgid "Loading apps..."
 msgstr "Uygulamalar yükleniyor..."
 
-#: ../src/apps_page.py:282
+#: ../src/apps_page.py:284
 #, fuzzy
 msgid "No results found"
 msgstr "Hiçbir uygulama bulunamadı"
 
-#: ../src/apps_page.py:283
+#: ../src/apps_page.py:285
 msgid "Try searching for something else"
 msgstr ""
 
-#: ../src/file_page.py:225
+#: ../src/file_page.py:222
 msgid "No string values present"
 msgstr "Dizge değeri yok"
 
-#: ../src/file_page.py:235
+#: ../src/file_page.py:228
 msgid "No boolean values present"
 msgstr "Mantıksal değer yok"
 
-#: ../src/file_page.py:265
+#: ../src/file_page.py:255
 msgid "Upload icon"
 msgstr "Simge yükle"
 
-#: ../src/file_page.py:267
+#: ../src/file_page.py:257
 msgid "Open"
 msgstr "Aç"
 
