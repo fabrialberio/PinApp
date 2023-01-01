@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
-"POT-Creation-Date: 2022-12-03 12:55+0100\n"
+"POT-Creation-Date: 2023-01-01 21:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr ""
 
 #: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
-#: ../src/apps_page.py:153
+#: ../src/apps_page.py:152
 msgid "Add new app"
 msgstr ""
 
@@ -37,7 +37,7 @@ msgid "File name"
 msgstr ""
 
 #: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
-#: ../src/file_page.py:268
+#: ../src/file_page.py:258
 msgid "Cancel"
 msgstr ""
 
@@ -89,7 +89,7 @@ msgstr ""
 msgid "Add new key"
 msgstr ""
 
-#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:89
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:90
 msgid "Locale"
 msgstr ""
 
@@ -106,7 +106,7 @@ msgid "Unpin this app?"
 msgstr ""
 
 #: ../src/ui/file_page_dialogs.ui.h:7
-msgid "If you unpin this app, it will be deleted forever."
+msgid "If you unpin an app, your changes will be permanently lost."
 msgstr ""
 
 #: ../src/ui/file_page_dialogs.ui.h:8 ../src/ui/file_page.ui.h:3
@@ -165,42 +165,42 @@ msgstr ""
 msgid "About PinApp"
 msgstr ""
 
-#: ../src/apps_page.py:145
+#: ../src/apps_page.py:144
 msgid "No apps found"
 msgstr ""
 
-#: ../src/apps_page.py:159
+#: ../src/apps_page.py:158
 msgid "Applications you install will appear here"
 msgstr ""
 
-#: ../src/apps_page.py:163
+#: ../src/apps_page.py:162
 msgid "Error loading apps"
 msgstr ""
 
-#: ../src/apps_page.py:169
+#: ../src/apps_page.py:168
 msgid "Loading apps..."
 msgstr ""
 
-#: ../src/apps_page.py:282
+#: ../src/apps_page.py:284
 msgid "No results found"
 msgstr ""
 
-#: ../src/apps_page.py:283
+#: ../src/apps_page.py:285
 msgid "Try searching for something else"
 msgstr ""
 
-#: ../src/file_page.py:225
+#: ../src/file_page.py:222
 msgid "No string values present"
 msgstr ""
 
-#: ../src/file_page.py:235
+#: ../src/file_page.py:228
 msgid "No boolean values present"
 msgstr ""
 
-#: ../src/file_page.py:265
+#: ../src/file_page.py:255
 msgid "Upload icon"
 msgstr ""
 
-#: ../src/file_page.py:267
+#: ../src/file_page.py:257
 msgid "Open"
 msgstr ""

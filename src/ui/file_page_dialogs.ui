@@ -28,7 +28,7 @@
 
   <object class='AdwMessageDialog' id='confirm_delete_dialog'>
     <property name='heading' translatable='yes'>Unpin this app?</property>
-    <property name='body' translatable='yes'>If you unpin this app, it will be deleted forever.</property>
+    <property name='body' translatable='yes'>If you unpin an app, your changes will be permanently lost.</property>
     <property name='default-response'>cancel</property>
     <property name='close-response'>cancel</property>
     <responses>
