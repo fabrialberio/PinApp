@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: https://github.com/fabrialberio/PinApp/issues\n"
 "POT-Creation-Date: 2022-12-03 12:55+0100\n"
-"PO-Revision-Date: 2023-01-01 22:30+0300\n"
+"PO-Revision-Date: 2023-01-01 22:54+0300\n"
 "Last-Translator: David Lapshin <ddaudix@gmail.com>\n"
-"Language-Team: \n"
+"Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -163,7 +163,7 @@ msgstr "Комбинации клавиш"
 
 #: ../src/ui/window.ui.h:8
 msgid "About PinApp"
-msgstr "О PinApp"
+msgstr "О приложении"
 
 #: ../src/apps_page.py:145
 msgid "No apps found"
