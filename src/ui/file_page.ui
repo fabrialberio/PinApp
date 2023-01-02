@@ -157,7 +157,7 @@
                 <child>
                   <!-- String values group -->
                   <object class='AdwPreferencesGroup' id='strings_group'>
-                    <property name='title' translatable='yes'>String values</property>
+                    <property name='title' translatable='yes'>String Values</property>
                     <property name='header-suffix'>
                       <object class='GtkButton' id='add_string_button'>
                         <style>
@@ -176,7 +176,7 @@
                 <child>
                   <!-- Bool values group -->
                   <object class='AdwPreferencesGroup' id='bools_group'>
-                    <property name='title' translatable='yes'>Boolean values</property>
+                    <property name='title' translatable='yes'>Boolean Values</property>
                     <property name='header-suffix'>
                       <object class='GtkButton' id='add_bool_button'>
                         <style>
