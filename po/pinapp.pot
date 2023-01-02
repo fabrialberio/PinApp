@@ -178,7 +178,7 @@ msgid "Error loading apps"
 msgstr ""
 
 #: ../src/apps_page.py:168
-msgid "Loading apps..."
+msgid "Loading apps…"
 msgstr ""
 
 #: ../src/apps_page.py:284

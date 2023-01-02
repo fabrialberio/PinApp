@@ -180,8 +180,8 @@ msgid "Error loading apps"
 msgstr "Errore caricamento applicazioni"
 
 #: ../src/apps_page.py:168
-msgid "Loading apps..."
-msgstr "Caricamento applicazioni..."
+msgid "Loading apps…"
+msgstr "Caricamento applicazioni…"
 
 #: ../src/apps_page.py:284
 msgid "No results found"
