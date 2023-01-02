@@ -142,12 +142,12 @@ msgstr "Yerelleştirilmiş Değerler"
 
 # Başlık Düzeni tercih edildi.
 #: ../src/ui/file_page.ui.h:7
-msgid "String values"
+msgid "String Values"
 msgstr "Dizge Değerleri"
 
 # Başlık Düzeni tercih edildi.
 #: ../src/ui/file_page.ui.h:8
-msgid "Boolean values"
+msgid "Boolean Values"
 msgstr "Mantıksal Değerler"
 
 #: ../src/ui/window.ui.h:2

@@ -133,12 +133,12 @@ msgid "Localized values"
 msgstr "Valeurs localisées"
 
 #: ../src/ui/file_page.ui.h:7
-msgid "String values"
-msgstr "Valeurs du texte"
+msgid "String Values"
+msgstr "Valeurs du Texte"
 
 #: ../src/ui/file_page.ui.h:8
-msgid "Boolean values"
-msgstr "Valeurs booléennes"
+msgid "Boolean Values"
+msgstr "Valeurs Booléennes"
 
 #: ../src/ui/window.ui.h:2
 msgid "Show menu"

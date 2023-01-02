@@ -130,11 +130,11 @@ msgid "Localized values"
 msgstr ""
 
 #: ../src/ui/file_page.ui.h:7
-msgid "String values"
+msgid "String Values"
 msgstr ""
 
 #: ../src/ui/file_page.ui.h:8
-msgid "Boolean values"
+msgid "Boolean Values"
 msgstr ""
 
 #: ../src/ui/window.ui.h:2
