@@ -165,7 +165,7 @@ class AppsView(Adw.Bin):
 
         self.loading_page = Adw.StatusPage(
             vexpand=True,
-            title=_('Loading apps...'),
+            title=_('Loading apps…'),
             icon_name='go-back-symbolic')
         box = (self.loading_page
             .get_first_child() # GtkScrolledWindow

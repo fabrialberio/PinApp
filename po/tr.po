@@ -192,8 +192,8 @@ msgid "Error loading apps"
 msgstr "Uygulamalar yüklenemedi"
 
 #: ../src/apps_page.py:168
-msgid "Loading apps..."
-msgstr "Uygulamalar yükleniyor..."
+msgid "Loading apps…"
+msgstr "Uygulamalar yükleniyor…"
 
 #: ../src/apps_page.py:284
 #, fuzzy

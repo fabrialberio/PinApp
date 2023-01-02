@@ -181,8 +181,8 @@ msgid "Error loading apps"
 msgstr "Erreur lors du chargement des applications"
 
 #: ../src/apps_page.py:168
-msgid "Loading apps..."
-msgstr "Chargement des applications..."
+msgid "Loading apps…"
+msgstr "Chargement des applications…"
 
 #: ../src/apps_page.py:284
 #, fuzzy
