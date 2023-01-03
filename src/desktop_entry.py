@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 from os import access, W_OK
-from locale import getlocale, LC_ALL
+from locale import getlocale, LC_CTYPE
 from configparser import ConfigParser, SectionProxy, Error as ConfigParserError
 
 
@@ -27,7 +27,7 @@ class LocaleString:
         return cls(lang, country, modifier)
 
     @classmethod
-    def current(cls, category = LC_ALL) -> 'LocaleString':
+    def current(cls, category = LC_CTYPE) -> 'LocaleString':
         return cls.parse(getlocale(category)[0])
 
 
