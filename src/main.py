@@ -36,7 +36,7 @@ class PinAppApplication(Adw.Application):
 
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
         self.create_action('about', lambda a, _: self.window.show_about_window())
-        self.create_action('search', lambda a, _: self.window.set_search_mode(True, reset_entry_text=True), ['<primary>f'])
+        self.create_action('search', lambda a, _: self.window.set_search_mode(True), ['<primary>f'])
         
         self.create_action('reload', lambda a, _: self.window.reload_apps())
         self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])

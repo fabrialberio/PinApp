@@ -108,12 +108,16 @@ class PinAppWindow(Adw.ApplicationWindow):
     def get_view(self) -> Gtk.Widget:
         return self.view_stack.get_visible_child()
 
-    def set_search_mode(self, state: bool, reset_entry_text=False):
+    def set_search_mode(self, state: bool, clear_entry=False):
         '''Shows or hides search view and search bar'''
         if state:
+            self.set_page(self.apps_page)
             self.set_view(self.search_view)
+
             self.search_bar.set_search_mode(True)
-            if reset_entry_text:
+            self.search_entry.grab_focus()
+
+            if clear_entry:
                 self.search_entry.set_text('')
         else:
             if self.get_view() == self.search_view:
