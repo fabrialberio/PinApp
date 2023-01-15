@@ -86,7 +86,7 @@ msgstr "Speichern und schließen"
 
 #: ../src/ui/file_page_dialogs.ui.h:1
 msgid "Add new key"
-msgstr "Neuen Wert hinzufügen"
+msgstr "Neuen Schlüssel hinzufügen"
 
 #: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:90
 msgid "Locale"
@@ -94,7 +94,7 @@ msgstr "Sprache"
 
 #: ../src/ui/file_page_dialogs.ui.h:3
 msgid "Key name"
-msgstr "Name"
+msgstr "Schlüsselname"
 
 #: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:6
 msgid "Add"
