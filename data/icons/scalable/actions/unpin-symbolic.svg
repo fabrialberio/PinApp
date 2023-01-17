@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16.0px"
+   height="16.0px"
+   viewBox="0 0 16.0 16.0"
+   version="1.1"
+   id="SVGRoot"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="uinpin-symbolic.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#242424"
+     inkscape:document-units="px"
+     showgrid="true"
+     inkscape:zoom="26.91226"
+     inkscape:cx="7.1157162"
+     inkscape:cy="9.6610246"
+     inkscape:window-width="2560"
+     inkscape:window-height="1371"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid254" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Livello 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(5.0889808,20.275961)">
+    <path
+       id="path311"
+       d="M -0.0889808 -20.275961 C -0.63976125 -20.275961 -1.0889808 -19.826741 -1.0889808 -19.275961 C -1.0889808 -18.725181 -0.63976125 -18.275961 -0.0889808 -18.275961 L 0.0516442 -18.275961 L 0.5672692 -14.682211 C 0.36478717 -14.574673 0.17199686 -14.45445 -0.0108558 -14.322836 L 4.0360192 -10.275961 L 7.9110192 -10.275961 C 7.9071092 -12.123615 6.8875796 -13.815024 5.2547692 -14.682211 L 5.766488 -18.275961 L 5.9110192 -18.275961 C 6.4617996 -18.275961 6.9110192 -18.725181 6.9110192 -19.275961 C 6.9110192 -19.541586 6.8055503 -19.795492 6.6180505 -19.982992 C 6.4305506 -20.170492 6.1766439 -20.275961 5.9110192 -20.275961 L -0.0889808 -20.275961 z M -1.0831214 -13.270102 C -1.7214595 -12.42145 -2.0866535 -11.376846 -2.0889808 -10.275961 L 1.9110192 -10.275961 L -1.0831214 -13.270102 z M 1.9110192 -9.275961 L 1.9110192 -5.275961 L 2.9110192 -4.275961 L 3.9110192 -5.275961 L 3.9110192 -8.275961 L 2.9110192 -9.275961 L 1.9110192 -9.275961 z "
+       style="fill:#222222;fill-opacity:1" />
+    <g
+       fill="#222222"
+       id="g432"
+       transform="translate(-5.0577308,-20.287681)">
+      <path
+         d="m 1.53125,0.46875 -1.0625,1.0625 14,14 1.0625,-1.0625 z m 0,0"
+         id="path430" />
+    </g>
+  </g>
+</svg>

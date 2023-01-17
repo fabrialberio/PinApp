@@ -68,7 +68,7 @@
               <object class='AdwViewStack' id='view_stack'>
                 <child>
                   <object class='AdwViewStackPage'>
-                    <property name='icon-name'>view-pin-symbolic</property>
+                    <property name='icon-name'>pin-symbolic</property>
                     <property name='title' translatable='yes'>Your pins</property>
                     <property name='name'>pins_view</property>
                     <property name='child'>
@@ -78,7 +78,7 @@
                 </child>
                 <child>
                   <object class='AdwViewStackPage'>
-                    <property name='icon-name'>folder-download-symbolic</property>
+                    <property name='icon-name'>installed-symbolic</property>
                     <property name='title' translatable='yes'>Installed</property>
                     <property name='name'>installed_view</property>
                     <property name='child'>

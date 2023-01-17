@@ -35,22 +35,18 @@
             </style>
           </object>
         </child>
-        <!-- Save button -->
-        <child type='end'>
-          <object class='GtkButton' id='save_button'>
-            <property name='label' translatable='yes'>Save</property>
-            <style>
-              <class name='suggested-action'/>
-            </style>
-          </object>
-        </child>
         <!-- Unpin button -->
         <child type='end'>
           <object class='GtkButton' id='unpin_button'>
-            <property name='label' translatable='yes'>Unpin</property>
-            <style>
-              <class name='destructive-action'/>
-            </style>
+            <property name='icon-name'>unpin-symbolic</property>
+            <property name='tooltip-text' translatable='yes'>Unpin</property>
+          </object>
+        </child>
+        <!-- Save button -->
+        <child type='end'>
+          <object class='GtkButton' id='save_button'>
+            <property name='icon-name'>document-save-symbolic</property>
+            <property name='tooltip-text' translatable='yes'>Save</property>
           </object>
         </child>
       </object>

@@ -9,7 +9,10 @@
     <file>style-hc.css</file>
     <file>style.css</file>
   </gresource>
-  <gresource prefix='/io/github/fabrialberio/pinapp/icons/16x16/actions'>
-    <file alias='flatpak-symbolic.svg'>icons/flatpak-symbolic.svg</file>
+  <gresource prefix='/io/github/fabrialberio/pinapp/icons/scalable/actions'>
+    <file alias='flatpak-symbolic.svg'>../../data/icons/scalable/actions/flatpak-symbolic.svg</file>
+    <file alias='installed-symbolic.svg'>../../data/icons/scalable/actions/installed-symbolic.svg</file>
+    <file alias='pin-symbolic.svg'>../../data/icons/scalable/actions/pin-symbolic.svg</file>
+    <file alias='unpin-symbolic.svg'>../../data/icons/scalable/actions/unpin-symbolic.svg</file>
   </gresource>
 </gresources>
