@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#from apps_view import AppsView
-
 from pathlib import Path
+from typing import Callable
 
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw
 
 from .utils import USER_APPS
 from .desktop_entry import DesktopEntry
+
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
@@ -159,8 +159,34 @@ class PinAppWindow(Adw.ApplicationWindow):
         dialog.set_transient_for(self.get_root())
         dialog.show()
 
-    def show_apps(self):
-        self.set_page(self.apps_page)
+    def choose_file(self, callback: Callable) -> None:
+        '''Callback must take one argument, of type `Path`'''
+        def on_resp(dialog, resp: Gtk.ResponseType):
+            if resp == Gtk.ResponseType.ACCEPT:
+                callback(Path(dialog.get_file().get_path()))
+            else:
+                return
+
+        desktop_file_filter = Gtk.FileFilter()
+        desktop_file_filter.set_name(_('Desktop files'))
+        desktop_file_filter.add_mime_type('application/x-desktop')
+
+        dialog = Gtk.FileChooserNative()
+        dialog.add_filter(desktop_file_filter)
+        dialog.set_filter(desktop_file_filter)
+
+        dialog.connect('response', on_resp)
+        dialog.set_transient_for(self)
+        dialog.show()
+
+    def load_file(self, path: Path):
+        if path is None:
+            return
+
+        file = DesktopEntry(path)
+
+        self.file_page.load_file(file)
+        self.set_page(self.file_page)
 
     def reload_apps(self, show_pins=False):
         self.set_page(self.apps_page)

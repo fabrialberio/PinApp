@@ -17,6 +17,7 @@
 
 import sys
 from locale import bindtextdomain, textdomain
+from pathlib import Path
 
 from gi.repository import Gtk, Gio, Adw
 
@@ -32,7 +33,7 @@ class PinAppApplication(Adw.Application):
     def __init__(self):
         super().__init__(
             application_id='io.github.fabrialberio.pinapp',
-            flags=Gio.ApplicationFlags.FLAGS_NONE)
+            flags=Gio.ApplicationFlags.HANDLES_OPEN)
 
         self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
         self.create_action('about', lambda a, _: self.window.show_about_window())
@@ -48,15 +49,19 @@ class PinAppApplication(Adw.Application):
         self.window = None
 
     def do_activate(self):
-        """Called when the application is activated.
+        """Called when the application is activated"""
+        self._create_window()
+        self.window.present()
 
-        We raise the application's main window, creating it if
-        necessary.
-        """
-        self.window = self.props.active_window
-        if not self.window:
-            self.window = PinAppWindow(application=self)
+    def do_open(self, files, n_files, hint):
+        print(f'Do open called!\n{files=}\t{n_files=}\t{hint=}')
+        
+        path = Path(files[0].get_path())
+        print(f'{path=}')
 
+        self._create_window()
+        print(f'{self.window=}')
+        self.window.load_file(path)
         self.window.present()
 
     def on_escape(self, *args):
@@ -72,6 +77,10 @@ class PinAppApplication(Adw.Application):
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
 
+    def _create_window(self):
+        self.window = self.props.active_window
+        if not self.window:
+            self.window = PinAppWindow(application=self)
 
 def main(version):
     """The application's entry point."""

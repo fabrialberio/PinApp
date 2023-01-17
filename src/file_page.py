@@ -196,13 +196,12 @@ class FilePage(Gtk.Box):
         self.file = file
 
         self._update_app_banner()
-        #self.window_title.set_subtitle(self.file.filename)
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
         self.save_button.set_visible(self.file.writable)
-        self.unpin_button.set_visible(self.file.writable)
-        self.pin_button.set_visible(not self.file.writable)
+        self.unpin_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
+        self.pin_button.set_visible(self.file.path.parent != USER_APPS or not self.file.path.exists())
 
         self.update_file()
 

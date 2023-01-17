@@ -1,7 +1,8 @@
 [Desktop Entry]
 Name=PinApp
 Comment=Create and edit application shortcuts
-Exec=pinapp
+Exec=pinapp %u
+MimeType=application/x-desktop;
 Icon=io.github.fabrialberio.pinapp
 Terminal=false
 Type=Application
