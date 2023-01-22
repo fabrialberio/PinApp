@@ -8,9 +8,7 @@ from .utils import set_icon_from_name, USER_APPS
 
 
 class BoolRow(Adw.ActionRow):
-    @staticmethod
-    def list_from_field_list(fields: list[Field]):
-        return [BoolRow(f) for f in fields if type(f.get()) == bool]
+    __gtype_name__ = 'BoolRow'
 
     def __init__(self, field: Field) -> None:
         self.field = field
@@ -31,11 +29,7 @@ class BoolRow(Adw.ActionRow):
         self.field.set(value)
 
 class StringRow(Adw.EntryRow):
-    __gtype_name__='StringRow'
-
-    @staticmethod
-    def list_from_field_list(fields: list[Field]):
-        return [StringRow(f) for f in fields if ((t := type(f.get())) == str or t == list) and not f.locale]
+    __gtype_name__ = 'StringRow'
 
     def __init__(self, field: Field) -> None:
         self.field = field
@@ -89,6 +83,21 @@ class LocaleChooserRow(Adw.ComboRow):
         super().__init__(
             title = _('Locale'),
             model = model)
+
+    def connect_localized_rows(self, rows: list[LocalizedRow]):
+        def update_rows(*args):
+            for row in rows:
+                row.set_locale(self.get_current_locale())
+        
+        self.connect('notify', update_rows)
+
+    def set_current_locale(self):
+        self.set_locale(
+            str(LocaleString.current().closest(
+                [LocaleString.parse(l) for l in self.locales])))
+
+    def get_current_locale(self) -> str:
+        return self.get_selected_item().get_string()
 
     def set_locale(self, locale):
         if locale in self.locales:
@@ -156,6 +165,8 @@ class FilePage(Gtk.Box):
 
     def save_file(self):
         '''Saves a file to its current folder.'''
+        assert self.file is not None
+
         if not self.visible: 
             return
 
@@ -163,14 +174,13 @@ class FilePage(Gtk.Box):
             self.pin_file()
             return
 
-        # Removes all empty localized fields (to clean up the file)
-        self.file.filter_items(lambda k, v: False if '[' in k and not v else True)
-
         self.file.save()
         self.emit('file-save')
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
+        assert self.file is not None
+
         if not self.visible:
             return
 
@@ -195,60 +205,82 @@ class FilePage(Gtk.Box):
     def load_file(self, file: DesktopEntry):
         self.file = file
 
-        self._update_app_banner()
-
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
         self.save_button.set_visible(self.file.writable)
         self.unpin_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
         self.pin_button.set_visible(self.file.path.parent != USER_APPS or not self.file.path.exists())
 
-        self.update_file()
+        self.update_page()
 
-    def update_file(self):
-        file_dict: dict = self.file.appsection.as_dict()
-        file_dict.pop('Name', '')
-        file_dict.pop('Comment', '')
-        file_dict.pop('Icon', '')
+    def update_page(self):
+        localized_rows: list[LocalizedRow] = []
+        string_rows: list[StringRow] = []
+        bool_rows: list[BoolRow] = []
 
-        self._update_locale()
-        icon_row = self._get_icon_row()
+        all_locales = set()
+        added_keys = []
 
-        string_rows = [icon_row] + StringRow.list_from_field_list(file_dict.values())
+        for key, field in self.file.appsection.items():
+            if field.locale is not None:
+                all_locales = all_locales | {f.locale for f in field.localized_fields}
+                if field.unlocalized_key not in added_keys:
+                    localized_rows.append(LocalizedRow(field))
+                    added_keys.append(field.unlocalized_key)
+
+            elif key in ['Name', 'Comment']:
+                continue
+
+            elif key == 'Icon':
+                icon_field = self.file.appsection.Icon
+
+                self.icon_row = StringRow(icon_field)
+                self.icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
+                self.icon_row.connect('changed', lambda _: self._update_icon())
+
+                string_rows.append(self.icon_row)
+
+            elif type(field.get()) in [str, list]:
+                string_rows.append(StringRow(field))
+            elif type(field.get()) == bool:
+                bool_rows.append(BoolRow(field))
+
+
+        if all_locales:
+            self.locale_chooser_row = LocaleChooserRow(sorted(list(all_locales)))
+            self.locale_chooser_row.connect_localized_rows(localized_rows)
+            self.locale_chooser_row.set_current_locale()
+
+            self._update_pref_group(self.localized_group, [self.locale_chooser_row]+localized_rows)
+            self.localized_group.set_visible(True)
+        else:
+            self.localized_group.set_visible(False)
+
         self._update_pref_group(
             pref_group=self.strings_group,
             new_children=string_rows, 
             empty_message=_('No string values present'))
 
-        bool_rows = BoolRow.list_from_field_list(file_dict.values())
         self._update_pref_group(
             pref_group=self.bools_group, 
             new_children=bool_rows, 
             empty_message=_('No boolean values present'))
 
+        self._update_app_banner()
+
     @property
     def visible(self):
         return isinstance(self.get_parent().get_visible_child(), FilePage)
 
-    def _get_icon_row(self, value: str=None) -> StringRow:
-        icon_field = self.file.appsection.Icon
-        if value != None:
-            icon_field.set(value)
-        
-        icon_row = StringRow(icon_field)
-        icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
-        icon_row.connect('changed', lambda _: self._get_icon_row())
-
-        self.app_icon = set_icon_from_name(self.app_icon, icon_field.as_str())
-
-        return icon_row
+    def _update_icon(self):
+        set_icon_from_name(self.app_icon, self.icon_row.field.as_str())
 
     def _upload_icon(self):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
                 path = dialog.get_file().get_path()
-                self._get_icon_row(path)
-                self.update_file()
+                self._update_icon(path)
+                self.update_page()
 
         dialog = Gtk.FileChooserNative(
             title=_('Upload icon'),
@@ -265,63 +297,28 @@ class FilePage(Gtk.Box):
         dialog.show()
 
     def _update_app_banner(self):
-        if self.file == None:
+        if self.file is None:
             return
 
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
             self.banner_listbox.remove(row)
 
         app_name_row = StringRow(self.file.appsection.Name)
-        # Style app name
-        app_name_text = (app_name_row
-            .get_first_child() # GtkBox containing the header
-            .observe_children() # List of all children
-            .get_item(1) # Get second child (editable area)
-            .get_last_child()) # GtkText
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
 
         if self.banner_expanded:
             app_name_row.set_size_request(0, 64)
-            app_name_text.add_css_class('title-1')
+            app_name_row.add_css_class('title-1-row')
         else:
-            app_name_text.add_css_class('title-2')
+            app_name_row.add_css_class('title-2-row')
 
         app_comment_row = StringRow(self.file.appsection.Comment)
         app_comment_row.add_css_class('app-banner-entry')
 
         self.banner_listbox.append(app_name_row)
         self.banner_listbox.append(app_comment_row)
-        self._get_icon_row()
-
-    def _update_locale(self):
-        all_locales = set()
-        localized_rows: list[LocalizedRow] = []
-        added_keys = [] # This list is used to avoid duplicates in a performance-efficient way
-        for field in self.file.appsection.values():
-            if field.locale:
-                all_locales = all_locales | {f.locale for f in field.localized_fields}
-                if (k := field.unlocalized_key) not in added_keys:
-                    localized_rows.append(LocalizedRow(field))
-                    added_keys.append(k)
-
-        all_locales = list(all_locales)
-        self.locale_chooser_row = LocaleChooserRow(sorted(all_locales))
-        
-        if all_locales:
-            def update_row_locales(*args):
-                for row in localized_rows:
-                    row.set_locale(self.locale_chooser_row.get_selected_item().get_string())
-
-            self.locale_chooser_row.connect('notify', update_row_locales)
-            self.locale_chooser_row.set_locale(
-                str(LocaleString.current().closest(
-                    [LocaleString.parse(l) for l in all_locales])))
-
-            self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
-            self.localized_group.set_visible(True)
-        else:
-            self.localized_group.set_visible(False)
+        self._update_icon()
 
     def _add_key(self, is_bool=False, is_localized=False):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
@@ -331,7 +328,7 @@ class FilePage(Gtk.Box):
         key_entry = builder.get_object('key_entry')
 
         if is_localized:
-            locale = self.locale_chooser_row.get_selected_item().get_string()
+            locale = self.locale_chooser_row.get_current_locale()
             locale_entry.set_visible(True)
             locale_entry.set_text(locale)
 
@@ -343,7 +340,7 @@ class FilePage(Gtk.Box):
             if resp == 'add':
                 key = key_entry.get_text()
                 value = False if is_bool else ''
-                
+
                 field = Field(key, self.file.appsection.section)
                 if is_localized and (locale := locale_entry.get_text()): 
                     field = field.localize(
@@ -352,7 +349,7 @@ class FilePage(Gtk.Box):
                         return_unlocalized_as_fallback=False)
                 field.set(value)
 
-                self.update_file()
+                self.update_page()
 
         add_key_dialog.connect('response', callback)
         add_key_dialog.set_transient_for(self.get_root())
