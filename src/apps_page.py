@@ -85,7 +85,7 @@ class AppRow(Adw.ActionRow):
             margin_top=6,
             margin_bottom=6,
             css_classes=['icon-dropshadow'])
-        icon = set_icon_from_name(icon, file.appsection.Icon.as_str())
+        set_icon_from_name(icon, file.appsection.Icon.as_str())
 
         self.add_prefix(icon)
 

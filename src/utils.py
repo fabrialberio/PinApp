@@ -5,7 +5,6 @@ from pathlib import Path
 from gi.repository import Gtk, Gdk
 
 
-
 class RunningAs(Enum):
     DEFAULT = 'default'
     FLATPAK = 'flatpak'
@@ -14,6 +13,7 @@ if Path('/.flatpak-info').exists():
     RUNNING_AS = RunningAs.FLATPAK
 else:
     RUNNING_AS = RunningAs.DEFAULT
+
 
 USER_DATA = Path.home() / '.local/share'
 USER_APPS = USER_DATA / 'applications'
@@ -31,6 +31,7 @@ FLATPAK_SYSTEM = Path('/var/lib/flatpak')
 FLATPAK_SYSTEM_APPS = FLATPAK_SYSTEM / 'exports/share/applications'
 FLATPAK_SYSTEM_ICONS = FLATPAK_SYSTEM / 'exports/share/icons'
 
+
 if RUNNING_AS == RunningAs.FLATPAK:
     LOCALE_DIR = Path('/app/share/locale')
 
@@ -44,6 +45,7 @@ else:
     HOST_APPS = SYSTEM_APPS
     HOST_ICONS = SYSTEM_ICONS
 
+
 def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
     theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 
@@ -54,5 +56,3 @@ def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
             icon.set_from_icon_name(icon_name)
         elif Path(icon_name).is_file():
             icon.set_from_file(icon_name)
-
-    return icon
