@@ -115,7 +115,10 @@ class FilePage(Gtk.Box):
     pin_button = Gtk.Template.Child('pin_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
-    main_view = Gtk.Template.Child('main_box')
+
+    view_stack = Gtk.Template.Child('view_stack')
+    file_view = Gtk.Template.Child('file_view')
+    error_view = Gtk.Template.Child('error_view')
 
     banner_squeezer = Gtk.Template.Child('banner_squeezer')
     banner_box_l = Gtk.Template.Child('banner_box_l')
@@ -170,7 +173,7 @@ class FilePage(Gtk.Box):
         if not self.visible: 
             return
 
-        if not self.file.writable:
+        if not self.file.write_permission:
             self.pin_file()
             return
 
@@ -202,12 +205,21 @@ class FilePage(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.present()
 
+    def load_path(self, path: Path):
+        try:
+            file = DesktopEntry(path)
+        except (FileExistsError, PermissionError):
+            self.view_stack.set_visible_child(self.error_view)
+        else:
+            self.load_file(file)
+
     def load_file(self, file: DesktopEntry):
+        self.view_stack.set_visible_child(self.file_view)
         self.file = file
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
-        self.save_button.set_visible(self.file.writable)
+        self.save_button.set_visible(self.file.write_permission)
         self.unpin_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
         self.pin_button.set_visible(self.file.path.parent != USER_APPS or not self.file.path.exists())
 

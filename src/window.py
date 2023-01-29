@@ -179,13 +179,11 @@ class PinAppWindow(Adw.ApplicationWindow):
         dialog.set_transient_for(self)
         dialog.show()
 
-    def load_file(self, path: Path):
+    def load_path(self, path: Path):
         if path is None:
             return
 
-        file = DesktopEntry(path)
-
-        self.file_page.load_file(file)
+        self.file_page.load_path(path)
         self.set_page(self.file_page)
 
     def reload_apps(self, show_pins=False):

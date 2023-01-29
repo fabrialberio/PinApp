@@ -61,7 +61,7 @@ class PinAppApplication(Adw.Application):
 
         self._create_window()
         print(f'{self.window=}')
-        self.window.load_file(path)
+        self.window.load_path(path)
         self.window.present()
 
     def on_escape(self, *args):

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from os import access, W_OK
+from os import access, W_OK, R_OK
 from locale import getlocale, LC_CTYPE
 from configparser import ConfigParser, SectionProxy, Error as ConfigParserError
 
@@ -159,7 +159,7 @@ class Field:
             return Field(f'{self.unlocalized_key}[{locale}]', self.section)
         else:
             raise ValueError(f'{self.__repr__()} cannot be localized as \'{locale}\'')
-    
+
     def exists(self) -> bool:
         return self._value != None
 
@@ -333,9 +333,15 @@ class ActionSection(Section):
 
 
 class IniFile:
+    path: Path
+    read_permission: bool
+    write_permission: bool
+
     def __init__(self, path: 'str | Path') -> None:
         self.path = Path(path)
-        self.is_loaded = False
+
+        self.read_permission = access(self.path, R_OK)
+        self.write_permission = access(self.path, W_OK)
 
         self.parser = ConfigParser(interpolation=None, strict=False)
         self.parser.optionxform = str
@@ -344,9 +350,14 @@ class IniFile:
     def filename(self) -> str: return self.path.name
 
     def load(self):
+        if not self.path.exists():
+            raise FileExistsError(f'File "{self.path}" does not exist')
+
+        if not self.read_permission:
+            raise PermissionError(f'No read permissions for "{self.path}"')
+
         self.parser.clear()
         self.parser.read(self.path)
-        self.is_loaded = True
 
     def filter(self, filter: Callable) -> None:
         '''Applies `filter()` to all values of the file, and only keeps values for wich it returns True'''
@@ -363,17 +374,20 @@ class IniFile:
                         self.parser.remove_option(section_name, k) 
 
     def save(self, path=None) -> None:
+        if not self.read_permission:
+            raise PermissionError(f'No write permission for "{self.path}')
+
         if path == None: path = self.path
         with open(path, 'w') as f:
             self.parser.write(f)
 
     def delete(self, missing_ok=True) -> None:
         self.path.unlink(missing_ok=missing_ok)
+        del self
 
 class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
     path: Path
-    writable: bool
     search_string: str
 
     @staticmethod
@@ -400,8 +414,6 @@ class DesktopEntry(IniFile):
 
     def __init__(self, path: Path) -> None:
         super().__init__(path)
-
-        self.writable = access(self.path, W_OK)
 
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')

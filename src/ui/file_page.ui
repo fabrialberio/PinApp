@@ -52,144 +52,170 @@
       </object>
     </child>
     <child>
-      <object class='GtkScrolledWindow' id='scrolled_window'>
-            <property name='vexpand'>true</property>
-            <child>
-          <object class='AdwClamp' id='main_clamp'>
-            <child>
-              <object class='GtkBox' id='main_box'>
-                <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
-                <property name='spacing'>12</property>
-                <property name='margin-bottom'>24</property>
-                <property name='margin-top'>24</property>
-                <property name='margin-start'>12</property>
-                <property name='margin-end'>12</property>
+      <object class='AdwViewStack' id='view_stack'>
+        <child>
+          <object class='AdwViewStackPage'>
+            <property name='name'>file_view</property>
+            <property name='child'>
+              <object class='AdwBin' id='file_view'>
                 <child>
-                  <object class='AdwSqueezer' id='banner_squeezer'>
-                    <property name='homogeneous'>false</property>
-                    <property name='interpolate-size'>true</property>
-                    <property name='transition-duration'>100</property>
-                    <property name='transition-type'>ADW_SQUEEZER_TRANSITION_TYPE_CROSSFADE</property>
-                    <!-- Application banner (wide) -->
+                  <object class='GtkScrolledWindow' id='scrolled_window'>
+                    <property name='vexpand'>true</property>
                     <child>
-                      <object class='GtkBox' id='banner_box_l'>
-                        <property name='width_request'>400</property>
+                      <object class='AdwClamp' id='main_clamp'>
                         <child>
-                          <!-- App icon -->
-                          <object class='GtkImage' id='icon_l'>
-                            <property name='margin-end'>6</property>
-                            <property name='tooltip-text' translatable='yes'>Application icon</property>
-                            <property name='icon-name'>application-x-executable</property>
-                            <property name='pixel-size'>128</property>
-                            <style>
-                              <class name='icon-dropshadow'/>
-                            </style>
-                          </object>
-                        </child>
-                        <!-- App title and comment -->
-                        <child>
-                          <object class='GtkListBox' id='banner_listbox_l'>
-                            <property name='valign'>center</property>
-                            <property name='hexpand'>true</property>
-                            <property name='selection-mode'>none</property>
-                            <style>
-                              <class name='app-banner-listbox'/>
-                            </style>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <!-- Application banner (narrow) -->
-                    <child>
-                      <object class='GtkBox' id='banner_box_s'>
-                        <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
-                        <child>
-                          <!-- App icon -->
-                          <object class='GtkImage' id='icon_s'>
+                          <object class='GtkBox' id='main_box'>
+                            <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                            <property name='spacing'>12</property>
                             <property name='margin-bottom'>24</property>
-                            <property name='tooltip-text' translatable='yes'>Application icon</property>
-                            <property name='icon-name'>application-x-executable</property>
-                            <property name='pixel-size'>96</property>
-                            <style>
-                              <class name='icon-dropshadow'/>
-                            </style>
-                          </object>
-                        </child>
-                        <!-- App title and comment -->
-                        <child>
-                          <object class='GtkListBox' id='banner_listbox_s'>
-                            <property name='valign'>center</property>
-                            <property name='hexpand'>true</property>
-                            <property name='selection-mode'>none</property>
-                            <style>
-                              <class name='app-banner-listbox'/>
-                            </style>
+                            <property name='margin-top'>24</property>
+                            <property name='margin-start'>12</property>
+                            <property name='margin-end'>12</property>
+                            <child>
+                              <object class='AdwSqueezer' id='banner_squeezer'>
+                                <property name='homogeneous'>false</property>
+                                <property name='interpolate-size'>true</property>
+                                <property name='transition-duration'>100</property>
+                                <property name='transition-type'>ADW_SQUEEZER_TRANSITION_TYPE_CROSSFADE</property>
+                                <!-- Application banner (wide) -->
+                                <child>
+                                  <object class='GtkBox' id='banner_box_l'>
+                                    <property name='width_request'>400</property>
+                                    <child>
+                                      <!-- App icon -->
+                                      <object class='GtkImage' id='icon_l'>
+                                        <property name='margin-end'>6</property>
+                                        <property name='tooltip-text' translatable='yes'>Application
+                                          icon</property>
+                                        <property name='icon-name'>application-x-executable</property>
+                                        <property name='pixel-size'>128</property>
+                                        <style>
+                                          <class name='icon-dropshadow' />
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <!-- App title and comment -->
+                                    <child>
+                                      <object class='GtkListBox' id='banner_listbox_l'>
+                                        <property name='valign'>center</property>
+                                        <property name='hexpand'>true</property>
+                                        <property name='selection-mode'>none</property>
+                                        <style>
+                                          <class name='app-banner-listbox' />
+                                        </style>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <!-- Application banner (narrow) -->
+                                <child>
+                                  <object class='GtkBox' id='banner_box_s'>
+                                    <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                                    <child>
+                                      <!-- App icon -->
+                                      <object class='GtkImage' id='icon_s'>
+                                        <property name='margin-bottom'>24</property>
+                                        <property name='tooltip-text' translatable='yes'>Application
+                                          icon</property>
+                                        <property name='icon-name'>application-x-executable</property>
+                                        <property name='pixel-size'>96</property>
+                                        <style>
+                                          <class name='icon-dropshadow' />
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <!-- App title and comment -->
+                                    <child>
+                                      <object class='GtkListBox' id='banner_listbox_s'>
+                                        <property name='valign'>center</property>
+                                        <property name='hexpand'>true</property>
+                                        <property name='selection-mode'>none</property>
+                                        <style>
+                                          <class name='app-banner-listbox' />
+                                        </style>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <!-- Localized values group -->
+                              <object class='AdwPreferencesGroup' id='localized_group'>
+                                <property name='title' translatable='yes'>Localized values</property>
+                                <property name='header-suffix'>
+                                  <object class='GtkButton' id='add_localized_button'>
+                                    <style>
+                                      <class name='flat' />
+                                    </style>
+                                    <child>
+                                      <object class='AdwButtonContent'>
+                                        <property name='label' translatable='yes'>Add</property>
+                                        <property name='icon-name'>list-add</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                                <property name='visible'>False</property>
+                              </object>
+                            </child>
+                            <child>
+                              <!-- String values group -->
+                              <object class='AdwPreferencesGroup' id='strings_group'>
+                                <property name='title' translatable='yes'>String Values</property>
+                                <property name='header-suffix'>
+                                  <object class='GtkButton' id='add_string_button'>
+                                    <style>
+                                      <class name='flat' />
+                                    </style>
+                                    <child>
+                                      <object class='AdwButtonContent'>
+                                        <property name='label' translatable='yes'>Add</property>
+                                        <property name='icon-name'>list-add</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <!-- Bool values group -->
+                              <object class='AdwPreferencesGroup' id='bools_group'>
+                                <property name='title' translatable='yes'>Boolean Values</property>
+                                <property name='header-suffix'>
+                                  <object class='GtkButton' id='add_bool_button'>
+                                    <style>
+                                      <class name='flat' />
+                                    </style>
+                                    <child>
+                                      <object class='AdwButtonContent'>
+                                        <property name='label' translatable='yes'>Add</property>
+                                        <property name='icon-name'>list-add</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
                     </child>
-                  </object>
-                </child>
-                <child>
-                  <!-- Localized values group -->
-                  <object class='AdwPreferencesGroup' id='localized_group'>
-                    <property name='title' translatable='yes'>Localized values</property>
-                    <property name='header-suffix'>
-                      <object class='GtkButton' id='add_localized_button'>
-                        <style>
-                          <class name='flat'/>
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='label' translatable='yes'>Add</property>
-                            <property name='icon-name'>list-add</property>
-                          </object>
-                        </child>
-                      </object>
-                    </property>
-                    <property name='visible'>False</property>
-                  </object>
-                </child>
-                <child>
-                  <!-- String values group -->
-                  <object class='AdwPreferencesGroup' id='strings_group'>
-                    <property name='title' translatable='yes'>String Values</property>
-                    <property name='header-suffix'>
-                      <object class='GtkButton' id='add_string_button'>
-                        <style>
-                          <class name='flat'/>
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='label' translatable='yes'>Add</property>
-                            <property name='icon-name'>list-add</property>
-                          </object>
-                        </child>
-                      </object>
-                    </property>
-                  </object>
-                </child>
-                <child>
-                  <!-- Bool values group -->
-                  <object class='AdwPreferencesGroup' id='bools_group'>
-                    <property name='title' translatable='yes'>Boolean Values</property>
-                    <property name='header-suffix'>
-                      <object class='GtkButton' id='add_bool_button'>
-                        <style>
-                          <class name='flat'/>
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='label' translatable='yes'>Add</property>
-                            <property name='icon-name'>list-add</property>
-                          </object>
-                        </child>
-                      </object>
-                    </property>
                   </object>
                 </child>
               </object>
-            </child>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class='AdwViewStackPage'>
+            <property name='name'>error_view</property>
+            <property name='child'>
+              <object class='AdwStatusPage' id='error_view'>
+                <property name='title' translatable='yes'>Error opening file</property>
+                <property name='icon-name'>dialog-error-symbolic</property>
+              </object>
+            </property>
           </object>
         </child>
       </object>
