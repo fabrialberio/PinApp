@@ -41,7 +41,9 @@
     <property name="developers">Fabrizio Alberio</property>
     <property name="translator-credits">Irénée Thirion (French) &lt;irenee.thirion@e.email&gt;
       Sabri Ünal (Turkish) &lt;libreajans@gmail.com&gt;
-      Fyodor Sobolev (Russian)</property>
+      Fyodor Sobolev (Russian)
+      David Lapshin (Russian)
+      gregorni (German)</property>
   </object>
 
   <object class="GtkShortcutsWindow" id="help_overlay">
