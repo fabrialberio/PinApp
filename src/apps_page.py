@@ -130,10 +130,11 @@ class AppsView(Adw.Bin):
     '''A widget that handles status pages for states'''
     __gtype_name__ = 'AppsPage'
 
-    def __init__(self, show_new_file_button: bool) -> None:
+    def __init__(self, show_new_file_button: bool, description: str = '') -> None:
         super().__init__()
 
         self.show_new_file_button = show_new_file_button
+        self.description = description
         self.state = State.EMPTY
 
         self._init_widgets()
@@ -192,6 +193,9 @@ class AppsView(Adw.Bin):
             listbox.append(row)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.append(Adw.PreferencesGroup(
+            description=self.description
+        ))
         box.append(listbox)
         
         self.filled_page = Gtk.ScrolledWindow(
@@ -223,9 +227,10 @@ class FolderGroupView(AppsView):
     '''A widget that handles status pages for states and represents apps in a FolderGroup'''
     __gtype_name__ = 'FolderView'
 
-    def __init__(self, folder_group: FolderGroup) -> None:
+    def __init__(self, folder_group: FolderGroup, description: str = '') -> None:
         self.folder_group = folder_group
-        super().__init__(self.folder_group.writable)
+        self.description = description
+        super().__init__(self.folder_group.writable, self.description)
 
     def load_apps(self, loading_ok=True):
         if self.state == State.LOADING or loading_ok:
@@ -270,7 +275,7 @@ class SearchView(AppsView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
-    source_views: list[AppsView]
+    source_views: list[FolderGroupView]
     folder_groups: list[FolderGroup]
     rows: list[AppRow] = []
     search_entry: Gtk.SearchEntry
