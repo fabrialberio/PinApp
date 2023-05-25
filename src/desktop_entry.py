@@ -4,6 +4,7 @@ from typing import Callable
 
 from os import access, W_OK, R_OK
 from locale import getlocale, LC_CTYPE
+from hashlib import sha256
 from configparser import ConfigParser, SectionProxy, Error as ConfigParserError
 
 
@@ -388,6 +389,7 @@ class IniFile:
 class DesktopEntry(IniFile):
     '''Representation of a .desktop file, implementing both dictionary-like and specific methods and properties'''
     path: Path
+    _saved_hash: str
     search_string: str
 
     @staticmethod
@@ -411,9 +413,14 @@ class DesktopEntry(IniFile):
             path = Path(str(path) + '.desktop')
         return path
 
+    def edited(self) -> bool:
+        return self._saved_hash != self._get_hash()
 
     def __init__(self, path: Path) -> None:
         super().__init__(path)
+
+        self._saved_hash = None
+        self.search_string = None
 
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
@@ -423,8 +430,18 @@ class DesktopEntry(IniFile):
     def load(self):
         super().load()
 
+        self._saved_hash = self._get_hash()
+
         self.search_string = '\n'.join(f.as_str() for f in self.appsection.values() if not f.as_bool()).lower()
         self.search_string += '\n'+'\n'.join(f.key for f in self.appsection.values() if f.as_bool() == True).lower()
+
+    def save(self, path=None):
+        super().save(path)
+
+        self._saved_hash = self._get_hash()
+
+        self.filter_items(lambda k, v: False if '[' in k and not v else True)
+
 
     @property
     def appsection(self) -> 'AppSection': 
@@ -432,6 +449,9 @@ class DesktopEntry(IniFile):
     @property
     def actionsections(self) -> dict[str, 'ActionSection']:
         return ActionSection.dict_from_parser(self.parser)
+
+    def _get_hash(self) -> str:
+        return sha256(''.join(f.as_str() for f in self.appsection.values()).encode()).hexdigest()
 
     def __lt__(self, __o: object) -> bool:
 
