@@ -10,18 +10,20 @@ from .utils import set_icon_from_name, USER_APPS
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
 
-    def __init__(self, field: Field) -> None:
+    def __init__(self, field: Field, enabled: bool = True) -> None:
         self.field = field
 
         self.switch = Gtk.Switch(
             active=field.as_bool(),
             valign=Gtk.Align.CENTER,
+            sensitive=enabled,
         )
         self.switch.connect('state-set', self._on_state_set)
 
         super().__init__(
             title=field.key,
             activatable_widget=self.switch,
+            sensitive=enabled,
         )
         self.add_suffix(self.switch)
 
@@ -31,10 +33,13 @@ class BoolRow(Adw.ActionRow):
 class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
-    def __init__(self, field: Field) -> None:
+    def __init__(self, field: Field, enabled: bool = True) -> None:
         self.field = field
         
-        super().__init__(title=field.key)
+        super().__init__(
+            title=field.key,
+            sensitive=enabled,
+        )
         self.set_text(field.as_str() or '')
         self.connect('changed', self._on_changed)
 
@@ -53,8 +58,11 @@ class StringRow(Adw.EntryRow):
 class LocalizedRow(StringRow):
     __gtype_name__='LocaleStringRow'
 
-    def __init__(self, field: Field, locale: 'str | None' = None) -> None:
-        super().__init__(field=field)
+    def __init__(self, field: Field, locale: 'str | None' = None, enabled: bool = True) -> None:
+        super().__init__(
+            field=field,
+            enabled=enabled,
+        )
         self.locale = locale
 
     def set_locale(self, locale: str):
@@ -110,9 +118,11 @@ class FilePage(Gtk.Box):
 
     window_title = Gtk.Template.Child('title_widget')
     back_button = Gtk.Template.Child('back_button')
-    unpin_button = Gtk.Template.Child('unpin_button')
-    save_button = Gtk.Template.Child('save_button')
     pin_button = Gtk.Template.Child('pin_button')
+
+    file_menu_button = Gtk.Template.Child('file_menu_button')
+    unpin_button = Gtk.Template.Child('unpin_button')
+    rename_button = Gtk.Template.Child('rename_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -159,8 +169,7 @@ class FilePage(Gtk.Box):
         self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
         self.back_button.connect('clicked', lambda _: self.emit('file-back'))
-        self.unpin_button.connect('clicked', lambda _: self.delete_file())
-        self.save_button.connect('clicked', lambda _: self.save_file())
+        self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
@@ -178,7 +187,7 @@ class FilePage(Gtk.Box):
             return
 
         self.file.save()
-        self.emit('file-save')
+        self.emit('file-close')
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -187,10 +196,38 @@ class FilePage(Gtk.Box):
         if not self.visible:
             return
 
-        self.file.save(USER_APPS / self.file.filename)
-        self.emit('file-save')
+        pinned_path: Path = USER_APPS / self.file.filename
 
-    def delete_file(self):
+        self.file.save(pinned_path)
+        self.load_file(DesktopEntry(pinned_path))
+
+    def on_leave(self):
+        '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
+        assert self.file is not None
+
+        if not self.file.path.exists():
+            return
+
+        if self.file.edited():
+            if not self.file.write_permission:
+                builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
+
+                dialog = builder.get_object('save_changes_dialog')
+
+                def callback(widget, resp):
+                    if resp == 'discard':
+                        return # Without saving
+                    elif resp == 'pin':
+                        self.file.save(USER_APPS / self.file.filename)
+                        self.emit('file-close')
+
+                dialog.connect('response', callback)
+                dialog.set_transient_for(self.get_root())
+                dialog.present()
+            else:
+                self.file.save()
+
+    def unpin_file(self):
         '''Deletes a file. It is used when the file has write access.'''
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
         
@@ -219,13 +256,15 @@ class FilePage(Gtk.Box):
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
-        self.save_button.set_visible(self.file.write_permission)
-        self.unpin_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
+        self.file_menu_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
         self.pin_button.set_visible(self.file.path.parent != USER_APPS or not self.file.path.exists())
 
         self.update_page()
 
     def update_page(self):
+        if self.file is None:
+            raise ValueError
+        
         localized_rows: list[LocalizedRow] = []
         string_rows: list[StringRow] = []
         bool_rows: list[BoolRow] = []
@@ -233,29 +272,29 @@ class FilePage(Gtk.Box):
         all_locales = set()
         added_keys = []
 
+        rows_enabled = self.file.write_permission
+
         for key, field in self.file.appsection.items():
             if field.locale is not None:
-                all_locales = all_locales | {f.locale for f in field.localized_fields}
-                if field.unlocalized_key not in added_keys:
-                    localized_rows.append(LocalizedRow(field))
-                    added_keys.append(field.unlocalized_key)
+                all_locales = all_locales | {f.locale for f in field.localized_fields if f.locale is not None}
 
+                if field.unlocalized_key not in added_keys:
+                    localized_rows.append(LocalizedRow(field, enabled=rows_enabled))
+                    added_keys.append(field.unlocalized_key)
             elif key in ['Name', 'Comment']:
                 continue
-
             elif key == 'Icon':
                 icon_field = self.file.appsection.Icon
 
-                self.icon_row = StringRow(icon_field)
+                self.icon_row = StringRow(icon_field, enabled=rows_enabled)
                 self.icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
                 self.icon_row.connect('changed', lambda _: self._update_icon())
 
                 string_rows.append(self.icon_row)
-
             elif type(field.get()) in [str, list]:
-                string_rows.append(StringRow(field))
+                string_rows.append(StringRow(field, enabled=rows_enabled))
             elif type(field.get()) == bool:
-                bool_rows.append(BoolRow(field))
+                bool_rows.append(BoolRow(field, enabled=rows_enabled))
 
 
         if all_locales:
@@ -291,7 +330,8 @@ class FilePage(Gtk.Box):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
                 path = dialog.get_file().get_path()
-                self._update_icon(path)
+                self.icon_row.field.set(path)
+                self._update_icon()
                 self.update_page()
 
         dialog = Gtk.FileChooserNative(
