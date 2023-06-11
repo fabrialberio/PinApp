@@ -408,7 +408,7 @@ class DesktopEntry(IniFile):
     def validate_path(_path: (str)) -> Path:
         path = Path(_path)
 
-        # Sets the exstension to .desktop
+        # Sets the extension to .desktop
         if not path.suffix == '.desktop':
             path = Path(str(path) + '.desktop')
         return path
@@ -433,7 +433,8 @@ class DesktopEntry(IniFile):
 
         self._saved_hash = self._get_hash()
 
-        self.search_string = '\n'.join(f.as_str() for f in self.appsection.values() if not f.as_bool()).lower()
+        self.search_string = self.path.stem
+        self.search_string += '\n'+'\n'.join(f.as_str() for f in self.appsection.values() if not f.as_bool()).lower()
         self.search_string += '\n'+'\n'.join(f.key for f in self.appsection.values() if f.as_bool() == True).lower()
 
     def save(self, path=None):
