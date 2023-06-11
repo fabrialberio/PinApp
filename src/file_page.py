@@ -1,10 +1,11 @@
+from shutil import copy
 from pathlib import Path
 from typing import Callable, Optional
 
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_entry import DesktopEntry, Field, LocaleString
-from .utils import set_icon_from_name, USER_APPS
+from .utils import set_icon_from_name, new_file_name, USER_APPS
 
 
 class BoolRow(Adw.ActionRow):
@@ -115,6 +116,7 @@ class FilePage(Gtk.Box):
     file_menu_button = Gtk.Template.Child('file_menu_button')
     unpin_button = Gtk.Template.Child('unpin_button')
     rename_button = Gtk.Template.Child('rename_button')
+    duplicate_button = Gtk.Template.Child('duplicate_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -171,6 +173,7 @@ class FilePage(Gtk.Box):
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
+        self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
@@ -276,6 +279,16 @@ class FilePage(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.show()
 
+    def duplicate_file(self):
+        assert self.file is not None
+
+        new_path = new_file_name(USER_APPS, self.file.path.stem)
+
+        copy(self.file.path, new_path)
+
+        self.load_path(new_path)
+        self.emit('file-changed')
+
     def load_path(self, path: Path):
         try:
             file = DesktopEntry(path)
@@ -294,6 +307,7 @@ class FilePage(Gtk.Box):
         self.file_menu_button.set_visible(is_pinned)
         self.pin_button.set_visible(not is_pinned)
 
+        self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
 
         self.update_page()
