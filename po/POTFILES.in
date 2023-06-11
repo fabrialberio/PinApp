@@ -8,3 +8,4 @@
 
 src/apps_page.py
 src/file_page.py
+src/window.py
