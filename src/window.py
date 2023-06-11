@@ -20,7 +20,7 @@ from typing import Callable
 
 from gi.repository import Gtk, Adw, Gio
 
-from .utils import USER_APPS
+from .utils import USER_APPS, new_file_name
 from .desktop_entry import DesktopEntry
 
 
@@ -130,38 +130,17 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_page(self.file_page)
 
     def new_file(self):
-        if self.file_page.visible:
+        if self.get_page() != self.apps_page:
             return
 
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
-        dialog = builder.get_object('filename_dialog')
-        name_entry = builder.get_object('name_entry')
+        path = new_file_name(USER_APPS)
+        file = DesktopEntry.new_with_defaults(path)
 
-        def path_is_valid() -> bool:
-            path = name_entry.get_text()
-            if '/' in path:
-                return False
-            else:
-                return True
+        self.file_page.load_file(file)
+        self.set_page(self.file_page)
 
-        name_entry.connect('changed', lambda _: dialog.set_response_enabled(
-            'create',
-            path_is_valid()))
 
-        def callback(widget, resp):
-            if resp == 'create':
-                path = USER_APPS / Path(f'{Path(name_entry.get_text())}.desktop')
-                file = DesktopEntry.new_with_defaults(path)
-
-                self.file_page.load_file(file)
-                self.set_page(self.file_page)
-
-        dialog.connect('response', callback)
-        dialog.set_transient_for(self.get_root())
-        dialog.show()
-
-    def choose_file(self, callback: Callable) -> None:
-        '''Callback must take one argument, of type `Path`'''
+    def choose_file(self, callback: Callable[[Path], None]) -> None:
         def on_resp(dialog, resp: Gtk.ResponseType):
             if resp == Gtk.ResponseType.ACCEPT:
                 callback(Path(dialog.get_file().get_path()))

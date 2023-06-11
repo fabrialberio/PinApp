@@ -224,7 +224,7 @@
         <property name="margin-end">6</property>
         <child>
           <object class="GtkModelButton" id="unpin_button">
-            <property name="text" translatable="true">Remove file</property>
+            <property name="text" translatable="true">Unpin</property>
           </object>
         </child>
         <child>

@@ -166,8 +166,8 @@ class FilePage(Gtk.Box):
         self.file = None
 
         self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
-        self.back_button.connect('clicked', lambda _: self.on_leave())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
+        self.back_button.connect('clicked', lambda _: self.on_leave())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
@@ -177,20 +177,20 @@ class FilePage(Gtk.Box):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
         assert self.file is not None
 
-        if not self.visible:
-            return
-
+        is_new_file = not self.file.path.exists()
         pinned_path: Path = USER_APPS / self.file.filename
 
         self.file.save(pinned_path)
         self.emit('file-changed')
-        self.load_path(pinned_path)
+
+        if is_new_file:
+            self.emit('file-leave')
+        else:
+            self.load_path(pinned_path)
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
-        assert self.file is not None
-
-        if self.allow_leave:
+        if self.allow_leave or self.file is None:
             self.emit('file-leave')
             if callback is not None:
                 callback(self)
@@ -312,10 +312,6 @@ class FilePage(Gtk.Box):
             empty_message=_('No boolean values present'))
 
         self._update_app_banner()
-
-    @property
-    def visible(self):
-        return isinstance(self.get_parent().get_visible_child(), FilePage)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.icon_row.field.as_str())

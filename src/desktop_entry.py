@@ -342,7 +342,7 @@ class IniFile:
         self.path = Path(path)
 
         self.read_permission = access(self.path, R_OK)
-        self.write_permission = access(self.path, W_OK)
+        self.write_permission = access(self.path, W_OK) or access(self.path.parent, W_OK)
 
         self.parser = ConfigParser(interpolation=None, strict=False)
         self.parser.optionxform = str
@@ -375,8 +375,8 @@ class IniFile:
                         self.parser.remove_option(section_name, k) 
 
     def save(self, path=None) -> None:
-        if not self.read_permission:
-            raise PermissionError(f'No write permission for "{self.path}')
+        if not self.write_permission:
+            raise PermissionError(f'No write permission for "{self.path}" or the parent folder')
 
         if path == None: path = self.path
         with open(path, 'w') as f:
@@ -425,7 +425,8 @@ class DesktopEntry(IniFile):
         if not self.path.suffix == '.desktop':
             raise ValueError(f'Path {self.path} is not a .desktop file')
 
-        self.load()
+        if self.path.exists():
+            self.load()
 
     def load(self):
         super().load()
