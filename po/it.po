@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-11 15:08+0200\n"
-"PO-Revision-Date: 2023-06-11 15:10+0200\n"
+"POT-Creation-Date: 2023-06-11 20:01+0200\n"
+"PO-Revision-Date: 2023-06-11 19:57+0200\n"
 "Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
 "Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
 "Language: it\n"
@@ -18,64 +18,52 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "X-Generator: Gtranslator 42.0\n"
 
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
 #: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
 msgid "Create and edit application shortcuts"
 msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
 
-#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
-#: ../src/apps_page.py:153
-msgid "Add new app"
-msgstr "Aggiungi applicazione"
-
-#: ../src/ui/apps_page_dialogs.ui.h:2
-msgid "File name"
-msgstr "Nome file"
-
-#: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
-#: ../src/file_page.py:335
-msgid "Cancel"
-msgstr "Annulla"
-
-#: ../src/ui/apps_page_dialogs.ui.h:4
-msgid "Create"
-msgstr "Crea"
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
+msgstr "GNOME;GTK;Applicazioni;Scorciatoie;Icone;"
 
 #: ../src/ui/apps_page_dialogs.ui.h:5
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Generale"
 
-#: ../src/ui/apps_page_dialogs.ui.h:6
+#: ../src/ui/apps_page_dialogs.ui.h:2
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Scorciatoie"
 
-#: ../src/ui/apps_page_dialogs.ui.h:7
+#: ../src/ui/apps_page_dialogs.ui.h:3
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Chiude la finestra"
 
-#: ../src/ui/apps_page_dialogs.ui.h:8
+#: ../src/ui/apps_page_dialogs.ui.h:4
 msgctxt "shortcut window"
 msgid "Add new app"
 msgstr "Aggiunge una nuova applicazione"
 
-#: ../src/ui/apps_page_dialogs.ui.h:9
+#: ../src/ui/apps_page_dialogs.ui.h:5
 msgctxt "shortcut window"
 msgid "Search"
 msgstr "Cerca"
 
-#: ../src/ui/apps_page_dialogs.ui.h:10
+#: ../src/ui/apps_page_dialogs.ui.h:6
 msgctxt "shortcut window"
 msgid "App editing"
 msgstr "Modifica"
 
-#: ../src/ui/apps_page_dialogs.ui.h:11
+#: ../src/ui/apps_page_dialogs.ui.h:7
 msgctxt "shortcut window"
 msgid "Close"
 msgstr "Chiudi"
 
-#: ../src/ui/apps_page_dialogs.ui.h:12
+#: ../src/ui/apps_page_dialogs.ui.h:8
 msgctxt "shortcut window"
 msgid "Save and close"
 msgstr "Salva e chiudi"
@@ -84,13 +72,17 @@ msgstr "Salva e chiudi"
 msgid "Add new key"
 msgstr "Aggiungi chiave"
 
-#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:84
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:85
 msgid "Locale"
 msgstr "Località"
 
 #: ../src/ui/file_page_dialogs.ui.h:3
 msgid "Key name"
 msgstr "Nome della chiave"
+
+#: ../src/ui/file_page_dialogs.ui.h:4 ../src/file_page.py:391
+msgid "Cancel"
+msgstr "Annulla"
 
 #: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:5
 msgid "Add"
@@ -127,6 +119,18 @@ msgstr "Scarta"
 msgid "Pin"
 msgstr "Appunta"
 
+#: ../src/ui/file_page_dialogs.ui.h:13
+msgid "Rename file"
+msgstr "Rinomina file"
+
+#: ../src/ui/file_page_dialogs.ui.h:14
+msgid "File name"
+msgstr "Nome file"
+
+#: ../src/ui/file_page_dialogs.ui.h:15
+msgid "Rename"
+msgstr "Rinomina"
+
 #: ../src/ui/file_page.ui.h:2
 msgid "File menu"
 msgstr "Menu del file"
@@ -150,6 +154,10 @@ msgstr "Valori Booleani"
 #: ../src/ui/file_page.ui.h:8
 msgid "Error opening file"
 msgstr "Errore nell'apertura del file"
+
+#: ../src/ui/window.ui.h:1 ../src/apps_page.py:153
+msgid "Add new app"
+msgstr "Aggiungi applicazione"
 
 #: ../src/ui/window.ui.h:2
 msgid "Show menu"
@@ -203,25 +211,25 @@ msgstr "Nessun risultato trovato"
 msgid "Try searching for something else"
 msgstr "Prova a cercare qualcos'altro"
 
-#: ../src/file_page.py:307
+#: ../src/file_page.py:362
 msgid "No string values present"
 msgstr "Nessun valore di testo presente"
 
-#: ../src/file_page.py:312
+#: ../src/file_page.py:367
 msgid "No boolean values present"
 msgstr "Nessun valore booleano presente"
 
-#: ../src/file_page.py:332
+#: ../src/file_page.py:388
 msgid "Upload icon"
 msgstr "Carica icona"
 
-#: ../src/file_page.py:334
+#: ../src/file_page.py:390
 msgid "Open"
 msgstr "Apri"
 
-#: ../src/window.py:172
+#: ../src/window.py:151
 msgid "Desktop files"
 msgstr "File desktop"
 
-#~ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
-#~ msgstr "GNOME;GTK;Applicazioni;Scorciatoie;Icone;"
+#~ msgid "Create"
+#~ msgstr "Crea"

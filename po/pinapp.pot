@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-11 15:18+0200\n"
+"POT-Creation-Date: 2023-06-11 20:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,60 +27,42 @@ msgstr ""
 msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:1 ../src/ui/window.ui.h:1
-#: ../src/apps_page.py:153
-msgid "Add new app"
-msgstr ""
-
-#: ../src/ui/apps_page_dialogs.ui.h:2
-msgid "File name"
-msgstr ""
-
-#: ../src/ui/apps_page_dialogs.ui.h:3 ../src/ui/file_page_dialogs.ui.h:4
-#: ../src/file_page.py:335
-msgid "Cancel"
-msgstr ""
-
-#: ../src/ui/apps_page_dialogs.ui.h:4
-msgid "Create"
-msgstr ""
-
 #: ../src/ui/apps_page_dialogs.ui.h:5
 msgctxt "shortcut window"
 msgid "General"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:6
+#: ../src/ui/apps_page_dialogs.ui.h:2
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:7
+#: ../src/ui/apps_page_dialogs.ui.h:3
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:8
+#: ../src/ui/apps_page_dialogs.ui.h:4
 msgctxt "shortcut window"
 msgid "Add new app"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:9
+#: ../src/ui/apps_page_dialogs.ui.h:5
 msgctxt "shortcut window"
 msgid "Search"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:10
+#: ../src/ui/apps_page_dialogs.ui.h:6
 msgctxt "shortcut window"
 msgid "App editing"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:11
+#: ../src/ui/apps_page_dialogs.ui.h:7
 msgctxt "shortcut window"
 msgid "Close"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:12
+#: ../src/ui/apps_page_dialogs.ui.h:8
 msgctxt "shortcut window"
 msgid "Save and close"
 msgstr ""
@@ -89,12 +71,16 @@ msgstr ""
 msgid "Add new key"
 msgstr ""
 
-#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:84
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:85
 msgid "Locale"
 msgstr ""
 
 #: ../src/ui/file_page_dialogs.ui.h:3
 msgid "Key name"
+msgstr ""
+
+#: ../src/ui/file_page_dialogs.ui.h:4 ../src/file_page.py:391
+msgid "Cancel"
 msgstr ""
 
 #: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:5
@@ -130,6 +116,18 @@ msgstr ""
 msgid "Pin"
 msgstr ""
 
+#: ../src/ui/file_page_dialogs.ui.h:13
+msgid "Rename file"
+msgstr ""
+
+#: ../src/ui/file_page_dialogs.ui.h:14
+msgid "File name"
+msgstr ""
+
+#: ../src/ui/file_page_dialogs.ui.h:15
+msgid "Rename"
+msgstr ""
+
 #: ../src/ui/file_page.ui.h:2
 msgid "File menu"
 msgstr ""
@@ -152,6 +150,10 @@ msgstr ""
 
 #: ../src/ui/file_page.ui.h:8
 msgid "Error opening file"
+msgstr ""
+
+#: ../src/ui/window.ui.h:1 ../src/apps_page.py:153
+msgid "Add new app"
 msgstr ""
 
 #: ../src/ui/window.ui.h:2
@@ -206,22 +208,22 @@ msgstr ""
 msgid "Try searching for something else"
 msgstr ""
 
-#: ../src/file_page.py:307
+#: ../src/file_page.py:362
 msgid "No string values present"
 msgstr ""
 
-#: ../src/file_page.py:312
+#: ../src/file_page.py:367
 msgid "No boolean values present"
 msgstr ""
 
-#: ../src/file_page.py:332
+#: ../src/file_page.py:388
 msgid "Upload icon"
 msgstr ""
 
-#: ../src/file_page.py:334
+#: ../src/file_page.py:390
 msgid "Open"
 msgstr ""
 
-#: ../src/window.py:172
+#: ../src/window.py:151
 msgid "Desktop files"
 msgstr ""
