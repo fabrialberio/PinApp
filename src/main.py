@@ -43,7 +43,6 @@ class PinAppApplication(Adw.Application):
         self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])
         
         self.create_action('exit', self.on_escape, ['Escape'])
-        self.create_action('save', lambda a, _: self.window.file_page.save_file(), ['<primary>s'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
         self.window = None
@@ -66,7 +65,7 @@ class PinAppApplication(Adw.Application):
 
     def on_escape(self, *args):
         if self.window.get_page() == self.window.file_page:
-            self.window.set_page(self.window.apps_page)
+            self.window.file_page.on_leave()
         elif self.window.get_page() == self.window.apps_page and self.window.get_view() == self.window.search_view:
             self.window.set_search_mode(False)
 

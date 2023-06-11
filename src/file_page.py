@@ -122,7 +122,6 @@ class FilePage(Gtk.Box):
 
     file_menu_button = Gtk.Template.Child('file_menu_button')
     unpin_button = Gtk.Template.Child('unpin_button')
-    rename_button = Gtk.Template.Child('rename_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -167,27 +166,12 @@ class FilePage(Gtk.Box):
         self.file = None
 
         self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
-        self.back_button.connect('clicked', lambda _: self.emit('file-back'))
-        self.back_button.connect('clicked', lambda _: self.emit('file-back'))
+        self.back_button.connect('clicked', lambda _: self.on_leave())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
-
-    def save_file(self):
-        '''Saves a file to its current folder.'''
-        assert self.file is not None
-
-        if not self.visible: 
-            return
-
-        if not self.file.write_permission:
-            self.pin_file()
-            return
-
-        self.file.save()
-        self.emit('file-close')
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -199,7 +183,8 @@ class FilePage(Gtk.Box):
         pinned_path: Path = USER_APPS / self.file.filename
 
         self.file.save(pinned_path)
-        self.load_file(DesktopEntry(pinned_path))
+        self.emit('file-changed')
+        self.load_path(pinned_path)
 
     def on_leave(self):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
@@ -209,23 +194,26 @@ class FilePage(Gtk.Box):
             return
 
         if self.file.edited():
-            if not self.file.write_permission:
+            if self.file.write_permission:
+                self.file.save()
+                self.emit('file-changed')
+                self.emit('file-leave')
+            else:
                 builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
 
                 dialog = builder.get_object('save_changes_dialog')
 
                 def callback(widget, resp):
                     if resp == 'discard':
-                        return # Without saving
+                        self.emit('file-leave')
                     elif resp == 'pin':
-                        self.file.save(USER_APPS / self.file.filename)
-                        self.emit('file-close')
+                        self.pin_file()
 
                 dialog.connect('response', callback)
                 dialog.set_transient_for(self.get_root())
                 dialog.present()
-            else:
-                self.file.save()
+        else:
+            self.emit('file-leave')
 
     def unpin_file(self):
         '''Deletes a file. It is used when the file has write access.'''
@@ -236,7 +224,8 @@ class FilePage(Gtk.Box):
         def callback(widget, resp):
             if resp == 'delete':
                 self.file.delete()
-                self.emit('file-delete')
+                self.emit('file-leave')
+                self.emit('file-changed')
 
         dialog.connect('response', callback)
         dialog.set_transient_for(self.get_root())
@@ -256,8 +245,9 @@ class FilePage(Gtk.Box):
 
         self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
 
-        self.file_menu_button.set_visible(self.file.path.parent == USER_APPS and self.file.path.exists())
-        self.pin_button.set_visible(self.file.path.parent != USER_APPS or not self.file.path.exists())
+        is_pinned = self.file.path.parent == USER_APPS
+        self.file_menu_button.set_visible(is_pinned)
+        self.pin_button.set_visible(not is_pinned)
 
         self.update_page()
 

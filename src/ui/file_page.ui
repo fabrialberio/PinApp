@@ -1,12 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <interface>
   <template class='FilePage' parent='GtkBox'>
-    <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+    <property name='orientation'>vertical</property>
     <child>
       <!-- HeaderBar -->
       <object class='AdwHeaderBar' id='header_bar'>
-        <property name='show-end-title-buttons'>false</property>
-        <property name='show-start-title-buttons'>false</property>
         <!-- Back button -->
         <child type='start'>
           <object class='GtkButton' id='back_button'>
@@ -25,28 +23,21 @@
           <object class='GtkButton' id='pin_button'>
             <property name='child'>
               <object class='AdwButtonContent'>
-                <property name='label' translatable='yes'>Add pin</property>
+                <property name='label' translatable='yes'>Pin</property>
                 <property name='icon-name'>view-pin-symbolic</property>
               </object>
             </property>
-            <property name='visible'>false</property>
             <style>
               <class name='suggested-action'/>
             </style>
           </object>
         </child>
-        <!-- Unpin button -->
+        <!-- File menu button -->
         <child type='end'>
-          <object class='GtkButton' id='unpin_button'>
-            <property name='icon-name'>unpin-symbolic</property>
-            <property name='tooltip-text' translatable='yes'>Unpin</property>
-          </object>
-        </child>
-        <!-- Save button -->
-        <child type='end'>
-          <object class='GtkButton' id='save_button'>
-            <property name='icon-name'>document-save-symbolic</property>
-            <property name='tooltip-text' translatable='yes'>Save</property>
+          <object class='GtkMenuButton' id='file_menu_button'>
+            <property name='icon-name'>view-more-symbolic</property>
+            <property name='tooltip-text' translatable='yes'>File menu</property>
+            <property name='popover'>file_menu_popover</property>
           </object>
         </child>
       </object>
@@ -65,7 +56,7 @@
                       <object class='AdwClamp' id='main_clamp'>
                         <child>
                           <object class='GtkBox' id='main_box'>
-                            <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                            <property name='orientation'>vertical</property>
                             <property name='spacing'>12</property>
                             <property name='margin-bottom'>24</property>
                             <property name='margin-top'>24</property>
@@ -76,7 +67,7 @@
                                 <property name='homogeneous'>false</property>
                                 <property name='interpolate-size'>true</property>
                                 <property name='transition-duration'>100</property>
-                                <property name='transition-type'>ADW_SQUEEZER_TRANSITION_TYPE_CROSSFADE</property>
+                                <property name='transition-type'>crossfade</property>
                                 <!-- Application banner (wide) -->
                                 <child>
                                   <object class='GtkBox' id='banner_box_l'>
@@ -110,7 +101,7 @@
                                 <!-- Application banner (narrow) -->
                                 <child>
                                   <object class='GtkBox' id='banner_box_s'>
-                                    <property name='orientation'>GTK_ORIENTATION_VERTICAL</property>
+                                    <property name='orientation'>vertical</property>
                                     <child>
                                       <!-- App icon -->
                                       <object class='GtkImage' id='icon_s'>
@@ -221,4 +212,34 @@
       </object>
     </child>
   </template>
+
+  <object class='GtkPopover' id='file_menu_popover'>
+    <style>
+      <class name='menu'/>
+    </style>
+    <child>
+      <object class='GtkBox'>
+        <property name="orientation">1</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <child>
+          <object class="GtkModelButton" id="unpin_button">
+            <property name="text" translatable="true">Remove file</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="rename_button">
+            <property name="text" translatable="true">Rename file</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="duplicate_button">
+            <property name="text" translatable="true">Duplicate file</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

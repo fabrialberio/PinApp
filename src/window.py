@@ -55,9 +55,10 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.installed_view.connect('file-open', lambda _, f: self.open_file(f))
         self.search_view.connect('file-open', lambda _, f: self.open_file(f))
 
-        self.file_page.connect('file-back', lambda _: self.set_page(self.apps_page))
-        self.file_page.connect('file-save', lambda _: self.reload_apps(show_pins=True))
-        self.file_page.connect('file-delete', lambda _: self.reload_apps())
+        self.file_page.connect('file-leave', lambda _: self.set_page(self.apps_page))
+        self.file_page.connect('file-changed', lambda _: self.reload_apps(show_pins=True, show_apps=False, only_pins=True))
+
+        self.connect('close-request', lambda _: self.on_close_request())
 
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
         help_overlay = builder.get_object('help_overlay')
@@ -186,13 +187,21 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.load_path(path)
         self.set_page(self.file_page)
 
-    def reload_apps(self, show_pins=False):
-        self.set_page(self.apps_page)
+    def reload_apps(self, show_pins=False, show_apps=True, only_pins=False):
+        if show_apps:
+            self.set_page(self.apps_page)
+
         if show_pins:
             self.set_view(self.pins_view)
 
         self.pins_view.load_apps(loading_ok=False)
-        self.installed_view.load_apps(loading_ok=False)
+
+        if not only_pins:
+            self.installed_view.load_apps(loading_ok=False)
+
+    def on_close_request(self):
+        if self.get_page() == self.file_page:
+            self.file_page.on_leave()
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
