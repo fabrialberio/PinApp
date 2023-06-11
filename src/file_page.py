@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 from gi.repository import Gtk, Adw, Gio
 
@@ -10,20 +10,18 @@ from .utils import set_icon_from_name, USER_APPS
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
 
-    def __init__(self, field: Field, enabled: bool = True) -> None:
+    def __init__(self, field: Field) -> None:
         self.field = field
 
         self.switch = Gtk.Switch(
             active=field.as_bool(),
             valign=Gtk.Align.CENTER,
-            sensitive=enabled,
         )
         self.switch.connect('state-set', self._on_state_set)
 
         super().__init__(
             title=field.key,
             activatable_widget=self.switch,
-            sensitive=enabled,
         )
         self.add_suffix(self.switch)
 
@@ -33,13 +31,10 @@ class BoolRow(Adw.ActionRow):
 class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
-    def __init__(self, field: Field, enabled: bool = True) -> None:
+    def __init__(self, field: Field) -> None:
         self.field = field
         
-        super().__init__(
-            title=field.key,
-            sensitive=enabled,
-        )
+        super().__init__(title=field.key)
         self.set_text(field.as_str() or '')
         self.connect('changed', self._on_changed)
 
@@ -58,11 +53,8 @@ class StringRow(Adw.EntryRow):
 class LocalizedRow(StringRow):
     __gtype_name__='LocaleStringRow'
 
-    def __init__(self, field: Field, locale: 'str | None' = None, enabled: bool = True) -> None:
-        super().__init__(
-            field=field,
-            enabled=enabled,
-        )
+    def __init__(self, field: Field, locale: 'str | None' = None) -> None:
+        super().__init__(field=field)
         self.locale = locale
 
     def set_locale(self, locale: str):
@@ -160,6 +152,14 @@ class FilePage(Gtk.Box):
     bools_group = Gtk.Template.Child('bools_group')
 
 
+    @property
+    def allow_leave(self) -> bool:
+        if self.file is not None:
+            return not self.file.edited()
+        else:
+            return True
+
+
     def __init__(self):
         super().__init__()
 
@@ -186,34 +186,40 @@ class FilePage(Gtk.Box):
         self.emit('file-changed')
         self.load_path(pinned_path)
 
-    def on_leave(self):
+    def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
         assert self.file is not None
 
-        if not self.file.path.exists():
-            return
-
-        if self.file.edited():
+        if self.allow_leave:
+            self.emit('file-leave')
+            if callback is not None:
+                callback(self)
+        else:
             if self.file.write_permission:
                 self.file.save()
                 self.emit('file-changed')
                 self.emit('file-leave')
+
+                if callback is not None:
+                    callback(self)
             else:
                 builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
 
                 dialog = builder.get_object('save_changes_dialog')
 
-                def callback(widget, resp):
+                def on_resp(widget, resp):
                     if resp == 'discard':
                         self.emit('file-leave')
+                        if callback is not None:
+                            callback(self)
                     elif resp == 'pin':
                         self.pin_file()
+                        if callback is not None:
+                            callback(self)
 
-                dialog.connect('response', callback)
+                dialog.connect('response', on_resp)
                 dialog.set_transient_for(self.get_root())
                 dialog.present()
-        else:
-            self.emit('file-leave')
 
     def unpin_file(self):
         '''Deletes a file. It is used when the file has write access.'''
@@ -262,29 +268,27 @@ class FilePage(Gtk.Box):
         all_locales = set()
         added_keys = []
 
-        rows_enabled = self.file.write_permission
-
         for key, field in self.file.appsection.items():
             if field.locale is not None:
                 all_locales = all_locales | {f.locale for f in field.localized_fields if f.locale is not None}
 
                 if field.unlocalized_key not in added_keys:
-                    localized_rows.append(LocalizedRow(field, enabled=rows_enabled))
+                    localized_rows.append(LocalizedRow(field))
                     added_keys.append(field.unlocalized_key)
             elif key in ['Name', 'Comment']:
                 continue
             elif key == 'Icon':
                 icon_field = self.file.appsection.Icon
 
-                self.icon_row = StringRow(icon_field, enabled=rows_enabled)
+                self.icon_row = StringRow(icon_field)
                 self.icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
                 self.icon_row.connect('changed', lambda _: self._update_icon())
 
                 string_rows.append(self.icon_row)
             elif type(field.get()) in [str, list]:
-                string_rows.append(StringRow(field, enabled=rows_enabled))
+                string_rows.append(StringRow(field))
             elif type(field.get()) == bool:
-                bool_rows.append(BoolRow(field, enabled=rows_enabled))
+                bool_rows.append(BoolRow(field))
 
 
         if all_locales:

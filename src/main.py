@@ -35,7 +35,7 @@ class PinAppApplication(Adw.Application):
             application_id='io.github.fabrialberio.pinapp',
             flags=Gio.ApplicationFlags.HANDLES_OPEN)
 
-        self.create_action('quit', lambda a, _: self.quit(), ['<primary>q'])
+        self.create_action('quit', lambda a, _: self.window.do_close_request(), ['<primary>q'])
         self.create_action('about', lambda a, _: self.window.show_about_window())
         self.create_action('search', lambda a, _: self.window.set_search_mode(True), ['<primary>f'])
         

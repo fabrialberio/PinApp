@@ -18,7 +18,7 @@
 from pathlib import Path
 from typing import Callable
 
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, Gio
 
 from .utils import USER_APPS
 from .desktop_entry import DesktopEntry
@@ -58,7 +58,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.connect('file-leave', lambda _: self.set_page(self.apps_page))
         self.file_page.connect('file-changed', lambda _: self.reload_apps(show_pins=True, show_apps=False, only_pins=True))
 
-        self.connect('close-request', lambda _: self.on_close_request())
+        self.connect('close-request', lambda _: self.do_close_request())
 
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
         help_overlay = builder.get_object('help_overlay')
@@ -199,9 +199,28 @@ class PinAppWindow(Adw.ApplicationWindow):
         if not only_pins:
             self.installed_view.load_apps(loading_ok=False)
 
-    def on_close_request(self):
+    def do_close_request(self, *args):
+        '''Return `False` if the window can close, otherwise `True`'''
+        def quit():
+            self.close()
+            self.destroy()
+
         if self.get_page() == self.file_page:
-            self.file_page.on_leave()
+            if self.file_page.allow_leave:
+                self.close()
+                quit()
+                return False
+            else:
+                def callback(_):
+                    global block_close
+                    block_close = False
+                    quit()
+
+                self.file_page.on_leave(callback=callback)
+
+                return True
+        else:
+            quit()
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
