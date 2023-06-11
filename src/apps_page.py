@@ -77,7 +77,7 @@ class AppRow(Adw.ActionRow):
             title = escape_xml(self.file.appsection.Name.as_str()),
             title_lines = 1,
             subtitle = escape_xml(self.file.appsection.Comment.as_str()),
-            subtitle_lines = 2,
+            subtitle_lines = 1,
             activatable = True,)
 
         icon = Gtk.Image(
