@@ -114,6 +114,7 @@ class FilePage(Gtk.Box):
 
     file_menu_button = Gtk.Template.Child('file_menu_button')
     unpin_button = Gtk.Template.Child('unpin_button')
+    rename_button = Gtk.Template.Child('rename_button')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -166,9 +167,10 @@ class FilePage(Gtk.Box):
         self.file = None
 
         self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
-        self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.back_button.connect('clicked', lambda _: self.on_leave())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
+        self.unpin_button.connect('clicked', lambda _: self.unpin_file())
+        self.rename_button.connect('clicked', lambda _: self.rename_file())
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
@@ -195,7 +197,7 @@ class FilePage(Gtk.Box):
             if callback is not None:
                 callback(self)
         else:
-            if self.file.write_permission:
+            if self.file.write_permission and self.file.path.exists():
                 self.file.save()
                 self.emit('file-changed')
                 self.emit('file-leave')
@@ -237,6 +239,43 @@ class FilePage(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.present()
 
+    def rename_file(self):
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
+        dialog = builder.get_object('rename_dialog')
+        name_entry = builder.get_object('name_entry')
+        name_entry.set_text(self.file.path.stem)
+
+        def get_path():
+            return USER_APPS / Path(f'{Path(name_entry.get_text())}.desktop')
+
+
+        def path_is_valid() -> bool:
+            path = name_entry.get_text()
+
+            return '/' not in path and not get_path().exists()
+
+        name_entry.connect('changed', lambda _: dialog.set_response_enabled(
+            'rename',
+            path_is_valid()
+        ))
+
+        def on_resp(widget, resp):
+            if resp == 'rename':
+                new_path = get_path()
+
+                if self.file.path.exists():
+                    self.file.path.rename(new_path)
+                    self.load_path(new_path)
+                else:
+                    self.file.path = new_path
+                    self._update_window_title()
+
+                self.emit('file-changed')
+
+        dialog.connect('response', on_resp)
+        dialog.set_transient_for(self.get_root())
+        dialog.show()
+
     def load_path(self, path: Path):
         try:
             file = DesktopEntry(path)
@@ -254,6 +293,8 @@ class FilePage(Gtk.Box):
         is_pinned = self.file.path.parent == USER_APPS
         self.file_menu_button.set_visible(is_pinned)
         self.pin_button.set_visible(not is_pinned)
+
+        self.unpin_button.set_sensitive(self.file.path.exists())
 
         self.update_page()
 
@@ -311,10 +352,15 @@ class FilePage(Gtk.Box):
             new_children=bool_rows, 
             empty_message=_('No boolean values present'))
 
+        self._update_window_title()
         self._update_app_banner()
 
+    def _update_window_title(self):
+        self.window_title.set_title(self.file.appsection.Name.as_str() or '')
+        self.window_title.set_subtitle(self.file.filename)
+
     def _update_icon(self):
-        set_icon_from_name(self.app_icon, self.icon_row.field.as_str())
+        set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
 
     def _upload_icon(self):
         def callback(dialog, response):
@@ -348,6 +394,8 @@ class FilePage(Gtk.Box):
         app_name_row = StringRow(self.file.appsection.Name)
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
+
+        app_name_row.connect('changed', lambda _: self.window_title.set_title(app_name_row.get_text()))
 
         if self.banner_expanded:
             app_name_row.set_size_request(0, 64)
