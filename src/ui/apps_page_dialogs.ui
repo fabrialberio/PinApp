@@ -62,12 +62,6 @@
                 <property name="action-name">app.exit</property>
               </object>
             </child>
-            <child>
-              <object class="GtkShortcutsShortcut">
-                <property name="title" translatable="yes" context="shortcut window">Save and close</property>
-                <property name="action-name">app.save</property>
-              </object>
-            </child>
           </object>
         </child>
       </object>
