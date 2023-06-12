@@ -133,6 +133,7 @@ class FilePage(Adw.BreakpointBin):
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
 
+    banner_expanded = True
 
     @property
     def allow_leave(self) -> bool:
@@ -156,8 +157,12 @@ class FilePage(Adw.BreakpointBin):
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
 
-        self.compact_breakpoint.connect('apply', lambda _: self._update_app_banner(set_compact=True))
-        self.compact_breakpoint.connect('unapply', lambda _: self._update_app_banner(set_expanded=True))
+        def _set_banner_expanded(value: bool):
+            self.banner_expanded = value
+            self._update_app_banner()
+
+        self.compact_breakpoint.connect('apply', lambda _: _set_banner_expanded(False))
+        self.compact_breakpoint.connect('unapply', lambda _: _set_banner_expanded(True))
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -379,7 +384,7 @@ class FilePage(Adw.BreakpointBin):
         dialog.set_transient_for(self.get_root())
         dialog.show()
 
-    def _update_app_banner(self, set_compact = False, set_expanded = False):
+    def _update_app_banner(self):
         if self.file is None:
             return
 
@@ -392,10 +397,10 @@ class FilePage(Adw.BreakpointBin):
 
         app_name_row.connect('changed', lambda _: self.window_title.set_title(app_name_row.get_text()))
 
-        if set_expanded:
+        if self.banner_expanded:
             app_name_row.set_size_request(0, 64)
             app_name_row.add_css_class('title-1-row')
-        elif set_compact:
+        else:
             app_name_row.add_css_class('title-2-row')
 
         app_comment_row = StringRow(self.file.appsection.Comment)
