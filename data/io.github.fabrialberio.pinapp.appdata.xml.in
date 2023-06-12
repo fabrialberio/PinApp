@@ -44,6 +44,27 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="1.2" date="">
+			<description>
+				<p>What's changed</p>
+				<ul>
+					<li>Added autosave</li>
+					<li>Improved file view UI</li>
+					<li>Simplified creation of new files</li>
+					<li>Added ability to rename and duplicate pinned files</li>
+					<li>Added german translation thanks to @gregorni</li>
+					<li>Added spanish translation thanks to @josushu0</li>
+					<li>Improved russian translation thanks to @daudix-UFO and @fsobolev</li>
+					<li>Improvements to better comply with GNOME design guidelines thanks to @TheEvilSkeleton and @daudix-UFO</li>
+				</ul>
+				<p>Fixes</p>
+				<ul>
+					<li>Localization was prone to errors with mixed locales. Fixed thanks to @fsobolev</li>
+					<li>Using Ctrl+F to enter search always cleared the search entry and was generally unreliable</li>
+					<li>Wording of unpin dialog was unclear</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.1.7" date="2022-12-31">
 			<description>
 				<p>What's changed</p>
