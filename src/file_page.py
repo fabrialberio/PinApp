@@ -106,8 +106,10 @@ class LocaleChooserRow(Adw.ComboRow):
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
-class FilePage(Gtk.Box):
+class FilePage(Adw.BreakpointBin):
     __gtype_name__ = 'FilePage'
+
+    compact_breakpoint = Gtk.Template.Child('compact_breakpoint')
 
     window_title = Gtk.Template.Child('title_widget')
     back_button = Gtk.Template.Child('back_button')
@@ -124,32 +126,9 @@ class FilePage(Gtk.Box):
     file_view = Gtk.Template.Child('file_view')
     error_view = Gtk.Template.Child('error_view')
 
-    banner_squeezer = Gtk.Template.Child('banner_squeezer')
-    banner_box_l = Gtk.Template.Child('banner_box_l')
-    
-    icon_s = Gtk.Template.Child('icon_s')
-    banner_listbox_s = Gtk.Template.Child('banner_listbox_s')
-    icon_l = Gtk.Template.Child('icon_l')
-    banner_listbox_l = Gtk.Template.Child('banner_listbox_l')
+    app_icon = Gtk.Template.Child('icon')
+    banner_listbox = Gtk.Template.Child('banner_listbox')
 
-    @property
-    def banner_expanded(self) -> bool:
-        return self.banner_squeezer.get_visible_child() == self.banner_box_l
-    
-    @property
-    def app_icon(self):
-        return self.icon_l if self.banner_expanded else self.icon_s
-    @app_icon.setter
-    def app_icon(self, value: Gtk.Image):
-        if self.banner_expanded:
-            self.icon_l = value
-        else:
-            self.icon_s = value
-
-    @property
-    def banner_listbox(self):
-        return self.banner_listbox_l if self.banner_expanded else self.banner_listbox_s
-    
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
@@ -168,7 +147,6 @@ class FilePage(Gtk.Box):
 
         self.file = None
 
-        self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
         self.back_button.connect('clicked', lambda _: self.on_leave())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
@@ -177,6 +155,9 @@ class FilePage(Gtk.Box):
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
+
+        self.compact_breakpoint.connect('apply', lambda _: self._update_app_banner(set_compact=True))
+        self.compact_breakpoint.connect('unapply', lambda _: self._update_app_banner(set_expanded=True))
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -398,7 +379,7 @@ class FilePage(Gtk.Box):
         dialog.set_transient_for(self.get_root())
         dialog.show()
 
-    def _update_app_banner(self):
+    def _update_app_banner(self, set_compact = False, set_expanded = False):
         if self.file is None:
             return
 
@@ -411,10 +392,10 @@ class FilePage(Gtk.Box):
 
         app_name_row.connect('changed', lambda _: self.window_title.set_title(app_name_row.get_text()))
 
-        if self.banner_expanded:
+        if set_expanded:
             app_name_row.set_size_request(0, 64)
             app_name_row.add_css_class('title-1-row')
-        else:
+        elif set_compact:
             app_name_row.add_css_class('title-2-row')
 
         app_comment_row = StringRow(self.file.appsection.Comment)
