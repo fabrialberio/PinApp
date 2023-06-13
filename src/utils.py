@@ -59,11 +59,15 @@ def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
 
 
 def new_file_name(parent: Path, suggestion: str = 'pinned-app', index_separator: str = '-', extension: str = '.desktop') -> Path:
+    if suggestion[-1].isdigit():
+        suggestion = index_separator.join(suggestion.split(index_separator)[:-1]) # Remove trailing index from suggestion
+
     other_files = list(parent.glob(f'{suggestion}*{extension}'))
     other_files = [f.name.removeprefix(suggestion).removeprefix(index_separator).removesuffix(extension) for f in other_files]
     other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit()]
-    max_index = max(other_indexes) if other_indexes else 0
-    
+
+    max_index = max(other_indexes) if other_indexes else -1
+
     def get_path_with_index(i: int):
         if i == 0:
             return parent / f'{suggestion}{extension}'

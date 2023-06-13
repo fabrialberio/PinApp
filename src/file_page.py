@@ -172,7 +172,7 @@ class FilePage(Adw.BreakpointBin):
         assert self.file is not None
 
         is_new_file = not self.file.path.exists()
-        pinned_path: Path = USER_APPS / self.file.filename
+        pinned_path: Path = new_file_name(USER_APPS, self.file.path.stem)
 
         self.file.save(pinned_path)
         self.emit('file-changed')
