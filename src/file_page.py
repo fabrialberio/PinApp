@@ -111,7 +111,7 @@ class FilePage(Adw.BreakpointBin):
 
     compact_breakpoint = Gtk.Template.Child('compact_breakpoint')
 
-    window_title = Gtk.Template.Child('title_widget')
+    window_title = Gtk.Template.Child('window_title')
     back_button = Gtk.Template.Child('back_button')
     pin_button = Gtk.Template.Child('pin_button')
 
@@ -163,6 +163,7 @@ class FilePage(Adw.BreakpointBin):
 
         self.compact_breakpoint.connect('apply', lambda _: _set_banner_expanded(False))
         self.compact_breakpoint.connect('unapply', lambda _: _set_banner_expanded(True))
+        self.scrolled_window.get_vadjustment().connect('value-changed', lambda _: self._update_window_title())
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -257,7 +258,6 @@ class FilePage(Adw.BreakpointBin):
                     self.load_path(new_path)
                 else:
                     self.file.path = new_path
-                    self._update_window_title()
 
                 self.emit('file-changed')
 
@@ -287,7 +287,7 @@ class FilePage(Adw.BreakpointBin):
         self.view_stack.set_visible_child(self.file_view)
         self.file = file
 
-        self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
+        self.scrolled_window.get_vadjustment().set_value(0)
 
         is_pinned = self.file.path.parent == USER_APPS
         self.file_menu_button.set_visible(is_pinned)
@@ -356,8 +356,11 @@ class FilePage(Adw.BreakpointBin):
         self._update_app_banner()
 
     def _update_window_title(self):
-        self.window_title.set_title(self.file.appsection.Name.as_str() or '')
-        self.window_title.set_subtitle(self.file.filename)
+        if self.scrolled_window.get_vadjustment().get_value() > 0:
+            self.window_title.set_visible(True)
+            self.window_title.set_title(self.file.appsection.Name.as_str())
+        else:
+            self.window_title.set_visible(False)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
@@ -395,7 +398,7 @@ class FilePage(Adw.BreakpointBin):
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
 
-        app_name_row.connect('changed', lambda _: self.window_title.set_title(app_name_row.get_text()))
+        app_name_row.connect('changed', lambda _: self._update_window_title())
 
         if self.banner_expanded:
             app_name_row.set_size_request(0, 64)
