@@ -85,6 +85,8 @@ class LocaleChooserRow(Adw.ComboRow):
             title = _('Locale'),
             model = model)
 
+        self.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
+
     def connect_localized_rows(self, rows: list[LocalizedRow]):
         def update_rows(*args):
             for row in rows:
