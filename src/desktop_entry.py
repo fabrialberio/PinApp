@@ -375,10 +375,12 @@ class IniFile:
                         self.parser.remove_option(section_name, k) 
 
     def save(self, path=None) -> None:
-        if not self.write_permission:
-            raise PermissionError(f'No write permission for "{self.path}" or the parent folder')
+        if path == None:
+            path = self.path
 
-        if path == None: path = self.path
+        if not (access(path, W_OK) or access(path.parent, W_OK)):
+            raise PermissionError(f'No write permission for "{path}" or the parent folder')
+
         with open(path, 'w') as f:
             self.parser.write(f)
 
