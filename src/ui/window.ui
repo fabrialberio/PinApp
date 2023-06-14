@@ -26,9 +26,9 @@
                         <property name='centering-policy'>strict</property>
                         <!-- View Switcher -->
                         <property name='title-widget'>
-                          <object class='AdwViewSwitcherTitle' id='view_switcher'>
+                          <object class='AdwViewSwitcher' id='view_switcher'>
                             <property name='stack'>view_stack</property>
-                            <property name="title" translatable="no">PinApp</property>
+                            <property name='policy'>wide</property>
                           </object>
                         </property>
                         <!-- New file button -->
