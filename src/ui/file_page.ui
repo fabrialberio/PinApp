@@ -18,7 +18,6 @@
             <!-- Title (PinApp) -->
             <property name='title-widget'>
               <object class='AdwWindowTitle' id='window_title'>
-                <property name='visible'>false</property>
               </object>
             </property>
             <!-- Pin button -->

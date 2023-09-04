@@ -114,6 +114,7 @@ class FilePage(Adw.BreakpointBin):
     compact_breakpoint = Gtk.Template.Child('compact_breakpoint')
 
     window_title = Gtk.Template.Child('window_title')
+    header_bar = Gtk.Template.Child('header_bar')
     back_button = Gtk.Template.Child('back_button')
     pin_button = Gtk.Template.Child('pin_button')
 
@@ -359,10 +360,10 @@ class FilePage(Adw.BreakpointBin):
 
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
-            self.window_title.set_visible(True)
+            self.header_bar.set_show_title(True)
             self.window_title.set_title(self.file.appsection.Name.as_str())
         else:
-            self.window_title.set_visible(False)
+            self.header_bar.set_show_title(False)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
