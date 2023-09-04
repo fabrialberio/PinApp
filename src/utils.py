@@ -46,9 +46,8 @@ APP_PATHS = [
     FLATPAK_USER / 'exports/share/applications',
     FLATPAK_SYSTEM / 'exports/share/applications',
     HOST_DATA / 'applications',
+    Path('/var/lib/snapd/desktop/applications'),
 ]
-
-
 
 
 def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
