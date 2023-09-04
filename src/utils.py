@@ -58,7 +58,7 @@ def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
             icon.set_from_file(icon_name)
 
 
-def new_file_name(parent: Path, suggestion: str = 'pinned-app', index_separator: str = '-', extension: str = '.desktop') -> Path:
+def new_file_name(parent: Path, suggestion: str, index_separator: str = '-', extension: str = '.desktop') -> Path:
     split_suggestion = suggestion.split(index_separator)
     if len(split_suggestion) > 1 and split_suggestion[-1].isdigit():
         suggestion = index_separator.join(split_suggestion[:-1]) # Remove trailing index from suggestion

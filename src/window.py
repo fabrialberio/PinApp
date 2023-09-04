@@ -135,7 +135,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.get_page() != Page.APPS_PAGE:
             return
 
-        path = new_file_name(USER_APPS)
+        path = new_file_name(USER_APPS, 'pinned-app')
         file = DesktopEntry.new_with_defaults(path)
 
         self.file_page.load_file(file)
