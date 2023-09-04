@@ -58,15 +58,18 @@ def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
             icon.set_from_file(icon_name)
 
 
-def new_file_name(parent: Path, suggestion: str = 'pinned-app', index_separator: str = '-', extension: str = '.desktop') -> Path:
-    if suggestion[-1].isdigit():
-        suggestion = index_separator.join(suggestion.split(index_separator)[:-1]) # Remove trailing index from suggestion
+def new_file_name(parent: Path, suggestion: str, index_separator: str = '-', extension: str = '.desktop') -> Path:
+    split_suggestion = suggestion.split(index_separator)
+    if len(split_suggestion) > 1 and split_suggestion[-1].isdigit():
+        suggestion = index_separator.join(split_suggestion[:-1]) # Remove trailing index from suggestion
 
     other_files = list(parent.glob(f'{suggestion}*{extension}'))
     other_files = [f.name.removeprefix(suggestion).removeprefix(index_separator).removesuffix(extension) for f in other_files]
-    other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit()]
+    other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
 
-    max_index = max(other_indexes) if other_indexes else -1
+    first_available_index = next((i for i in range(0, len(other_indexes)+1) if i not in other_indexes), None)
+    if first_available_index == None:
+        raise Exception('No available index found')
 
     def get_path_with_index(i: int):
         if i == 0:
@@ -74,4 +77,4 @@ def new_file_name(parent: Path, suggestion: str = 'pinned-app', index_separator:
         else:
             return parent / f'{suggestion}{index_separator}{i}{extension}'
 
-    return get_path_with_index(max_index+1)
+    return get_path_with_index(first_available_index)
