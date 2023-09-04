@@ -44,7 +44,7 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="1.2" date="">
+		<release version="1.2" date="2022-09-04">
 			<description>
 				<p>What's changed</p>
 				<ul>
@@ -52,6 +52,7 @@
 					<li>UI overhaul with new libadwaita 1.4 widgets</li>
 					<li>Simplified creation of new files</li>
 					<li>Added ability to rename and duplicate pinned files</li>
+					<li>Snap apps are now supported</li>
 					<li>Added german translation thanks to @gregorni</li>
 					<li>Added spanish translation thanks to @josushu0</li>
 					<li>Improved russian translation thanks to @daudix-UFO and @fsobolev</li>
