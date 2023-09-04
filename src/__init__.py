@@ -14,12 +14,7 @@ from .utils import *
 
 theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 paths = theme.get_search_path()
-paths += [
-    str(USER_ICONS),
-    str(HOST_ICONS),
-    str(SYSTEM_ICONS),
-    str(FLATPAK_USER_ICONS),
-    str(FLATPAK_SYSTEM_ICONS)]
+paths += [str(p) for p in ICON_PATHS]
 
 theme.set_search_path(paths)
 
