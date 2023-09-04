@@ -14,6 +14,10 @@ if Path('/.flatpak-info').exists():
 else:
     RUNNING_AS = RunningAs.DEFAULT
 
+APP_DIR = Path.home() / '.var/app/io.github.fabrialberio.pinapp'
+APP_DATA = APP_DIR / 'data'
+
+(APP_DATA / 'icons').mkdir(parents=True, exist_ok=True) # Create icons dir if it doesn't exist
 
 USER_DATA = Path.home() / '.local/share'
 SYSTEM_DATA = Path('/usr/share')

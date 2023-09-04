@@ -5,7 +5,7 @@ from typing import Callable, Optional
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_entry import DesktopEntry, Field, LocaleString
-from .utils import set_icon_from_name, new_file_name, USER_APPS
+from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 
 
 class BoolRow(Adw.ActionRow):
@@ -371,8 +371,16 @@ class FilePage(Adw.BreakpointBin):
     def _upload_icon(self):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
-                path = dialog.get_file().get_path()
-                self.icon_row.field.set(path)
+                path = Path(dialog.get_file().get_path())
+
+                # Copy file inside app data directory, so it persists after reboot
+                new_path = APP_DATA / 'icons' / path.name
+
+                print(f'{path=}\n{new_path=}')
+
+                copy(path, new_path)
+
+                self.icon_row.field.set(str(new_path))
                 self._update_icon()
                 self.update_page()
 
