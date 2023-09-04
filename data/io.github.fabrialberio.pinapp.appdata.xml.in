@@ -48,8 +48,8 @@
 			<description>
 				<p>What's changed</p>
 				<ul>
-					<li>Added autosave</li>
-					<li>Improved file view UI</li>
+					<li>Implemented autosave</li>
+					<li>UI overhaul with new libadwaita 1.4 widgets</li>
 					<li>Simplified creation of new files</li>
 					<li>Added ability to rename and duplicate pinned files</li>
 					<li>Added german translation thanks to @gregorni</li>
@@ -62,6 +62,7 @@
 					<li>Localization was prone to errors with mixed locales. Fixed thanks to @fsobolev</li>
 					<li>Using Ctrl+F to enter search always cleared the search entry and was generally unreliable</li>
 					<li>Wording of unpin dialog was unclear</li>
+					<li>On Silverblue icons disappeared on reboot. Fixed by copying icons to app directory, as suggested by @thatLeaflet.</li>
 				</ul>
 			</description>
 		</release>
