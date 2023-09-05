@@ -44,7 +44,7 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="1.2" date="2022-09-04">
+		<release version="1.2.0" date="2022-09-04">
 			<description>
 				<p>What's changed</p>
 				<ul>
