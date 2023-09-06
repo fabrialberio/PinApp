@@ -1,0 +1,227 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pinapp\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-04 14:12+0200\n"
+"PO-Revision-Date: 2023-09-06 14:41+0200\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
+"Language-Team: \n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
+#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgid "Create and edit application shortcuts"
+msgstr "Maak en bewerk snelkoppelingen"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
+msgstr "GNOME;GTK;Apps;Toepassingen;Programma's;Snelkoppelingen;Pictogrammen;"
+
+#: ../src/ui/apps_page_dialogs.ui.h:1
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Algemeen"
+
+#: ../src/ui/apps_page_dialogs.ui.h:2
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Sneltoetsen tonen"
+
+#: ../src/ui/apps_page_dialogs.ui.h:3
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Afsluiten"
+
+#: ../src/ui/apps_page_dialogs.ui.h:4
+msgctxt "shortcut window"
+msgid "Add new app"
+msgstr "Toepassing toevoegen"
+
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Zoeken"
+
+#: ../src/ui/apps_page_dialogs.ui.h:6
+msgctxt "shortcut window"
+msgid "App editing"
+msgstr "Toepassing bewerken"
+
+#: ../src/ui/apps_page_dialogs.ui.h:7
+msgctxt "shortcut window"
+msgid "Close"
+msgstr "Sluiten"
+
+#: ../src/ui/file_page_dialogs.ui.h:1
+msgid "Add new key"
+msgstr "Item toevoegen"
+
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:85
+msgid "Locale"
+msgstr "Taal"
+
+#: ../src/ui/file_page_dialogs.ui.h:3
+msgid "Key name"
+msgstr "Itemnaam"
+
+#: ../src/ui/file_page_dialogs.ui.h:4 ../src/file_page.py:391
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:5
+msgid "Add"
+msgstr "Toevoegen"
+
+#: ../src/ui/file_page_dialogs.ui.h:6
+msgid "Unpin this app?"
+msgstr "Toepassing losmaken?"
+
+#: ../src/ui/file_page_dialogs.ui.h:7
+msgid "If you unpin an app, your changes will be permanently lost."
+msgstr "Als u de toepassing losmaakt, dan worden alle aanpassingen gewist."
+
+#: ../src/ui/file_page_dialogs.ui.h:8
+msgid "Unpin"
+msgstr "Losmaken"
+
+#: ../src/ui/file_page_dialogs.ui.h:9
+msgid "Save changes?"
+msgstr "Wĳzigingen opslaan?"
+
+#: ../src/ui/file_page_dialogs.ui.h:10
+msgid "If you leave without pinning the file, your changes will be permanently lost."
+msgstr "Als u afsluit zonder het bestand vast te maken, dan worden alle aanpassingen gewist."
+
+#: ../src/ui/file_page_dialogs.ui.h:11
+msgid "Discard"
+msgstr "Verwerpen"
+
+#: ../src/ui/file_page_dialogs.ui.h:12 ../src/ui/file_page.ui.h:1
+msgid "Pin"
+msgstr "Vastmaken"
+
+#: ../src/ui/file_page_dialogs.ui.h:13
+msgid "Rename file"
+msgstr "Naam wijzigen"
+
+#: ../src/ui/file_page_dialogs.ui.h:14
+msgid "File name"
+msgstr "Bestandsnaam"
+
+#: ../src/ui/file_page_dialogs.ui.h:15
+msgid "Rename"
+msgstr "Naam wijzigen"
+
+#: ../src/ui/file_page.ui.h:2
+msgid "File menu"
+msgstr "Bestandsmenu"
+
+#: ../src/ui/file_page.ui.h:3
+msgid "Application icon"
+msgstr "Toepassingspictogram"
+
+#: ../src/ui/file_page.ui.h:4
+msgid "Localized values"
+msgstr "Vertaalde items"
+
+#: ../src/ui/file_page.ui.h:6
+msgid "String Values"
+msgstr "Vaste items"
+
+#: ../src/ui/file_page.ui.h:7
+msgid "Boolean Values"
+msgstr "Booleanwaarden"
+
+#: ../src/ui/file_page.ui.h:8
+msgid "Error opening file"
+msgstr "Het bestand kan niet worden geopend"
+
+#: ../src/ui/window.ui.h:1
+msgid "PinApp"
+msgstr "PinApp"
+
+#: ../src/ui/window.ui.h:2 ../src/apps_page.py:164
+msgid "Add new app"
+msgstr "Toepassing toevoegen"
+
+#: ../src/ui/window.ui.h:3
+msgid "Show menu"
+msgstr "Menu tonen"
+
+#: ../src/ui/window.ui.h:4
+msgid "Search"
+msgstr "Zoeken"
+
+#: ../src/ui/window.ui.h:5
+msgid "Your pins"
+msgstr "Mĳn snelkoppelingen"
+
+#: ../src/ui/window.ui.h:6
+msgid "Installed"
+msgstr "Geïnstalleerd"
+
+#: ../src/ui/window.ui.h:7
+msgid "Reload Apps"
+msgstr "Toepassingen herladen"
+
+#: ../src/ui/window.ui.h:8
+msgid "Keyboard Shortcuts"
+msgstr "Sneltoetsen"
+
+#: ../src/ui/window.ui.h:9
+msgid "About PinApp"
+msgstr "Over PinApp"
+
+#: ../src/apps_page.py:156
+msgid "No apps found"
+msgstr "Er zĳn geen toepassingen beschikbaar"
+
+#: ../src/apps_page.py:170
+msgid "Applications you install will appear here"
+msgstr "Geïnstalleerde toepassingen worden hier getoond"
+
+#: ../src/apps_page.py:174
+msgid "Error loading apps"
+msgstr "De toepassingen kunnen niet worden geladen"
+
+#: ../src/apps_page.py:180
+msgid "Loading apps…"
+msgstr "Bezig met laden…"
+
+#: ../src/apps_page.py:300
+msgid "No results found"
+msgstr "Er zĳn geen zoekresultaten"
+
+#: ../src/apps_page.py:301
+msgid "Try searching for something else"
+msgstr "Probeer een andere zoekopdracht"
+
+#: ../src/file_page.py:351
+msgid "No string values present"
+msgstr "Er zĳn geen items beschikbaar"
+
+#: ../src/file_page.py:356
+msgid "No boolean values present"
+msgstr "Er zĳn geen booleanwaarden beschikbaar"
+
+#: ../src/file_page.py:388
+msgid "Upload icon"
+msgstr "Pictogram bĳwerken"
+
+#: ../src/file_page.py:390
+msgid "Open"
+msgstr "Openen"
+
+#: ../src/window.py:153
+msgid "Desktop files"
+msgstr "Desktopbestanden"
