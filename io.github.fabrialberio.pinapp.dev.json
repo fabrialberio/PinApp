@@ -1,7 +1,7 @@
 {
     "id": "io.github.fabrialberio.pinapp",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "43",
+    "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "pinapp",
 
@@ -13,7 +13,8 @@
 
         "--filesystem=xdg-data/applications:rw",
         "--filesystem=xdg-data/flatpak:ro",
-        "--filesystem=/var/lib/flatpak:ro"
+        "--filesystem=/var/lib/flatpak:ro",
+        "--filesystem=/var/lib/snapd:ro"
     ],
 
     "cleanup": [

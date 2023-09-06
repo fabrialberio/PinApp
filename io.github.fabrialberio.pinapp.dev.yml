@@ -1,7 +1,7 @@
 id: io.github.fabrialberio.pinapp
 sdk: org.gnome.Sdk
 runtime: org.gnome.Platform
-runtime-version: "43"
+runtime-version: "master"
 command: pinapp
 
 finish-args:
@@ -13,6 +13,7 @@ finish-args:
   - --filesystem=xdg-data/applications:rw
   - --filesystem=xdg-data/flatpak:ro
   - --filesystem=/var/lib/flatpak:ro
+  - --filesystem=/var/lib/snapd:ro
 
 cleanup:
   - /include

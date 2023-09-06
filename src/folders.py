@@ -81,15 +81,10 @@ class UserFolders(FolderGroup):
     writable = True
 
     def __init__(self) -> None:
-        super().__init__([
-            USER_APPS])
+        super().__init__([USER_APPS])
 
 class SystemFolders(FolderGroup):
     writable = False
 
     def __init__(self) -> None:
-        super().__init__([
-            HOST_APPS,
-            SYSTEM_APPS,
-            FLATPAK_USER_APPS,
-            FLATPAK_SYSTEM_APPS])
+        super().__init__(APP_PATHS)

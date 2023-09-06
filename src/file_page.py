@@ -5,7 +5,7 @@ from typing import Callable, Optional
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_entry import DesktopEntry, Field, LocaleString
-from .utils import set_icon_from_name, new_file_name, USER_APPS
+from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 
 
 class BoolRow(Adw.ActionRow):
@@ -85,6 +85,8 @@ class LocaleChooserRow(Adw.ComboRow):
             title = _('Locale'),
             model = model)
 
+        self.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
+
     def connect_localized_rows(self, rows: list[LocalizedRow]):
         def update_rows(*args):
             for row in rows:
@@ -106,10 +108,13 @@ class LocaleChooserRow(Adw.ComboRow):
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
-class FilePage(Gtk.Box):
+class FilePage(Adw.BreakpointBin):
     __gtype_name__ = 'FilePage'
 
-    window_title = Gtk.Template.Child('title_widget')
+    compact_breakpoint = Gtk.Template.Child('compact_breakpoint')
+
+    window_title = Gtk.Template.Child('window_title')
+    header_bar = Gtk.Template.Child('header_bar')
     back_button = Gtk.Template.Child('back_button')
     pin_button = Gtk.Template.Child('pin_button')
 
@@ -124,36 +129,14 @@ class FilePage(Gtk.Box):
     file_view = Gtk.Template.Child('file_view')
     error_view = Gtk.Template.Child('error_view')
 
-    banner_squeezer = Gtk.Template.Child('banner_squeezer')
-    banner_box_l = Gtk.Template.Child('banner_box_l')
-    
-    icon_s = Gtk.Template.Child('icon_s')
-    banner_listbox_s = Gtk.Template.Child('banner_listbox_s')
-    icon_l = Gtk.Template.Child('icon_l')
-    banner_listbox_l = Gtk.Template.Child('banner_listbox_l')
+    app_icon = Gtk.Template.Child('icon')
+    banner_listbox = Gtk.Template.Child('banner_listbox')
 
-    @property
-    def banner_expanded(self) -> bool:
-        return self.banner_squeezer.get_visible_child() == self.banner_box_l
-    
-    @property
-    def app_icon(self):
-        return self.icon_l if self.banner_expanded else self.icon_s
-    @app_icon.setter
-    def app_icon(self, value: Gtk.Image):
-        if self.banner_expanded:
-            self.icon_l = value
-        else:
-            self.icon_s = value
-
-    @property
-    def banner_listbox(self):
-        return self.banner_listbox_l if self.banner_expanded else self.banner_listbox_s
-    
     localized_group = Gtk.Template.Child('localized_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
 
+    banner_expanded = True
 
     @property
     def allow_leave(self) -> bool:
@@ -168,7 +151,6 @@ class FilePage(Gtk.Box):
 
         self.file = None
 
-        self.banner_squeezer.connect('notify', lambda *_: self._update_app_banner())
         self.back_button.connect('clicked', lambda _: self.on_leave())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
@@ -178,12 +160,20 @@ class FilePage(Gtk.Box):
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
 
+        def _set_banner_expanded(value: bool):
+            self.banner_expanded = value
+            self._update_app_banner()
+
+        self.compact_breakpoint.connect('apply', lambda _: _set_banner_expanded(False))
+        self.compact_breakpoint.connect('unapply', lambda _: _set_banner_expanded(True))
+        self.scrolled_window.get_vadjustment().connect('value-changed', lambda _: self._update_window_title())
+
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
         assert self.file is not None
 
         is_new_file = not self.file.path.exists()
-        pinned_path: Path = USER_APPS / self.file.filename
+        pinned_path: Path = new_file_name(USER_APPS, self.file.path.stem)
 
         self.file.save(pinned_path)
         self.emit('file-changed')
@@ -271,7 +261,6 @@ class FilePage(Gtk.Box):
                     self.load_path(new_path)
                 else:
                     self.file.path = new_path
-                    self._update_window_title()
 
                 self.emit('file-changed')
 
@@ -301,7 +290,7 @@ class FilePage(Gtk.Box):
         self.view_stack.set_visible_child(self.file_view)
         self.file = file
 
-        self.scrolled_window.set_vadjustment(Gtk.Adjustment.new(0, 0, 0, 0, 0, 0))
+        self.scrolled_window.get_vadjustment().set_value(0)
 
         is_pinned = self.file.path.parent == USER_APPS
         self.file_menu_button.set_visible(is_pinned)
@@ -370,8 +359,11 @@ class FilePage(Gtk.Box):
         self._update_app_banner()
 
     def _update_window_title(self):
-        self.window_title.set_title(self.file.appsection.Name.as_str() or '')
-        self.window_title.set_subtitle(self.file.filename)
+        if self.scrolled_window.get_vadjustment().get_value() > 0:
+            self.header_bar.set_show_title(True)
+            self.window_title.set_title(self.file.appsection.Name.as_str())
+        else:
+            self.header_bar.set_show_title(False)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
@@ -379,8 +371,16 @@ class FilePage(Gtk.Box):
     def _upload_icon(self):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
-                path = dialog.get_file().get_path()
-                self.icon_row.field.set(path)
+                path = Path(dialog.get_file().get_path())
+
+                # Copy file inside app data directory, so it persists after reboot
+                new_path = APP_DATA / 'icons' / path.name
+
+                print(f'{path=}\n{new_path=}')
+
+                copy(path, new_path)
+
+                self.icon_row.field.set(str(new_path))
                 self._update_icon()
                 self.update_page()
 
@@ -409,7 +409,7 @@ class FilePage(Gtk.Box):
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
 
-        app_name_row.connect('changed', lambda _: self.window_title.set_title(app_name_row.get_text()))
+        app_name_row.connect('changed', lambda _: self._update_window_title())
 
         if self.banner_expanded:
             app_name_row.set_size_request(0, 64)

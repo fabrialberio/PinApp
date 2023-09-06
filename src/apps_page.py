@@ -18,6 +18,7 @@ class AppChip(Gtk.Box):
         GRAY = 'chip-gray'
         BLUE = 'chip-blue'
         YELLOW = 'chip-yellow'
+        ORANGE = 'chip-orange'
 
     @classmethod
     def Pinned(cls):
@@ -35,6 +36,14 @@ class AppChip(Gtk.Box):
             icon_name='flatpak-symbolic',
             label='Flatpak',
             color=AppChip.Color.BLUE,
+            show_label=show_label)
+    
+    @classmethod
+    def Snap(cls, show_label=False):
+        return cls(
+            icon_name='snap-symbolic',
+            label='Snap',
+            color=AppChip.Color.ORANGE,
             show_label=show_label)
 
     def __init__(self,
@@ -101,6 +110,8 @@ class AppRow(Adw.ActionRow):
             icon.set_opacity(.2)
         if self.file.appsection.as_dict().get('X-Flatpak') != None:
             self.add_chip(AppChip.Flatpak())
+        if self.file.appsection.as_dict().get('X-SnapInstanceName') != None:
+            self.add_chip(AppChip.Snap())
         if self.file.appsection.Terminal.as_bool() == True:
             self.add_chip(AppChip.Terminal())
 

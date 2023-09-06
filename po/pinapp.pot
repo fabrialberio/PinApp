@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-11 20:01+0200\n"
+"POT-Creation-Date: 2023-09-04 14:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,7 @@ msgstr ""
 msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr ""
 
-#: ../src/ui/apps_page_dialogs.ui.h:5
+#: ../src/ui/apps_page_dialogs.ui.h:1
 msgctxt "shortcut window"
 msgid "General"
 msgstr ""
@@ -60,11 +60,6 @@ msgstr ""
 #: ../src/ui/apps_page_dialogs.ui.h:7
 msgctxt "shortcut window"
 msgid "Close"
-msgstr ""
-
-#: ../src/ui/apps_page_dialogs.ui.h:8
-msgctxt "shortcut window"
-msgid "Save and close"
 msgstr ""
 
 #: ../src/ui/file_page_dialogs.ui.h:1
@@ -152,67 +147,71 @@ msgstr ""
 msgid "Error opening file"
 msgstr ""
 
-#: ../src/ui/window.ui.h:1 ../src/apps_page.py:153
+#: ../src/ui/window.ui.h:1
+msgid "PinApp"
+msgstr ""
+
+#: ../src/ui/window.ui.h:2 ../src/apps_page.py:164
 msgid "Add new app"
 msgstr ""
 
-#: ../src/ui/window.ui.h:2
+#: ../src/ui/window.ui.h:3
 msgid "Show menu"
 msgstr ""
 
-#: ../src/ui/window.ui.h:3
+#: ../src/ui/window.ui.h:4
 msgid "Search"
 msgstr ""
 
-#: ../src/ui/window.ui.h:4
+#: ../src/ui/window.ui.h:5
 msgid "Your pins"
 msgstr ""
 
-#: ../src/ui/window.ui.h:5
+#: ../src/ui/window.ui.h:6
 msgid "Installed"
 msgstr ""
 
-#: ../src/ui/window.ui.h:6
+#: ../src/ui/window.ui.h:7
 msgid "Reload Apps"
 msgstr ""
 
-#: ../src/ui/window.ui.h:7
+#: ../src/ui/window.ui.h:8
 msgid "Keyboard Shortcuts"
 msgstr ""
 
-#: ../src/ui/window.ui.h:8
+#: ../src/ui/window.ui.h:9
 msgid "About PinApp"
 msgstr ""
 
-#: ../src/apps_page.py:145
+#: ../src/apps_page.py:156
 msgid "No apps found"
 msgstr ""
 
-#: ../src/apps_page.py:159
+#: ../src/apps_page.py:170
 msgid "Applications you install will appear here"
 msgstr ""
 
-#: ../src/apps_page.py:163
+#: ../src/apps_page.py:174
 msgid "Error loading apps"
 msgstr ""
 
-#: ../src/apps_page.py:169
+#: ../src/apps_page.py:180
 msgid "Loading apps…"
 msgstr ""
 
-#: ../src/apps_page.py:289
+#: ../src/apps_page.py:300
 msgid "No results found"
 msgstr ""
 
-#: ../src/apps_page.py:290
+#: ../src/apps_page.py:301
 msgid "Try searching for something else"
 msgstr ""
 
-#: ../src/file_page.py:362
+#: ../src/file_page.py:351
 msgid "No string values present"
 msgstr ""
 
-#: ../src/file_page.py:367
+#: ../src/file_page.py:356
 msgid "No boolean values present"
 msgstr ""
 
@@ -224,6 +223,6 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-#: ../src/window.py:151
+#: ../src/window.py:153
 msgid "Desktop files"
 msgstr ""

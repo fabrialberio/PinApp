@@ -17,6 +17,7 @@
 
 from pathlib import Path
 from typing import Callable
+from enum import Enum
 
 from gi.repository import Gtk, Adw, Gio
 
@@ -24,14 +25,17 @@ from .utils import USER_APPS, new_file_name
 from .desktop_entry import DesktopEntry
 
 
+class Page(Enum):
+    APPS_PAGE = 'apps-page'
+    FILE_PAGE = 'file-page'
+
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'PinAppWindow'
 
     new_file_button = Gtk.Template.Child('new_file_button')
 
-    leaflet = Gtk.Template.Child('main_leaflet')
-    apps_page = Gtk.Template.Child('apps_page')
+    navigation_view = Gtk.Template.Child('navigation_view')
     file_page = Gtk.Template.Child('file_page')
 
     view_stack = Gtk.Template.Child('view_stack')
@@ -55,7 +59,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.installed_view.connect('file-open', lambda _, f: self.open_file(f))
         self.search_view.connect('file-open', lambda _, f: self.open_file(f))
 
-        self.file_page.connect('file-leave', lambda _: self.set_page(self.apps_page))
+        self.file_page.connect('file-leave', lambda _: self.set_page(Page.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_apps(show_pins=True, show_apps=False, only_pins=True))
 
         self.connect('close-request', lambda _: self.do_close_request())
@@ -84,16 +88,14 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', view_changed_cb)
 
-    def set_page(self, new_page: Gtk.Widget):
-        if new_page in [
-                self.apps_page,
-                self.file_page]:
-            self.leaflet.set_visible_child(new_page)
-        else:
-            raise ValueError
+    def set_page(self, new_page: Page):
+        if new_page == Page.APPS_PAGE:
+            self.navigation_view.pop_to_tag(Page.APPS_PAGE.value)
+        elif new_page == Page.FILE_PAGE:
+            self.navigation_view.push_by_tag(Page.FILE_PAGE.value)
 
-    def get_page(self) -> Gtk.Widget:
-        return self.leaflet.get_visible_child()
+    def get_page(self) -> Page:
+        return Page(self.navigation_view.get_visible_page().get_tag())
 
     def set_view(self, new_view: Gtk.Widget):
         if new_view in [
@@ -112,7 +114,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     def set_search_mode(self, state: bool, clear_entry=False):
         '''Shows or hides search view and search bar'''
         if state:
-            self.set_page(self.apps_page)
+            self.set_page(Page.APPS_PAGE)
             self.set_view(self.search_view)
 
             self.search_bar.set_search_mode(True)
@@ -127,17 +129,17 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def open_file(self, file):
         self.file_page.load_file(file)
-        self.set_page(self.file_page)
+        self.set_page(Page.FILE_PAGE)
 
     def new_file(self):
-        if self.get_page() != self.apps_page:
+        if self.get_page() != Page.APPS_PAGE:
             return
 
-        path = new_file_name(USER_APPS)
+        path = new_file_name(USER_APPS, 'pinned-app')
         file = DesktopEntry.new_with_defaults(path)
 
         self.file_page.load_file(file)
-        self.set_page(self.file_page)
+        self.set_page(Page.FILE_PAGE)
 
 
     def choose_file(self, callback: Callable[[Path], None]) -> None:
@@ -164,11 +166,11 @@ class PinAppWindow(Adw.ApplicationWindow):
             return
 
         self.file_page.load_path(path)
-        self.set_page(self.file_page)
+        self.set_page(Page.FILE_PAGE)
 
     def reload_apps(self, show_pins=False, show_apps=True, only_pins=False):
         if show_apps:
-            self.set_page(self.apps_page)
+            self.set_page(Page.APPS_PAGE)
 
         if show_pins:
             self.set_view(self.pins_view)
@@ -184,7 +186,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.close()
             self.destroy()
 
-        if self.get_page() == self.file_page:
+        if self.get_page() == Page.FILE_PAGE:
             if self.file_page.allow_leave:
                 self.close()
                 quit()

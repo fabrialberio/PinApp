@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-11 20:01+0200\n"
-"PO-Revision-Date: 2023-06-11 19:57+0200\n"
+"POT-Creation-Date: 2023-09-04 14:15+0200\n"
+"PO-Revision-Date: 2023-09-04 14:11+0200\n"
 "Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
 "Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
 "Language: it\n"
@@ -62,11 +62,6 @@ msgstr "Modifica"
 msgctxt "shortcut window"
 msgid "Close"
 msgstr "Chiudi"
-
-#: ../src/ui/apps_page_dialogs.ui.h:8
-msgctxt "shortcut window"
-msgid "Save and close"
-msgstr "Salva e chiudi"
 
 #: ../src/ui/file_page_dialogs.ui.h:1
 msgid "Add new key"
@@ -155,67 +150,71 @@ msgstr "Valori Booleani"
 msgid "Error opening file"
 msgstr "Errore nell'apertura del file"
 
-#: ../src/ui/window.ui.h:1 ../src/apps_page.py:153
+#: ../src/ui/window.ui.h:1
+msgid "PinApp"
+msgstr "PinApp"
+
+#: ../src/ui/window.ui.h:2 ../src/apps_page.py:164
 msgid "Add new app"
 msgstr "Aggiungi applicazione"
 
-#: ../src/ui/window.ui.h:2
+#: ../src/ui/window.ui.h:3
 msgid "Show menu"
 msgstr "Mostra menu"
 
-#: ../src/ui/window.ui.h:3
+#: ../src/ui/window.ui.h:4
 msgid "Search"
 msgstr "Cerca"
 
-#: ../src/ui/window.ui.h:4
+#: ../src/ui/window.ui.h:5
 msgid "Your pins"
 msgstr "Appuntate"
 
-#: ../src/ui/window.ui.h:5
+#: ../src/ui/window.ui.h:6
 msgid "Installed"
 msgstr "Installate"
 
-#: ../src/ui/window.ui.h:6
+#: ../src/ui/window.ui.h:7
 msgid "Reload Apps"
 msgstr "Ricarica applicazioni"
 
-#: ../src/ui/window.ui.h:7
+#: ../src/ui/window.ui.h:8
 msgid "Keyboard Shortcuts"
 msgstr "Scorciatoie da tastiera"
 
-#: ../src/ui/window.ui.h:8
+#: ../src/ui/window.ui.h:9
 msgid "About PinApp"
 msgstr "Informazioni su PinApp"
 
-#: ../src/apps_page.py:145
+#: ../src/apps_page.py:156
 msgid "No apps found"
 msgstr "Nessuna applicazione trovata"
 
-#: ../src/apps_page.py:159
+#: ../src/apps_page.py:170
 msgid "Applications you install will appear here"
 msgstr "Le applicazioni installate appariranno qui"
 
-#: ../src/apps_page.py:163
+#: ../src/apps_page.py:174
 msgid "Error loading apps"
 msgstr "Errore caricamento applicazioni"
 
-#: ../src/apps_page.py:169
+#: ../src/apps_page.py:180
 msgid "Loading apps…"
 msgstr "Caricamento applicazioni…"
 
-#: ../src/apps_page.py:289
+#: ../src/apps_page.py:300
 msgid "No results found"
 msgstr "Nessun risultato trovato"
 
-#: ../src/apps_page.py:290
+#: ../src/apps_page.py:301
 msgid "Try searching for something else"
 msgstr "Prova a cercare qualcos'altro"
 
-#: ../src/file_page.py:362
+#: ../src/file_page.py:351
 msgid "No string values present"
 msgstr "Nessun valore di testo presente"
 
-#: ../src/file_page.py:367
+#: ../src/file_page.py:356
 msgid "No boolean values present"
 msgstr "Nessun valore booleano presente"
 
@@ -227,9 +226,13 @@ msgstr "Carica icona"
 msgid "Open"
 msgstr "Apri"
 
-#: ../src/window.py:151
+#: ../src/window.py:153
 msgid "Desktop files"
 msgstr "File desktop"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Save and close"
+#~ msgstr "Salva e chiudi"
 
 #~ msgid "Create"
 #~ msgstr "Crea"

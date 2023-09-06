@@ -10,6 +10,7 @@
     <file>style.css</file>
   </gresource>
   <gresource prefix='/io/github/fabrialberio/pinapp/icons/scalable/actions'>
+    <file alias='snap-symbolic.svg'>../../data/icons/scalable/actions/snap-symbolic.svg</file>
     <file alias='flatpak-symbolic.svg'>../../data/icons/scalable/actions/flatpak-symbolic.svg</file>
     <file alias='installed-symbolic.svg'>../../data/icons/scalable/actions/installed-symbolic.svg</file>
     <file alias='pin-symbolic.svg'>../../data/icons/scalable/actions/pin-symbolic.svg</file>
