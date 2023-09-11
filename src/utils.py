@@ -40,6 +40,8 @@ ICON_PATHS = [
 ]
 
 USER_APPS = USER_DATA / 'applications'
+# TODO: How about KDE??
+AUTOSTART_APPS = Path.home() / '.config/autostart'
 
 APP_PATHS = [
     SYSTEM_DATA / 'applications',

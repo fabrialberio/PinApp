@@ -93,6 +93,22 @@
                                   </object>
                                 </child>
                                 <child>
+                                  <object class="AdwPreferencesGroup" id="autostart_group">
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <property name="title" translatable="true">Autostart</property>
+                                        <property name="subtitle" translatable="true">Start the application when the user logs in</property>
+                                        <property name="activatable-widget">autostart_switch</property>
+                                        <child>
+                                          <object class="GtkSwitch" id="autostart_switch">
+                                            <property name="valign">center</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
                                   <!-- Localized values group -->
                                   <object class='AdwPreferencesGroup' id='localized_group'>
                                     <property name='title' translatable='yes'>Localized values</property>
@@ -184,7 +200,6 @@
         <setter object="icon" property="pixel-size">96</setter>
       </object>
     </child>
-
   </template>
 
   <object class='GtkPopover' id='file_menu_popover'>

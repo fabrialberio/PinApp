@@ -5,7 +5,7 @@ from typing import Callable, Optional
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_entry import DesktopEntry, Field, LocaleString
-from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
+from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA, AUTOSTART_APPS
 
 
 class BoolRow(Adw.ActionRow):
@@ -122,6 +122,7 @@ class FilePage(Adw.BreakpointBin):
     unpin_button = Gtk.Template.Child('unpin_button')
     rename_button = Gtk.Template.Child('rename_button')
     duplicate_button = Gtk.Template.Child('duplicate_button')
+    autostart_toggle = Gtk.Template.Child('autostart_switch')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -156,6 +157,7 @@ class FilePage(Adw.BreakpointBin):
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
         self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
+        self.autostart_toggle.connect('state-set', lambda _, v: self.toggle_file_autostart(v))
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
@@ -278,6 +280,22 @@ class FilePage(Adw.BreakpointBin):
         self.load_path(new_path)
         self.emit('file-changed')
 
+    def toggle_file_autostart(self, value: bool):
+        autostart_path = AUTOSTART_APPS / self.file.path.name
+
+        autostart_key = 'X-GNOME-Autostart-enabled' # TODO: Temporary, mabye there are more?
+        autostart_field = Field(autostart_key, self.file.appsection.section)
+        autostart_field.set(value)
+
+        if value:
+            if not autostart_path.exists():
+                copy(self.file.path, autostart_path)
+        else:
+            if autostart_path.exists():
+                autostart_path.unlink()
+
+        self.update_page()
+
     def load_path(self, path: Path):
         try:
             file = DesktopEntry(path)
@@ -298,6 +316,9 @@ class FilePage(Adw.BreakpointBin):
 
         self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
+
+        self.autostart_toggle.set_sensitive(AUTOSTART_APPS.exists())
+        self.autostart_toggle.set_active((AUTOSTART_APPS / self.file.path.name).exists())
 
         self.update_page()
 
