@@ -19,6 +19,7 @@ class AppChip(Gtk.Box):
         BLUE = 'chip-blue'
         YELLOW = 'chip-yellow'
         ORANGE = 'chip-orange'
+        GREEN = 'chip-green'
 
     @classmethod
     def Pinned(cls):
@@ -44,6 +45,14 @@ class AppChip(Gtk.Box):
             icon_name='snap-symbolic',
             label='Snap',
             color=AppChip.Color.ORANGE,
+            show_label=show_label)
+    
+    @classmethod
+    def Autostart(cls, show_label=False):
+        return cls(
+            icon_name='media-playback-start-symbolic',
+            label='Autostart',
+            color=AppChip.Color.GREEN,
             show_label=show_label)
 
     def __init__(self,
@@ -108,12 +117,14 @@ class AppRow(Adw.ActionRow):
 
         if self.file.appsection.NoDisplay.as_bool() == True:
             icon.set_opacity(.2)
+        if self.file.autostart():
+            self.add_chip(AppChip.Autostart())
+        if self.file.appsection.Terminal.as_bool() == True:
+            self.add_chip(AppChip.Terminal())
         if self.file.appsection.as_dict().get('X-Flatpak') != None:
             self.add_chip(AppChip.Flatpak())
         if self.file.appsection.as_dict().get('X-SnapInstanceName') != None:
             self.add_chip(AppChip.Snap())
-        if self.file.appsection.Terminal.as_bool() == True:
-            self.add_chip(AppChip.Terminal())
 
         for c in chips:
             self.add_chip(c)
