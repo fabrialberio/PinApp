@@ -7,6 +7,38 @@ from gi.repository import Gtk, Adw, Gio
 from .desktop_entry import DesktopEntry, Field, LocaleString
 from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA, AUTOSTART_APPS
 
+class ActionToggleButton(Gtk.ToggleButton):
+    __gtype_name__ = 'ActionToggleButton'
+
+    def __init__(self,
+            label: str,
+            icon_name: str,
+            active: bool = False,
+            sensitive: bool = True,
+            active_css_class = 'active-toggle-blue'
+        ) -> None:
+        super().__init__(
+            hexpand=True,
+            active=active,
+            sensitive=sensitive,
+            css_classes=['pill'],
+
+            child=Adw.ButtonContent(
+                label=label,
+                icon_name=icon_name,
+                halign=Gtk.Align.CENTER,
+            )
+        )
+        self.active_css_class = active_css_class
+
+        self._set_toggled(active)
+        self.connect('toggled', lambda _: self._set_toggled(self.get_active()))
+
+    def _set_toggled(self, value: bool):
+        if value:
+            self.add_css_class(self.active_css_class)
+        else:
+            self.remove_css_class(self.active_css_class)
 
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
@@ -122,7 +154,7 @@ class FilePage(Adw.BreakpointBin):
     unpin_button = Gtk.Template.Child('unpin_button')
     rename_button = Gtk.Template.Child('rename_button')
     duplicate_button = Gtk.Template.Child('duplicate_button')
-    autostart_toggle = Gtk.Template.Child('autostart_switch')
+    quick_toggles_box = Gtk.Template.Child('quick_toggles_box')
 
     scrolled_window = Gtk.Template.Child('scrolled_window')
 
@@ -157,7 +189,6 @@ class FilePage(Adw.BreakpointBin):
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
         self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
-        self.autostart_toggle.connect('state-set', lambda _, v: self.toggle_file_autostart(v))
         self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
@@ -280,22 +311,6 @@ class FilePage(Adw.BreakpointBin):
         self.load_path(new_path)
         self.emit('file-changed')
 
-    def toggle_file_autostart(self, value: bool):
-        autostart_path = AUTOSTART_APPS / self.file.path.name
-
-        autostart_key = 'X-GNOME-Autostart-enabled' # TODO: Temporary, mabye there are more?
-        autostart_field = Field(autostart_key, self.file.appsection.section)
-        autostart_field.set(value)
-
-        if value:
-            if not autostart_path.exists():
-                copy(self.file.path, autostart_path)
-        else:
-            if autostart_path.exists():
-                autostart_path.unlink()
-
-        self.update_page()
-
     def load_path(self, path: Path):
         try:
             file = DesktopEntry(path)
@@ -316,9 +331,6 @@ class FilePage(Adw.BreakpointBin):
 
         self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
-
-        self.autostart_toggle.set_sensitive(AUTOSTART_APPS.exists())
-        self.autostart_toggle.set_active((AUTOSTART_APPS / self.file.path.name).exists())
 
         self.update_page()
 
@@ -378,6 +390,7 @@ class FilePage(Adw.BreakpointBin):
 
         self._update_window_title()
         self._update_app_banner()
+        self._update_quick_toggles_box()
 
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
@@ -385,6 +398,40 @@ class FilePage(Adw.BreakpointBin):
             self.window_title.set_title(self.file.appsection.Name.as_str())
         else:
             self.header_bar.set_show_title(False)
+
+    def _update_quick_toggles_box(self):
+        while (toggle := self.quick_toggles_box.get_first_child()) != None:
+            self.quick_toggles_box.remove(toggle)
+
+        autostart_toggle = ActionToggleButton(
+            label=_('Autostart'),
+            icon_name='media-playback-start-symbolic',
+            sensitive=AUTOSTART_APPS.exists(),
+            active=(AUTOSTART_APPS / self.file.path.name).exists(),
+            active_css_class='active-toggle-green',
+        )
+        autostart_toggle.connect('toggled', lambda _: self.file.set_autostart(autostart_toggle.get_active()))
+        autostart_toggle.connect('toggled', lambda _: self.update_page())
+
+        hidden_toggle = ActionToggleButton(
+            label=_('Hidden'),
+            icon_name='view-conceal-symbolic',
+            active=self.file.appsection.NoDisplay.as_bool(),
+        )
+        hidden_toggle.connect('toggled', lambda _: self.file.appsection.NoDisplay.set(hidden_toggle.get_active()))
+        hidden_toggle.connect('toggled', lambda _: self.update_page())
+
+        terminal_toggle = ActionToggleButton(
+            label=_('Terminal'),
+            icon_name='utilities-terminal-symbolic',
+            active=self.file.appsection.Terminal.as_bool(),
+        )
+        terminal_toggle.connect('toggled', lambda _: self.file.appsection.Terminal.set(terminal_toggle.get_active()))
+        terminal_toggle.connect('toggled', lambda _: self.update_page())
+
+        self.quick_toggles_box.append(autostart_toggle)
+        self.quick_toggles_box.append(hidden_toggle)
+        self.quick_toggles_box.append(terminal_toggle)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())

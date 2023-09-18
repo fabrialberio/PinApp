@@ -93,19 +93,10 @@
                                   </object>
                                 </child>
                                 <child>
-                                  <object class="AdwPreferencesGroup" id="autostart_group">
-                                    <child>
-                                      <object class="AdwActionRow">
-                                        <property name="title" translatable="true">Autostart</property>
-                                        <property name="subtitle" translatable="true">Start the application when the user logs in</property>
-                                        <property name="activatable-widget">autostart_switch</property>
-                                        <child>
-                                          <object class="GtkSwitch" id="autostart_switch">
-                                            <property name="valign">center</property>
-                                          </object>
-                                        </child>
-                                      </object>
-                                    </child>
+                                  <object class='GtkBox' id='quick_toggles_box'>
+                                    <property name='orientation'>horizontal</property>
+                                    <property name='spacing'>12</property>
+                                    <property name='margin-top'>6</property>
                                   </object>
                                 </child>
                                 <child>
@@ -198,6 +189,8 @@
         <setter object="icon" property="margin-end">0</setter>
         <setter object="icon" property="margin-bottom">24</setter>
         <setter object="icon" property="pixel-size">96</setter>
+        <setter object="quick_toggles_box" property="orientation">vertical</setter>
+        <setter object="quick_toggles_box" property="spacing">6</setter>
       </object>
     </child>
   </template>

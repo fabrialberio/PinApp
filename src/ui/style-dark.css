@@ -9,3 +9,7 @@
 .chip-orange {
 	color: @orange_2;
 }
+
+.chip-green {
+	color: @green_2;
+}

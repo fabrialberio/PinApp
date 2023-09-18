@@ -19,6 +19,27 @@
 	color: @orange_5;
 }
 
+.chip-green	{
+	color: @green_4;
+}
+
+.active-toggle-blue {
+	background-color: @blue_3;
+	color: @light_1;
+}
+
+.active-toggle-blue:hover {
+	background-color: @blue_4;
+}
+
+.active-toggle-green {
+	background-color: @green_4;
+	color: @light_1;
+}
+
+.active-toggle-green:hover {
+	background-color: @green_5;
+}
 
 .app-banner-listbox {
 	background-color: transparent;
