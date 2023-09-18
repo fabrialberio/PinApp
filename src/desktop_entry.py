@@ -2,10 +2,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from os import access, W_OK, R_OK
+from os import access, W_OK, R_OK, symlink
 from locale import getlocale, LC_CTYPE
 from hashlib import sha256
 from configparser import ConfigParser, SectionProxy, Error as ConfigParserError
+
+from .utils import AUTOSTART_APPS
 
 
 @dataclass
@@ -418,6 +420,9 @@ class DesktopEntry(IniFile):
     def edited(self) -> bool:
         return self._saved_hash != self._get_hash()
 
+    def autostart(self) -> bool:
+        return (AUTOSTART_APPS / self.path.name).exists()
+
     def __init__(self, path: Path) -> None:
         super().__init__(path)
 
@@ -429,6 +434,19 @@ class DesktopEntry(IniFile):
 
         if self.path.exists():
             self.load()
+
+    def set_autostart(self, value: bool) -> None:
+        autostart_path = AUTOSTART_APPS / self.path.name
+        autostart_key = 'X-GNOME-Autostart-enabled'
+        autostart_field = Field(autostart_key, self.appsection.section)
+        autostart_field.set(value)
+
+        if value:
+            if not autostart_path.exists():
+                symlink(self.path, autostart_path)
+        else:
+            if autostart_path.exists():
+                autostart_path.unlink()
 
     def load(self):
         super().load()
@@ -455,6 +473,7 @@ class DesktopEntry(IniFile):
         return ActionSection.dict_from_parser(self.parser)
 
     def _get_hash(self) -> str:
+        # TODO: Doesn't take into account action sections
         return sha256(''.join(f.as_str() for f in self.appsection.values()).encode()).hexdigest()
 
     def __lt__(self, __o: object) -> bool:
