@@ -89,11 +89,11 @@ class Section:
 
     def __dict__(self) -> dict[str, str]:
         return {k: self._section.get(k) for k in self._section.keys()}
-    
+
     def __hash__(self) -> int:
         return hash(tuple(self.__dict__().items()))
 
-@dataclass
+@dataclass(eq = False)
 class IniFile:
     path: Path
 
@@ -147,6 +147,7 @@ class DesktopEntry(Section):
     Comment: LocalizedField[str]
     Keywords: LocalizedField[list[str]]
     X_Flatpak: Field[bool]
+    X_SnapInstanceName: Field[str]
     X_GNOME_Autostart: Field[bool]
 
     def __init__(self, _section: SectionProxy) -> None:
@@ -166,7 +167,7 @@ class DesktopAction(Section):
 
         super().__init__(_section)
 
-@dataclass
+@dataclass(eq = False)
 class DesktopFile(IniFile):
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -208,9 +209,3 @@ class DesktopFile(IniFile):
 
     def __hash__(self) -> int:
         return hash(tuple(self.__dict__().items()))
-
-    def __lt__(self, __o: object) -> bool:
-        if isinstance(__o, DesktopFile):
-            return self.desktop_entry.Name.get(default = '').lower() < __o.desktop_entry.Name.get(default = '').lower()
-        else:
-            raise TypeError(f"'<' not supported between instances of {type(self)} and {type(__o)}")

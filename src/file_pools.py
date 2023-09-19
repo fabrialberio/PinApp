@@ -41,7 +41,7 @@ class WritableDesktopFilePool(DesktopFilePool):
         if not self._dirs:
             raise Exception('At least one of paths must be writable')
 
-    def new_file_name(self, name: str, separator = '-', suffix = '.desktop') -> Path:
+    def new_file_name(self, name: str, suffix = '.desktop', separator = '-') -> Path:
         parent = self._dirs[0]
 
         other_files = list(parent.glob(f'{name}*{suffix}'))
@@ -64,11 +64,9 @@ USER_POOL = WritableDesktopFilePool(
 SYSTEM_POOL = DesktopFilePool(
     paths = [
         SYSTEM_DATA / 'applications',
+        FLATPAK_USER / 'exports/share/applications',
+        FLATPAK_SYSTEM / 'exports/share/applications',
         HOST_DATA / 'applications',
         Path('/var/lib/snapd/desktop/applications'),
     ]
-)
-
-EMPTY_POOL = WritableDesktopFilePool(
-    paths = []
 )
