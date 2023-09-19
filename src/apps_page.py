@@ -4,8 +4,8 @@ from gi.repository import Gtk, Adw, Pango
 from xml.sax.saxutils import escape
 
 from .utils import *
-from .folders import FolderGroup, UserFolders, SystemFolders
-from .desktop_entry import DesktopEntry
+from .file_pools import USER_POOL, SYSTEM_POOL, DesktopFilePool, WritableDesktopFilePool
+from .desktop_file import DesktopFile
 
 def escape_xml(string: str) -> str:
     return escape(string or '')
@@ -48,7 +48,7 @@ class AppChip(Gtk.Box):
 
     def __init__(self,
             icon_name: str,
-            label: str = None,
+            label: str = '',
             show_label: bool = True,
             color: Color = Color.GRAY
         ) -> None:
@@ -78,14 +78,14 @@ class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
     def __init__(self,
-            file: DesktopEntry,
+            file: DesktopFile,
             chips: list[AppChip] = []):
         self.file = file
 
         super().__init__(
-            title = escape_xml(self.file.appsection.Name.as_str()),
+            title = escape_xml(self.file.desktop_entry.Name.get(default='')),
             title_lines = 1,
-            subtitle = escape_xml(self.file.appsection.Comment.as_str()),
+            subtitle = escape_xml(self.file.desktop_entry.Comment.get(default='')),
             subtitle_lines = 1,
             activatable = True,)
 
@@ -94,7 +94,7 @@ class AppRow(Adw.ActionRow):
             margin_top=6,
             margin_bottom=6,
             css_classes=['icon-dropshadow'])
-        set_icon_from_name(icon, file.appsection.Icon.as_str())
+        set_icon_from_name(icon, file.desktop_entry.Icon.get(default=''))
 
         self.add_prefix(icon)
 
@@ -106,13 +106,13 @@ class AppRow(Adw.ActionRow):
             opacity=.6))
 
 
-        if self.file.appsection.NoDisplay.as_bool() == True:
+        if self.file.desktop_entry.NoDisplay.get(default=False):
             icon.set_opacity(.2)
-        if self.file.appsection.as_dict().get('X-Flatpak') != None:
+        if self.file.desktop_entry.X_Flatpak.get(default = False):
             self.add_chip(AppChip.Flatpak())
-        if self.file.appsection.as_dict().get('X-SnapInstanceName') != None:
+        if self.file.desktop_entry.X_SnapInstanceName.get(default = False):
             self.add_chip(AppChip.Snap())
-        if self.file.appsection.Terminal.as_bool() == True:
+        if self.file.desktop_entry.Terminal.get(default=False):
             self.add_chip(AppChip.Terminal())
 
         for c in chips:
@@ -127,7 +127,7 @@ class AppRow(Adw.ActionRow):
     # Used for sorting apps by name in SearchView
     def __lt__(self, other) -> bool:
         if isinstance(other, AppRow):
-            return self.file.__lt__(other.file)
+            return self.file.desktop_entry.Name.get(default='') < other.file.desktop_entry.Name.get(default='')
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
 
@@ -234,60 +234,60 @@ class AppsView(Adw.Bin):
         self.state = state
         self.emit('state-changed')
 
-class FolderGroupView(AppsView):
+class DesktopFilePoolView(AppsView):
     '''A widget that handles status pages for states and represents apps in a FolderGroup'''
     __gtype_name__ = 'FolderView'
 
-    def __init__(self, folder_group: FolderGroup, description: str = '') -> None:
-        self.folder_group = folder_group
+    def __init__(self, pool: DesktopFilePool, description: str = '') -> None:
+        self.pool = pool
         self.description = description
-        super().__init__(self.folder_group.writable, self.description)
+        super().__init__(isinstance(self.pool, WritableDesktopFilePool), self.description)
 
     def load_apps(self, loading_ok=True):
         if self.state == State.LOADING or loading_ok:
             return
 
-        if self.folder_group.any_exists:
+        if self.pool._dirs:
             self.set_state(State.LOADING)
 
-            def fill_group():
-                if not self.folder_group.empty:
+            def fill_group(files: list[DesktopFile]):
+                if files:
                     rows = []
-                    files = sorted(self.folder_group.files)
+
                     for file in files:
                         row = AppRow(file)
                         row.connect('file-open', lambda _, f: self.emit('file-open', f))
                         rows.append(row)
+
+                    rows = sorted(rows)
 
                     self.update_filled_page(rows)
                     self.set_state(State.FILLED)
                 else:
                     self.set_state(State.EMPTY)
 
-            self.folder_group.get_files_async(
-                callback=fill_group,
-                ignore_parsing_errors=True)
+            self.pool.files_async(callback=fill_group)
         else:
             self.set_state(State.ERROR)
 
-class PinsView(FolderGroupView):
+class PinsView(DesktopFilePoolView):
     __gtype_name__ = 'PinsView'
 
     def __init__(self) -> None:
-        super().__init__(UserFolders())
+        super().__init__(USER_POOL)
 
-class InstalledView(FolderGroupView):
+class InstalledView(DesktopFilePoolView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:
-        super().__init__(SystemFolders())
+        super().__init__(SYSTEM_POOL)
 
 class SearchView(AppsView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
-    source_views: list[FolderGroupView]
-    folder_groups: list[FolderGroup]
+    source_views: list[DesktopFilePoolView]
+    pools: list[DesktopFilePool]
     rows: list[AppRow] = []
     search_entry: Gtk.SearchEntry
 
@@ -305,12 +305,12 @@ class SearchView(AppsView):
         self.search_entry = search_entry
         self.search_entry.connect('search-changed', lambda e: self.search(e.get_text()))
 
-    def set_source_views(self, source_views: list[FolderGroupView]):
+    def set_source_views(self, source_views: list[DesktopFilePoolView]):
         self.source_views = source_views
 
-        self.folder_groups = [v.folder_group for v in self.source_views]
+        self.pools = [v.pool for v in self.source_views]
 
-        def state_changed_cb(view: FolderGroupView):
+        def state_changed_cb(view: DesktopFilePoolView):
             '''Updates search_map when all source_views are loaded'''
             if view.state == State.LOADING:
                 self.set_state(State.LOADING)
@@ -325,11 +325,11 @@ class SearchView(AppsView):
     def load_apps(self):
         self.rows = []
         self.set_state(State.LOADING)
-        for g in self.folder_groups:
-            for f in g.files:
+        for g in self.pools:
+            for f in g.files():
                 row = AppRow(f)
                 row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                if g.writable:
+                if g == USER_POOL:
                     row.add_chip(AppChip.Pinned())
 
                 self.rows.append(row)
@@ -344,7 +344,7 @@ class SearchView(AppsView):
         any_visible = False
 
         for r in self.rows:
-            if query.lower() in r.file.search_string:
+            if query.lower() in r.file.search_str:
                 r.set_visible(True)
                 any_visible = True
             else:

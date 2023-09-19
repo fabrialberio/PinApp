@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Type, TypeVar, Generic
+from typing import Type, TypeVar, Generic, Any
 
 from configparser import ConfigParser, SectionProxy
 
@@ -14,12 +14,26 @@ class Field(Generic[T]):
     _parent_section: SectionProxy
     _type: Type[T]
 
+    @classmethod
+    def parse_type(cls, key: str, value: str, _parent_section: SectionProxy) -> 'Field[Any]':
+        if value in ['true', 'false']:
+            return Field[bool](key, _parent_section, bool)
+        elif value.isdigit():
+            return Field[int](key, _parent_section, int)
+        elif value.replace('.', '', 1).isdigit():
+            return Field[float](key, _parent_section, float)
+        elif value.endswith(';'):
+            return Field[list[str]](key, _parent_section, list[str])
+        else:
+            return Field[str](key, _parent_section, str)
+
+
     def get(self, default: T|Unknown = Unknown) -> T:
         value: str | None = self._parent_section.get(self.key, fallback = None)
 
         if value is None:
             if default is Unknown:
-                raise KeyError(f'Key {self.key} does not exist')
+                raise KeyError(f'Key "{self.key}" does not exist in section "{self._parent_section.name}"')
             else:
                 return default
 
@@ -52,26 +66,36 @@ class Field(Generic[T]):
 
 @dataclass
 class LocalizedField(Field[T]):
+    @staticmethod
+    def split_localized_key(key: str) -> tuple[str, str]|None:
+        if '[' in key and key.endswith(']'):
+            return (key.split('[')[0], key.split('[')[1].removesuffix(']'))
+        else:
+            return None
+
     def __post_init__(self):
-        if '[' in self.key:
+        if LocalizedField.split_localized_key(self.key):
             raise ValueError(f'LocalizedField key "{self.key}" cannot contain "[]", use Field instead.')
 
     @property
-    def _localized_keys(self) -> list[str]:
+    def localized_keys(self) -> list[str]:
         return [k for k in self._parent_section.keys() if k.startswith(self.key+'[')]
 
     @property
     def locales(self) -> list[str]:
-        return [k.removeprefix(self.key+'[').removesuffix(']') for k in self._localized_keys]
+        return [k.removeprefix(self.key+'[').removesuffix(']') for k in self.localized_keys]
+
+    def as_locale(self, locale: str) -> Field[T]:
+        return Field[T](f'{self.key}[{locale}]', self._parent_section, self._type)
 
     def get_localized(self, locale: str, default: T|Unknown = Unknown) -> T:
-        return Field[T](f'{self.key}[{locale}]', self._parent_section, self._type).get(default = default)
+        return self.as_locale(locale).get(default = default)
     
     def set_localized(self, locale: str, value: T):
-        Field[T](f'{self.key}[{locale}]', self._parent_section, self._type).set(value)
+        self.as_locale(locale).set(value)
 
     def __dict__(self) -> dict[str, T]:
-        return {k: Field[T](k, self._parent_section, self._type).get() for k in self._localized_keys}
+        return {k: Field[T](k, self._parent_section, self._type).get() for k in self.localized_keys}
     def __repr__(self) -> str: return f'<LocalizedField "{self.key}" type={self._type.__name__}>'
 
 @dataclass
@@ -169,11 +193,22 @@ class DesktopAction(Section):
 
 @dataclass(eq = False)
 class DesktopFile(IniFile):
+    @classmethod
+    def new_with_defaults(cls, path: Path) -> 'DesktopFile':
+        file = cls(path)
+
+        file.desktop_entry.Type.set('Application')
+        file.desktop_entry.Name.set('')
+        file.desktop_entry.Exec.set('notify-send "Hello World"')
+        file.desktop_entry.Icon.set('')
+
+        return file
+
     def __post_init__(self) -> None:
         super().__post_init__()
 
         self._saved_hash = None
-        self.search_str = None
+        self.search_str = ''
 
         self.load()
 

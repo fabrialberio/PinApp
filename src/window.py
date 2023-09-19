@@ -21,8 +21,8 @@ from enum import Enum
 
 from gi.repository import Gtk, Adw, Gio
 
-from .utils import USER_APPS, new_file_name
-from .desktop_entry import DesktopEntry
+from .desktop_file import DesktopFile
+from .file_pools import USER_POOL
 
 
 class Page(Enum):
@@ -135,8 +135,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.get_page() != Page.APPS_PAGE:
             return
 
-        path = new_file_name(USER_APPS, 'pinned-app')
-        file = DesktopEntry.new_with_defaults(path)
+        path = USER_POOL.new_file_name('pinned-app')
+        file = DesktopFile.new_with_defaults(path)
 
         self.file_page.load_file(file)
         self.set_page(Page.FILE_PAGE)

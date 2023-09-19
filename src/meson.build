@@ -22,9 +22,9 @@ subdir('ui')
 pinapp_sources = [
   '__init__.py',
   'apps_page.py',
-  'desktop_entry.py',
+  'desktop_file.py',
   'file_page.py',
-  'folders.py',
+  'file_pools.py',
   'main.py',
   'utils.py',
   'window.py',

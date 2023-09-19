@@ -41,10 +41,10 @@ class WritableDesktopFilePool(DesktopFilePool):
         if not self._dirs:
             raise Exception('At least one of paths must be writable')
 
-    def new_file_name(self, name: str, suffix = '.desktop', separator = '-') -> Path:
-        parent = self._dirs[0]
+        self.default_dir = self._dirs[0]
 
-        other_files = list(parent.glob(f'{name}*{suffix}'))
+    def new_file_name(self, name: str, suffix = '.desktop', separator = '-') -> Path:
+        other_files = list(self.default_dir.glob(f'{name}*{suffix}'))
         other_files = [f.name.removeprefix(name).removeprefix(separator).removesuffix(suffix) for f in other_files]
         other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
 
@@ -52,7 +52,7 @@ class WritableDesktopFilePool(DesktopFilePool):
         if next_available_index == None:
             raise Exception('No available index found')
 
-        return parent / f'{name}{separator + str(next_available_index) if next_available_index > 0 else ""}{suffix}'
+        return self.default_dir / f'{name}{separator + str(next_available_index) if next_available_index > 0 else ""}{suffix}'
 
 
 USER_POOL = WritableDesktopFilePool(
