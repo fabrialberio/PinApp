@@ -1,0 +1,227 @@
+# Occitan translation file.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Quentin PAGÈS, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pinapp\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-04 14:12+0200\n"
+"PO-Revision-Date: 2023-09-22 21:17+0200\n"
+"Last-Translator: Quentin PAGÈS\n"
+"Language-Team: \n"
+"Language: oc\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
+#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgid "Create and edit application shortcuts"
+msgstr "Crear e modificar d’acorchis d’aplicacions"
+
+#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
+msgstr "GNOME;GTK;Aplicacion;acorchi;abracat;icòna;"
+
+#: ../src/ui/apps_page_dialogs.ui.h:1
+msgctxt "shortcut window"
+msgid "General"
+msgstr "General"
+
+#: ../src/ui/apps_page_dialogs.ui.h:2
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Afichar los acorchis"
+
+#: ../src/ui/apps_page_dialogs.ui.h:3
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Sortir"
+
+#: ../src/ui/apps_page_dialogs.ui.h:4
+msgctxt "shortcut window"
+msgid "Add new app"
+msgstr "Apondre apli novèla"
+
+#: ../src/ui/apps_page_dialogs.ui.h:5
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Recercar"
+
+#: ../src/ui/apps_page_dialogs.ui.h:6
+msgctxt "shortcut window"
+msgid "App editing"
+msgstr "Modificacion d’aplicacion"
+
+#: ../src/ui/apps_page_dialogs.ui.h:7
+msgctxt "shortcut window"
+msgid "Close"
+msgstr "Tampar"
+
+#: ../src/ui/file_page_dialogs.ui.h:1
+msgid "Add new key"
+msgstr "Apondre una clau novèla"
+
+#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:85
+msgid "Locale"
+msgstr "Lenga"
+
+#: ../src/ui/file_page_dialogs.ui.h:3
+msgid "Key name"
+msgstr "Nom de clau"
+
+#: ../src/ui/file_page_dialogs.ui.h:4 ../src/file_page.py:391
+msgid "Cancel"
+msgstr "Anullar"
+
+#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:5
+msgid "Add"
+msgstr "Apondre"
+
+#: ../src/ui/file_page_dialogs.ui.h:6
+msgid "Unpin this app?"
+msgstr "Despenjar aquesta aplicacion ?"
+
+#: ../src/ui/file_page_dialogs.ui.h:7
+msgid "If you unpin an app, your changes will be permanently lost."
+msgstr "Se despenjatz una aplicacions, vòstras modificacions seràn definitivament perdudas."
+
+#: ../src/ui/file_page_dialogs.ui.h:8
+msgid "Unpin"
+msgstr "Despenjar"
+
+#: ../src/ui/file_page_dialogs.ui.h:9
+msgid "Save changes?"
+msgstr "Enregistrar las modificacions ?"
+
+#: ../src/ui/file_page_dialogs.ui.h:10
+msgid "If you leave without pinning the file, your changes will be permanently lost."
+msgstr "Se quitatz sens penjar lo fichièr, vòstras modificacions seràn definitivament perdudas."
+
+#: ../src/ui/file_page_dialogs.ui.h:11
+msgid "Discard"
+msgstr "Ignorar"
+
+#: ../src/ui/file_page_dialogs.ui.h:12 ../src/ui/file_page.ui.h:1
+msgid "Pin"
+msgstr "Penjar"
+
+#: ../src/ui/file_page_dialogs.ui.h:13
+msgid "Rename file"
+msgstr "Renomenar fichièr"
+
+#: ../src/ui/file_page_dialogs.ui.h:14
+msgid "File name"
+msgstr "Nom de fichièr"
+
+#: ../src/ui/file_page_dialogs.ui.h:15
+msgid "Rename"
+msgstr "Renomenar"
+
+#: ../src/ui/file_page.ui.h:2
+msgid "File menu"
+msgstr "Menú fichièr"
+
+#: ../src/ui/file_page.ui.h:3
+msgid "Application icon"
+msgstr "Icòna de l’aplicacion"
+
+#: ../src/ui/file_page.ui.h:4
+msgid "Localized values"
+msgstr "Valors localizadas"
+
+#: ../src/ui/file_page.ui.h:6
+msgid "String Values"
+msgstr "Valors de la cadena"
+
+#: ../src/ui/file_page.ui.h:7
+msgid "Boolean Values"
+msgstr "Valors boolean"
+
+#: ../src/ui/file_page.ui.h:8
+msgid "Error opening file"
+msgstr "Error de dobertura de fichièr"
+
+#: ../src/ui/window.ui.h:1
+msgid "PinApp"
+msgstr "PinApp"
+
+#: ../src/ui/window.ui.h:2 ../src/apps_page.py:164
+msgid "Add new app"
+msgstr "Apondre apli novèla"
+
+#: ../src/ui/window.ui.h:3
+msgid "Show menu"
+msgstr "Mostrar lo menú"
+
+#: ../src/ui/window.ui.h:4
+msgid "Search"
+msgstr "Recercar"
+
+#: ../src/ui/window.ui.h:5
+msgid "Your pins"
+msgstr "Vòstras espillas"
+
+#: ../src/ui/window.ui.h:6
+msgid "Installed"
+msgstr "Installada"
+
+#: ../src/ui/window.ui.h:7
+msgid "Reload Apps"
+msgstr "Recargar las aplicacions"
+
+#: ../src/ui/window.ui.h:8
+msgid "Keyboard Shortcuts"
+msgstr "Acorchis de clavièr"
+
+#: ../src/ui/window.ui.h:9
+msgid "About PinApp"
+msgstr "A prepaus de PinApp"
+
+#: ../src/apps_page.py:156
+msgid "No apps found"
+msgstr "Cap d'aplicacion pas trobada"
+
+#: ../src/apps_page.py:170
+msgid "Applications you install will appear here"
+msgstr "Las aplicacions qu’installatz apareisseràn aicí"
+
+#: ../src/apps_page.py:174
+msgid "Error loading apps"
+msgstr "Error al moment de cargar las aplicacions"
+
+#: ../src/apps_page.py:180
+msgid "Loading apps…"
+msgstr "Cargament de las aplicacions…"
+
+#: ../src/apps_page.py:300
+msgid "No results found"
+msgstr "Cap de resultat pas trobat"
+
+#: ../src/apps_page.py:301
+msgid "Try searching for something else"
+msgstr "Ensajatz de recercar quicòm mai"
+
+#: ../src/file_page.py:351
+msgid "No string values present"
+msgstr "Cap de valor de cadena de tèxt pas presenta"
+
+#: ../src/file_page.py:356
+msgid "No boolean values present"
+msgstr "Cap de valor boolean pas presenta"
+
+#: ../src/file_page.py:388
+msgid "Upload icon"
+msgstr "Mandar icòna"
+
+#: ../src/file_page.py:390
+msgid "Open"
+msgstr "Dobrir"
+
+#: ../src/window.py:153
+msgid "Desktop files"
+msgstr "Fichièrs Desktop"
