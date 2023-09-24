@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-24 21:12+0200\n"
+"POT-Creation-Date: 2023-09-24 21:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,7 +99,7 @@ msgstr ""
 msgid "Add new key"
 msgstr ""
 
-#: src/ui/file_page_dialogs.ui:12 src/file_page.py:86
+#: src/ui/file_page_dialogs.ui:12 src/file_page.py:85
 msgid "Locale"
 msgstr ""
 
@@ -109,7 +109,7 @@ msgstr ""
 
 #: src/ui/file_page_dialogs.ui:24 src/ui/file_page_dialogs.ui:35
 #: src/ui/file_page_dialogs.ui:46 src/ui/file_page_dialogs.ui:75
-#: src/file_page.py:392
+#: src/file_page.py:391
 msgid "Cancel"
 msgstr ""
 
@@ -243,19 +243,19 @@ msgstr ""
 msgid "Try searching for something else"
 msgstr ""
 
-#: src/file_page.py:352
+#: src/file_page.py:351
 msgid "No string values present"
 msgstr ""
 
-#: src/file_page.py:357
+#: src/file_page.py:356
 msgid "No boolean values present"
 msgstr ""
 
-#: src/file_page.py:389
+#: src/file_page.py:388
 msgid "Upload icon"
 msgstr ""
 
-#: src/file_page.py:391
+#: src/file_page.py:390
 msgid "Open"
 msgstr ""
 
