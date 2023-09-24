@@ -44,6 +44,17 @@
 		<control>touch</control>
 	</recommends>
 	<releases>
+		<release version="" date="">
+			<description translatable="no">
+				<p>What's changed</p>
+				<ul>
+					<li>@Alexmelman88 updated the Russian translation</li>
+					<li>@Mejans added an Occitan translation</li>
+					<li>@Vistaus added a Dutch translation</li>
+					<li>@oscfdezdz updated the Spanish translation</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.2.0" date="2022-09-04">
 			<description translatable="no">
 				<p>What's changed</p>
