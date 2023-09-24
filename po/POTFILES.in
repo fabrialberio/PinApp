@@ -1,10 +1,10 @@
-[type: gettext/ini] data/io.github.fabrialberio.pinapp.desktop.in
-[type: gettext/glade] data/io.github.fabrialberio.pinapp.appdata.xml.in
+data/io.github.fabrialberio.pinapp.desktop.in
+data/io.github.fabrialberio.pinapp.appdata.xml.in
 
-[type: gettext/glade] src/ui/apps_page_dialogs.ui
-[type: gettext/glade] src/ui/file_page_dialogs.ui
-[type: gettext/glade] src/ui/file_page.ui
-[type: gettext/glade] src/ui/window.ui
+src/ui/apps_page_dialogs.ui
+src/ui/file_page_dialogs.ui
+src/ui/file_page.ui
+src/ui/window.ui
 
 src/apps_page.py
 src/file_page.py
