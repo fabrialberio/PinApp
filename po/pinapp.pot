@@ -56,8 +56,8 @@ msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
 msgid ""
-"The app is made with Libadwaita and GTK4, with consideration for small-"
-"screen devices"
+"The app is made with Libadwaita and GTK4, with consideration for small-screen "
+"devices"
 msgstr ""
 
 #: src/ui/apps_page_dialogs.ui:29
@@ -135,8 +135,7 @@ msgid "Save changes?"
 msgstr ""
 
 #: src/ui/file_page_dialogs.ui:42
-msgid ""
-"If you leave without pinning the file, your changes will be permanently lost."
+msgid "If you leave without pinning the file, your changes will be permanently lost."
 msgstr ""
 
 #: src/ui/file_page_dialogs.ui:47
