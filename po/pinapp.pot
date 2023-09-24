@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the pinapp package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-10 15:12+0300\n"
+"POT-Creation-Date: 2023-09-24 21:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,12 +108,13 @@ msgid "Key name"
 msgstr ""
 
 #: src/ui/file_page_dialogs.ui:24 src/ui/file_page_dialogs.ui:35
-#: src/ui/file_page_dialogs.ui:46 src/ui/file_page_dialogs.ui:75 src/file_page.py:391
+#: src/ui/file_page_dialogs.ui:46 src/ui/file_page_dialogs.ui:75
+#: src/file_page.py:391
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/file_page_dialogs.ui:25 src/ui/file_page.ui:106 src/ui/file_page.ui:126
-#: src/ui/file_page.ui:145
+#: src/ui/file_page_dialogs.ui:25 src/ui/file_page.ui:106
+#: src/ui/file_page.ui:126 src/ui/file_page.ui:145
 msgid "Add"
 msgstr ""
 
@@ -125,7 +126,7 @@ msgstr ""
 msgid "If you unpin an app, your changes will be permanently lost."
 msgstr ""
 
-#: src/ui/file_page_dialogs.ui:36
+#: src/ui/file_page_dialogs.ui:36 src/ui/file_page.ui:203
 msgid "Unpin"
 msgstr ""
 
@@ -145,7 +146,7 @@ msgstr ""
 msgid "Pin"
 msgstr ""
 
-#: src/ui/file_page_dialogs.ui:54
+#: src/ui/file_page_dialogs.ui:54 src/ui/file_page.ui:208
 msgid "Rename file"
 msgstr ""
 
@@ -179,6 +180,10 @@ msgstr ""
 
 #: src/ui/file_page.ui:168
 msgid "Error opening file"
+msgstr ""
+
+#: src/ui/file_page.ui:213
+msgid "Duplicate file"
 msgstr ""
 
 #: src/ui/window.ui:38 src/apps_page.py:164
