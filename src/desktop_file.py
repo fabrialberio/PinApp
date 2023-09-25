@@ -6,7 +6,8 @@ from configparser import ConfigParser, SectionProxy
 
 
 T = TypeVar('T', str, int, float, bool, list[str])
-Unknown = object()
+U = TypeVar('U', str, int, float, bool, list[str], None)
+
 
 @dataclass
 class Field(Generic[T]):
@@ -28,14 +29,11 @@ class Field(Generic[T]):
             return Field[str](key, _parent_section, str)
 
 
-    def get(self, default: T|Unknown = Unknown) -> T:
+    def get(self, default: U = None) -> U:
         value: str | None = self._parent_section.get(self.key, fallback = None)
 
         if value is None:
-            if default is Unknown:
-                raise KeyError(f'Key "{self.key}" does not exist in section "{self._parent_section.name}"')
-            else:
-                return default
+            return default
 
         if (self._type == bool):
             return value.lower() == 'true'
@@ -88,13 +86,13 @@ class LocalizedField(Field[T]):
     def as_locale(self, locale: str) -> Field[T]:
         return Field[T](f'{self.key}[{locale}]', self._parent_section, self._type)
 
-    def get_localized(self, locale: str, default: T|Unknown = Unknown) -> T:
+    def get_localized(self, locale: str, default: U = None) -> U:
         return self.as_locale(locale).get(default = default)
     
     def set_localized(self, locale: str, value: T):
         self.as_locale(locale).set(value)
 
-    def __dict__(self) -> dict[str, T]:
+    def __dict__(self) -> dict[str, T|None]:
         return {k: Field[T](k, self._parent_section, self._type).get() for k in self.localized_keys}
     def __repr__(self) -> str: return f'<LocalizedField "{self.key}" type={self._type.__name__}>'
 

@@ -36,6 +36,10 @@ class StringRow(Adw.EntryRow):
 
     def __init__(self, field: Field[str]) -> None:
         self.field = field
+
+        # TODO: bodge, must implement listrow
+        if field._type != str:
+            field = Field(field.key, field._parent_section, str)
         
         super().__init__(title=field.key)
         self.set_text(field.get(default=''))
