@@ -22,10 +22,10 @@ from enum import Enum
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_file import DesktopFile
-from .file_pools import USER_POOL
+from .file_pools import USER_POOL, SYSTEM_POOL
+from .apps_page import PoolState, PinsView, InstalledView, SearchView
 
-
-class Page(Enum):
+class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
     FILE_PAGE = 'file-page'
 
@@ -39,28 +39,39 @@ class PinAppWindow(Adw.ApplicationWindow):
     file_page = Gtk.Template.Child('file_page')
 
     view_stack = Gtk.Template.Child('view_stack')
-    pins_view = Gtk.Template.Child('pins_view')
-    installed_view = Gtk.Template.Child('installed_view')
-    search_view = Gtk.Template.Child('search_view')
+    pins_view: PinsView = Gtk.Template.Child('pins_view')
+    installed_view: InstalledView = Gtk.Template.Child('installed_view')
+    search_view: SearchView = Gtk.Template.Child('search_view')
 
     search_bar = Gtk.Template.Child('search_bar')
     search_entry = Gtk.Template.Child('search_entry')
     search_button = Gtk.Template.Child('search_button')
 
-    last_view = None
+    last_view: WindowPage = WindowPage.APPS_PAGE
+    user_files: list[DesktopFile] = []
+    system_files: list[DesktopFile] = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        button = Gtk.Button(
+            halign=Gtk.Align.CENTER,
+            css_classes=['suggested-action', 'pill'],
+            child=Adw.ButtonContent(
+                label=_('Add new app'),
+                icon_name='list-add-symbolic'))
+        button.connect('clicked', lambda _: self.new_file())
+
+        self.pins_view.empty_status_page.set_child(button)
+
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
-        self.pins_view.connect('file-open', lambda _, f: self.open_file(f))
-        self.pins_view.connect('file-new', lambda _: self.new_file())
-        self.installed_view.connect('file-open', lambda _, f: self.open_file(f))
-        self.search_view.connect('file-open', lambda _, f: self.open_file(f))
+        self.pins_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.installed_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.search_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
 
-        self.file_page.connect('file-leave', lambda _: self.set_page(Page.APPS_PAGE))
-        self.file_page.connect('file-changed', lambda _: self.reload_apps(show_pins=True, show_apps=False, only_pins=True))
+        self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
+        self.file_page.connect('file-changed', lambda _: self.reload_pins())
 
         self.connect('close-request', lambda _: self.do_close_request())
 
@@ -70,14 +81,13 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_help_overlay(help_overlay)
 
         self._init_search()
-        self.reload_apps(show_pins=True)
+        self.reload_apps()
+        self.set_view(self.pins_view)
 
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.connect_entry(self.search_entry)
         self.search_view.connect_entry(self.search_entry)
-
-        self.search_view.set_source_views([self.pins_view, self.installed_view])
 
         def view_changed_cb(*args):
             '''Disables search mode when the view is changed to something else'''
@@ -88,14 +98,14 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', view_changed_cb)
 
-    def set_page(self, new_page: Page):
-        if new_page == Page.APPS_PAGE:
-            self.navigation_view.pop_to_tag(Page.APPS_PAGE.value)
-        elif new_page == Page.FILE_PAGE:
-            self.navigation_view.push_by_tag(Page.FILE_PAGE.value)
+    def set_page(self, new_page: WindowPage):
+        if new_page == WindowPage.APPS_PAGE:
+            self.navigation_view.pop_to_tag(WindowPage.APPS_PAGE.value)
+        elif new_page == WindowPage.FILE_PAGE:
+            self.navigation_view.push_by_tag(WindowPage.FILE_PAGE.value)
 
-    def get_page(self) -> Page:
-        return Page(self.navigation_view.get_visible_page().get_tag())
+    def get_page(self) -> WindowPage:
+        return WindowPage(self.navigation_view.get_visible_page().get_tag())
 
     def set_view(self, new_view: Gtk.Widget):
         if new_view in [
@@ -114,7 +124,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     def set_search_mode(self, state: bool, clear_entry=False):
         '''Shows or hides search view and search bar'''
         if state:
-            self.set_page(Page.APPS_PAGE)
+            self.set_page(WindowPage.APPS_PAGE)
             self.set_view(self.search_view)
 
             self.search_bar.set_search_mode(True)
@@ -129,17 +139,17 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def open_file(self, file):
         self.file_page.load_file(file)
-        self.set_page(Page.FILE_PAGE)
+        self.set_page(WindowPage.FILE_PAGE)
 
     def new_file(self):
-        if self.get_page() != Page.APPS_PAGE:
+        if self.get_page() != WindowPage.APPS_PAGE:
             return
 
         path = USER_POOL.new_file_name('pinned-app')
         file = DesktopFile.new_with_defaults(path)
 
         self.file_page.load_file(file)
-        self.set_page(Page.FILE_PAGE)
+        self.set_page(WindowPage.FILE_PAGE)
 
 
     def choose_file(self, callback: Callable[[Path], None]) -> None:
@@ -166,19 +176,42 @@ class PinAppWindow(Adw.ApplicationWindow):
             return
 
         self.file_page.load_path(path)
-        self.set_page(Page.FILE_PAGE)
+        self.set_page(WindowPage.FILE_PAGE)
 
-    def reload_apps(self, show_pins=False, show_apps=True, only_pins=False):
-        if show_apps:
-            self.set_page(Page.APPS_PAGE)
+    def reload_pins(self):
+        self.set_view(self.pins_view)
+        self.pins_view.set_state(PoolState.LOADING)
+        
+        def callback(files: list[DesktopFile]):
+            self.pins_view.pool_page.update(files)
+            self.pins_view.set_state(PoolState.LOADED)
 
-        if show_pins:
-            self.set_view(self.pins_view)
+        USER_POOL.files_async(callback=callback)
 
-        self.pins_view.load_apps(loading_ok=False)
+    def reload_apps(self):
+        self.pins_view.set_state(PoolState.LOADING)
+        self.installed_view.set_state(PoolState.LOADING)
 
-        if not only_pins:
-            self.installed_view.load_apps(loading_ok=False)
+        all_files = []
+
+        # TODO: Load search_view all at once, to avoid race conditions
+        # TODO: crash when reloading apps fast???
+        # TODO: various errors
+
+        def user_callback(files: list[DesktopFile]):
+            self.pins_view.pool_page.update(files)
+            self.pins_view.set_state(PoolState.LOADED)
+            self.search_view.update(all_files)
+        
+        def system_callback(files: list[DesktopFile]):
+            all_files.extend(files)
+            self.installed_view.pool_page.update(files)
+            self.installed_view.set_state(PoolState.LOADED)
+            self.search_view.update(all_files)
+
+        USER_POOL.files_async(callback=user_callback)
+        SYSTEM_POOL.files_async(callback=system_callback)
+
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''
@@ -186,7 +219,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.close()
             self.destroy()
 
-        if self.get_page() == Page.FILE_PAGE:
+        if self.get_page() == WindowPage.FILE_PAGE:
             if self.file_page.allow_leave:
                 self.close()
                 quit()
