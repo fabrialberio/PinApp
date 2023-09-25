@@ -74,7 +74,7 @@
                 <property name='content'>
                   <object class='AdwViewStack' id='view_stack'>
                     <child>
-                      <object class='AdwViewStackPage'>
+                      <object class='AdwViewStackPage' id='pins_view_stack_page'>
                         <property name='icon-name'>pin-symbolic</property>
                         <property name='title' translatable='yes'>Your pins</property>
                         <property name='name'>pins_view</property>
@@ -84,7 +84,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class='AdwViewStackPage'>
+                      <object class='AdwViewStackPage' id='installed_view_stack_page'>
                         <property name='icon-name'>installed-symbolic</property>
                         <property name='title' translatable='yes'>Installed</property>
                         <property name='name'>installed_view</property>
@@ -94,7 +94,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class='AdwViewStackPage'>
+                      <object class='AdwViewStackPage' id='search_view_stack_page'>
                         <property name='name'>search_view</property>
                         <property name='child'>
                           <object class='SearchView' id='search_view'/>
