@@ -3,7 +3,6 @@
   <gresource prefix="/io/github/fabrialberio/pinapp">
     <file preprocess="xml-stripblanks">apps_page_dialogs.ui</file>
     <file preprocess="xml-stripblanks">file_page_dialogs.ui</file>
-    <file preprocess="xml-stripblanks">pool_state_view.ui</file>
     <file preprocess="xml-stripblanks">file_page.ui</file>
     <file preprocess="xml-stripblanks">window.ui</file>
     <file>style-dark.css</file>
