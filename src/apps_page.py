@@ -1,14 +1,11 @@
 from enum import Enum
 
 from gi.repository import Gtk, Adw, Pango
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape as escape_xml
 
 from .utils import *
-from .file_pools import USER_POOL, SYSTEM_POOL, DesktopFilePool, WritableDesktopFilePool
+from .file_pools import USER_POOL
 from .desktop_file import DesktopFile
-
-def escape_xml(string: str) -> str:
-    return escape(string or '')
 
 
 class AppChip(Gtk.Box):
@@ -77,9 +74,14 @@ class AppChip(Gtk.Box):
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
-    def __init__(self,
+    def __init__(self, 
             file: DesktopFile,
-            chips: list[AppChip] = []):
+            add_pinned_chip = False,
+            add_hidden_chip = True,
+            add_flatpak_chip = True,
+            add_snap_chip = True,
+            add_terminal_chip = True,
+        ) -> None:
         self.file = file
 
         super().__init__(
@@ -105,18 +107,16 @@ class AppRow(Adw.ActionRow):
             icon_name='go-next-symbolic',
             opacity=.6))
 
-
-        if self.file.desktop_entry.NoDisplay.get(default=False):
+        if self.file.desktop_entry.NoDisplay.get(default=False) and add_hidden_chip:
             icon.set_opacity(.2)
-        if self.file.desktop_entry.X_Flatpak.get(default = False):
+        if self.file.desktop_entry.X_Flatpak.get(default = False) and add_flatpak_chip:
             self.add_chip(AppChip.Flatpak())
-        if self.file.desktop_entry.X_SnapInstanceName.get(default = False):
+        if self.file.desktop_entry.X_SnapInstanceName.get(default = False) and add_snap_chip:
             self.add_chip(AppChip.Snap())
-        if self.file.desktop_entry.Terminal.get(default=False):
+        if self.file.desktop_entry.Terminal.get(default=False) and add_terminal_chip:
             self.add_chip(AppChip.Terminal())
-
-        for c in chips:
-            self.add_chip(c)
+        if self.file.path.parent in USER_POOL.paths and add_pinned_chip:
+            self.add_chip(AppChip.Pinned())
 
         self.connect('activated', lambda _: self.emit('file-open', file))
 
@@ -131,55 +131,83 @@ class AppRow(Adw.ActionRow):
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
 
-class State(Enum):
-    FILLED = 'filled'
-    EMPTY = 'empty'
-    ERROR = 'error'
-    LOADING = 'loading'
-
 class AppsView(Adw.Bin):
-    '''A widget that handles status pages for states'''
-    __gtype_name__ = 'AppsPage'
+    __gtype_name__ = 'AppsView'
 
-    def __init__(self, show_new_file_button: bool, description: str = '') -> None:
+    def __init__(self) -> None:
         super().__init__()
 
-        self.show_new_file_button = show_new_file_button
-        self.description = description
-        self.state = State.EMPTY
+    def update(self, files: list[DesktopFile]):
+        ...
+class AppListView(AppsView):
+    __gtype_name__ = 'AppListView'
 
-        self._init_widgets()
+    def __init__(self) -> None:
+        super().__init__()
 
-    def _init_widgets(self):
-        self.empty_page = Adw.StatusPage(
-            vexpand=True,
+    def update(self, files: list[DesktopFile], add_pinned_chip: bool = False):
+        listbox = Gtk.ListBox(
+            selection_mode=Gtk.SelectionMode.NONE,
+            css_classes=['boxed-list'])
+
+        rows = sorted([AppRow(f, add_pinned_chip = add_pinned_chip) for f in files])
+        for row in rows:
+            row.connect('file-open', lambda _, f: self.emit('file-open', f))
+            listbox.append(row)
+
+        self.set_child(
+            Gtk.ScrolledWindow(
+                vexpand = True,
+                child = Adw.Clamp(
+                    margin_top = 12,
+                    margin_bottom = 12,
+                    margin_start = 12,
+                    margin_end = 12,
+                    child = listbox)))
+
+class AppGridView(AppsView):
+    __gtype_name__ = 'AppGridView'
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def update(self, files: list[DesktopFile]):
+        ...
+
+
+class PoolState(Enum):
+    LOADED = 'pool_page'
+    EMPTY = 'empty_page'
+    LOADING = 'loading_page'
+    ERROR = 'error_page'
+
+class PoolStateView(Gtk.Stack):
+    __gtype_name__ = 'PoolStateView'
+
+    pool_page: AppsView
+    state: PoolState
+
+    def __init__(self, pool_page: AppsView) -> None:
+        super().__init__()
+
+        self.pool_page = pool_page
+        self.add_named(pool_page, PoolState.LOADED.value)
+        
+        self.empty_status_page = Adw.StatusPage(
             title=_('No apps found'),
-            icon_name='folder-open-symbolic'
-        )
-        if self.show_new_file_button:
-            button = Gtk.Button(
-                halign=Gtk.Align.CENTER,
-                css_classes=['suggested-action', 'pill'],
-                child=Adw.ButtonContent(
-                    label=_('Add new app'),
-                    icon_name='list-add-symbolic'))
-            
-            button.connect('clicked', lambda _: self.emit('file-new'))
-            self.empty_page.set_child(button)
-        else:
-            self.empty_page.set_description(_('Applications you install will appear here'))
+            icon_name='folder-open-symbolic')
+        self.add_named(self.empty_status_page, PoolState.EMPTY.value)
 
-        self.error_page = Adw.StatusPage(
-            vexpand=True,
+        self.loading_status_page = Adw.StatusPage(
+            title=_('Loading apps'))
+        self.add_named(self.loading_status_page, PoolState.LOADING.value)
+
+        self.error_status_page = Adw.StatusPage(
             title=_('Error loading apps'),
-            icon_name='dialog-error-symbolic'
-        )
+            icon_name='dialog-error-symbolic')
+        self.add_named(self.error_status_page, PoolState.ERROR.value)
 
-        self.loading_page = Adw.StatusPage(
-            vexpand=True,
-            title=_('Loading apps…'),
-            icon_name='go-back-symbolic')
-        box = (self.loading_page
+        box = (self.loading_status_page
             .get_first_child() # GtkScrolledWindow
             .get_first_child() # GtkWiewport
             .get_first_child() # GtkBox
@@ -191,166 +219,63 @@ class AppsView(Adw.Bin):
             height_request=32,
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
-
-    def update_filled_page(self, rows: list[Gtk.ListBoxRow], sort=False):
-        if sort and isinstance(rows[0], AppRow):
-            rows = sorted(rows)
-
-        listbox = Gtk.ListBox(
-            selection_mode=Gtk.SelectionMode.NONE,
-            css_classes=['boxed-list'])
-
-        for row in rows:
-            listbox.append(row)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.append(Adw.PreferencesGroup(
-            description=self.description
-        ))
-        box.append(listbox)
         
-        self.filled_page = Gtk.ScrolledWindow(
-            vexpand=True,
-            child=Adw.Clamp(
-                margin_top=24,
-                margin_bottom=24,
-                margin_start=12,
-                margin_end=12,
-                child = box))
+        self.set_state(PoolState.LOADING)
 
-    def set_state(self, state: State):
-        if state == self.state:
+    def set_state(self, state: PoolState):
+        if state.value == self.get_visible_child_name():
             return
-
-        if state == State.FILLED:
-            self.set_child(self.filled_page)
-        elif state == State.EMPTY:
-            self.set_child(self.empty_page)
-        elif state == State.ERROR:
-            self.set_child(self.error_page)
-        elif state == State.LOADING:
-            self.set_child(self.loading_page)
 
         self.state = state
+        self.set_visible_child_name(state.value)
         self.emit('state-changed')
 
-class DesktopFilePoolView(AppsView):
-    '''A widget that handles status pages for states and represents apps in a FolderGroup'''
-    __gtype_name__ = 'FolderView'
 
-    def __init__(self, pool: DesktopFilePool, description: str = '') -> None:
-        self.pool = pool
-        self.description = description
-        super().__init__(isinstance(self.pool, WritableDesktopFilePool), self.description)
-
-    def load_apps(self, loading_ok=True):
-        if self.state == State.LOADING or loading_ok:
-            return
-
-        if self.pool._dirs:
-            self.set_state(State.LOADING)
-
-            def fill_group(files: list[DesktopFile]):
-                if files:
-                    rows = []
-
-                    for file in files:
-                        row = AppRow(file)
-                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                        rows.append(row)
-
-                    rows = sorted(rows)
-
-                    self.update_filled_page(rows)
-                    self.set_state(State.FILLED)
-                else:
-                    self.set_state(State.EMPTY)
-
-            self.pool.files_async(callback=fill_group)
-        else:
-            self.set_state(State.ERROR)
-
-class PinsView(DesktopFilePoolView):
+class PinsView(PoolStateView):
     __gtype_name__ = 'PinsView'
 
     def __init__(self) -> None:
-        super().__init__(USER_POOL)
+        super().__init__(pool_page = AppListView())
 
-class InstalledView(DesktopFilePoolView):
+class InstalledView(PoolStateView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:
-        super().__init__(SYSTEM_POOL)
+        super().__init__(pool_page = AppListView())
 
-class SearchView(AppsView):
+class SearchView(PoolStateView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
-    source_views: list[DesktopFilePoolView]
-    pools: list[DesktopFilePool]
-    rows: list[AppRow] = []
     search_entry: Gtk.SearchEntry
+    pool_page: AppListView
+    _files: list[DesktopFile]
 
     def __init__(self) -> None:
-        super().__init__(show_new_file_button=False)
+        super().__init__(pool_page = AppListView())
 
         # Override empty page with a more appropriate one
-        self.empty_page = Adw.StatusPage(
-            vexpand=True,
-            title=_('No results found'),
-            description=_('Try searching for something else'),
-            icon_name='system-search-symbolic')
+        self.empty_status_page.set_title(_('No results found'))
+        self.empty_status_page.set_description(_('Try searching for something else'))
+        self.empty_status_page.set_icon_name('system-search-symbolic')
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         self.search_entry = search_entry
         self.search_entry.connect('search-changed', lambda e: self.search(e.get_text()))
 
-    def set_source_views(self, source_views: list[DesktopFilePoolView]):
-        self.source_views = source_views
-
-        self.pools = [v.pool for v in self.source_views]
-
-        def state_changed_cb(view: DesktopFilePoolView):
-            '''Updates search_map when all source_views are loaded'''
-            if view.state == State.LOADING:
-                self.set_state(State.LOADING)
-            if all(map(lambda v: v.state != State.LOADING, self.source_views)):
-                self.load_apps()
-                self.search(self.search_entry.get_text())
-
-        for v in self.source_views:
-            v.connect('state-changed', state_changed_cb)
-
-
-    def load_apps(self):
-        self.rows = []
-        self.set_state(State.LOADING)
-        for g in self.pools:
-            for f in g.files():
-                row = AppRow(f)
-                row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                if g == USER_POOL:
-                    row.add_chip(AppChip.Pinned())
-
-                self.rows.append(row)
-
-        self.update_filled_page(self.rows, sort=True)
-        self.set_state(State.FILLED)
+    def update(self, files: list[DesktopFile]):
+        self._files = files
+        self.pool_page.update(files, add_pinned_chip = True)
+        self.set_state(PoolState.LOADED)
 
     def search(self, query: str):
-        if self.state == State.LOADING:
+        if self.state == PoolState.LOADING:
             return
 
-        any_visible = False
+        results = [f for f in self._files if query.lower() in f.search_str]
+        self.pool_page.update(results)
 
-        for r in self.rows:
-            if query.lower() in r.file.search_str:
-                r.set_visible(True)
-                any_visible = True
-            else:
-                r.set_visible(False)
-
-        if any_visible:
-            self.set_state(State.FILLED)
+        if results:
+            self.set_state(PoolState.LOADED)
         else:
-            self.set_state(State.EMPTY)
+            self.set_state(PoolState.EMPTY)

@@ -19,15 +19,17 @@ paths += [str(p) for p in ICON_PATHS]
 theme.set_search_path(paths)
 
 # Register all GOBject types
-from .apps_page import AppRow, AppsView, PinsView, InstalledView, DesktopFilePoolView, SearchView
+from .apps_page import AppRow, AppsView, PoolStateView, SearchView, AppListView, AppGridView, PinsView, InstalledView
 from .file_page import FilePage, LocaleChooserRow, StringRow
 from .window import PinAppWindow
 
 GObject.type_register(AppRow)
 GObject.type_register(AppsView)
+GObject.type_register(AppListView)
+GObject.type_register(AppGridView)
+GObject.type_register(PoolStateView)
 GObject.type_register(PinsView)
 GObject.type_register(InstalledView)
-GObject.type_register(DesktopFilePoolView)
 GObject.type_register(SearchView)
 GObject.type_register(StringRow)
 GObject.type_register(LocaleChooserRow)
@@ -36,8 +38,7 @@ GObject.type_register(PinAppWindow)
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('state-changed', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('state-changed', PoolStateView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
 GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
