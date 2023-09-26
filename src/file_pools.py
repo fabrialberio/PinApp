@@ -33,6 +33,17 @@ class DesktopFilePool:
         t = Thread(target=target)
         t.start()
 
+    def __add__(self, other):
+        if not isinstance(other, DesktopFilePool):
+            raise TypeError(f"'+' not supported between instances of {type(self)} and {type(other)}")
+
+        if self._pattern != other._pattern:
+            raise Exception('Adding two DesktopFilePools with different patterns is not supported')
+
+        return DesktopFilePool(
+            paths = self.paths + other.paths
+        )
+
 class WritableDesktopFilePool(DesktopFilePool):
     def __post_init__(self):
         super().__post_init__()
