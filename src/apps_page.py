@@ -2,6 +2,7 @@ from enum import Enum
 
 from gi.repository import Gtk, Adw, Pango
 from xml.sax.saxutils import escape as escape_xml
+from typing import Callable
 
 from .utils import *
 from .file_pools import USER_POOL
@@ -124,12 +125,12 @@ class AppRow(Adw.ActionRow):
         self.chip_box.append(chip)
 
 
-    # Used for sorting apps by name in SearchView
-    def __lt__(self, other) -> bool:
-        if isinstance(other, AppRow):
-            return self.file.desktop_entry.Name.get(default='') < other.file.desktop_entry.Name.get(default='')
-        else:
+    # Used for sorting apps by name
+    def __lt__(self, other: 'AppRow') -> bool:
+        if not isinstance(other, AppRow):
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
+        
+        return self.file.desktop_entry.Name.get(default='') < other.file.desktop_entry.Name.get(default='')
 
 class AppsView(Adw.Bin):
     __gtype_name__ = 'AppsView'
@@ -145,15 +146,12 @@ class AppListView(AppsView):
     def __init__(self) -> None:
         super().__init__()
 
-    def update(self, files: list[DesktopFile], add_pinned_chip: bool = False):
-        listbox = Gtk.ListBox(
+        self._listbox = Gtk.ListBox(
             selection_mode=Gtk.SelectionMode.NONE,
             css_classes=['boxed-list'])
 
-        rows = sorted([AppRow(f, add_pinned_chip = add_pinned_chip) for f in files])
-        for row in rows:
-            row.connect('file-open', lambda _, f: self.emit('file-open', f))
-            listbox.append(row)
+        box = Gtk.Box(orientation = Gtk.Orientation.VERTICAL) # Wrap listbox in box to allow it to shrink to fit its contents
+        box.append(self._listbox)
 
         self.set_child(
             Gtk.ScrolledWindow(
@@ -163,7 +161,25 @@ class AppListView(AppsView):
                     margin_bottom = 12,
                     margin_start = 12,
                     margin_end = 12,
-                    child = listbox)))
+                    child = box)))
+
+    def update(self, files: list[DesktopFile], add_pinned_chip: bool = False):
+        rows = sorted([AppRow(f, add_pinned_chip = add_pinned_chip) for f in files])
+
+        while (row := self._listbox.get_row_at_index(0)):
+            self._listbox.remove(row)
+
+        for row in rows:
+            row.connect('file-open', lambda _, f: self.emit('file-open', f))
+            self._listbox.append(row)
+
+    # More performant than update, used for search
+    def hide_where(self, predicate: Callable[[AppRow], bool]):
+        i = 0
+
+        while (row := self._listbox.get_row_at_index(i)):
+            row.set_visible(not predicate(row))
+            i += 1
 
 class AppGridView(AppsView):
     __gtype_name__ = 'AppGridView'
@@ -272,8 +288,10 @@ class SearchView(PoolStateView):
         if self.state == PoolState.LOADING:
             return
 
+        self.set_state(PoolState.LOADING)
+
         results = [f for f in self._files if query.lower() in f.search_str]
-        self.pool_page.update(results)
+        self.pool_page.hide_where(lambda r: r.file not in results)
 
         if results:
             self.set_state(PoolState.LOADED)
