@@ -7,7 +7,7 @@ from gi.repository import Gtk, Adw, Gio
 
 from .desktop_file import DesktopFile, Field, LocalizedField
 from .file_pools import USER_POOL
-from .utils import set_icon_from_name, APP_DATA
+from .utils import APP_DATA
 
 
 class BoolRow(Adw.ActionRow):
@@ -371,7 +371,8 @@ class FilePage(Adw.BreakpointBin):
             self.header_bar.set_show_title(False)
 
     def _update_icon(self):
-        set_icon_from_name(self.app_icon, self.file.desktop_entry.Icon.get())
+        self.app_icon.set_pixel_size(128)
+        self.app_icon.set_app_icon_name(self.file.desktop_entry.Icon.get())
 
     def _upload_icon(self):
         def callback(dialog, response):
