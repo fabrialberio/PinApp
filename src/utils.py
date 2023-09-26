@@ -38,15 +38,3 @@ ICON_PATHS = [
     FLATPAK_SYSTEM / 'exports/share/icons',
     HOST_DATA / 'icons',
 ]
-
-def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
-    theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
-
-    icon.set_from_icon_name('application-x-executable')
-    if icon_name != None:
-        # Checking for -symbolic because sometimes icons only have a symbolic version
-        if theme.has_icon(icon_name) or theme.has_icon(f'{icon_name}-symbolic'):
-            icon.set_from_icon_name(icon_name)
-        elif Path(icon_name).is_file():
-            icon.set_from_file(icon_name)
-
