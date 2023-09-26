@@ -220,7 +220,7 @@ class PoolStateView(Gtk.Stack):
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
         
-        self.set_state(PoolState.LOADING)
+        self.set_state(PoolState.EMPTY)
 
     def set_state(self, state: PoolState):
         if state.value == self.get_visible_child_name():
