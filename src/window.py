@@ -22,8 +22,8 @@ from enum import Enum
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_file import DesktopFile
-from .file_pools import USER_POOL, SYSTEM_POOL
-from .apps_page import PoolState, PinsView, InstalledView, SearchView
+from .file_pools import USER_POOL, SYSTEM_POOL, DesktopFilePool
+from .apps_page import PoolState, PinsView, InstalledView, SearchView, PoolStateView
 
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
@@ -142,6 +142,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_page(WindowPage.FILE_PAGE)
 
     def new_file(self):
+        # TODO crashes with new DesktopFile
         if self.get_page() != WindowPage.APPS_PAGE:
             return
 
@@ -151,26 +152,6 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.load_file(file)
         self.set_page(WindowPage.FILE_PAGE)
 
-
-    def choose_file(self, callback: Callable[[Path], None]) -> None:
-        def on_resp(dialog, resp: Gtk.ResponseType):
-            if resp == Gtk.ResponseType.ACCEPT:
-                callback(Path(dialog.get_file().get_path()))
-            else:
-                return
-
-        desktop_file_filter = Gtk.FileFilter()
-        desktop_file_filter.set_name(_('Desktop files'))
-        desktop_file_filter.add_mime_type('application/x-desktop')
-
-        dialog = Gtk.FileChooserNative()
-        dialog.add_filter(desktop_file_filter)
-        dialog.set_filter(desktop_file_filter)
-
-        dialog.connect('response', on_resp)
-        dialog.set_transient_for(self)
-        dialog.show()
-
     def load_path(self, path: Path):
         if path is None:
             return
@@ -178,40 +159,37 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.load_path(path)
         self.set_page(WindowPage.FILE_PAGE)
 
+    def _update_pool_view(self, pool_view: PoolStateView|SearchView, pool: DesktopFilePool):
+        if not pool._dirs:
+            pool_view.set_state(PoolState.ERROR)
+            return
+
+        if pool_view.state == PoolState.LOADING:
+            return
+
+        pool_view.set_state(PoolState.LOADING)
+
+        def callback(files: list[DesktopFile]):
+            if isinstance(pool_view, SearchView):
+                pool_view.update(files)
+            else:
+                pool_view.pool_page.update(files)
+
+            if files:
+                pool_view.set_state(PoolState.LOADED)
+            else:
+                pool_view.set_state(PoolState.EMPTY)
+
+        pool.files_async(callback=callback)
+
     def reload_pins(self):
         self.set_view(self.pins_view)
-        self.pins_view.set_state(PoolState.LOADING)
-        
-        def callback(files: list[DesktopFile]):
-            self.pins_view.pool_page.update(files)
-            self.pins_view.set_state(PoolState.LOADED)
-
-        USER_POOL.files_async(callback=callback)
+        self._update_pool_view(self.pins_view, USER_POOL)
 
     def reload_apps(self):
-        self.pins_view.set_state(PoolState.LOADING)
-        self.installed_view.set_state(PoolState.LOADING)
-
-        all_files = []
-
-        # TODO: Load search_view all at once, to avoid race conditions
-        # TODO: crash when reloading apps fast???
-        # TODO: various errors
-
-        def user_callback(files: list[DesktopFile]):
-            self.pins_view.pool_page.update(files)
-            self.pins_view.set_state(PoolState.LOADED)
-            self.search_view.update(all_files)
-        
-        def system_callback(files: list[DesktopFile]):
-            all_files.extend(files)
-            self.installed_view.pool_page.update(files)
-            self.installed_view.set_state(PoolState.LOADED)
-            self.search_view.update(all_files)
-
-        USER_POOL.files_async(callback=user_callback)
-        SYSTEM_POOL.files_async(callback=system_callback)
-
+        self._update_pool_view(self.pins_view, USER_POOL)
+        self._update_pool_view(self.installed_view, SYSTEM_POOL)
+        self._update_pool_view(self.search_view, USER_POOL + SYSTEM_POOL)
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''
