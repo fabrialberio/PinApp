@@ -168,7 +168,7 @@ class DesktopEntry(Section):
     GenericName: LocalizedField[str]
     Comment: LocalizedField[str]
     Keywords: LocalizedField[list[str]]
-    X_Flatpak: Field[bool]
+    X_Flatpak: Field[str]
     X_SnapInstanceName: Field[str]
     X_GNOME_Autostart: Field[bool]
 
