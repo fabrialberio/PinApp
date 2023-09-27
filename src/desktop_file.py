@@ -189,8 +189,14 @@ class DesktopAction(Section):
 
         super().__init__(_section)
 
-@dataclass(eq = False)
+@dataclass(eq = False, init=False)
 class DesktopFile(IniFile):
+    desktop_entry: DesktopEntry
+    desktop_actions: list[DesktopAction]
+
+    _saved_hash: int
+    search_str: str
+
     @classmethod
     def new_with_defaults(cls, path: Path) -> 'DesktopFile':
         file = cls(path)
@@ -205,9 +211,6 @@ class DesktopFile(IniFile):
     def __post_init__(self) -> None:
         super().__post_init__()
 
-        self._saved_hash = None
-        self.search_str = ''
-
         self.load()
 
     def edited(self) -> bool:
@@ -216,6 +219,9 @@ class DesktopFile(IniFile):
     def load(self):
         super().load()
 
+        self.desktop_entry = DesktopEntry(self._parser['Desktop Entry'])
+        self.desktop_actions = [DesktopAction(self._parser[t]) for t in self._parser.sections() if t.startswith('Desktop Action')]
+
         self._saved_hash = hash(self)
         self.search_str = self.__search_str__()
 
@@ -223,14 +229,6 @@ class DesktopFile(IniFile):
         super().save_as(path)
 
         self._saved_hash = hash(self)
-
-    @property
-    def desktop_entry(self) -> DesktopEntry:
-        return DesktopEntry(self._parser['Desktop Entry'])
-
-    @property
-    def desktop_actions(self) -> list[DesktopAction]:
-        return [DesktopAction(self._parser[t]) for t in self._parser.sections() if t.startswith('Desktop Action')]
 
     def __search_str__(self) -> str:
         file_name = self.path.stem
