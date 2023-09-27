@@ -170,15 +170,20 @@ class PinAppWindow(Adw.ApplicationWindow):
         pool_view.set_state(PoolState.LOADING)
 
         def callback(files: list[DesktopFile]):
-            if isinstance(pool_view, SearchView):
-                pool_view.update(files)
-            else:
-                pool_view.pool_page.update(files)
+            try:
+                if isinstance(pool_view, SearchView):
+                    pool_view.update(files)
+                else:
+                    pool_view.pool_page.update(files)
 
-            if files:
-                pool_view.set_state(PoolState.LOADED)
-            else:
-                pool_view.set_state(PoolState.EMPTY)
+                if files:
+                    pool_view.set_state(PoolState.LOADED)
+                else:
+                    pool_view.set_state(PoolState.EMPTY)
+            except:
+                pool_view.set_state(PoolState.ERROR)
+                raise
+
 
         pool.files_async(callback=callback)
 
