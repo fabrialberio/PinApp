@@ -143,10 +143,13 @@ class AppsView(Adw.Bin):
 class AppListView(AppsView):
     __gtype_name__ = 'AppListView'
 
+    show_pinned_chip: bool = False
     _listbox: Gtk.ListBox
 
-    def __init__(self) -> None:
+    def __init__(self, show_pinned_chip = False) -> None:
         super().__init__()
+
+        self.show_pinned_chip = show_pinned_chip
 
         self._listbox = Gtk.ListBox(
             selection_mode=Gtk.SelectionMode.NONE,
@@ -168,14 +171,17 @@ class AppListView(AppsView):
                     margin_end = 12,
                     child = box)))
 
-    def update(self, files: list[DesktopFile], add_pinned_chip: bool = False):
-        rows = [AppRow(f, add_pinned_chip = add_pinned_chip) for f in files]
+    def update(self, files: list[DesktopFile]):
+        rows = [AppRow(f, add_pinned_chip = self.show_pinned_chip) for f in files]
 
         self._listbox.remove_all()
+        print('Old rows removed')
 
         for row in rows:
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             self._listbox.append(row)
+
+        print('Rows added')
 
     # More performant than update, used for search
     def set_filter(self, predicate: Callable[[AppRow], bool]):
@@ -279,15 +285,16 @@ class SearchView(PoolStateView):
 
     def connect_pool(self, pool: DesktopFilePool, pool_page: AppListView):
         super().connect_pool(pool, pool_page)
-        pool.connect('files-loaded', lambda _, files: self.update(files))
+
+        def _on_files_loaded(files):
+            self._files = files
+            self.pool_page.set_filter(lambda r: True)
+
+        pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         self.search_entry = search_entry
         self.search_entry.connect('search-changed', lambda e: self.search(e.get_text()))
-
-    def update(self, files: list[DesktopFile]):
-        self._files = files
-        self.pool_page.update(files, add_pinned_chip = True)
 
     def search(self, query: str):
         if self.state == PoolState.LOADING:

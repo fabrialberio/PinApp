@@ -58,7 +58,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.pins_tab.connect_pool(USER_POOL, AppListView())
         self.installed_tab.connect_pool(SYSTEM_POOL, AppListView())
-        self.search_tab.connect_pool(SEARCH_POOL, AppListView())
+        self.search_tab.connect_pool(SEARCH_POOL, AppListView(show_pinned_chip = True))
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,
@@ -163,8 +163,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         USER_POOL.files_async()
 
     def reload_apps(self):
-        USER_POOL.files_async()
-        SYSTEM_POOL.files_async()
+        #USER_POOL.files_async()
+        #SYSTEM_POOL.files_async()
         SEARCH_POOL.files_async()
 
     def do_close_request(self, *args):
