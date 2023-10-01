@@ -5,7 +5,7 @@ from xml.sax.saxutils import escape as escape_xml
 from typing import Callable
 
 from .utils import *
-from .file_pools import DesktopFilePool, USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .file_pools import DesktopFilePool, USER_POOL
 from .desktop_file import DesktopFile
 
 
@@ -205,21 +205,11 @@ class PoolStateView(Gtk.Stack):
     pool_page: AppsView
     state: PoolState|None = None
 
-    def __init__(self, pool: DesktopFilePool, pool_page: AppsView) -> None:
+    def __init__(self, pool: DesktopFilePool = None, pool_page: AppsView = None) -> None:
         super().__init__()
 
-        def _on_files_loaded(_, files):
-            print(len(pool.paths),'Signal received')
-            self.pool_page.update(files)
-            self.set_state(PoolState.LOADED)
-
-        pool.connect('files-loading', lambda _: self.set_state(PoolState.LOADING))
-        pool.connect('files-loaded', _on_files_loaded)
-        pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
-        pool.connect('files-error', lambda _, e: self.set_state(PoolState.ERROR))
-
-        self.pool_page = pool_page
-        self.add_named(pool_page, PoolState.LOADED.value)
+        if pool and pool_page:
+            self.connect_pool(pool, pool_page)
         
         self.empty_status_page = Adw.StatusPage(
             title=_('No apps found'),
@@ -250,6 +240,19 @@ class PoolStateView(Gtk.Stack):
         
         self.set_state(PoolState.EMPTY)
 
+    def connect_pool(self, pool: DesktopFilePool, pool_page: AppsView):
+        def _on_files_loaded(_, files):
+            self.pool_page.update(files)
+            self.set_state(PoolState.LOADED)
+
+        pool.connect('files-loading', lambda _: self.set_state(PoolState.LOADING))
+        pool.connect('files-loaded', _on_files_loaded)
+        pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
+        pool.connect('files-error', lambda _, e: self.set_state(PoolState.ERROR))
+
+        self.pool_page = pool_page
+        self.add_named(pool_page, PoolState.LOADED.value)
+
     def set_state(self, state: PoolState):
         if state.value == self.get_visible_child_name():
             return
@@ -257,19 +260,6 @@ class PoolStateView(Gtk.Stack):
         self.state = state
         self.set_visible_child_name(state.value)
         self.emit('state-changed')
-
-
-class PinsView(PoolStateView):
-    __gtype_name__ = 'PinsView'
-
-    def __init__(self) -> None:
-        super().__init__(pool = USER_POOL, pool_page = AppListView())
-
-class InstalledView(PoolStateView):
-    __gtype_name__ = 'InstalledView'
-
-    def __init__(self) -> None:
-        super().__init__(pool = SYSTEM_POOL, pool_page = AppListView())
 
 class SearchView(PoolStateView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
@@ -280,16 +270,16 @@ class SearchView(PoolStateView):
     _files: list[DesktopFile]
 
     def __init__(self) -> None:
-        pool = SEARCH_POOL
-
-        super().__init__(pool = pool, pool_page = AppListView())
-
-        pool.connect('files-loaded', lambda _, files: self.update(files))
+        super().__init__()
 
         # Override empty page with a more appropriate one
         self.empty_status_page.set_title(_('No results found'))
         self.empty_status_page.set_description(_('Try searching for something else'))
         self.empty_status_page.set_icon_name('system-search-symbolic')
+
+    def connect_pool(self, pool: DesktopFilePool, pool_page: AppListView):
+        super().connect_pool(pool, pool_page)
+        pool.connect('files-loaded', lambda _, files: self.update(files))
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         self.search_entry = search_entry

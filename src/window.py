@@ -22,7 +22,7 @@ from gi.repository import Gtk, Adw
 
 from .desktop_file import DesktopFile
 from .file_pools import USER_POOL, SYSTEM_POOL, SEARCH_POOL
-from .apps_page import PinsView, InstalledView, SearchView, PoolStateView
+from .apps_page import SearchView, PoolStateView, AppListView
 
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
@@ -38,8 +38,8 @@ class PinAppWindow(Adw.ApplicationWindow):
     file_page = Gtk.Template.Child('file_page')
 
     view_stack = Gtk.Template.Child('view_stack')
-    pins_view: PinsView = Gtk.Template.Child('pins_view')
-    installed_view: InstalledView = Gtk.Template.Child('installed_view')
+    pins_view: PoolStateView = Gtk.Template.Child('pins_view')
+    installed_view: PoolStateView = Gtk.Template.Child('installed_view')
     search_view: SearchView = Gtk.Template.Child('search_view')
 
     search_bar = Gtk.Template.Child('search_bar')
@@ -50,6 +50,10 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.pins_view.connect_pool(USER_POOL, AppListView())
+        self.installed_view.connect_pool(SYSTEM_POOL, AppListView())
+        self.search_view.connect_pool(SEARCH_POOL, AppListView())
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,
