@@ -1,9 +1,8 @@
 from os import access, W_OK
 from pathlib import Path
-from threading import Thread
 from dataclasses import dataclass, field
 
-from gi.repository import GObject
+from gi.repository import GObject, GLib
 
 from .utils import *
 from .desktop_file import DesktopFile
@@ -51,14 +50,13 @@ class DesktopFilePool(GObject.Object):
                 self.emit('files-error', e)
                 raise
 
-        t = Thread(target=target)
-        t.start()
+        GLib.Thread.new('load_files', target)
 
     @property
     def __doc__(self): return None
     
     @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
-    def __doc__(self, value): ...
+    def __doc__(self, _): ...
 
 class WritableDesktopFilePool(DesktopFilePool):
     def __post_init__(self):
