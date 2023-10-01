@@ -5,7 +5,7 @@ from xml.sax.saxutils import escape as escape_xml
 from typing import Callable
 
 from .utils import *
-from .file_pools import USER_POOL
+from .file_pools import DesktopFilePool, USER_POOL, SYSTEM_POOL, SEARCH_POOL
 from .desktop_file import DesktopFile
 
 
@@ -171,7 +171,6 @@ class AppListView(AppsView):
     def update(self, files: list[DesktopFile], add_pinned_chip: bool = False):
         rows = [AppRow(f, add_pinned_chip = add_pinned_chip) for f in files]
 
-        # TODO: This creates crashes??
         self._listbox.remove_all()
 
         for row in rows:
@@ -202,11 +201,22 @@ class PoolState(Enum):
 class PoolStateView(Gtk.Stack):
     __gtype_name__ = 'PoolStateView'
 
+    pool: DesktopFilePool
     pool_page: AppsView
     state: PoolState|None = None
 
-    def __init__(self, pool_page: AppsView) -> None:
+    def __init__(self, pool: DesktopFilePool, pool_page: AppsView) -> None:
         super().__init__()
+
+        def _on_files_loaded(_, files):
+            print(len(pool.paths),'Signal received')
+            self.pool_page.update(files)
+            self.set_state(PoolState.LOADED)
+
+        pool.connect('files-loading', lambda _: self.set_state(PoolState.LOADING))
+        pool.connect('files-loaded', _on_files_loaded)
+        pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
+        pool.connect('files-error', lambda _, e: self.set_state(PoolState.ERROR))
 
         self.pool_page = pool_page
         self.add_named(pool_page, PoolState.LOADED.value)
@@ -253,13 +263,13 @@ class PinsView(PoolStateView):
     __gtype_name__ = 'PinsView'
 
     def __init__(self) -> None:
-        super().__init__(pool_page = AppListView())
+        super().__init__(pool = USER_POOL, pool_page = AppListView())
 
 class InstalledView(PoolStateView):
     __gtype_name__ = 'InstalledView'
 
     def __init__(self) -> None:
-        super().__init__(pool_page = AppListView())
+        super().__init__(pool = SYSTEM_POOL, pool_page = AppListView())
 
 class SearchView(PoolStateView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
@@ -270,7 +280,11 @@ class SearchView(PoolStateView):
     _files: list[DesktopFile]
 
     def __init__(self) -> None:
-        super().__init__(pool_page = AppListView())
+        pool = SEARCH_POOL
+
+        super().__init__(pool = pool, pool_page = AppListView())
+
+        pool.connect('files-loaded', lambda _, files: self.update(files))
 
         # Override empty page with a more appropriate one
         self.empty_status_page.set_title(_('No results found'))

@@ -1,19 +1,25 @@
 from os import access, W_OK
-from typing import Callable
 from pathlib import Path
 from threading import Thread
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from gi.repository import GObject
 
 from .utils import *
 from .desktop_file import DesktopFile
 
 
 @dataclass
-class DesktopFilePool:
+class DesktopFilePool(GObject.Object):
+    __gtype_name__ = 'DesktopFilePool'
+
     paths: list[Path]
     _pattern = '*.desktop'
+    _dirs: list[Path] = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        super().__init__()
+
         self._dirs = [p for p in self.paths if p.is_dir()]
 
     def files(self) -> list[DesktopFile]:
@@ -25,24 +31,34 @@ class DesktopFilePool:
         files = list(set(files)) # Remove duplicate paths
         return [DesktopFile(p) for p in files]
 
-    def files_async(self, callback: Callable[[list[DesktopFile]], None]) -> None:
+    def files_async(self) -> None:
+        '''Emit files-loaded, files-empty or files-error signals asynchronously'''
+
+        self.emit('files-loading')
+        print(len(self.paths), 'Loading files...')
+
         def target():
-            files = self.files()
-            callback(files)
+            try:
+                files = self.files()
+                print(len(self.paths),'Files loaded')
+
+                if files:
+                    self.emit('files-loaded', files)
+                    print(len(self.paths),'Signal emitted')
+                else:
+                    self.emit('files-empty')
+            except Exception as e:
+                self.emit('files-error', e)
+                raise
 
         t = Thread(target=target)
         t.start()
 
-    def __add__(self, other):
-        if not isinstance(other, DesktopFilePool):
-            raise TypeError(f"'+' not supported between instances of {type(self)} and {type(other)}")
-
-        if self._pattern != other._pattern:
-            raise Exception('Adding two DesktopFilePools with different patterns is not supported')
-
-        return DesktopFilePool(
-            paths = self.paths + other.paths
-        )
+    @property
+    def __doc__(self): return None
+    
+    @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
+    def __doc__(self, value): ...
 
 class WritableDesktopFilePool(DesktopFilePool):
     def __post_init__(self):
@@ -80,4 +96,8 @@ SYSTEM_POOL = DesktopFilePool(
         HOST_DATA / 'applications',
         Path('/var/lib/snapd/desktop/applications'),
     ]
+)
+
+SEARCH_POOL = DesktopFilePool(
+    USER_POOL.paths + SYSTEM_POOL.paths
 )

@@ -16,14 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from pathlib import Path
-from typing import Callable
 from enum import Enum
 
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw
 
 from .desktop_file import DesktopFile
-from .file_pools import USER_POOL, SYSTEM_POOL, DesktopFilePool
-from .apps_page import PoolState, PinsView, InstalledView, SearchView, PoolStateView
+from .file_pools import USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .apps_page import PinsView, InstalledView, SearchView, PoolStateView
 
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
@@ -48,8 +47,6 @@ class PinAppWindow(Adw.ApplicationWindow):
     search_button = Gtk.Template.Child('search_button')
 
     last_view: WindowPage = WindowPage.APPS_PAGE
-    user_files: list[DesktopFile] = []
-    system_files: list[DesktopFile] = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -159,42 +156,14 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.load_path(path)
         self.set_page(WindowPage.FILE_PAGE)
 
-    def _update_pool_view(self, pool_view: PoolStateView|SearchView, pool: DesktopFilePool):
-        if not pool._dirs:
-            pool_view.set_state(PoolState.ERROR)
-            return
-
-        if pool_view.state == PoolState.LOADING:
-            return
-
-        pool_view.set_state(PoolState.LOADING)
-
-        def callback(files: list[DesktopFile]):
-            try:
-                if isinstance(pool_view, SearchView):
-                    pool_view.update(files)
-                else:
-                    pool_view.pool_page.update(files)
-
-                if files:
-                    pool_view.set_state(PoolState.LOADED)
-                else:
-                    pool_view.set_state(PoolState.EMPTY)
-            except:
-                pool_view.set_state(PoolState.ERROR)
-                raise
-
-
-        pool.files_async(callback=callback)
-
     def reload_pins(self):
         self.set_view(self.pins_view)
-        self._update_pool_view(self.pins_view, USER_POOL)
+        USER_POOL.files_async()
 
     def reload_apps(self):
-        self._update_pool_view(self.pins_view, USER_POOL)
-        self._update_pool_view(self.installed_view, SYSTEM_POOL)
-        self._update_pool_view(self.search_view, USER_POOL + SYSTEM_POOL)
+        USER_POOL.files_async()
+        SYSTEM_POOL.files_async()
+        SEARCH_POOL.files_async()
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''
