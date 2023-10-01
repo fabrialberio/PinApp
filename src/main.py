@@ -22,7 +22,7 @@ from pathlib import Path
 from gi.repository import Gtk, Gio, Adw
 
 from .utils import LOCALE_DIR
-from .window import PinAppWindow, WindowPage
+from .window import PinAppWindow, WindowPage, WindowTab
 
 bindtextdomain('pinapp', LOCALE_DIR)
 textdomain('pinapp')
@@ -60,10 +60,13 @@ class PinAppApplication(Adw.Application):
         self.window.present()
 
     def on_escape(self, *args):
-        if self.window.get_page() == WindowPage.FILE_PAGE:
+        if self.window.current_page() == WindowPage.FILE_PAGE:
             self.window.file_page.on_leave()
-        elif self.window.get_page() == WindowPage.APPS_PAGE and self.window.get_view() == self.window.search_view:
-            self.window.set_search_mode(False)
+        elif self.window.current_page() == WindowPage.APPS_PAGE:
+            if self.window.current_tab() == WindowTab.INSTALLED:
+                self.window.set_tab(WindowTab.PINS)
+            elif self.window.current_tab() == WindowTab.SEARCH:
+                self.window.set_search_mode(False)
 
     def create_action(self, name, callback, shortcuts=None):
         action = Gio.SimpleAction.new(name, None)

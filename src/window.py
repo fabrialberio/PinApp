@@ -24,6 +24,11 @@ from .desktop_file import DesktopFile
 from .file_pools import USER_POOL, SYSTEM_POOL, SEARCH_POOL
 from .apps_page import SearchView, PoolStateView, AppListView
 
+
+class WindowTab(Enum):
+    PINS = 'pins_tab'
+    INSTALLED = 'installed_tab'
+    SEARCH = 'search_tab'
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
     FILE_PAGE = 'file-page'
@@ -38,22 +43,22 @@ class PinAppWindow(Adw.ApplicationWindow):
     file_page = Gtk.Template.Child('file_page')
 
     view_stack = Gtk.Template.Child('view_stack')
-    pins_view: PoolStateView = Gtk.Template.Child('pins_view')
-    installed_view: PoolStateView = Gtk.Template.Child('installed_view')
-    search_view: SearchView = Gtk.Template.Child('search_view')
+    pins_tab: PoolStateView = Gtk.Template.Child('pins_tab')
+    installed_tab: PoolStateView = Gtk.Template.Child('installed_tab')
+    search_tab: SearchView = Gtk.Template.Child('search_tab')
 
     search_bar = Gtk.Template.Child('search_bar')
     search_entry = Gtk.Template.Child('search_entry')
     search_button = Gtk.Template.Child('search_button')
 
-    last_view: WindowPage = WindowPage.APPS_PAGE
+    last_tab: WindowTab = WindowTab.PINS
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.pins_view.connect_pool(USER_POOL, AppListView())
-        self.installed_view.connect_pool(SYSTEM_POOL, AppListView())
-        self.search_view.connect_pool(SEARCH_POOL, AppListView())
+        self.pins_tab.connect_pool(USER_POOL, AppListView())
+        self.installed_tab.connect_pool(SYSTEM_POOL, AppListView())
+        self.search_tab.connect_pool(SEARCH_POOL, AppListView())
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,
@@ -63,13 +68,13 @@ class PinAppWindow(Adw.ApplicationWindow):
                 icon_name='list-add-symbolic'))
         button.connect('clicked', lambda _: self.new_file())
 
-        self.pins_view.empty_status_page.set_child(button)
+        self.pins_tab.empty_status_page.set_child(button)
 
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
-        self.pins_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
-        self.installed_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
-        self.search_view.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.pins_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.installed_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.search_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
 
         self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_pins())
@@ -83,21 +88,20 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self._init_search()
         self.reload_apps()
-        self.set_view(self.pins_view)
 
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.connect_entry(self.search_entry)
-        self.search_view.connect_entry(self.search_entry)
+        self.search_tab.connect_entry(self.search_entry)
 
-        def view_changed_cb(*args):
+        def tab_changed_cb(*args):
             '''Disables search mode when the view is changed to something else'''
-            if self.search_bar.get_search_mode() == True and self.get_view() != self.search_view:
+            if self.search_bar.get_search_mode() == True and self.current_tab() != WindowTab.SEARCH:
                 self.search_bar.set_search_mode(False)
 
         self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
         self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
-        self.view_stack.connect('notify', view_changed_cb)
+        self.view_stack.connect('notify', tab_changed_cb)
 
     def set_page(self, new_page: WindowPage):
         if new_page == WindowPage.APPS_PAGE:
@@ -105,28 +109,22 @@ class PinAppWindow(Adw.ApplicationWindow):
         elif new_page == WindowPage.FILE_PAGE:
             self.navigation_view.push_by_tag(WindowPage.FILE_PAGE.value)
 
-    def get_page(self) -> WindowPage:
+    def current_page(self) -> WindowPage:
         return WindowPage(self.navigation_view.get_visible_page().get_tag())
 
-    def set_view(self, new_view: Gtk.Widget):
-        if new_view in [
-                self.pins_view,
-                self.installed_view,
-                self.search_view]:
-            if new_view != (current_view := self.get_view()):
-                self.last_view = current_view
-                self.view_stack.set_visible_child(new_view)
-        else:
-            raise ValueError
+    def set_tab(self, new_tab: WindowTab):
+        if new_tab != self.current_tab():
+            self.last_tab = self.current_tab()
+            self.view_stack.set_visible_child_name(new_tab.value)
 
-    def get_view(self) -> Gtk.Widget:
-        return self.view_stack.get_visible_child()
+    def current_tab(self) -> WindowTab:
+        return WindowTab(self.view_stack.get_visible_child_name())
 
     def set_search_mode(self, state: bool, clear_entry=False):
         '''Shows or hides search view and search bar'''
         if state:
             self.set_page(WindowPage.APPS_PAGE)
-            self.set_view(self.search_view)
+            self.set_tab(WindowTab.SEARCH)
 
             self.search_bar.set_search_mode(True)
             self.search_entry.grab_focus()
@@ -134,8 +132,8 @@ class PinAppWindow(Adw.ApplicationWindow):
             if clear_entry:
                 self.search_entry.set_text('')
         else:
-            if self.get_view() == self.search_view:
-                self.set_view(self.last_view)
+            if self.current_tab() == WindowTab.SEARCH:
+                self.set_tab(self.last_tab)
             self.search_bar.set_search_mode(False)
 
     def open_file(self, file):
@@ -144,7 +142,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def new_file(self):
         # TODO crashes with new DesktopFile
-        if self.get_page() != WindowPage.APPS_PAGE:
+        if self.current_page() != WindowPage.APPS_PAGE:
             return
 
         path = USER_POOL.new_file_name('pinned-app')
@@ -161,7 +159,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_page(WindowPage.FILE_PAGE)
 
     def reload_pins(self):
-        self.set_view(self.pins_view)
+        self.set_tab(WindowTab.PINS)
         USER_POOL.files_async()
 
     def reload_apps(self):
@@ -175,7 +173,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.close()
             self.destroy()
 
-        if self.get_page() == WindowPage.FILE_PAGE:
+        if self.current_page() == WindowPage.FILE_PAGE:
             if self.file_page.allow_leave:
                 self.close()
                 quit()
