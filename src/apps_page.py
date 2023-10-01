@@ -1,6 +1,6 @@
 from enum import Enum
 
-from gi.repository import Gtk, Adw, Pango
+from gi.repository import Gtk, Adw
 from xml.sax.saxutils import escape as escape_xml
 from typing import Callable
 
@@ -237,16 +237,16 @@ class PoolStateView(Gtk.Stack):
             height_request=32,
             opacity=.8,
             spinning=True)) # Replaces it with a spinner
-        
+
         self.set_state(PoolState.EMPTY)
 
     def connect_pool(self, pool: DesktopFilePool, pool_page: AppsView):
-        def _on_files_loaded(_, files):
+        def _on_files_loaded(files):
             self.pool_page.update(files)
             self.set_state(PoolState.LOADED)
 
         pool.connect('files-loading', lambda _: self.set_state(PoolState.LOADING))
-        pool.connect('files-loaded', _on_files_loaded)
+        pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
         pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
         pool.connect('files-error', lambda _, e: self.set_state(PoolState.ERROR))
 
