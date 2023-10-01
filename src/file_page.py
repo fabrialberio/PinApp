@@ -381,9 +381,6 @@ class FilePage(Adw.BreakpointBin):
 
                 # Copy file inside app data directory, so it persists after reboot
                 new_path = APP_DATA / 'icons' / path.name
-
-                print(f'{path=}\n{new_path=}')
-
                 copy(path, new_path)
 
                 self.icon_row.field.set(str(new_path))

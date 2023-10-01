@@ -34,16 +34,13 @@ class DesktopFilePool(GObject.Object):
         '''Emit files-loaded, files-empty or files-error signals asynchronously'''
 
         self.emit('files-loading')
-        print(len(self.paths), 'Loading files...')
 
         def target():
             try:
                 files = self.files()
-                print(len(self.paths),'Files loaded')
 
                 if files:
                     self.emit('files-loaded', files)
-                    print(len(self.paths),'Signal emitted')
                 else:
                     self.emit('files-empty')
             except Exception as e:

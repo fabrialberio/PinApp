@@ -45,21 +45,17 @@ class PinAppApplication(Adw.Application):
         self.create_action('exit', self.on_escape, ['Escape'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
-        self.window = None
+        self.window: PinAppWindow = None
 
     def do_activate(self):
         """Called when the application is activated"""
         self._create_window()
         self.window.present()
 
-    def do_open(self, files, n_files, hint):
-        print(f'Do open called!\n{files=}\t{n_files=}\t{hint=}')
-        
+    def do_open(self, files, n_files, hint):        
         path = Path(files[0].get_path())
-        print(f'{path=}')
 
         self._create_window()
-        print(f'{self.window=}')
         self.window.load_path(path)
         self.window.present()
 
