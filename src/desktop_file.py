@@ -1,226 +1,260 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Type, TypeVar, Generic, Any
+from typing import Type, Callable, overload
 
-from configparser import ConfigParser, SectionProxy
-
-
-T = TypeVar('T', str, int, float, bool, list[str])
-U = TypeVar('U', str, int, float, bool, list[str], None)
+from gi.repository import GLib
 
 
-@dataclass
-class Field(Generic[T]):
-    key: str
-    _parent_section: SectionProxy
-    _type: Type[T]
-
-    @classmethod
-    def parse_type(cls, key: str, value: str, _parent_section: SectionProxy) -> 'Field[Any]':
-        if value in ['true', 'false']:
-            return Field[bool](key, _parent_section, bool)
-        elif value.isdigit():
-            return Field[int](key, _parent_section, int)
-        elif value.replace('.', '', 1).isdigit():
-            return Field[float](key, _parent_section, float)
-        elif value.endswith(';'):
-            return Field[list[str]](key, _parent_section, list[str])
-        else:
-            return Field[str](key, _parent_section, str)
+type LocalizedFieldType = str | list[str]
+type FieldType = bool | int | float | str | \
+                 list[bool] | list[int] | list[float] | list[str] | \
+                 Localized[str] | Localized[list[str]]
 
 
-    def get(self, default: U = None) -> U:
-        value: str | None = self._parent_section.get(self.key, fallback = None)
+@dataclass(init = False)
+class Localized[T: LocalizedFieldType]:
+    locale_value: dict[str|None, T]
+    locales: list[str] = field(init = False)
 
-        if value is None:
-            return default
-
-        if (self._type == bool):
-            return value.lower() == 'true'
-        elif (self._type == int):
-            return int(value)
-        elif (self._type == float):
-            return float(value)
-        elif (self._type == list[str]):
-            return value.split(';')[:-1]
-        else:
-            return value
-
-    def set(self, value: T):
-        if (self._type == bool):
-            self._parent_section[self.key] = str(value).lower()
-        elif (self._type == int):
-            self._parent_section[self.key] = str(value)
-        elif (self._type == float):
-            self._parent_section[self.key] = str(value)
-        elif (self._type == list[str]):
-            self._parent_section[self.key] = ';'.join(value) + ';'
-        else:
-            self._parent_section[self.key] = str(value)
-
-    def __str__(self) -> str: return str(self.get(default = ''))
-    def __dict__(self) -> dict[str, T]: return {self.key: self.get()}
-    def __repr__(self) -> str: return f'<Field "{self.key}" type={self._type.__name__}>'
-
-@dataclass
-class LocalizedField(Field[T]):
     @staticmethod
-    def split_localized_key(key: str) -> tuple[str, str]|None:
+    def split_key_locale(key: str) -> tuple[str, str|None]:
         if '[' in key and key.endswith(']'):
             return (key.split('[')[0], key.split('[')[1].removesuffix(']'))
         else:
-            return None
+            return (key, None)
+        
+    @staticmethod
+    def join_key_locale(key: str, locale: str|None) -> str:
+        if locale is None:
+            return key
+        else:
+            return f'{key}[{locale}]'
 
-    def __post_init__(self):
-        if LocalizedField.split_localized_key(self.key):
-            raise ValueError(f'LocalizedField key "{self.key}" cannot contain "[]", use Field instead.')
+    @classmethod
+    def get_from_key_file(cls,
+            key_file: '_KeyFile',
+            group_name: str,
+            key: str,
+            get_as: Type[T]
+        ) -> 'Localized[T]':
+        key = Localized.split_key_locale(key)[0]
+        key_value = {k: v for k, v in key_file.tree(get_as)[group_name].items() \
+                     if Localized.split_key_locale(k)[0] == key}
 
-    @property
-    def localized_keys(self) -> list[str]:
-        return [k for k in self._parent_section.keys() if k.startswith(self.key+'[')]
-
-    @property
-    def locales(self) -> list[str]:
-        return [k.removeprefix(self.key+'[').removesuffix(']') for k in self.localized_keys]
-
-    def as_locale(self, locale: str) -> Field[T]:
-        return Field[T](f'{self.key}[{locale}]', self._parent_section, self._type)
-
-    def get_localized(self, locale: str, default: U = None) -> U:
-        return self.as_locale(locale).get(default = default)
+        return Localized[get_as]({Localized.split_key_locale(k)[1]: v for k, v in key_value.items() \
+                                  if v is not None})
     
-    def set_localized(self, locale: str, value: T):
-        self.as_locale(locale).set(value)
+    @classmethod
+    def set_to_key_file(cls,
+            key_file: '_KeyFile',
+            group_name: str,
+            key: str,
+            value: 'Localized[T]',
+            set_as: Type[T]
+        ):
+        for locale, v in value.locale_value.items():
+            key_file.set(group_name, Localized.join_key_locale(key, locale), v, set_as)
 
-    def __dict__(self) -> dict[str, T|None]:
-        return {k: Field[T](k, self._parent_section, self._type).get() for k in self.localized_keys}
-    def __repr__(self) -> str: return f'<LocalizedField "{self.key}" type={self._type.__name__}>'
+    @overload
+    def __init__(self, value: T): ...
+    @overload
+    def __init__(self, value: T, locale: str): ...
+    @overload
+    def __init__(self, value: dict[str|None, T]): ...
+
+    def __init__(self, value: T|dict[str|None, T], locale: str|None = None):
+        if isinstance(value, dict):
+            self.locale_value = value
+        else:
+            self.locale_value = {locale: value}
+
+        self.locales = [l for l in self.locale_value.keys() if l is not None]
+
+    def __getitem__(self, locale: str|None) -> LocalizedFieldType:
+        return self.locale_value[locale]
+
+TYPE_GET_MAP: dict[type[FieldType], Callable[['_KeyFile', str, str], FieldType]] = {
+    bool:                 lambda f, n, k: f._key_file.get_boolean(n, k),
+    int:                  lambda f, n, k: f._key_file.get_integer(n, k),
+    float:                lambda f, n, k: f._key_file.get_double(n, k),
+    str:                  lambda f, n, k: f._key_file.get_string(n, k),
+    list[bool]:           lambda f, n, k: f._key_file.get_boolean_list(n, k),
+    list[int]:            lambda f, n, k: f._key_file.get_integer_list(n, k),
+    list[float]:          lambda f, n, k: f._key_file.get_double_list(n, k),
+    list[str]:            lambda f, n, k: f._key_file.get_string_list(n, k),
+    Localized[str]:       lambda f, n, k: Localized.get_from_key_file(f, n, k, str),
+    Localized[list[str]]: lambda f, n, k: Localized.get_from_key_file(f, n, k, list[str]),
+}
+
+TYPE_SET_MAP: dict[type[FieldType], Callable[['_KeyFile', str, str, FieldType], None]] = {
+    bool:                 lambda f, n, k, v: f._key_file.set_boolean(n, k, v),
+    int:                  lambda f, n, k, v: f._key_file.set_integer(n, k, v),
+    float:                lambda f, n, k, v: f._key_file.set_double(n, k, v),
+    str:                  lambda f, n, k, v: f._key_file.set_string(n, k, v),
+    list[bool]:           lambda f, n, k, v: f._key_file.set_boolean_list(n, k, v),
+    list[int]:            lambda f, n, k, v: f._key_file.set_integer_list(n, k, v),
+    list[float]:          lambda f, n, k, v: f._key_file.set_double_list(n, k, v),
+    list[str]:            lambda f, n, k, v: f._key_file.set_string_list(n, k, v),
+    Localized[str]:       lambda f, n, k, v: Localized.set_to_key_file(f, n, k, v, str),
+    Localized[list[str]]: lambda f, n, k, v: Localized.set_to_key_file(f, n, k, v, list[str]),
+}
 
 @dataclass
-class Section:
-    _section: SectionProxy
-
-    def __post_init__(self):
-        self.title = self._section.name
-
-    def field(self, key: str, _type: Type[T]) -> Field[T]:
-        return Field(key, self._section, _type)
-
-    def localized_field(self, key: str, _type: Type[T]) -> LocalizedField[T]:
-        return LocalizedField(key, self._section, _type)
-
-    def __dict__(self) -> dict[str, str]:
-        return {k: self._section.get(k) for k in self._section.keys()}
-
-    def __hash__(self) -> int:
-        return hash(tuple(self.__dict__().items()))
-
-@dataclass(eq = False)
-class IniFile:
+class _KeyFile:
     path: Path
+    _key_file: GLib.KeyFile = field(init = False)
 
     def __post_init__(self):
-        self._parser = ConfigParser(interpolation=None, strict=False)
-        self._parser.optionxform = str
-
+        self._key_file = GLib.KeyFile.new()
 
     def load(self):
         if not self.path.exists():
             raise FileExistsError(f'File "{self.path}" does not exist.')
 
-        self._parser.clear()
-        self._parser.read(self.path)
+        self._key_file.load_from_file(
+            str(self.path), 
+            GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
+        )
 
     def save_as(self, path: Path):
         with open(path, 'w+') as f:
-            self._parser.write(f)
+            f.write(self._key_file.to_data()[0])
 
     def save(self):
         self.save_as(self.path)
 
-    def __dict__(self) -> dict[str, Section]:
-        return {t: Section(self._parser[t]) for t in self._parser.sections()}
+    def get[T: FieldType, D: FieldType|None](self,
+            group_name: str,
+            key: str,
+            get_as: Type[T],
+            default: D = None
+        ) -> T|D:
+        if group_name not in self._key_file.get_groups()[0]:
+            raise KeyError(f'Group "{group_name}" does not exist.')
+        try:
+            if (r := TYPE_GET_MAP[get_as](self, group_name, key)) is not None:
+                return r
+            else:
+                return default
+        except Exception:
+            return default
+
+    def set[T: FieldType](self,
+            group_name: str,
+            key: str,
+            value: T,
+            set_as: Type[T]
+        ):
+        TYPE_SET_MAP[set_as](self, group_name, key, value)
+
+    def tree[T: FieldType, D: FieldType|None](self,
+            get_as: Type[T] = str,
+            default: D = None
+        ) -> dict[str, dict[str, T|D]]:
+        return {n: {
+            k: self.get(n, k, get_as, default) for k in self._key_file.get_keys(n)[0]
+        } for n in self._key_file.get_groups()[0]}
+
+    def __dict__(self) -> dict[str, list[str]]:
+        return {n: [
+            k for k in self._key_file.get_keys(n)[0]
+        ] for n in self._key_file.get_groups()[0]}
 
 
-class DesktopEntry(Section):
-    NoDisplay: Field[bool]
-    Hidden: Field[bool]
-    DBusActivatable: Field[bool]
-    Terminal: Field[bool]
-    StartupNotify: Field[bool]
-    PrefersNonDefaultGPU: Field[bool]
-    SingleMainWindow: Field[bool]
-    Type: Field[str]
-    Exec: Field[str]
-    Icon: Field[str]
-    Version: Field[str]
-    TryExec: Field[str]
-    Path: Field[str]
-    StartupWMClass: Field[str]
-    URL: Field[str]
-    OnlyShowIn: Field[list[str]]
-    NotShowIn: Field[list[str]]
-    Actions: Field[list[str]]
-    MimeType: Field[list[str]]
-    Categories: Field[list[str]]
-    Implements: Field[list[str]]
-    Name: LocalizedField[str]
-    GenericName: LocalizedField[str]
-    Comment: LocalizedField[str]
-    Keywords: LocalizedField[list[str]]
-    X_Flatpak: Field[str]
-    X_SnapInstanceName: Field[str]
-    X_GNOME_Autostart: Field[bool]
+DESKTOP_ENTRY_GROUP_NAME = 'Desktop Entry'
+DESKTOP_ACTION_GROUP_PREFIX = 'Desktop Action '
 
-    def __init__(self, _section: SectionProxy) -> None:
-        for name, t in self.__annotations__.items():
-            setattr(self, name, t(name.replace('_', '-'), _section, t.__args__[0]))
+@dataclass
+class MagicGroup:
+    _key_file: _KeyFile
+    _group_name: str
 
-        super().__init__(_section)
+    def __getattr__(self, name: str) -> FieldType|None:
+        if name in self.__annotations__:
+            get_as = self.__annotations__[name]
+            return self._key_file.get(self._group_name, name.replace('_', '-'), get_as)
+        else:
+            raise AttributeError(f'Attribute "{name}" does not exist.')
+    
+    def __setattr__(self, name: str, value: FieldType):
+        if name in self.__annotations__:
+            set_as = self.__annotations__[name]
+            self._key_file.set(self._group_name, name.replace('_', '-'), value, set_as)
+        else:
+            super().__setattr__(name, value)
 
-class DesktopAction(Section):
-    Name: LocalizedField[str]
-    Icon: Field[str]
-    Exec: Field[str]
+    def __dict__(self) -> dict[str, FieldType]:
+        return {name: getattr(self, name) for name in self.__annotations__}
 
-    def __init__(self, _section: SectionProxy) -> None:
-        for name, t in self.__annotations__.items():
-            setattr(self, name, t(name.replace('_', '-'), _section, t.__args__[0]))
+class DesktopEntry(MagicGroup):
+    NoDisplay: bool
+    Hidden: bool
+    DBusActivatable: bool
+    Terminal: bool
+    StartupNotify: bool
+    PrefersNonDefaultGPU: bool
+    SingleMainWindow: bool
+    Type: str
+    Exec: str
+    Icon: str
+    Version: str
+    TryExec: str
+    Path: str
+    StartupWMClass: str
+    URL: str
+    OnlyShowIn: list[str]
+    NotShowIn: list[str]
+    Actions: list[str]
+    MimeType: list[str]
+    Categories: list[str]
+    Implements: list[str]
+    Name: Localized[str]
+    GenericName: Localized[str]
+    Comment: Localized[str]
+    Keywords: Localized[list[str]]
+    X_Flatpak: str
+    X_SnapInstanceName: str
+    X_GNOME_Autostart: bool
 
-        super().__init__(_section)
+class DesktopAction(MagicGroup):
+    Name: Localized[str]
+    Icon: str
+    Exec: str
 
-@dataclass(eq = False, init=False)
-class DesktopFile(IniFile):
+@dataclass(eq = False, init = False)
+class DesktopFile(_KeyFile):
+    search_str: str
+    _saved_hash: int
     desktop_entry: DesktopEntry
     desktop_actions: list[DesktopAction]
 
-    _saved_hash: int
-    search_str: str
-
     @classmethod
     def new_with_defaults(cls, path: Path) -> 'DesktopFile':
-        file = cls(path)
+        f = cls(path)
 
-        file.desktop_entry.Type.set('Application')
-        file.desktop_entry.Name.set('')
-        file.desktop_entry.Exec.set('notify-send "Hello World"')
-        file.desktop_entry.Icon.set('')
+        f.desktop_entry.Type = 'Application'
+        f.desktop_entry.Name = Localized[str]('New Application')
+        f.desktop_entry.Exec = 'echo "Hello World"'
+        f.desktop_entry.Icon = ''
 
-        return file
+        return f
 
-    def __post_init__(self) -> None:
+    def __post_init__(self):
         super().__post_init__()
 
         self.load()
 
     def edited(self) -> bool:
         return self._saved_hash != hash(self)
-
+    
     def load(self):
         super().load()
 
-        self.desktop_entry = DesktopEntry(self._parser['Desktop Entry'])
-        self.desktop_actions = [DesktopAction(self._parser[t]) for t in self._parser.sections() if t.startswith('Desktop Action')]
+        self.desktop_entry = DesktopEntry(self, DESKTOP_ENTRY_GROUP_NAME)
+        self.desktop_actions = [
+            DesktopAction(self, n) for n in self._key_file.get_groups()[0] \
+            if n.startswith(DESKTOP_ACTION_GROUP_PREFIX)
+        ]
 
         self._saved_hash = hash(self)
         self.search_str = self.__search_str__()
@@ -232,11 +266,11 @@ class DesktopFile(IniFile):
 
     def __search_str__(self) -> str:
         file_name = self.path.stem
-        de_values = '\n'.join(v for v in self.desktop_entry.__dict__().values())
-        de_true_keys = '\n'.join(k for k, v in self.desktop_entry.__dict__().items() if v == 'true')
-        da_values = '\n'.join(v for a in self.desktop_actions for v in a.__dict__().values())
+        de_values = '\n'.join(self.get(self.desktop_entry._group_name, k, str, '') for k in self.desktop_entry.__dict__().keys())
+        de_true_keys = '\n'.join(k for k, v in self.desktop_entry.__dict__().items() if v)
+        da_values = '\n'.join(self.get(a._group_name, k, str, '') for a in self.desktop_actions for k in a.__dict__().keys())
 
         return '\n'.join([file_name, de_values, de_true_keys, da_values]).lower()
-
+    
     def __hash__(self) -> int:
-        return hash(tuple(self.__dict__().items()))
+        return hash(tuple((k, tuple(v.items())) for k, v in self.tree().items()))
