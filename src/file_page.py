@@ -362,6 +362,10 @@ class FilePage(Adw.BreakpointBin):
                 self.icon_row.connect('changed', lambda _: self._update_icon())
 
                 string_rows.append(self.icon_row)
+            elif key == 'NoDisplay':
+                row = BoolRow(field)
+                row.switch.connect('state-set', lambda _, s: self._update_quick_toggles_box())
+                bool_rows.append(row)
             elif type(field.get()) in [str, list]:
                 string_rows.append(StringRow(field))
             elif type(field.get()) == bool:
@@ -395,7 +399,7 @@ class FilePage(Adw.BreakpointBin):
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
             self.header_bar.set_show_title(True)
-            self.window_title.set_title(self.file.appsection.Name.as_str())
+            self.window_title.set_title(self.file.appsection.Name.as_str() or '')
         else:
             self.header_bar.set_show_title(False)
 
