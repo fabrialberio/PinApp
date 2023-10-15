@@ -2,13 +2,44 @@ from os import access, W_OK
 from shutil import copy
 from pathlib import Path
 from typing import Callable, Optional
+from dataclasses import dataclass
 
 from gi.repository import Gtk, Adw, Gio
 
-from .desktop_file import DesktopFile, Field, LocalizedField
+from .desktop_file import DesktopFile, FieldType
 from .file_pools import USER_POOL
 from .utils import APP_DATA
 
+
+
+def get_field_row[T: FieldType](group_name: str, key: str, type_: type[T]) -> 'FieldRow':
+    if type_ == bool:
+        return BoolRow(group_name, key)
+    else:
+        return StringRow(group_name, key)
+
+class FieldRow[T: FieldType](Adw.Bin):
+    __gtype_name__ = 'FieldRow'
+
+    group_name: str
+    key: str
+    type_: type[T]
+
+    def __init__(self, group_name: str, key: str, type_: type[T]) -> None:
+        self.group_name = group_name
+        self.key = key
+        self.type_ = type_
+
+        super().__init__(title=self.key)
+
+    def add_action(self, icon_name: str, callback: Callable):
+        button = Gtk.Button(
+            valign=Gtk.Align.CENTER,
+            icon_name=icon_name,
+            css_classes=['flat']
+        )
+        button.connect('clicked', callback)
+        self.add_suffix(button)
 
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
@@ -322,7 +353,7 @@ class FilePage(Adw.BreakpointBin):
                 all_locales |= {locale}
 
                 if unlocalized_key not in added_keys:
-                    localized_rows.append(LocalizedRow(LocalizedField(unlocalized_key, field._parent_section, field._type), locale))
+                    localized_rows.append(LocalizedRow(LocalizedField(unlocalized_key, field._group_name, field._type), locale))
                     added_keys.append(unlocalized_key)
             elif key in ['Name', 'Comment']:
                 continue
