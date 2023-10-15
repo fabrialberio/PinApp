@@ -421,17 +421,8 @@ class FilePage(Adw.BreakpointBin):
         hidden_toggle.connect('toggled', lambda _: self.file.appsection.NoDisplay.set(hidden_toggle.get_active()))
         hidden_toggle.connect('toggled', lambda _: self.update_page())
 
-        terminal_toggle = ActionToggleButton(
-            label=_('Terminal'),
-            icon_name='utilities-terminal-symbolic',
-            active=self.file.appsection.Terminal.as_bool(),
-        )
-        terminal_toggle.connect('toggled', lambda _: self.file.appsection.Terminal.set(terminal_toggle.get_active()))
-        terminal_toggle.connect('toggled', lambda _: self.update_page())
-
         self.quick_toggles_box.append(autostart_toggle)
         self.quick_toggles_box.append(hidden_toggle)
-        self.quick_toggles_box.append(terminal_toggle)
 
     def _update_icon(self):
         set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
