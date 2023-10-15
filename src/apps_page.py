@@ -1,8 +1,8 @@
+from xml.sax.saxutils import escape as escape_xml
+from typing import Callable
 from enum import Enum
 
 from gi.repository import Gtk, Adw
-from xml.sax.saxutils import escape as escape_xml
-from typing import Callable
 
 from .utils import *
 from .file_pools import DesktopFilePool, USER_POOL
@@ -72,7 +72,7 @@ class AppIcon(Gtk.Image):
         self.set_from_icon_name('application-x-executable')
         
         theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
-        if icon_name != None:
+        if icon_name is not None:
             # Checking for -symbolic because sometimes icons only have a symbolic version
             if theme.has_icon(icon_name) or theme.has_icon(f'{icon_name}-symbolic'):
                 self.set_from_icon_name(icon_name)
@@ -172,12 +172,11 @@ class AppListView(AppsView):
                     child = box)))
 
     def update(self, files: list[DesktopFile]):
-        rows = [AppRow(f, add_pinned_chip = self.show_pinned_chip) for f in files]
-
         self._listbox.remove_all()
         print('Old rows removed')
 
-        for row in rows:
+        for f in files:
+            row = AppRow(f, add_pinned_chip = self.show_pinned_chip)
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             self._listbox.append(row)
 
@@ -247,12 +246,12 @@ class PoolStateView(Gtk.Stack):
         self.set_state(PoolState.EMPTY)
 
     def connect_pool(self, pool: DesktopFilePool, pool_page: AppsView):
-        def _on_files_loaded(files):
+        def _on_files_loaded(_, files):
             self.pool_page.update(files)
             self.set_state(PoolState.LOADED)
 
         pool.connect('files-loading', lambda _: self.set_state(PoolState.LOADING))
-        pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
+        pool.connect('files-loaded', _on_files_loaded)
         pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
         pool.connect('files-error', lambda _, e: self.set_state(PoolState.ERROR))
 

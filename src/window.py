@@ -96,7 +96,7 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         def tab_changed_cb(*args):
             '''Disables search mode when the view is changed to something else'''
-            if self.search_bar.get_search_mode() == True and self.current_tab() != WindowTab.SEARCH:
+            if self.search_bar.get_search_mode() is True and self.current_tab() != WindowTab.SEARCH:
                 self.search_bar.set_search_mode(False)
 
         self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
@@ -163,8 +163,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         USER_POOL.files_async()
 
     def reload_apps(self):
-        #USER_POOL.files_async()
-        #SYSTEM_POOL.files_async()
+        USER_POOL.files_async()
+        SYSTEM_POOL.files_async()
         SEARCH_POOL.files_async()
 
     def do_close_request(self, *args):
@@ -187,8 +187,8 @@ class PinAppWindow(Adw.ApplicationWindow):
                 self.file_page.on_leave(callback=callback)
 
                 return True
-        else:
-            quit()
+
+        quit()
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')

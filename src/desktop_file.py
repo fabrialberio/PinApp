@@ -134,8 +134,8 @@ class _KeyFile:
         try:
             if (r := TYPE_GET_MAP[get_as](self, group_name, key)) is not None:
                 return r
-            else:
-                return default
+
+            return default
         except Exception:
             return default
 

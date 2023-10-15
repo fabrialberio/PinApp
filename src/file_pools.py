@@ -71,7 +71,7 @@ class WritableDesktopFilePool(DesktopFilePool):
         other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
 
         next_available_index = next((i for i in range(0, len(other_indexes)+1) if i not in other_indexes), None)
-        if next_available_index == None:
+        if next_available_index is None:
             raise Exception('No available index found')
 
         return self.default_dir / f'{name}{separator + str(next_available_index) if next_available_index > 0 else ""}{suffix}'
