@@ -4,31 +4,33 @@ from dataclasses import dataclass, field
 
 from gi.repository import GObject, GLib
 
-from .utils import *
-from .desktop_file import DesktopFile
+from .config import *
 
 
-@dataclass
-class DesktopFilePool(GObject.Object):
+@dataclass(init=False)
+class FilePool(GObject.Object):
     __gtype_name__ = 'DesktopFilePool'
 
     paths: list[Path]
-    _pattern = '*.desktop'
+    _pattern: str
     _dirs: list[Path] = field(init=False)
 
-    def __post_init__(self) -> None:
+    def __init__(self, paths: list[Path], _pattern = '*.desktop') -> None:
+        self.paths = paths
+        self._pattern = _pattern
+
         super().__init__()
 
         self._dirs = [p for p in self.paths if p.is_dir()]
 
-    def files(self) -> list[DesktopFile]:
+    def files(self) -> list[Path]:
         files = []
 
         for d in self._dirs:
             files += [p for p in d.rglob(self._pattern) if p.is_file()]
 
         files = list(set(files)) # Remove duplicate paths
-        return [DesktopFile(p) for p in files]
+        return files
 
     def files_async(self) -> None:
         '''Emit files-loaded, files-empty or files-error signals asynchronously'''
@@ -49,13 +51,10 @@ class DesktopFilePool(GObject.Object):
 
         GLib.Thread.new('load_files', target)
 
-    @property
-    def __doc__(self): return None
-    
-    @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
-    def __doc__(self, _): ...
+    def __iter__(self):
+        return iter(self.files())
 
-class WritableDesktopFilePool(DesktopFilePool):
+class WritableFilePool(FilePool):
     def __post_init__(self):
         super().__post_init__()
         self._dirs = [p for p in self._dirs if access(p, W_OK)]
@@ -65,7 +64,7 @@ class WritableDesktopFilePool(DesktopFilePool):
 
         self.default_dir = self._dirs[0]
 
-    def new_file_name(self, name: str, suffix = '.desktop', separator = '-') -> Path:
+    def new_file_path(self, name: str, suffix = '.desktop', separator = '-') -> Path:
         other_files = list(self.default_dir.glob(f'{name}*{suffix}'))
         other_files = [f.name.removeprefix(name).removeprefix(separator).removesuffix(suffix) for f in other_files]
         other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
@@ -76,14 +75,23 @@ class WritableDesktopFilePool(DesktopFilePool):
 
         return self.default_dir / f'{name}{separator + str(next_available_index) if next_available_index > 0 else ""}{suffix}'
 
+    def remove_all(self, name: str) -> None:
+        for dir in self._dirs:
+            for f in dir.glob(name):
+                f.unlink()
 
-USER_POOL = WritableDesktopFilePool(
+    def rename_all(self, old_name: str, new_name: str) -> None:
+        for dir in self._dirs:
+            for f in dir.glob(old_name):
+                f.rename(f.with_name(new_name))
+
+USER_POOL = WritableFilePool(
     paths = [
         USER_DATA / 'applications',
     ]
 )
 
-SYSTEM_POOL = DesktopFilePool(
+SYSTEM_POOL = FilePool(
     paths = [
         SYSTEM_DATA / 'applications',
         FLATPAK_USER / 'exports/share/applications',
@@ -93,6 +101,12 @@ SYSTEM_POOL = DesktopFilePool(
     ]
 )
 
-SEARCH_POOL = DesktopFilePool(
+SEARCH_POOL = FilePool(
     USER_POOL.paths + SYSTEM_POOL.paths
+)
+
+AUTOSTART_POOL = WritableFilePool(
+    paths = [
+        Path.home() / '.config/autostart',
+    ]
 )
