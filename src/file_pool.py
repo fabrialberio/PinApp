@@ -9,13 +9,13 @@ from .config import *
 
 @dataclass(init=False)
 class FilePool(GObject.Object):
-    __gtype_name__ = 'DesktopFilePool'
+    __gtype_name__ = 'FilePool'
 
     paths: list[Path]
     _pattern: str
     _dirs: list[Path] = field(init=False)
 
-    def __init__(self, paths: list[Path], _pattern = '*.desktop') -> None:
+    def __init__(self, paths: list[Path], _pattern) -> None:
         self.paths = paths
         self._pattern = _pattern
 
@@ -64,7 +64,7 @@ class WritableFilePool(FilePool):
 
         self.default_dir = self._dirs[0]
 
-    def new_file_path(self, name: str, suffix = '.desktop', separator = '-') -> Path:
+    def new_file_path(self, name: str, suffix: str, separator = '-') -> Path:
         other_files = list(self.default_dir.glob(f'{name}*{suffix}'))
         other_files = [f.name.removeprefix(name).removeprefix(separator).removesuffix(suffix) for f in other_files]
         other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
@@ -88,7 +88,8 @@ class WritableFilePool(FilePool):
 USER_POOL = WritableFilePool(
     paths = [
         USER_DATA / 'applications',
-    ]
+    ],
+    _pattern = '*.desktop'
 )
 
 SYSTEM_POOL = FilePool(
@@ -98,15 +99,18 @@ SYSTEM_POOL = FilePool(
         FLATPAK_SYSTEM / 'exports/share/applications',
         HOST_DATA / 'applications',
         Path('/var/lib/snapd/desktop/applications'),
-    ]
+    ],
+    _pattern = '*.desktop'
 )
 
 SEARCH_POOL = FilePool(
-    USER_POOL.paths + SYSTEM_POOL.paths
+    paths = USER_POOL.paths + SYSTEM_POOL.paths,
+    _pattern = '*.desktop'
 )
 
 AUTOSTART_POOL = WritableFilePool(
     paths = [
         Path.home() / '.config/autostart',
-    ]
+    ],
+    _pattern = '{*.desktop,*.desktop.off}'
 )
