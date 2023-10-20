@@ -1,9 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Type, Callable, overload
-from gi.repository import GLib
 
 from .key_file import Localized, _KeyFile, MagicGroup
+from .file_pool import AUTOSTART_POOL
+
+
+DESKTOP_FILE_EXT = '.desktop'
 
 
 DESKTOP_ENTRY_GROUP_NAME = 'Desktop Entry'
@@ -55,6 +57,7 @@ class DesktopFile(_KeyFile):
 
     search_str: str
     _saved_hash: int
+    _autostart_path: Path
     desktop_entry: DesktopEntry
     desktop_actions: list[DesktopAction]
 
@@ -77,6 +80,20 @@ class DesktopFile(_KeyFile):
     def edited(self) -> bool:
         return self._saved_hash != hash(self)
 
+    def autostart(self) -> bool:
+        return self._autostart_path.exists()
+        
+    def set_autostart(self, state: bool) -> None:
+        if state:
+            autostart_off_path = self._autostart_path.with_suffix(f'{DESKTOP_FILE_EXT}.off')
+
+            if autostart_off_path.exists():
+                AUTOSTART_POOL.rename_all(autostart_off_path.name, self.path.name)
+            else:
+                self.save_as(self._autostart_path)
+        else:
+            AUTOSTART_POOL.rename_all(self.path.name, f'{self.path.name}.off')
+
     def load(self):
         super().load()
 
@@ -87,10 +104,14 @@ class DesktopFile(_KeyFile):
         ]
 
         self._saved_hash = hash(self)
+        self._autostart_path = AUTOSTART_POOL.default_dir / self.path.name
         self.search_str = self.__search_str__()
 
     def save_as(self, path=None):
         super().save_as(path)
+
+        if self.autostart():
+            super().save_as(self._autostart_path)
 
         self._saved_hash = hash(self)
 
