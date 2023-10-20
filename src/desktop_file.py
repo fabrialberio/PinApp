@@ -5,26 +5,27 @@ from typing import Type, Callable, overload
 from gi.repository import GLib
 
 
+type Locale = str
+
 type LocalizedFieldType = str | list[str]
 type FieldType = bool | int | float | str | \
                  list[bool] | list[int] | list[float] | list[str] | \
                  Localized[str] | Localized[list[str]]
 
-
 @dataclass(init = False)
 class Localized[T: LocalizedFieldType]:
-    locale_value: dict[str|None, T]
-    locales: list[str] = field(init = False)
+    locale_value: dict[Locale|None, T]
+    locales: list[Locale] = field(init = False)
 
     @staticmethod
-    def split_key_locale(key: str) -> tuple[str, str|None]:
+    def split_key_locale(key: str) -> tuple[str, Locale|None]:
         if '[' in key and key.endswith(']'):
             return (key.split('[')[0], key.split('[')[1].removesuffix(']'))
         else:
             return (key, None)
         
     @staticmethod
-    def join_key_locale(key: str, locale: str|None) -> str:
+    def join_key_locale(key: str, locale: Locale|None) -> str:
         if locale is None:
             return key
         else:
@@ -38,11 +39,15 @@ class Localized[T: LocalizedFieldType]:
             get_as: Type[T]
         ) -> 'Localized[T]':
         key = Localized.split_key_locale(key)[0]
-        key_value = {k: v for k, v in key_file.tree(get_as)[group_name].items() \
-                     if Localized.split_key_locale(k)[0] == key}
+        key_value = {
+            k: v for k, v in key_file.tree(get_as)[group_name].items() \
+            if Localized.split_key_locale(k)[0] == key
+        }
 
-        return Localized[get_as]({Localized.split_key_locale(k)[1]: v for k, v in key_value.items() \
-                                  if v is not None})
+        return Localized[get_as]({
+            Localized.split_key_locale(k)[1]: v for k, v in key_value.items() \
+            if v is not None
+        })
     
     @classmethod
     def set_to_key_file(cls,
@@ -58,11 +63,11 @@ class Localized[T: LocalizedFieldType]:
     @overload
     def __init__(self, value: T): ...
     @overload
-    def __init__(self, value: T, locale: str): ...
+    def __init__(self, value: T, locale: Locale): ...
     @overload
-    def __init__(self, value: dict[str|None, T]): ...
+    def __init__(self, value: dict[Locale|None, T]): ...
 
-    def __init__(self, value: T|dict[str|None, T], locale: str|None = None):
+    def __init__(self, value: T|dict[Locale|None, T], locale: Locale|None = None):
         if isinstance(value, dict):
             self.locale_value = value
         else:
@@ -70,7 +75,7 @@ class Localized[T: LocalizedFieldType]:
 
         self.locales = [l for l in self.locale_value.keys() if l is not None]
 
-    def __getitem__(self, locale: str|None) -> LocalizedFieldType:
+    def __getitem__(self, locale: Locale|None) -> LocalizedFieldType:
         return self.locale_value[locale]
 
 TYPE_GET_MAP: dict[type[FieldType], Callable[['_KeyFile', str, str], FieldType]] = {
@@ -166,13 +171,28 @@ DESKTOP_ACTION_GROUP_PREFIX = 'Desktop Action '
 
 @dataclass
 class MagicGroup:
+    """
+    A representation of a group in a key file.
+
+    Uses magic methods to provide a simple and type-hinted interface to the key file.
+
+    Example:
+    ```python
+    group = MagicGroup(key_file, 'group_name')
+    name = group.Name         # Get the value of the key "Key" in the group "group_name"
+    group.Name = 'hello'      # Set the value of the key "Key" in the group "group_name" to "hello"
+    name_key = group.Name_key # Get the key name of the key "Key" in the group "group_name"
+    """
+
     _key_file: _KeyFile
     _group_name: str
 
-    def __getattr__(self, name: str) -> FieldType|None:
+    def __getattr__(self, name: str) -> FieldType|None|str:
         if name in self.__annotations__:
             get_as = self.__annotations__[name]
             return self._key_file.get(self._group_name, name.replace('_', '-'), get_as)
+        elif name + '_key' in self.__annotations__:
+            return name.replace('_', '-')
         else:
             raise AttributeError(f'Attribute "{name}" does not exist.')
     
@@ -184,7 +204,7 @@ class MagicGroup:
             super().__setattr__(name, value)
 
     def __dict__(self) -> dict[str, FieldType]:
-        return {name: getattr(self, name) for name in self.__annotations__}
+        return {key: getattr(self, key) for key in self.__annotations__}
 
 class DesktopEntry(MagicGroup):
     NoDisplay: bool
@@ -223,6 +243,13 @@ class DesktopAction(MagicGroup):
 
 @dataclass(eq = False, init = False)
 class DesktopFile(_KeyFile):
+    """
+    Represents a desktop file.
+
+    Based on the freedesktop.org desktop entry
+    [specification](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-0.9.5.html).
+    """
+
     search_str: str
     _saved_hash: int
     desktop_entry: DesktopEntry
@@ -234,7 +261,7 @@ class DesktopFile(_KeyFile):
 
         f.desktop_entry.Type = 'Application'
         f.desktop_entry.Name = Localized[str]('New Application')
-        f.desktop_entry.Exec = 'echo "Hello World"'
+        f.desktop_entry.Exec = ''
         f.desktop_entry.Icon = ''
 
         return f
@@ -246,7 +273,7 @@ class DesktopFile(_KeyFile):
 
     def edited(self) -> bool:
         return self._saved_hash != hash(self)
-    
+
     def load(self):
         super().load()
 
