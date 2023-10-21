@@ -7,9 +7,9 @@ from .file_pool import AUTOSTART_POOL
 
 DESKTOP_FILE_EXT = '.desktop'
 
-
 DESKTOP_ENTRY_GROUP_NAME = 'Desktop Entry'
 DESKTOP_ACTION_GROUP_PREFIX = 'Desktop Action '
+
 
 class DesktopEntry(MagicGroup):
     NoDisplay: bool
@@ -117,9 +117,10 @@ class DesktopFile(_KeyFile):
 
     def __search_str__(self) -> str:
         file_name = self.path.stem
-        de_values = '\n'.join(self.get(self.desktop_entry._group_name, k, str, '') for k in self.desktop_entry.__dict__().keys())
-        de_true_keys = '\n'.join(k for k, v in self.desktop_entry.__dict__().items() if v)
-        da_values = '\n'.join(self.get(a._group_name, k, str, '') for a in self.desktop_actions for k in a.__dict__().keys())
+
+        de_values = '\n'.join(self.get(self.desktop_entry._group_name, k, str, '') for k in self.desktop_entry.keys())
+        de_true_keys = '\n'.join(k for k, t in self.desktop_entry.items() if self.get(DESKTOP_ENTRY_GROUP_NAME, k, bool, False))
+        da_values = '\n'.join(self.get(a._group_name, k, str, '') for a in self.desktop_actions for k in a.keys())
 
         return '\n'.join([file_name, de_values, de_true_keys, da_values]).lower()
     

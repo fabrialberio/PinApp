@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Type, Callable, overload
+from typing import Type, Callable, overload, Iterable
 
 from gi.repository import GLib
 
@@ -75,8 +75,15 @@ class Localized[T: LocalizedFieldType]:
 
         self.locales = [l for l in self.locale_value.keys() if l is not None]
 
-    def __getitem__(self, locale: Locale|None) -> LocalizedFieldType:
+    def __getitem__(self, locale: Locale|None) -> T:
         return self.locale_value[locale]
+    
+    def unlocalized_or[D](self, default: D = None) -> T|D:
+        if None in self.locale_value:
+            return self.locale_value[None]
+        else:
+            return default
+
 
 TYPE_GET_MAP: dict[type[FieldType], Callable[['_KeyFile', str, str], FieldType]] = {
     bool:                 lambda f, n, k: f._key_file.get_boolean(n, k),
@@ -160,15 +167,6 @@ class _KeyFile:
             k: self.get(n, k, get_as, default) for k in self._key_file.get_keys(n)[0]
         } for n in self._key_file.get_groups()[0]}
 
-    def __dict__(self) -> dict[str, list[str]]:
-        return {n: [
-            k for k in self._key_file.get_keys(n)[0]
-        ] for n in self._key_file.get_groups()[0]}
-
-
-DESKTOP_ENTRY_GROUP_NAME = 'Desktop Entry'
-DESKTOP_ACTION_GROUP_PREFIX = 'Desktop Action '
-
 @dataclass
 class MagicGroup:
     """
@@ -203,5 +201,13 @@ class MagicGroup:
         else:
             super().__setattr__(name, value)
 
-    def __dict__(self) -> dict[str, FieldType]:
-        return {key: getattr(self, key) for key in self.__annotations__}
+    def __getitem__(self, key: str) -> type[FieldType]:
+        return self.__annotations__[key.replace('-', '_')]
+
+    def keys(self) -> Iterable[str]:
+        for name in self.__annotations__.keys():
+            yield name.replace('_', '-')
+
+    def items(self) -> Iterable[tuple[str, type[FieldType]]]:
+        for key in self.keys():
+            yield (key, self[key])
