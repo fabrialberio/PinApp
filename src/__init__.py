@@ -10,7 +10,7 @@ require_version('Pango', '1.0')
 from gi.repository import GObject, Gtk, Gdk
 
 # Set icon search paths
-from .utils import *
+from .config import *
 
 theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 paths = theme.get_search_path()
@@ -20,23 +20,23 @@ theme.set_search_path(paths)
 
 # Register all GOBject types that need to emit signals
 from .apps_page import AppRow, AppsView, PoolStateView
-from .file_pools import DesktopFilePool
+from .file_pool import FilePool
 from .file_page import FilePage
 
 GObject.type_register(AppRow)
 GObject.type_register(AppsView)
 GObject.type_register(PoolStateView)
-GObject.type_register(DesktopFilePool)
+GObject.type_register(FilePool)
 GObject.type_register(FilePage)
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new('state-changed', PoolStateView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 
-GObject.signal_new('files-loading', DesktopFilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('files-empty', DesktopFilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('files-error', DesktopFilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('files-loaded', DesktopFilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('files-loading', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-empty', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-error', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('files-loaded', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
 GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())

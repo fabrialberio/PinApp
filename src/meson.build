@@ -23,10 +23,11 @@ pinapp_sources = [
   '__init__.py',
   'apps_page.py',
   'desktop_file.py',
+  'key_file.py',
   'file_page.py',
-  'file_pools.py',
+  'file_pool.py',
   'main.py',
-  'utils.py',
+  'config.py',
   'window.py',
 ]
 

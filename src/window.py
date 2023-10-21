@@ -29,9 +29,12 @@ class WindowTab(Enum):
     PINS = 'pins_tab'
     INSTALLED = 'installed_tab'
     SEARCH = 'search_tab'
+
+
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
     FILE_PAGE = 'file-page'
+
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/window.ui')
 class PinAppWindow(Adw.ApplicationWindow):
@@ -58,7 +61,8 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.pins_tab.connect_pool(USER_POOL, AppListView())
         self.installed_tab.connect_pool(SYSTEM_POOL, AppListView())
-        self.search_tab.connect_pool(SEARCH_POOL, AppListView(show_pinned_chip = True))
+        self.search_tab.connect_pool(
+            SEARCH_POOL, AppListView(show_pinned_chip=True))
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,
@@ -72,16 +76,21 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
-        self.pins_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
-        self.installed_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
-        self.search_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.pins_tab.pool_page.connect(
+            'file-open', lambda _, f: self.open_file(f))
+        self.installed_tab.pool_page.connect(
+            'file-open', lambda _, f: self.open_file(f))
+        self.search_tab.pool_page.connect(
+            'file-open', lambda _, f: self.open_file(f))
 
-        self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
+        self.file_page.connect(
+            'file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_pins())
 
         self.connect('close-request', lambda _: self.do_close_request())
 
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource(
+            '/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
         help_overlay = builder.get_object('help_overlay')
         help_overlay.set_transient_for(self)
         self.set_help_overlay(help_overlay)
@@ -99,8 +108,10 @@ class PinAppWindow(Adw.ApplicationWindow):
             if self.search_bar.get_search_mode() is True and self.current_tab() != WindowTab.SEARCH:
                 self.search_bar.set_search_mode(False)
 
-        self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
-        self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
+        self.search_entry.connect(
+            'search-changed', lambda e: self.set_search_mode(True))
+        self.search_button.connect(
+            'toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', tab_changed_cb)
 
     def set_page(self, new_page: WindowPage):
@@ -191,7 +202,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         quit()
 
     def show_about_window(self):
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
+        builder = Gtk.Builder.new_from_resource(
+            '/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
         about_window = builder.get_object('about_window')
         about_window.set_transient_for(self)
         about_window.present()

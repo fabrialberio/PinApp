@@ -7,27 +7,23 @@ from gi.repository import GObject, GLib
 from .config import *
 
 
-@dataclass(init=False)
+@dataclass
 class FilePool(GObject.Object):
     __gtype_name__ = 'FilePool'
 
     paths: list[Path]
-    _pattern: str
+    glob_pattern: str
     _dirs: list[Path] = field(init=False)
 
-    def __init__(self, paths: list[Path], _pattern) -> None:
-        self.paths = paths
-        self._pattern = _pattern
-
+    def __post_init__(self) -> None:
         super().__init__()
-
         self._dirs = [p for p in self.paths if p.is_dir()]
 
     def files(self) -> list[Path]:
         files = []
 
         for d in self._dirs:
-            files += [p for p in d.rglob(self._pattern) if p.is_file()]
+            files += [p for p in d.rglob(self.glob_pattern) if p.is_file()]
 
         files = list(set(files)) # Remove duplicate paths
         return files
@@ -53,8 +49,16 @@ class FilePool(GObject.Object):
 
     def __iter__(self):
         return iter(self.files())
+    
+    @property
+    def __doc__(self): return None
+
+    @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
+    def __doc__(self, _): ...
 
 class WritableFilePool(FilePool):
+    default_dir: Path = field(init=False)
+
     def __post_init__(self):
         super().__post_init__()
         self._dirs = [p for p in self._dirs if access(p, W_OK)]
@@ -89,7 +93,7 @@ USER_POOL = WritableFilePool(
     paths = [
         USER_DATA / 'applications',
     ],
-    _pattern = '*.desktop'
+    glob_pattern = '*.desktop'
 )
 
 SYSTEM_POOL = FilePool(
@@ -100,17 +104,17 @@ SYSTEM_POOL = FilePool(
         HOST_DATA / 'applications',
         Path('/var/lib/snapd/desktop/applications'),
     ],
-    _pattern = '*.desktop'
+    glob_pattern = '*.desktop'
 )
 
 SEARCH_POOL = FilePool(
     paths = USER_POOL.paths + SYSTEM_POOL.paths,
-    _pattern = '*.desktop'
+    glob_pattern = '*.desktop'
 )
 
 AUTOSTART_POOL = WritableFilePool(
     paths = [
         Path.home() / '.config/autostart',
     ],
-    _pattern = '{*.desktop,*.desktop.off}'
+    glob_pattern = '{*.desktop,*.desktop.off}'
 )
