@@ -2,14 +2,14 @@ from xml.sax.saxutils import escape as escape_xml
 from typing import Callable
 from enum import Enum
 
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, Gdk
 
+from .desktop_file import DesktopFile, DesktopEntry
+from .file_pool import FilePool
+from .key_file import Localized
 from .config import *
-from .file_pool import FilePool, USER_POOL
-from .desktop_file import DesktopFile
 
 
-_ = lambda x: x
 
 class AppChip(Gtk.Box):
     __gtype_name__ = 'AppChip'
@@ -102,14 +102,14 @@ class AppRow(Adw.ActionRow):
         self.file = file
 
         super().__init__(
-            title=escape_xml(self.file.desktop_entry.Name.unlocalized_or('')),
+            title=escape_xml(self.file.get(DesktopEntry.NAME, Localized('')).unlocalized_or('')),
             title_lines=1,
             subtitle=escape_xml(
-                self.file.desktop_entry.Comment.unlocalized_or('')),
+                self.file.get(DesktopEntry.COMMENT, Localized('')).unlocalized_or('')),
             subtitle_lines=1,
             activatable=True,)
 
-        icon = AppIcon(self.file.desktop_entry.Icon)
+        icon = AppIcon(self.file.get(DesktopEntry.ICON))
         self.add_prefix(icon)
 
         self._chip_box = Gtk.Box(spacing=6)
@@ -119,15 +119,15 @@ class AppRow(Adw.ActionRow):
             icon_name='go-next-symbolic',
             opacity=.6))
 
-        if self.file.desktop_entry.NoDisplay:
+        if self.file.get(DesktopEntry.NODISPLAY, False):
             icon.set_faded(True)
-        if self.file.desktop_entry.X_Flatpak:
+        if self.file.get(DesktopEntry.X_FLATPAK, False):
             self.add_chip(AppChip.Flatpak())
-        if self.file.desktop_entry.X_SnapInstanceName:
+        if self.file.get(DesktopEntry.X_SNAPINSTANCENAME, False):
             self.add_chip(AppChip.Snap())
-        if self.file.desktop_entry.Terminal:
+        if self.file.get(DesktopEntry.TERMINAL, False):
             self.add_chip(AppChip.Terminal())
-        if self.file.path.parent in USER_POOL.paths and add_pinned_chip:
+        if self.file.user_pool() and add_pinned_chip:
             self.add_chip(AppChip.Pinned())
 
         self.connect('activated', lambda _: self.emit('file-open', file))
@@ -162,7 +162,7 @@ class AppListView(AppsView):
             css_classes=['boxed-list'])
 
         self._listbox.set_sort_func(lambda a, b:
-                                    a.file.desktop_entry.Name.unlocalized_or('') > b.file.desktop_entry.Name.unlocalized_or(''))
+                                    a.file.get(DesktopEntry.NAME, Localized('')).unlocalized_or('') > b.file.get(DesktopEntry.NAME, Localized('')).unlocalized_or(''))
 
         # Wrap listbox in box to allow it to shrink to fit its contents
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
