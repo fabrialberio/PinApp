@@ -1,31 +1,39 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Type, Callable, overload, Iterable
+from typing import Type, Callable, overload
 
 from gi.repository import GLib
 
 
 type Locale = str
 
-type LocalizedFieldType = str | list[str]
+type LocalizedType = str | list[str]
 type FieldType = bool | int | float | str | \
-                 list[bool] | list[int] | list[float] | list[str] | \
-                 Localized[str] | Localized[list[str]]
+    list[bool] | list[int] | list[float] | list[str] | \
+    Localized[str] | Localized[list[str]]
 
-@dataclass(init = False)
-class Localized[T: LocalizedFieldType]:
-    locale_value: dict[Locale|None, T]
-    locales: list[Locale] = field(init = False)
+
+@dataclass(frozen=True)
+class Field[T: FieldType]:
+    group_name: str
+    key: str
+    type_: type[T] = type(str)
+
+
+@dataclass(init=False)
+class Localized[T: LocalizedType]:
+    locale_value: dict[Locale | None, T]
+    locales: list[Locale] = field(init=False)
 
     @staticmethod
-    def split_key_locale(key: str) -> tuple[str, Locale|None]:
+    def split_key_locale(key: str) -> tuple[str, Locale | None]:
         if '[' in key and key.endswith(']'):
             return (key.split('[')[0], key.split('[')[1].removesuffix(']'))
         else:
             return (key, None)
-        
+
     @staticmethod
-    def join_key_locale(key: str, locale: Locale|None) -> str:
+    def join_key_locale(key: str, locale: Locale | None) -> str:
         if locale is None:
             return key
         else:
@@ -33,41 +41,45 @@ class Localized[T: LocalizedFieldType]:
 
     @classmethod
     def get_from_key_file(cls,
-            key_file: '_KeyFile',
-            group_name: str,
-            key: str,
-            get_as: Type[T]
-        ) -> 'Localized[T]':
+                          key_file: 'KeyFile',
+                          group_name: str,
+                          key: str,
+                          get_as: Type[T]
+                          ) -> 'Localized[T]':
         key = Localized.split_key_locale(key)[0]
         key_value = {
-            k: v for k, v in key_file.tree(get_as)[group_name].items() \
+            k: v for k, v in key_file.tree(get_as)[group_name].items()
             if Localized.split_key_locale(k)[0] == key
         }
 
         return Localized[get_as]({
-            Localized.split_key_locale(k)[1]: v for k, v in key_value.items() \
+            Localized.split_key_locale(k)[1]: v for k, v in key_value.items()
             if v is not None
         })
-    
+
     @classmethod
     def set_to_key_file(cls,
-            key_file: '_KeyFile',
-            group_name: str,
-            key: str,
-            value: 'Localized[T]',
-            set_as: Type[T]
-        ):
+                        key_file: 'KeyFile',
+                        group_name: str,
+                        key: str,
+                        value: 'Localized[T]',
+                        set_as: Type[T]
+                        ):
         for locale, v in value.locale_value.items():
-            key_file.set(group_name, Localized.join_key_locale(key, locale), v, set_as)
+            key_file.set(Field(
+                group_name,
+                Localized.join_key_locale(key, locale),
+                set_as
+            ), v)
 
     @overload
     def __init__(self, value: T): ...
     @overload
     def __init__(self, value: T, locale: Locale): ...
     @overload
-    def __init__(self, value: dict[Locale|None, T]): ...
+    def __init__(self, value: dict[Locale | None, T]): ...
 
-    def __init__(self, value: T|dict[Locale|None, T], locale: Locale|None = None):
+    def __init__(self, value: T | dict[Locale | None, T], locale: Locale | None = None):
         if isinstance(value, dict):
             self.locale_value = value
         else:
@@ -75,10 +87,10 @@ class Localized[T: LocalizedFieldType]:
 
         self.locales = [l for l in self.locale_value.keys() if l is not None]
 
-    def __getitem__(self, locale: Locale|None) -> T:
+    def __getitem__(self, locale: Locale | None) -> T:
         return self.locale_value[locale]
-    
-    def unlocalized_or[D](self, default: D = None) -> T|D:
+
+    def unlocalized_or[D](self, default: D = None) -> T | D:
         if None in self.locale_value:
             return self.locale_value[None]
         else:
@@ -111,10 +123,11 @@ TYPE_SET_MAP: dict[type[FieldType], Callable[['_KeyFile', str, str, FieldType], 
     Localized[list[str]]: lambda f, n, k, v: Localized.set_to_key_file(f, n, k, v, list[str]),
 }
 
+
 @dataclass
-class _KeyFile:
+class KeyFile:
     path: Path
-    _key_file: GLib.KeyFile = field(init = False)
+    _key_file: GLib.KeyFile = field(init=False)
 
     def __post_init__(self):
         self._key_file = GLib.KeyFile.new()
@@ -124,7 +137,7 @@ class _KeyFile:
             raise FileExistsError(f'File "{self.path}" does not exist.')
 
         self._key_file.load_from_file(
-            str(self.path), 
+            str(self.path),
             GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
         )
 
@@ -135,79 +148,44 @@ class _KeyFile:
     def save(self):
         self.save_as(self.path)
 
-    def get[T: FieldType, D: FieldType|None](self,
-            group_name: str,
-            key: str,
-            get_as: Type[T],
-            default: D = None
-        ) -> T|D:
-        if group_name not in self._key_file.get_groups()[0]:
-            raise KeyError(f'Group "{group_name}" does not exist.')
+    def get[T: FieldType, D: FieldType | None](self, field: Field[T], default: D = None) -> T | D:
+        if field.group_name not in self._key_file.get_groups()[0]:
+            raise KeyError(f'Group "{field.group_name}" does not exist.')
         try:
-            if (r := TYPE_GET_MAP[get_as](self, group_name, key)) is not None:
+            if (r := TYPE_GET_MAP[field.type_](self, field.group_name, field.key)) is not None:
                 return r
 
             return default
         except Exception:
             return default
 
-    def set[T: FieldType](self,
-            group_name: str,
-            key: str,
-            value: T,
-            set_as: Type[T]
-        ):
-        TYPE_SET_MAP[set_as](self, group_name, key, value)
+    def set[T: FieldType](self, field: Field[T], value: T):
+        TYPE_SET_MAP[field.type_](self, field.group_name, field.key, value)
 
-    def tree[T: FieldType, D: FieldType|None](self,
-            get_as: Type[T] = str,
-            default: D = None
-        ) -> dict[str, dict[str, T|D]]:
+    def tree[T: FieldType, D: FieldType | None](self,
+                                                get_as: Type[T] = str,
+                                                default: D = None
+                                                ) -> dict[str, dict[str, T | D]]:
         return {n: {
-            k: self.get(n, k, get_as, default) for k in self._key_file.get_keys(n)[0]
+            k: self.get(Field(n, k, get_as), default) for k in self._key_file.get_keys(n)[0]
         } for n in self._key_file.get_groups()[0]}
 
-@dataclass
-class MagicGroup:
-    """
-    A representation of a group in a key file.
 
-    Uses magic methods to provide a simple and type-hinted interface to the key file.
+@dataclass(eq=False, init=False)
+class HintedGroup:
+    GROUP_NAME: str
 
-    Example:
-    ```python
-    group = MagicGroup(key_file, 'group_name')
-    name = group.Name         # Get the value of the key "Key" in the group "group_name"
-    group.Name = 'hello'      # Set the value of the key "Key" in the group "group_name" to "hello"
-    name_key = group.Name_key # Get the key name of the key "Key" in the group "group_name"
-    """
+    def __init__(self, group_name: str) -> None:
+        self.GROUP_NAME = group_name
 
-    _key_file: _KeyFile
-    _group_name: str
+    def fields(self) -> list[Field]:
+        ...
 
-    def __getattr__(self, name: str) -> FieldType|None|str:
-        if name in self.__annotations__:
-            get_as = self.__annotations__[name]
-            return self._key_file.get(self._group_name, name.replace('_', '-'), get_as)
-        elif name + '_key' in self.__annotations__:
-            return name.replace('_', '-')
-        else:
-            raise AttributeError(f'Attribute "{name}" does not exist.')
-    
-    def __setattr__(self, name: str, value: FieldType):
-        if name in self.__annotations__:
-            set_as = self.__annotations__[name]
-            self._key_file.set(self._group_name, name.replace('_', '-'), value, set_as)
-        else:
-            super().__setattr__(name, value)
+    def keys(self) -> list[str]:
+        return [f.key for f in self.fields()]
 
-    def __getitem__(self, key: str) -> type[FieldType]:
-        return self.__annotations__[key.replace('-', '_')]
+    def __getitem__(self, key: str) -> Field:
+        return next(f for f in self.fields() if f.key == key)
 
-    def keys(self) -> Iterable[str]:
-        for name in self.__annotations__.keys():
-            yield name.replace('_', '-')
-
-    def items(self) -> Iterable[tuple[str, type[FieldType]]]:
-        for key in self.keys():
-            yield (key, self[key])
+    def items(self) -> list[tuple[str, Field]]:
+        return [(k, self[k]) for k in self.keys()]

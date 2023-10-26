@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 from gi.repository import Gtk, Adw, Gio, GObject
 
-from .desktop_file import DesktopFile, DesktopEntry, DESKTOP_FILE_EXT, DESKTOP_ENTRY_GROUP_NAME
+from .desktop_file import DesktopFile, DesktopEntry
 from .file_pool import USER_POOL
-from .key_file import FieldType, Localized, Locale
+from .key_file import FieldType, Localized, Locale, Field
 from .config import APP_DATA
 
 
@@ -17,30 +17,39 @@ type KeyRow = Adw.EntryRow | Adw.SwitchRow
 
 def row_for_key[T: FieldType](
         desktop_file: DesktopFile,
-        group_name: str,
-        key: str,
-        type_: type[T]
+        field: Field[T]
     ) -> KeyRow:
-    if type_ == bool:
+    if field.type_ == bool:
         row = Adw.SwitchRow(
-            title=key,
-            active=desktop_file.get(group_name, key, bool, default=False),
+            title=field.key,
+            active=desktop_file.get(field, default=False),
         )
         
-        def on_notify(widget: Adw.SwitchRow, param: GObject.ParamSpecBoolean):
+        def on_notify_active(widget: Adw.SwitchRow, param: GObject.ParamSpecBoolean):
             value = widget.get_active()
-            desktop_file.set(group_name, key, value, bool)
+            desktop_file.set(field, value)
 
-        row.connect('notify::active', on_notify)
-    else:
+        row.connect('notify::active', on_notify_active)
+    elif field.type_ in [Localized[str], Localized[list[str]]]:
         row = Adw.EntryRow(
-            title=key,
-            text=desktop_file.get(group_name, key, str, default=''),
+            title=Localized.split_key_locale(field.key)[0],
+            text=desktop_file.get(field, default=Localized({})).unlocalized_or(''),
         )
 
         def on_changed(widget: Adw.EntryRow):
             value = widget.get_text()
-            desktop_file.set(group_name, key, value, type_)
+            desktop_file.set(field, Localized({None: value}))
+
+        row.connect('changed', on_changed)
+    else:
+        row = Adw.EntryRow(
+            title=field.key,
+            text=desktop_file.get(field, default=''),
+        )
+
+        def on_changed(widget: Adw.EntryRow):
+            value = widget.get_text()
+            desktop_file.set(field, value)
 
         row.connect('changed', on_changed)
 
@@ -48,27 +57,23 @@ def row_for_key[T: FieldType](
 
 def row_for_localized_key[T: Localized](
         desktop_file: DesktopFile,
-        group_name: str,
-        key: str,
+        field: Field[T],
         locale: Locale,
-        type_: type[T]
     ) -> KeyRow:
-    if type_ == Localized[list[str]]:
+    if field.type_ == Localized[list[str]]:
         inner_type = list[str]
     else:
         inner_type = str
 
     return row_for_key(
         desktop_file,
-        group_name,
-        Localized.join_key_locale(key, locale),
-        inner_type
+        Field(field.group_name, Localized.join_key_locale(field.key, locale), inner_type),
     )
 
 class LocaleChooserRow(Adw.ComboRow):
     __gtype_name__ = 'LocaleChooserRow'
 
-    def __init__(self, locale_list: list[str]) -> None:
+    def __init__(self, locale_list: list[Locale]) -> None:
         self.locales = locale_list
 
         model = Gtk.StringList()
@@ -81,25 +86,24 @@ class LocaleChooserRow(Adw.ComboRow):
 
         self.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
 
-    def connect_localized_rows(self, rows: list[KeyRow]):
+    def connect_rows(self, rows: list[KeyRow]):
         def update_rows(*args):
             for row in rows:
-                ...
-                # TODO: Localized rows?
-                #row.set_locale(self.get_current_locale())
-        
+                key = row.get_title()
+                unlocalized_key, locale = Localized.split_key_locale(key)
+                row.set_visible(locale == self.get_selected_locale())
+
         self.connect('notify', update_rows)
 
     def set_default_locale(self):
         self.set_locale(Gtk.get_default_language().to_string())
 
-    def get_current_locale(self) -> str:
+    def get_selected_locale(self) -> Locale:
         return self.get_selected_item().get_string()
 
-    def set_locale(self, locale: str):
+    def set_locale(self, locale: Locale):
         if locale in self.locales:
             self.set_selected(self.locales.index(locale))
-
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
 class FilePage(Adw.BreakpointBin):
@@ -164,16 +168,11 @@ class FilePage(Adw.BreakpointBin):
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
-        file_already_exists = self.file.path.exists() # False if file has just been created
-        pinned_path = USER_POOL.new_file_path(self.file.path.stem, DESKTOP_FILE_EXT)
-
-        self.file.save_as(pinned_path)
-        self.emit('file-changed')
-
-        if not file_already_exists:
-            self.emit('file-leave')
+        if self.file.path.exists():
+            self.emit('file-changed')
+            self.load_file(self.file.as_user_pool())
         else:
-            self.load_path(pinned_path)
+            self.emit('file-leave')
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
@@ -182,7 +181,7 @@ class FilePage(Adw.BreakpointBin):
             if callback is not None:
                 callback(self)
         else:
-            if access(self.file.path, W_OK) and self.file.path.exists():
+            if self.file.user_pool() and self.file.path.exists():
                 self.file.save()
                 self.emit('file-changed')
                 self.emit('file-leave')
@@ -210,13 +209,16 @@ class FilePage(Adw.BreakpointBin):
 
     def unpin_file(self):
         '''Deletes a file. It is used when the file has write access.'''
+        if not self.file.user_pool():
+            raise Exception('File is not in user pool')
+
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
         
         dialog = builder.get_object('confirm_delete_dialog')
 
         def callback(widget, resp):
             if resp == 'delete':
-                self.file.path.unlink()
+                USER_POOL.remove_all(self.file.path.name)
                 self.emit('file-leave')
                 self.emit('file-changed')
 
@@ -231,8 +233,7 @@ class FilePage(Adw.BreakpointBin):
         name_entry.set_text(self.file.path.stem)
 
         def get_path():
-            return USER_POOL.default_dir / Path(f'{Path(name_entry.get_text())}{DESKTOP_FILE_EXT}')
-
+            return USER_POOL.default_dir / Path(f'{Path(name_entry.get_text())}{DesktopFile.SUFFIX}')
 
         def path_is_valid() -> bool:
             path = name_entry.get_text()
@@ -263,7 +264,7 @@ class FilePage(Adw.BreakpointBin):
     def duplicate_file(self):
         assert self.file is not None
 
-        new_path = USER_POOL.new_file_path(self.file.path.stem, DESKTOP_FILE_EXT)
+        new_path = USER_POOL.new_file_path(self.file.path.stem, DesktopFile.SUFFIX)
 
         copy(self.file.path, new_path)
 
@@ -284,9 +285,8 @@ class FilePage(Adw.BreakpointBin):
 
         self.scrolled_window.get_vadjustment().set_value(0)
 
-        is_pinned = self.file.path.parent == USER_POOL.default_dir
-        self.file_menu_button.set_visible(is_pinned)
-        self.pin_button.set_visible(not is_pinned)
+        self.file_menu_button.set_visible(self.file.user_pool())
+        self.pin_button.set_visible(not self.file.user_pool())
 
         self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
@@ -302,25 +302,27 @@ class FilePage(Adw.BreakpointBin):
         bool_rows: list[KeyRow] = []
 
         all_locales = set()
-        added_keys = []
 
-        for key, type_ in self.file.desktop_entry.items():
-            row = row_for_key(self.file, DESKTOP_ENTRY_GROUP_NAME, key, type_)
+        tree = self.file.tree()
 
-            unlocalized_key, locale = Localized.split_key_locale(key)
+        # Type-hinted values
+        for key, field in DesktopEntry.items():
+            if key not in tree[DesktopEntry.GROUP_NAME].keys():
+                continue
 
-            if locale is not None:
-                all_locales |= {locale}
+            row = row_for_key(self.file, field)
 
-                if unlocalized_key not in added_keys:
+            if field.type_ in [Localized[str], Localized[list[str]]]:
+                localized: Localized = self.file.get(field, Localized({}))
+
+                all_locales |= set(localized.locales)
+
+                for l in localized.locales:
                     localized_rows.append(row_for_localized_key(
                         self.file,
-                        DESKTOP_ENTRY_GROUP_NAME,
-                        unlocalized_key,
-                        locale,
-                        type_
+                        field,
+                        l,
                     ))
-                    added_keys.append(unlocalized_key)
 
             elif key in ['Name', 'Comment']:
                 continue
@@ -330,18 +332,18 @@ class FilePage(Adw.BreakpointBin):
                 #self.icon_row.connect('changed', lambda _: self._update_icon())
 
                 string_rows.append(row)
-            elif type_ in [str, list]:
+            elif field.type_ in [str, list]:
                 string_rows.append(row)
-            elif type_ == bool:
+            elif field.type_ == bool:
                 bool_rows.append(row)
 
 
         if all_locales:
             self.locale_chooser_row = LocaleChooserRow(sorted(list(all_locales)))
-            self.locale_chooser_row.connect_localized_rows(localized_rows)
+            self.locale_chooser_row.connect_rows(localized_rows)
             self.locale_chooser_row.set_default_locale()
 
-            self._update_pref_group(self.localized_group, [self.locale_chooser_row]+localized_rows)
+            self._update_pref_group(self.localized_group, [self.locale_chooser_row] + localized_rows)
             self.localized_group.set_visible(True)
         else:
             self.localized_group.set_visible(False)
@@ -362,13 +364,13 @@ class FilePage(Adw.BreakpointBin):
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
             self.header_bar.set_show_title(True)
-            self.window_title.set_title(self.file.desktop_entry.Name.unlocalized_or(''))
+            self.window_title.set_title(self.file.get(DesktopEntry.NAME, Localized('')).unlocalized_or(''))
         else:
             self.header_bar.set_show_title(False)
 
     def _update_icon(self):
         self.app_icon.set_pixel_size(128)
-        self.app_icon.set_app_icon_name(self.file.desktop_entry.Icon)
+        self.app_icon.set_app_icon_name(self.file.get(DesktopEntry.ICON))
 
     def _upload_icon(self):
         def callback(dialog, response):
@@ -389,7 +391,7 @@ class FilePage(Adw.BreakpointBin):
             accept_label=_('Open'),
             cancel_label=_('Cancel'))
 
-        if (path := Path(self.file.desktop_entry.Icon)).exists():
+        if (path := Path(self.file.get(DesktopEntry.ICON, ''))).exists():
             dialog.set_current_folder(Gio.File.new_for_path(str(path.parent)))
 
         dialog.connect('response', callback)
@@ -404,23 +406,23 @@ class FilePage(Adw.BreakpointBin):
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
             self.banner_listbox.remove(row)
 
-        app_name_row = row_for_key(self.file, DESKTOP_ENTRY_GROUP_NAME, 'Name', str)
-        app_name_row.set_margin_bottom(6)
-        app_name_row.add_css_class('app-banner-entry')
+        name_row = row_for_key(self.file, DesktopEntry.NAME)
+        name_row.set_margin_bottom(6)
+        name_row.add_css_class('app-banner-entry')
 
-        app_name_row.connect('changed', lambda _: self._update_window_title())
+        name_row.connect('changed', lambda _: self._update_window_title())
 
         if self.banner_expanded:
-            app_name_row.set_size_request(0, 64)
-            app_name_row.add_css_class('title-1-row')
+            name_row.set_size_request(0, 64)
+            name_row.add_css_class('title-1-row')
         else:
-            app_name_row.add_css_class('title-2-row')
+            name_row.add_css_class('title-2-row')
 
-        app_comment_row = row_for_key(self.file, DESKTOP_ENTRY_GROUP_NAME, 'Comment', str)
-        app_comment_row.add_css_class('app-banner-entry')
+        comment_row = row_for_key(self.file, DesktopEntry.COMMENT)
+        comment_row.add_css_class('app-banner-entry')
 
-        self.banner_listbox.append(app_name_row)
-        self.banner_listbox.append(app_comment_row)
+        self.banner_listbox.append(name_row)
+        self.banner_listbox.append(comment_row)
         self._update_icon()
 
     def _add_key(self, is_bool=False, is_localized=False):
@@ -431,7 +433,8 @@ class FilePage(Adw.BreakpointBin):
         key_entry = builder.get_object('key_entry')
 
         if is_localized:
-            locale = self.locale_chooser_row.get_current_locale()
+            # TODO: Can't add localized keys
+            locale = self.locale_chooser_row.get_selected_locale()
             locale_entry.set_visible(True)
             locale_entry.set_text(locale)
 
