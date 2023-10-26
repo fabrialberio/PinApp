@@ -20,7 +20,7 @@ from enum import Enum
 
 from gi.repository import Gtk, Adw
 
-from .desktop_file import DesktopFile, DESKTOP_FILE_EXT
+from .desktop_file import DesktopFile
 from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
 from .apps_page import SearchView, PoolStateView, AppListView
 
@@ -156,8 +156,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.current_page() != WindowPage.APPS_PAGE:
             return
 
-        path = USER_POOL.new_file_path('pinned-app', DESKTOP_FILE_EXT)
-        file = DesktopFile.new_with_defaults(path)
+        file = DesktopFile.new_with_defaults()
 
         self.file_page.load_file(file)
         self.set_page(WindowPage.FILE_PAGE)
