@@ -13,16 +13,17 @@ class FilePool(GObject.Object):
 
     paths: list[Path]
     glob_pattern: str
-    _dirs: list[Path] = field(init=False)
-
+    
     def __post_init__(self) -> None:
         super().__init__()
-        self._dirs = [p for p in self.paths if p.is_dir()]
+
+        if not all(p.is_dir() for p in self.paths):
+            raise Exception('All paths must be directories')
 
     def files(self) -> list[Path]:
         files = []
 
-        for d in self._dirs:
+        for d in self.paths:
             files += [p for p in d.rglob(self.glob_pattern) if p.is_file()]
 
         files = list(set(files)) # Remove duplicate paths
@@ -61,12 +62,10 @@ class WritableFilePool(FilePool):
 
     def __post_init__(self):
         super().__post_init__()
-        self._dirs = [p for p in self._dirs if access(p, W_OK)]
-
-        if not self._dirs:
+        if not all(access(p, W_OK) for p in self.paths):
             raise Exception('At least one of paths must be writable')
 
-        self.default_dir = self._dirs[0]
+        self.default_dir = self.paths[0]
 
     def new_file_path(self, name: str, suffix: str, separator = '-') -> Path:
         other_files = list(self.default_dir.glob(f'{name}*{suffix}'))
@@ -80,12 +79,12 @@ class WritableFilePool(FilePool):
         return self.default_dir / f'{name}{separator + str(next_available_index) if next_available_index > 0 else ""}{suffix}'
 
     def remove_all(self, name: str) -> None:
-        for dir in self._dirs:
+        for dir in self.paths:
             for f in dir.glob(name):
                 f.unlink()
 
     def rename_all(self, old_name: str, new_name: str) -> None:
-        for dir in self._dirs:
+        for dir in self.paths:
             for f in dir.glob(old_name):
                 f.rename(f.with_name(new_name))
 
