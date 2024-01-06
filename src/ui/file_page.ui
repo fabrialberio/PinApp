@@ -200,17 +200,17 @@
         <property name="margin-end">6</property>
         <child>
           <object class="GtkModelButton" id="unpin_button">
-            <property name="text" translatable="true">Unpin</property>
+            <property name="text" translatable="yes">Unpin</property>
           </object>
         </child>
         <child>
           <object class="GtkModelButton" id="rename_button">
-            <property name="text" translatable="true">Rename file</property>
+            <property name="text" translatable="yes">Rename file</property>
           </object>
         </child>
         <child>
           <object class="GtkModelButton" id="duplicate_button">
-            <property name="text" translatable="true">Duplicate file</property>
+            <property name="text" translatable="yes">Duplicate file</property>
           </object>
         </child>
       </object>
