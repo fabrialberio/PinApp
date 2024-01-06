@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
 	<id>io.github.fabrialberio.pinapp</id>
-	<launchable type="desktop-id">io.github.fabrialberio.pinapp.desktop</launchable>	<name translatable='no'>PinApp</name>
+	<launchable type="desktop-id">io.github.fabrialberio.pinapp.desktop</launchable>
+	<translation type="gettext">pinapp</translation>
+	<name translatable="no">PinApp</name>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
-	<name translatable='no'>PinApp</name>
-	<summary translatable='yes'>Create and edit application shortcuts</summary>
+	<summary>Create and edit application shortcuts</summary>
     <developer_name translatable="no">Fabrizio Alberio</developer_name>
-	<description translatable='yes'>
+	<description>
 		<p>PinApp is a simple application that lets you customize your app list.</p>
 		<p>Some of the possible uses are</p>
 		<ul>
@@ -38,13 +39,15 @@
     <content_rating type="oars-1.1"/>
 	<url type="homepage">https://github.com/fabrialberio/PinApp</url>
     <url type="bugtracker">https://github.com/fabrialberio/PinApp/issues</url>
+	<url type="vcs-browser">https://github.com/fabrialberio/PinApp</url>
+	<url type="translate">https://github.com/fabrialberio/PinApp/tree/master/po</url>
     <recommends>
 		<control>pointing</control>
 		<control>keyboard</control>
 		<control>touch</control>
 	</recommends>
 	<releases>
-		<release version="" date="">
+		<release version="1.3.0" date="2024-12-31">
 			<description translatable="no">
 				<p>What's changed</p>
 				<ul>
