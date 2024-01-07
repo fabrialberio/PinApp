@@ -24,7 +24,7 @@ msgstr "PinApp"
 
 #: data/io.github.fabrialberio.pinapp.desktop.in:4
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:8
-msgid "Create and edit application shortcuts"
+msgid "Create and edit app shortcuts"
 msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
 
 #: data/io.github.fabrialberio.pinapp.desktop.in:11
