@@ -2,8 +2,6 @@ from enum import Enum
 from sys import prefix
 from pathlib import Path
 
-from gi.repository import Gtk, Gdk
-
 
 class RunningAs(Enum):
     DEFAULT = 'default'
