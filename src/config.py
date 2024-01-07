@@ -3,6 +3,8 @@ from sys import prefix
 from pathlib import Path
 
 
+AUTOSTART_DISABLED_SUFFIX = '.disabled'
+
 class RunningAs(Enum):
     DEFAULT = 'default'
     FLATPAK = 'flatpak'

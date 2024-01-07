@@ -115,5 +115,5 @@ AUTOSTART_POOL = WritableFilePool(
     paths = [
         Path.home() / '.config/autostart',
     ],
-    glob_pattern = '{*.desktop,*.desktop.off}'
+    glob_pattern = '{*.desktop,*.desktop' + AUTOSTART_DISABLED_SUFFIX + '}'
 )

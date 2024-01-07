@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import override, Self
 
 from .key_file import Localized, KeyFile, Field, HintedGroup
-from .file_pool import AUTOSTART_POOL, USER_POOL
+from .file_pool import AUTOSTART_POOL, USER_POOL, AUTOSTART_DISABLED_SUFFIX
 
 
 class _DesktopEntry(HintedGroup):
@@ -111,16 +111,16 @@ class DesktopFile(KeyFile):
             return
 
         if value:
-            autostart_off_path = self._autostart_path.with_suffix(f'{DesktopFile.SUFFIX}.off')
+            autostart_disabled_path = self._autostart_path.with_suffix(f'{DesktopFile.SUFFIX}{AUTOSTART_DISABLED_SUFFIX}')
 
-            if autostart_off_path.exists():
-                AUTOSTART_POOL.rename_all(autostart_off_path.name, self.path.name)
+            if autostart_disabled_path.exists():
+                AUTOSTART_POOL.rename_all(autostart_disabled_path.name, self.path.name)
             else:
                 self.save_as(self._autostart_path)
 
             self.set(DesktopEntry.X_GNOME_AUTOSTART, True)
         else:
-            AUTOSTART_POOL.rename_all(self.path.name, f'{self.path.name}.off')
+            AUTOSTART_POOL.rename_all(self.path.name, f'{self.path.name}{AUTOSTART_DISABLED_SUFFIX}')
             self.set(DesktopEntry.X_GNOME_AUTOSTART, False)
 
     def user_pool(self) -> bool:
