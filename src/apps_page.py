@@ -3,7 +3,7 @@ from enum import Enum
 from gi.repository import Gtk, Adw, Pango
 from xml.sax.saxutils import escape
 
-from .utils import *
+from .config import *
 from .folders import FolderGroup, UserFolders, SystemFolders
 from .desktop_entry import DesktopEntry
 

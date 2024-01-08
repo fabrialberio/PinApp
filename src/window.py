@@ -21,7 +21,7 @@ from enum import Enum
 
 from gi.repository import Gtk, Adw, Gio
 
-from .utils import USER_APPS, new_file_name
+from .config import USER_APPS, new_file_name
 from .desktop_entry import DesktopEntry
 
 

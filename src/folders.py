@@ -3,7 +3,7 @@ from typing import Callable
 
 from threading import Thread
 
-from .utils import *
+from .config import *
 from .desktop_entry import DesktopEntry, ConfigParserError
 
 

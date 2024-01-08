@@ -21,7 +21,7 @@ from pathlib import Path
 
 from gi.repository import Gtk, Gio, Adw
 
-from .utils import LOCALE_DIR
+from .config import LOCALE_DIR
 from .window import PinAppWindow, Page
 
 bindtextdomain('pinapp', LOCALE_DIR)

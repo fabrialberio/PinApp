@@ -5,7 +5,7 @@ from typing import Callable, Optional
 from gi.repository import Gtk, Adw, Gio
 
 from .desktop_entry import DesktopEntry, Field, LocaleString
-from .utils import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
+from .config import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 
 
 class BoolRow(Adw.ActionRow):

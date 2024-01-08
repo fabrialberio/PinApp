@@ -10,7 +10,7 @@ require_version('Pango', '1.0')
 from gi.repository import GObject, Gtk, Gdk
 
 # Set icon search paths
-from .utils import *
+from .config import *
 
 theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 paths = theme.get_search_path()
