@@ -21,8 +21,8 @@ from pathlib import Path
 
 from gi.repository import Gtk, Gio, Adw
 
-from .utils import LOCALE_DIR
-from .window import PinAppWindow, Page
+from .config import LOCALE_DIR
+from .window import PinAppWindow, WindowPage, WindowTab
 
 bindtextdomain('pinapp', LOCALE_DIR)
 textdomain('pinapp')
@@ -45,7 +45,7 @@ class PinAppApplication(Adw.Application):
         self.create_action('exit', self.on_escape, ['Escape'])
 
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
-        self.window = None
+        self.window: PinAppWindow = None
 
     def do_activate(self):
         """Called when the application is activated"""
@@ -53,21 +53,21 @@ class PinAppApplication(Adw.Application):
         self.window.present()
 
     def do_open(self, files, n_files, hint):
-        print(f'Do open called!\n{files=}\t{n_files=}\t{hint=}')
-        
+      
         path = Path(files[0].get_path())
-        print(f'{path=}')
 
         self._create_window()
-        print(f'{self.window=}')
         self.window.load_path(path)
         self.window.present()
 
     def on_escape(self, *args):
-        if self.window.get_page() == Page.FILE_PAGE:
+        if self.window.current_page() == WindowPage.FILE_PAGE:
             self.window.file_page.on_leave()
-        elif self.window.get_page() == Page.APPS_PAGE and self.window.get_view() == self.window.search_view:
-            self.window.set_search_mode(False)
+        elif self.window.current_page() == WindowPage.APPS_PAGE:
+            if self.window.current_tab() == WindowTab.INSTALLED:
+                self.window.set_tab(WindowTab.PINS)
+            elif self.window.current_tab() == WindowTab.SEARCH:
+                self.window.set_search_mode(False)
 
     def create_action(self, name, callback, shortcuts=None):
         action = Gio.SimpleAction.new(name, None)

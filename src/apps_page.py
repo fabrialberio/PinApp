@@ -2,9 +2,10 @@ from enum import Enum
 
 from gi.repository import Gtk, Adw, Pango
 from xml.sax.saxutils import escape
+from typing import Callable
 
-from .utils import *
-from .folders import FolderGroup, UserFolders, SystemFolders
+from .config import *
+from .file_pool import FilePool, USER_POOL, SYSTEM_POOL
 from .desktop_entry import DesktopEntry
 
 def escape_xml(string: str) -> str:
@@ -131,226 +132,162 @@ class AppRow(Adw.ActionRow):
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
 
-class State(Enum):
-    FILLED = 'filled'
-    EMPTY = 'empty'
-    ERROR = 'error'
-    LOADING = 'loading'
+class AppListView(Adw.Bin):
+    __gtype_name__ = 'AppListView'
 
-class AppsView(Adw.Bin):
-    '''A widget that handles status pages for states'''
-    __gtype_name__ = 'AppsPage'
+    show_pinned_chip: bool = False
+    _listbox: Gtk.ListBox
 
-    def __init__(self, show_new_file_button: bool, description: str = '') -> None:
+    def __init__(self, show_pinned_chip: bool = False) -> None:
         super().__init__()
 
-        self.show_new_file_button = show_new_file_button
-        self.description = description
-        self.state = State.EMPTY
+        self.show_pinned_chip = show_pinned_chip
 
-        self._init_widgets()
+        self._listbox = Gtk.ListBox(
+            selection_mode=Gtk.SelectionMode.NONE,
+            css_classes=['boxed-list'])
 
-    def _init_widgets(self):
-        self.empty_page = Adw.StatusPage(
-            vexpand=True,
+        self._listbox.set_sort_func(lambda a, b:
+                                    (a.file.appsection.Name.as_str() or '') > (b.file.appsection.Name.as_str() or ''))
+
+        # Wrap listbox in box to allow it to shrink to fit its contents
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.append(self._listbox)
+
+        self.set_child(
+            Gtk.ScrolledWindow(
+                vexpand=True,
+                child=Adw.Clamp(
+                    margin_top=12,
+                    margin_bottom=12,
+                    margin_start=12,
+                    margin_end=12,
+                    child=box)))
+
+    def update(self, files: list[DesktopEntry]):
+        # TODO Warning: Accessing a sequence while it is being sorted or searched is not allowed
+        self._listbox.remove_all()
+
+        for f in files:
+            row = AppRow(f, chips=[AppChip.Pinned()] if self.show_pinned_chip else [])
+            row.connect('file-open', lambda _, f: self.emit('file-open', f))
+            self._listbox.append(row)
+
+    # More performant than update, used for search
+    def set_filter(self, predicate: Callable[[AppRow], bool]):
+        self._listbox.set_filter_func(predicate)
+
+class PoolState(Enum):
+    LOADED = 'pool_page'
+    EMPTY = 'empty_page'
+    LOADING = 'loading_page'
+    ERROR = 'error_page'
+
+
+class PoolStateView(Gtk.Stack):
+    __gtype_name__ = 'PoolStateView'
+
+    pool: FilePool
+    pool_page: AppListView
+    state: PoolState | None = None
+
+    def __init__(self, pool: FilePool = None, pool_page: AppListView = None) -> None:
+        super().__init__()
+
+        if pool and pool_page:
+            self.connect_pool(pool, pool_page)
+
+        self.empty_status_page = Adw.StatusPage(
             title=_('No apps found'),
-            icon_name='folder-open-symbolic'
-        )
-        if self.show_new_file_button:
-            button = Gtk.Button(
-                halign=Gtk.Align.CENTER,
-                css_classes=['suggested-action', 'pill'],
-                child=Adw.ButtonContent(
-                    label=_('Add new app'),
-                    icon_name='list-add-symbolic'))
-            
-            button.connect('clicked', lambda _: self.emit('file-new'))
-            self.empty_page.set_child(button)
-        else:
-            self.empty_page.set_description(_('Applications you install will appear here'))
+            icon_name='folder-open-symbolic')
+        self.add_named(self.empty_status_page, PoolState.EMPTY.value)
 
-        self.error_page = Adw.StatusPage(
-            vexpand=True,
+        self.loading_status_page = Adw.StatusPage(
+            title=_('Loading apps'))
+        self.add_named(self.loading_status_page, PoolState.LOADING.value)
+
+        self.error_status_page = Adw.StatusPage(
             title=_('Error loading apps'),
-            icon_name='dialog-error-symbolic'
-        )
+            icon_name='dialog-error-symbolic')
+        self.add_named(self.error_status_page, PoolState.ERROR.value)
 
-        self.loading_page = Adw.StatusPage(
-            vexpand=True,
-            title=_('Loading apps…'),
-            icon_name='go-back-symbolic')
-        box = (self.loading_page
-            .get_first_child() # GtkScrolledWindow
-            .get_first_child() # GtkWiewport
-            .get_first_child() # GtkBox
-            .get_first_child() # AdwClamp
-            .get_first_child()) # GtkBox
-        box.remove(box.get_first_child()) # Removes the GtkImage with the icon
+        box = (self.loading_status_page
+               .get_first_child()  # GtkScrolledWindow
+               .get_first_child()  # GtkWiewport
+               .get_first_child()  # GtkBox
+               .get_first_child()  # AdwClamp
+               .get_first_child())  # GtkBox
+        box.remove(box.get_first_child())  # Removes the GtkImage with the icon
         box.prepend(Gtk.Spinner(
             width_request=32,
             height_request=32,
             opacity=.8,
-            spinning=True)) # Replaces it with a spinner
+            spinning=True))  # Replaces it with a spinner
 
-    def update_filled_page(self, rows: list[Gtk.ListBoxRow], sort=False):
-        if sort and isinstance(rows[0], AppRow):
-            rows = sorted(rows)
+        self.set_state(PoolState.EMPTY)
 
-        listbox = Gtk.ListBox(
-            selection_mode=Gtk.SelectionMode.NONE,
-            css_classes=['boxed-list'])
+    def connect_pool(self, pool: FilePool, pool_page: AppListView):
+        def _on_files_loaded(_, files: list[Path]):
+            self.pool_page.update([DesktopEntry(f) for f in files])
+            self.set_state(PoolState.LOADED)
 
-        for row in rows:
-            listbox.append(row)
+        pool.connect('files-loading',
+                     lambda _: self.set_state(PoolState.LOADING))
+        pool.connect('files-loaded', _on_files_loaded)
+        pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
+        pool.connect('files-error', lambda _,
+                     e: self.set_state(PoolState.ERROR))
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.append(Adw.PreferencesGroup(
-            description=self.description
-        ))
-        box.append(listbox)
-        
-        self.filled_page = Gtk.ScrolledWindow(
-            vexpand=True,
-            child=Adw.Clamp(
-                margin_top=24,
-                margin_bottom=24,
-                margin_start=12,
-                margin_end=12,
-                child = box))
+        self.pool_page = pool_page
+        self.add_named(pool_page, PoolState.LOADED.value)
 
-    def set_state(self, state: State):
-        if state == self.state:
+    def set_state(self, state: PoolState):
+        if state.value == self.get_visible_child_name():
             return
-
-        if state == State.FILLED:
-            self.set_child(self.filled_page)
-        elif state == State.EMPTY:
-            self.set_child(self.empty_page)
-        elif state == State.ERROR:
-            self.set_child(self.error_page)
-        elif state == State.LOADING:
-            self.set_child(self.loading_page)
 
         self.state = state
+        self.set_visible_child_name(state.value)
         self.emit('state-changed')
 
-class FolderGroupView(AppsView):
-    '''A widget that handles status pages for states and represents apps in a FolderGroup'''
-    __gtype_name__ = 'FolderView'
 
-    def __init__(self, folder_group: FolderGroup, description: str = '') -> None:
-        self.folder_group = folder_group
-        self.description = description
-        super().__init__(self.folder_group.writable, self.description)
-
-    def load_apps(self, loading_ok=True):
-        if self.state == State.LOADING or loading_ok:
-            return
-
-        if self.folder_group.any_exists:
-            self.set_state(State.LOADING)
-
-            def fill_group():
-                if not self.folder_group.empty:
-                    rows = []
-                    files = sorted(self.folder_group.files)
-                    for file in files:
-                        row = AppRow(file)
-                        row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                        rows.append(row)
-
-                    self.update_filled_page(rows)
-                    self.set_state(State.FILLED)
-                else:
-                    self.set_state(State.EMPTY)
-
-            self.folder_group.get_files_async(
-                callback=fill_group,
-                ignore_parsing_errors=True)
-        else:
-            self.set_state(State.ERROR)
-
-class PinsView(FolderGroupView):
-    __gtype_name__ = 'PinsView'
-
-    def __init__(self) -> None:
-        super().__init__(UserFolders())
-
-class InstalledView(FolderGroupView):
-    __gtype_name__ = 'InstalledView'
-
-    def __init__(self) -> None:
-        super().__init__(SystemFolders())
-
-class SearchView(AppsView):
+class SearchView(PoolStateView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
-    source_views: list[FolderGroupView]
-    folder_groups: list[FolderGroup]
-    rows: list[AppRow] = []
     search_entry: Gtk.SearchEntry
+    pool_page: AppListView
+    _files: list[DesktopEntry]
 
     def __init__(self) -> None:
-        super().__init__(show_new_file_button=False)
+        super().__init__()
 
         # Override empty page with a more appropriate one
-        self.empty_page = Adw.StatusPage(
-            vexpand=True,
-            title=_('No results found'),
-            description=_('Try searching for something else'),
-            icon_name='system-search-symbolic')
+        self.empty_status_page.set_title(_('No results found'))
+        self.empty_status_page.set_description(
+            _('Try searching for something else'))
+        self.empty_status_page.set_icon_name('system-search-symbolic')
+
+    def connect_pool(self, pool: FilePool, pool_page: AppListView):
+        super().connect_pool(pool, pool_page)
+
+        def _on_files_loaded(files):
+            self._files = [DesktopEntry(f) for f in files]
+            self.pool_page.set_filter(lambda r: True)
+
+        pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         self.search_entry = search_entry
-        self.search_entry.connect('search-changed', lambda e: self.search(e.get_text()))
-
-    def set_source_views(self, source_views: list[FolderGroupView]):
-        self.source_views = source_views
-
-        self.folder_groups = [v.folder_group for v in self.source_views]
-
-        def state_changed_cb(view: FolderGroupView):
-            '''Updates search_map when all source_views are loaded'''
-            if view.state == State.LOADING:
-                self.set_state(State.LOADING)
-            if all(map(lambda v: v.state != State.LOADING, self.source_views)):
-                self.load_apps()
-                self.search(self.search_entry.get_text())
-
-        for v in self.source_views:
-            v.connect('state-changed', state_changed_cb)
-
-
-    def load_apps(self):
-        self.rows = []
-        self.set_state(State.LOADING)
-        for g in self.folder_groups:
-            for f in g.files:
-                row = AppRow(f)
-                row.connect('file-open', lambda _, f: self.emit('file-open', f))
-                if g.writable:
-                    row.add_chip(AppChip.Pinned())
-
-                self.rows.append(row)
-
-        self.update_filled_page(self.rows, sort=True)
-        self.set_state(State.FILLED)
+        self.search_entry.connect(
+            'search-changed', lambda e: self.search(e.get_text()))
 
     def search(self, query: str):
-        if self.state == State.LOADING:
+        if self.state == PoolState.LOADING:
             return
 
-        any_visible = False
+        self.set_state(PoolState.LOADING)
 
-        for r in self.rows:
-            if query.lower() in r.file.search_string:
-                r.set_visible(True)
-                any_visible = True
-            else:
-                r.set_visible(False)
+        self.pool_page.set_filter(lambda r: query.lower() in r.file.search_string)
 
-        if any_visible:
-            self.set_state(State.FILLED)
-        else:
-            self.set_state(State.EMPTY)
+        self.set_state(PoolState.LOADED)
+        
