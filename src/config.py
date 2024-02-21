@@ -49,6 +49,8 @@ APP_PATHS = [
     Path('/var/lib/snapd/desktop/applications'),
 ]
 
+AUTOSTART_DISABLED_SUFFIX = '.disabled'
+
 
 def set_icon_from_name(icon: Gtk.Image, icon_name: str) -> Gtk.Image:
     theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())

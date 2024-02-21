@@ -19,25 +19,29 @@ paths += [str(p) for p in ICON_PATHS]
 theme.set_search_path(paths)
 
 # Register all GOBject types
-from .apps_page import AppRow, AppsView, PinsView, InstalledView, FolderGroupView, SearchView
+from .apps_page import AppRow, AppListView, PoolStateView
 from .file_page import FilePage, LocaleChooserRow, StringRow
+from .file_pool import FilePool
 from .window import PinAppWindow
 
 GObject.type_register(AppRow)
-GObject.type_register(AppsView)
-GObject.type_register(PinsView)
-GObject.type_register(InstalledView)
-GObject.type_register(FolderGroupView)
-GObject.type_register(SearchView)
+GObject.type_register(AppListView)
+GObject.type_register(PoolStateView)
+GObject.type_register(PoolStateView)
+GObject.type_register(FilePool)
 GObject.type_register(StringRow)
 GObject.type_register(LocaleChooserRow)
 GObject.type_register(FilePage)
 GObject.type_register(PinAppWindow)
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-open', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-new', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('state-changed', AppsView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('state-changed', PoolStateView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+
+GObject.signal_new('files-loading', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-empty', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-error', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('files-loaded', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
 GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())

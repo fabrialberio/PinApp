@@ -16,19 +16,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from pathlib import Path
-from typing import Callable
 from enum import Enum
 
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw
 
 from .config import USER_APPS, new_file_name
 from .desktop_entry import DesktopEntry
+from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .apps_page import SearchView, PoolStateView, AppListView
 
 
 class WindowTab(Enum):
     PINS = 'pins_tab'
     INSTALLED = 'installed_tab'
     SEARCH = 'search_tab'
+
 
 class WindowPage(Enum):
     APPS_PAGE = 'apps-page'
@@ -45,25 +47,39 @@ class PinAppWindow(Adw.ApplicationWindow):
     file_page = Gtk.Template.Child('file_page')
 
     view_stack = Gtk.Template.Child('view_stack')
-    pins_tab = Gtk.Template.Child('pins_view')
-    installed_tab = Gtk.Template.Child('installed_view')
-    search_tab = Gtk.Template.Child('search_view')
+    pins_tab: PoolStateView = Gtk.Template.Child('pins_tab')
+    installed_tab: PoolStateView = Gtk.Template.Child('installed_tab')
+    search_tab: SearchView = Gtk.Template.Child('search_tab')
 
     search_bar = Gtk.Template.Child('search_bar')
     search_entry = Gtk.Template.Child('search_entry')
     search_button = Gtk.Template.Child('search_button')
 
-    last_tab: WindowTab = None
+    last_tab: WindowTab = WindowTab.PINS
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.pins_tab.connect_pool(USER_POOL, AppListView())
+        self.installed_tab.connect_pool(SYSTEM_POOL, AppListView())
+        self.search_tab.connect_pool(
+            SEARCH_POOL, AppListView(show_pinned_chip=True))
+
+        button = Gtk.Button(
+            halign=Gtk.Align.CENTER,
+            css_classes=['suggested-action', 'pill'],
+            child=Adw.ButtonContent(
+                label=_('Add new app'),
+                icon_name='list-add-symbolic'))
+        button.connect('clicked', lambda _: self.new_file())
+
+        self.pins_tab.empty_status_page.set_child(button)
+
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
-        self.pins_tab.connect('file-open', lambda _, f: self.open_file(f))
-        self.pins_tab.connect('file-new', lambda _: self.new_file())
-        self.installed_tab.connect('file-open', lambda _, f: self.open_file(f))
-        self.search_tab.connect('file-open', lambda _, f: self.open_file(f))
+        self.pins_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.installed_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
+        self.search_tab.pool_page.connect('file-open', lambda _, f: self.open_file(f))
 
         self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_pins())
@@ -83,15 +99,15 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.search_bar.connect_entry(self.search_entry)
         self.search_tab.connect_entry(self.search_entry)
 
-        self.search_tab.set_source_views([self.pins_tab, self.installed_tab])
-
         def tab_changed_cb(*args):
             '''Disables search mode when the view is changed to something else'''
-            if self.search_bar.get_search_mode() == True and self.current_tab() != self.search_tab:
+            if self.search_bar.get_search_mode() is True and self.current_tab() != WindowTab.SEARCH:
                 self.search_bar.set_search_mode(False)
 
-        self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
-        self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
+        self.search_entry.connect(
+            'search-changed', lambda e: self.set_search_mode(True))
+        self.search_button.connect(
+            'toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', tab_changed_cb)
 
     def set_page(self, new_page: WindowPage):
@@ -123,7 +139,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             if clear_entry:
                 self.search_entry.set_text('')
         else:
-            if self.current_tab() == self.search_tab:
+            if self.current_tab() == WindowTab.SEARCH:
                 self.set_tab(self.last_tab)
             self.search_bar.set_search_mode(False)
 
@@ -150,11 +166,12 @@ class PinAppWindow(Adw.ApplicationWindow):
 
     def reload_pins(self):
         self.set_tab(WindowTab.PINS)
-        self.pins_tab.load_apps(loading_ok=False)
+        USER_POOL.files_async()
 
     def reload_apps(self):
-        self.pins_tab.load_apps(loading_ok=False)
-        self.installed_tab.load_apps(loading_ok=False)
+        USER_POOL.files_async()
+        SYSTEM_POOL.files_async()
+        SEARCH_POOL.files_async()
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''
@@ -176,8 +193,8 @@ class PinAppWindow(Adw.ApplicationWindow):
                 self.file_page.on_leave(callback=callback)
 
                 return True
-        else:
-            quit()
+
+        quit()
 
     def show_about_window(self):
         builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')

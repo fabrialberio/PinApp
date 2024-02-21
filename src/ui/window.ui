@@ -79,7 +79,7 @@
                         <property name='title' translatable='yes'>Your pins</property>
                         <property name='name'>pins_tab</property>
                         <property name='child'>
-                          <object class='PinsView' id='pins_view'/>
+                          <object class='PoolStateView' id='pins_tab'/>
                         </property>
                       </object>
                     </child>
@@ -89,7 +89,7 @@
                         <property name='title' translatable='yes'>Installed</property>
                         <property name='name'>installed_tab</property>
                         <property name='child'>
-                          <object class='InstalledView' id='installed_view'/>
+                          <object class='PoolStateView' id='installed_tab'/>
                         </property>
                       </object>
                     </child>
@@ -97,7 +97,7 @@
                       <object class='AdwViewStackPage'>
                         <property name='name'>search_tab</property>
                         <property name='child'>
-                          <object class='SearchView' id='search_view'/>
+                          <object class='SearchView' id='search_tab'/>
                         </property>
                       </object>
                     </child>
