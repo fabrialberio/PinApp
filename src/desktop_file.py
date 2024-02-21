@@ -28,16 +28,13 @@ class Localized(Generic[LT]):
 
     def __getitem__(self, locale: Optional[str]) -> LT:
         return self.locale_value[locale]
-    
-    def unlocalized_or(self, default: LT) -> LT:
-        return self.locale_value.get(None, default)
 
-
-FT = TypeVar("FT",
+FT = TypeVar('FT',
     bool, int, float, str,
     list[bool], list[int], list[float], list[str],
     Localized[str], Localized[list[str]]
 )
+DT = TypeVar('DT')
 
 @dataclass(frozen=True)
 class Field(Generic[FT]):
@@ -96,7 +93,8 @@ class DesktopFile:
     _saved_hash: int
     _key_file: GLib.KeyFile = field(init=False)
 
-    def __post_init__(self):
+    def __init__(self, path: Path):
+        self.path = path
         self._key_file = GLib.KeyFile.new()
         self._key_file.load_from_file(
             str(self.path),
@@ -165,11 +163,14 @@ class DesktopFile:
         
         raise ValueError(f'Unsupported field type: "{field._type}"')
 
-    def get(self, field: Field[FT], default: Optional[FT] = None) -> Optional[FT]:
+    def get(self, field: Field[FT], default: DT = None) -> FT | DT:
         try:
             return self[field]
         except GLib.GError:
             return default
+        
+    def get_unlocalized(self, field: Field[Localized[LT]], default: DT = None) -> LT | DT: # type: ignore
+        return self.get(field, Localized.wrap(default)).locale_value.get(None, default) # type: ignore
 
     def set(self, field: Field[FT], value: FT) -> None:
         ukey = split_key_locale(field.key)[0]
