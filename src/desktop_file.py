@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Generic, Optional, Type, TypeVar
+from typing import Generic, Optional, Type, TypeVar, get_origin, get_args
 
-from gi.repository import GLib
+from gi.repository import GObject, GLib # type: ignore
 
 
 def split_key_locale(key: str) -> tuple[str, Optional[str]]:
@@ -16,24 +16,9 @@ def join_key_locale(key: str, locale: Optional[str]) -> str:
         return f"{key}[{locale}]"
     return key
 
+
+FT = TypeVar('FT', bool, str, list[str])
 LT = TypeVar("LT", str, list[str])
-
-@dataclass(frozen=True)
-class Localized(Generic[LT]):
-    locale_value: dict[Optional[str], LT]
-
-    @classmethod
-    def wrap(cls, value: LT) -> 'Localized[LT]':
-        return cls({None: value})
-
-    def __getitem__(self, locale: Optional[str]) -> LT:
-        return self.locale_value[locale]
-
-FT = TypeVar('FT',
-    bool, int, float, str,
-    list[bool], list[int], list[float], list[str],
-    Localized[str], Localized[list[str]]
-)
 DT = TypeVar('DT')
 
 @dataclass(frozen=True)
@@ -42,58 +27,64 @@ class Field(Generic[FT]):
     key: str
     _type: Type[FT]
 
-class DesktopEntry:
-    _GROUP = 'Desktop Entry'
-    
-    HIDDEN =                    Field[bool](_GROUP, 'Hidden', bool)
-    TERMINAL =                  Field[bool](_GROUP, 'Terminal', bool)
-    NO_DISPLAY =                Field[bool](_GROUP, 'NoDisplay', bool)
-    STARTUP_NOTIFY =            Field[bool](_GROUP, 'StartupNotify', bool)
-    D_BUS_ACTIVATABLE =         Field[bool](_GROUP, 'DBusActivatable', bool)
-    SINGLE_MAIN_WINDOW =        Field[bool](_GROUP, 'SingleMainWindow', bool)
-    PREFERS_NON_DEFAULT_GPU =   Field[bool](_GROUP, 'PrefersNonDefaultGPU', bool)
-    URL =               Field[str](_GROUP, 'URL', str)
-    TYPE =              Field[str](_GROUP, 'Type', str)
-    EXEC =              Field[str](_GROUP, 'Exec', str)
-    ICON =              Field[str](_GROUP, 'Icon', str)
-    PATH =              Field[str](_GROUP, 'Path', str)
-    VERSION =           Field[str](_GROUP, 'Version', str)
-    TRY_EXEC =          Field[str](_GROUP, 'TryExec', str)
-    STARTUP_WM_CLASS =  Field[str](_GROUP, 'StartupWMClass', str)
-    ACTIONS =       Field[list[str]](_GROUP, 'Actions', list[str])
-    MIME_TYPE =     Field[list[str]](_GROUP, 'MimeType', list[str])
-    CATEGORIES =    Field[list[str]](_GROUP, 'Categories', list[str])
-    IMPLEMENTS =    Field[list[str]](_GROUP, 'Implements', list[str])
-    NOT_SHOW_IN =   Field[list[str]](_GROUP, 'NotShowIn', list[str])
-    ONLY_SHOW_IN =  Field[list[str]](_GROUP, 'OnlyShowIn', list[str])
-    NAME =          Field[Localized[str]](_GROUP, 'Name', Localized[str])
-    COMMENT =       Field[Localized[str]](_GROUP, 'Comment', Localized[str])
-    KEYWORDS =      Field[Localized[list[str]]](_GROUP, 'Keywords', Localized[list[str]])
-    GENERIC_NAME =  Field[Localized[str]](_GROUP, 'GenericName', Localized[str])
-    X_FLATPAK =             Field[str](_GROUP, 'X-Flatpak', str)
-    XGNOME_AUTOSTART =      Field[bool](_GROUP, 'X-GNOME-Autostart', bool)
-    X_SNAP_INSTANCE_NAME =  Field[str](_GROUP, 'X-SnapInstanceName', str)
+class LocalizedField(Field[LT]):
+    def localize(self, locale: str) -> 'Field[LT]':
+        return Field[LT](self.group, join_key_locale(self.key, locale), self._type)
 
-    @staticmethod
-    def fields(): return [
-        DesktopEntry.HIDDEN, DesktopEntry.TERMINAL, DesktopEntry.NO_DISPLAY, DesktopEntry.STARTUP_NOTIFY,
-        DesktopEntry.D_BUS_ACTIVATABLE, DesktopEntry.SINGLE_MAIN_WINDOW, DesktopEntry.PREFERS_NON_DEFAULT_GPU,
-        DesktopEntry.URL, DesktopEntry.TYPE, DesktopEntry.EXEC, DesktopEntry.ICON, DesktopEntry.PATH,
-        DesktopEntry.VERSION, DesktopEntry.TRY_EXEC, DesktopEntry.STARTUP_WM_CLASS, DesktopEntry.ACTIONS,
-        DesktopEntry.MIME_TYPE, DesktopEntry.CATEGORIES, DesktopEntry.IMPLEMENTS, DesktopEntry.NOT_SHOW_IN,
-        DesktopEntry.ONLY_SHOW_IN, DesktopEntry.NAME, DesktopEntry.COMMENT, DesktopEntry.KEYWORDS,
-        DesktopEntry.GENERIC_NAME, DesktopEntry.X_FLATPAK, DesktopEntry.XGNOME_AUTOSTART, DesktopEntry.X_SNAP_INSTANCE_NAME
+
+class DesktopEntry:
+    '''https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s06.html'''
+
+    group = 'Desktop Entry'
+    
+    HIDDEN =                    Field[bool](group, 'Hidden', bool)
+    TERMINAL =                  Field[bool](group, 'Terminal', bool)
+    NO_DISPLAY =                Field[bool](group, 'NoDisplay', bool)
+    STARTUP_NOTIFY =            Field[bool](group, 'StartupNotify', bool)
+    D_BUS_ACTIVATABLE =         Field[bool](group, 'DBusActivatable', bool)
+    SINGLE_MAIN_WINDOW =        Field[bool](group, 'SingleMainWindow', bool)
+    PREFERS_NON_DEFAULT_GPU =   Field[bool](group, 'PrefersNonDefaultGPU', bool)
+    URL =               Field[str](group, 'URL', str)
+    TYPE =              Field[str](group, 'Type', str)
+    EXEC =              Field[str](group, 'Exec', str)
+    ICON =              Field[str](group, 'Icon', str)
+    PATH =              Field[str](group, 'Path', str)
+    VERSION =           Field[str](group, 'Version', str)
+    TRY_EXEC =          Field[str](group, 'TryExec', str)
+    STARTUP_WM_CLASS =  Field[str](group, 'StartupWMClass', str)
+    ACTIONS =       Field[list[str]](group, 'Actions', list[str])
+    MIME_TYPE =     Field[list[str]](group, 'MimeType', list[str])
+    CATEGORIES =    Field[list[str]](group, 'Categories', list[str])
+    IMPLEMENTS =    Field[list[str]](group, 'Implements', list[str])
+    NOT_SHOW_IN =   Field[list[str]](group, 'NotShowIn', list[str])
+    ONLY_SHOW_IN =  Field[list[str]](group, 'OnlyShowIn', list[str])
+    NAME =          LocalizedField[str](group, 'Name', str)
+    COMMENT =       LocalizedField[str](group, 'Comment', str)
+    KEYWORDS =      LocalizedField[list[str]](group, 'Keywords', list[str])
+    GENERIC_NAME =  LocalizedField[str](group, 'GenericName', str)
+    X_FLATPAK =             Field[str](group, 'X-Flatpak', str)
+    XGNOME_AUTOSTART =      Field[bool](group, 'X-GNOME-Autostart', bool)
+    X_SNAP_INSTANCE_NAME =  Field[str](group, 'X-SnapInstanceName', str)
+
+    fields: list[Field | LocalizedField] = [
+        HIDDEN, TERMINAL, NO_DISPLAY, STARTUP_NOTIFY, D_BUS_ACTIVATABLE,
+        SINGLE_MAIN_WINDOW, PREFERS_NON_DEFAULT_GPU, URL, TYPE, EXEC, ICON, PATH,
+        VERSION, TRY_EXEC, STARTUP_WM_CLASS, ACTIONS, MIME_TYPE, CATEGORIES,
+        IMPLEMENTS, NOT_SHOW_IN, ONLY_SHOW_IN, NAME, COMMENT, KEYWORDS,
+        GENERIC_NAME, X_FLATPAK, XGNOME_AUTOSTART, X_SNAP_INSTANCE_NAME
     ]
     
 
-@dataclass(eq=False, init=False)
-class DesktopFile:
+@dataclass(init=False, unsafe_hash=False)
+class DesktopFile(GObject.Object):
     path: Path
     search_str: str
     _saved_hash: int
     _key_file: GLib.KeyFile = field(init=False)
 
     def __init__(self, path: Path):
+        super().__init__()
+
         self.path = path
         self._key_file = GLib.KeyFile.new()
         self._key_file.load_from_file(
@@ -101,26 +92,28 @@ class DesktopFile:
             GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
         )
 
-        self._saved_hash = hash(self._key_file.to_data()[0])
-        self.search_str = self._key_file.to_data()[0]
+        self._saved_hash = hash(self)
+        self.search_str = self._key_file.to_data()[0].lower()
 
     @classmethod
     def default(cls, path: Path) -> 'DesktopFile':
         file = cls(path)
 
         file.set(DesktopEntry.TYPE, 'Application')
-        file.set(DesktopEntry.NAME, Localized[str].wrap('New Application'))
+        file.set(DesktopEntry.NAME, 'New Application')
         file.set(DesktopEntry.EXEC, '')
         file.set(DesktopEntry.ICON, '')
 
         return file
 
     def edited(self) -> bool:
-        return self._saved_hash != hash(self._key_file.to_data()[0])
+        return self._saved_hash != hash(self)
 
     def save_as(self, path: Path):
         with path.open('w') as f:
             f.write(self._key_file.to_data()[0])
+        
+        self._saved_hash = hash(self)
 
     def save(self):
         self.save_as(self.path)
@@ -130,36 +123,10 @@ class DesktopFile:
 
         if field._type == bool:
             return self._key_file.get_boolean(field.group, field.key)
-        if field._type == int:
-            return self._key_file.get_integer(field.group, field.key)
-        if field._type == float:
-            return self._key_file.get_double(field.group, field.key)
         if field._type == str:
             return self._key_file.get_string(field.group, field.key)
-        if field._type == list[bool]:
-            return self._key_file.get_boolean_list(field.group, field.key)
-        if field._type == list[int]:
-            return self._key_file.get_integer_list(field.group, field.key)
-        if field._type == list[float]:
-            return self._key_file.get_double_list(field.group, field.key)
         if field._type == list[str]:
             return self._key_file.get_string_list(field.group, field.key)
-        if field._type == Localized[str]:
-            return Localized[str](dict(map(
-                lambda t: (t[1], self._key_file.get_locale_string(field.group, ukey, t[1])),
-                filter(
-                    lambda t: t[0] == ukey,
-                    map(split_key_locale, self._key_file.get_keys(field.group)[0])
-                )
-            ))) # type: ignore
-        if field._type == Localized[list[str]]:
-            return Localized[list[str]](dict(map(
-                lambda t: (t[1], self._key_file.get_locale_string_list(field.group, ukey, t[1])),
-                filter(
-                    lambda t: t[0] == ukey,
-                    map(split_key_locale, self._key_file.get_keys(field.group)[0])
-                )
-            ))) # type: ignore
         
         raise ValueError(f'Unsupported field type: "{field._type}"')
 
@@ -168,36 +135,55 @@ class DesktopFile:
             return self[field]
         except GLib.GError:
             return default
-        
-    def get_unlocalized(self, field: Field[Localized[LT]], default: DT = None) -> LT | DT: # type: ignore
-        return self.get(field, Localized.wrap(default)).locale_value.get(None, default) # type: ignore
 
     def set(self, field: Field[FT], value: FT) -> None:
-        ukey = split_key_locale(field.key)[0]
+        self.emit('field-set', field, value)
 
         if field._type == bool:
             self._key_file.set_boolean(field.group, field.key, value)
-        elif field._type == int:
-            self._key_file.set_integer(field.group, field.key, value)
-        elif field._type == float:
-            self._key_file.set_double(field.group, field.key, value)
         elif field._type == str:
             self._key_file.set_string(field.group, field.key, value)
-        elif field._type == list[bool]:
-            self._key_file.set_boolean_list(field.group, field.key, value)
-        elif field._type == list[int]:
-            self._key_file.set_integer_list(field.group, field.key, value)
-        elif field._type == list[float]:
-            self._key_file.set_double_list(field.group, field.key, value)
         elif field._type == list[str]:
             self._key_file.set_string_list(field.group, field.key, value)
-        elif field._type == Localized[str]:
-            assert isinstance(value, Localized)
-            for l, v in value.locale_value.items():
-                self._key_file.set_locale_string(field.group, ukey, l, v)
-        elif field._type == Localized[list[str]]:
-            assert isinstance(value, Localized)
-            for l, v in value.locale_value.items():
-                self._key_file.set_locale_string_list(field.group, ukey, l, v)
+        else:
+            raise ValueError(f'Unsupported field type: "{field._type}"')
 
-        raise ValueError(f'Unsupported field type: "{field._type}"')
+    def remove(self, field: Field) -> None:
+        self._key_file.remove_key(field.group, field.key)
+
+    def locales(self, field: LocalizedField[LT]) -> list[str]:
+        return [
+            l\
+            for k, l in map(split_key_locale, self._key_file.get_keys(field.group)[0])\
+            if k == field.key and l is not None
+        ]
+
+    def fields(self, group: str) -> list[Field[str] | LocalizedField[str]]:
+        '''Returns a list of all fields in the specified group, cast to str.'''
+
+        key_field: dict[str, Field[str]] = {}
+
+        for key in self._key_file.get_keys(group)[0]:
+            ukey, locale = split_key_locale(key)
+            
+            if locale is None:
+                key_field[ukey] = Field[str](group, key, str)
+            else:
+                key_field[ukey] = LocalizedField[str](group, ukey, str)
+
+        return list(key_field.values())
+
+    def __hash__(self) -> int:
+        return hash(self._key_file.to_data()[0])
+    
+    def __repr__(self) -> str:
+        return f'DesktopFile({self.path})'
+
+    @property
+    def __doc__(self): return None
+
+    @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
+    def __doc__(self, _): ...
+
+GObject.type_register(DesktopFile)
+GObject.signal_new('field-set', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
