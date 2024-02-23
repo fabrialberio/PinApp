@@ -21,13 +21,16 @@ FT = TypeVar('FT', bool, str, list[str])
 LT = TypeVar("LT", str, list[str])
 DT = TypeVar('DT')
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Field(Generic[FT]):
     group: str
     key: str
     _type: Type[FT]
 
-class LocalizedField(Field[LT]):
+    def __eq__(self, other: 'Field | LocaleField'):
+        return self.group == other.group and self.key == other.key
+
+class LocaleField(Field[LT]):
     def localize(self, locale: str) -> 'Field[LT]':
         return Field[LT](self.group, join_key_locale(self.key, locale), self._type)
 
@@ -58,15 +61,15 @@ class DesktopEntry:
     IMPLEMENTS =    Field[list[str]](group, 'Implements', list[str])
     NOT_SHOW_IN =   Field[list[str]](group, 'NotShowIn', list[str])
     ONLY_SHOW_IN =  Field[list[str]](group, 'OnlyShowIn', list[str])
-    NAME =          LocalizedField[str](group, 'Name', str)
-    COMMENT =       LocalizedField[str](group, 'Comment', str)
-    KEYWORDS =      LocalizedField[list[str]](group, 'Keywords', list[str])
-    GENERIC_NAME =  LocalizedField[str](group, 'GenericName', str)
+    NAME =          LocaleField[str](group, 'Name', str)
+    COMMENT =       LocaleField[str](group, 'Comment', str)
+    KEYWORDS =      LocaleField[list[str]](group, 'Keywords', list[str])
+    GENERIC_NAME =  LocaleField[str](group, 'GenericName', str)
     X_FLATPAK =             Field[str](group, 'X-Flatpak', str)
     XGNOME_AUTOSTART =      Field[bool](group, 'X-GNOME-Autostart', bool)
     X_SNAP_INSTANCE_NAME =  Field[str](group, 'X-SnapInstanceName', str)
 
-    fields: list[Field | LocalizedField] = [
+    fields: list[Field | LocaleField] = [
         HIDDEN, TERMINAL, NO_DISPLAY, STARTUP_NOTIFY, D_BUS_ACTIVATABLE,
         SINGLE_MAIN_WINDOW, PREFERS_NON_DEFAULT_GPU, URL, TYPE, EXEC, ICON, PATH,
         VERSION, TRY_EXEC, STARTUP_WM_CLASS, ACTIONS, MIME_TYPE, CATEGORIES,
@@ -151,14 +154,14 @@ class DesktopFile(GObject.Object):
     def remove(self, field: Field) -> None:
         self._key_file.remove_key(field.group, field.key)
 
-    def locales(self, field: LocalizedField[LT]) -> list[str]:
+    def locales(self, field: LocaleField[LT]) -> list[str]:
         return [
             l\
             for k, l in map(split_key_locale, self._key_file.get_keys(field.group)[0])\
             if k == field.key and l is not None
         ]
 
-    def fields(self, group: str) -> list[Field[str] | LocalizedField[str]]:
+    def fields(self, group: str) -> list[Field[str] | LocaleField[str]]:
         '''Returns a list of all fields in the specified group, cast to str.'''
 
         key_field: dict[str, Field[str]] = {}
@@ -169,7 +172,7 @@ class DesktopFile(GObject.Object):
             if locale is None:
                 key_field[ukey] = Field[str](group, key, str)
             else:
-                key_field[ukey] = LocalizedField[str](group, ukey, str)
+                key_field[ukey] = LocaleField[str](group, ukey, str)
 
         return list(key_field.values())
 
@@ -185,5 +188,4 @@ class DesktopFile(GObject.Object):
     @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
     def __doc__(self, _): ...
 
-GObject.type_register(DesktopFile)
 GObject.signal_new('field-set', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
