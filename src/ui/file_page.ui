@@ -6,21 +6,12 @@
     <child>
       <object class='AdwToolbarView'>
         <child type='top'>
-          <!-- HeaderBar -->
           <object class='AdwHeaderBar' id='header_bar'>
             <property name='show-back-button'>false</property>
-            <!-- Custom back button -->
-            <child type='start'>
-              <object class='GtkButton' id='back_button'>
-                <property name='icon-name'>go-previous-symbolic</property>
-              </object>
-            </child>
-            <!-- Title (PinApp) -->
             <property name='title-widget'>
               <object class='AdwWindowTitle' id='window_title'>
               </object>
             </property>
-            <!-- Pin button -->
             <child type='end'>
               <object class='GtkButton' id='pin_button'>
                 <property name='child'>
@@ -34,7 +25,6 @@
                 </style>
               </object>
             </child>
-            <!-- File menu button -->
             <child type='end'>
               <object class='GtkMenuButton' id='file_menu_button'>
                 <property name='icon-name'>view-more-symbolic</property>
@@ -68,7 +58,6 @@
                                   <object class='GtkBox' id='banner_box'>
                                     <property name='orientation'>horizontal</property>
                                     <child>
-                                      <!-- App icon -->
                                       <object class='GtkImage' id='icon'>
                                         <property name='margin-end'>6</property>
                                         <property name='tooltip-text' translatable='yes'>Application icon</property>
@@ -79,7 +68,6 @@
                                         </style>
                                       </object>
                                     </child>
-                                    <!-- App title and comment -->
                                     <child>
                                       <object class='GtkListBox' id='banner_listbox'>
                                         <property name='valign'>center</property>
@@ -94,22 +82,7 @@
                                 </child>
                                 <child>
                                   <!-- Localized values group -->
-                                  <object class='AdwPreferencesGroup' id='localized_group'>
-                                    <property name='title' translatable='yes'>Localized values</property>
-                                    <property name='header-suffix'>
-                                      <object class='GtkButton' id='add_localized_button'>
-                                        <style>
-                                          <class name='flat' />
-                                        </style>
-                                        <child>
-                                          <object class='AdwButtonContent'>
-                                            <property name='label' translatable='yes'>Add</property>
-                                            <property name='icon-name'>list-add</property>
-                                          </object>
-                                        </child>
-                                      </object>
-                                    </property>
-                                    <property name='visible'>False</property>
+                                  <object class='LocalizedStringsGroup' id='localized_strings_group'>
                                   </object>
                                 </child>
                                 <child>

@@ -1,45 +1,58 @@
 from shutil import copy
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Protocol, get_origin
 
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw, Gio, GObject # type: ignore
+from gettext import gettext as _
 
-from .desktop_entry import DesktopEntry, Field, LocaleString
+from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField
 from .config import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 
 
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
 
-    def __init__(self, field: Field) -> None:
-        self.field = field
-
-        self.switch = Gtk.Switch(
-            active=field.as_bool(),
+    def __init__(self, file: DesktopFile, field: Field[bool]) -> None:
+        switch = Gtk.Switch(
+            active=file.get(field, False),
             valign=Gtk.Align.CENTER,
         )
-        self.switch.connect('state-set', self._on_state_set)
+        switch.set_active(file[field])
 
         super().__init__(
             title=field.key,
-            activatable_widget=self.switch,
+            activatable_widget=switch,
         )
-        self.add_suffix(self.switch)
+        self.add_suffix(switch)
 
-    def _on_state_set(self, widget, value):
-        self.field.set(value)
+        def on_state_set(self, widget: Gtk.Switch, value: bool):
+            file.set(field, value)
+
+        def on_field_set(file: DesktopFile, field_: Field[bool], value: bool):
+            if field_ == field and value != self.get_active():
+                switch.set_active(value)
+
+        switch.connect('state-set', on_state_set)
+        file.connect('field-set', on_field_set)
 
 class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
-    def __init__(self, field: Field) -> None:
-        self.field = field
-        
+    def __init__(self, file: DesktopFile, field: Field[str]) -> None:
         super().__init__(title=field.key)
-        self.set_text(field.as_str() or '')
-        self.connect('changed', self._on_changed)
+        self.set_text(file[field])
 
-    def add_action(self, icon_name: str, callback: Callable):
+        def on_changed(widget: StringRow):
+            self.file.set(field, self.get_text())
+        
+        def on_field_set(file: DesktopFile, field_: Field[str], value: str):
+            if field_ == field and value != self.get_text():
+                self.set_text(value)
+
+        self.connect('changed', on_changed)
+        file.connect('field-set', on_field_set)
+
+    def add_action(self, icon_name: str, callback: Callable[[Gtk.Widget], None]):
         button = Gtk.Button(
             valign=Gtk.Align.CENTER,
             icon_name=icon_name,
@@ -48,70 +61,70 @@ class StringRow(Adw.EntryRow):
         button.connect('clicked', callback)
         self.add_suffix(button)
 
-    def _on_changed(self, widget):
-        self.field.set(self.get_text())
+class LocaleStringRow(Adw.EntryRow):
+    __gtype_name__ = 'LocaleStringRow'
 
-class LocalizedRow(StringRow):
-    __gtype_name__='LocaleStringRow'
+    file: DesktopFile
+    field: LocaleField[str]
+    locale: str
 
-    def __init__(self, field: Field, locale: 'str | None' = None) -> None:
-        super().__init__(field=field)
+    def __init__(self, file: DesktopFile, field: LocaleField[str], locale: str) -> None:
+        super().__init__(title=field.key)
+
+        self.file = file
+        self.field = field
         self.locale = locale
+
+        self.set_locale(locale)
+
+        def on_changed(widget: StringRow):
+            self.file.set(self.field.localize(self.locale), self.get_text())
+        
+        def on_field_set(file: DesktopFile, field_: Field[str], value: str):
+            if field_ == field.localize(locale) and value != self.get_text():
+                self.set_text(value)
+
+        self.connect('changed', on_changed)
+        file.connect('field-set', on_field_set)
 
     def set_locale(self, locale: str):
         self.locale = locale
-        self.field = self.field.localize(
-            self.locale, 
-            return_non_existing_key_as_fallback=True, 
-            return_unlocalized_as_fallback=False)
+        self.set_text(self.file.get(self.field.localize(self.locale), ''))
 
-        self.set_title(self.field.unlocalized_key)
-        self.set_text(self.field.as_str() or '')
 
-    def _on_changed(self, widget):
-        self.field.set(self.get_text())
+class LocalizedStringsGroup(Adw.PreferencesGroup):
+    __gtype_name__ = 'LocalizedStringsGroup'
 
-class LocaleChooserRow(Adw.ComboRow):
-    __gtype_name__ = 'LocaleChooserRow'
+    def __init__(self) -> None:
+        super().__init__(title=_('Localized values'))
 
-    def __init__(self, locale_list: list[str]) -> None:
-        self.locales = locale_list
-
-        model = Gtk.StringList()
-        for l in self.locales:
-            model.append(l)
+    def set_fields(self, file: DesktopFile, fields: list[LocaleField]):
+        locales = sorted(list(set([l for f in fields for l in file.locales(f)])))
         
-        super().__init__(
-            title = _('Locale'),
-            model = model)
+        locale_chooser_row = Adw.ComboRow(
+            title=_('Locale'),
+            model=Gtk.StringList.new(locales)
+        )
+        locale_chooser_row.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
 
-        self.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
+        rows = [LocaleStringRow(file, f, locale_chooser_row.get_selected_item()) for f in fields]
 
-    def connect_localized_rows(self, rows: list[LocalizedRow]):
-        def update_rows(*args):
+        self.add(locale_chooser_row)
+        for row in rows:
+            self.add(row)
+
+        def update_rows(widget: LocalizedStringsGroup, pspec, user_data):
             for row in rows:
-                row.set_locale(self.get_current_locale())
-        
+                row.set_locale(locale_chooser_row.get_selected_item())
+
         self.connect('notify', update_rows)
-
-    def set_current_locale(self):
-        self.set_locale(
-            str(LocaleString.current().closest(
-                [LocaleString.parse(l) for l in self.locales])))
-
-    def get_current_locale(self) -> str:
-        return self.get_selected_item().get_string()
-
-    def set_locale(self, locale):
-        if locale in self.locales:
-            self.set_selected(self.locales.index(locale))
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
 class FilePage(Adw.BreakpointBin):
     __gtype_name__ = 'FilePage'
 
-    compact_breakpoint = Gtk.Template.Child('compact_breakpoint')
+    compact_breakpoint = Gtk.Template.Child()
 
     window_title = Gtk.Template.Child('window_title')
     header_bar = Gtk.Template.Child('header_bar')
@@ -132,11 +145,12 @@ class FilePage(Adw.BreakpointBin):
     app_icon = Gtk.Template.Child('icon')
     banner_listbox = Gtk.Template.Child('banner_listbox')
 
-    localized_group = Gtk.Template.Child('localized_group')
+    localized_strings_group = Gtk.Template.Child('localized_strings_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
 
     banner_expanded = True
+    file: DesktopFile
 
     @property
     def allow_leave(self) -> bool:
@@ -156,7 +170,7 @@ class FilePage(Adw.BreakpointBin):
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
         self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
-        self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
+        #self.localized_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_localized=True))
         self.strings_group.get_header_suffix().connect('clicked', lambda _: self._add_key())
         self.bools_group.get_header_suffix().connect('clicked', lambda _: self._add_key(is_bool=True))
 
@@ -175,7 +189,7 @@ class FilePage(Adw.BreakpointBin):
         is_new_file = not self.file.path.exists()
         pinned_path: Path = new_file_name(USER_APPS, self.file.path.stem)
 
-        self.file.save(pinned_path)
+        self.file.save_as(pinned_path)
         self.emit('file-changed')
 
         if is_new_file:
@@ -280,13 +294,13 @@ class FilePage(Adw.BreakpointBin):
 
     def load_path(self, path: Path):
         try:
-            file = DesktopEntry(path)
+            file = DesktopFile(path)
         except (FileExistsError, PermissionError):
             self.view_stack.set_visible_child(self.error_view)
         else:
             self.load_file(file)
 
-    def load_file(self, file: DesktopEntry):
+    def load_file(self, file: DesktopFile):
         self.view_stack.set_visible_child(self.file_view)
         self.file = file
 
@@ -304,46 +318,38 @@ class FilePage(Adw.BreakpointBin):
     def update_page(self):
         if self.file is None:
             raise ValueError
-        
-        localized_rows: list[LocalizedRow] = []
+
         string_rows: list[StringRow] = []
         bool_rows: list[BoolRow] = []
 
-        all_locales = set()
-        added_keys = []
+        locale_fields = []
 
-        for key, field in self.file.appsection.items():
-            if field.locale is not None:
-                all_locales = all_locales | {f.locale for f in field.localized_fields if f.locale is not None}
+        for field in self.file.fields(DesktopEntry.group):
+            if field.key in [f.key for f in DesktopEntry.fields]:
+                field = next(f for f in DesktopEntry.fields if f.key == field.key)
 
-                if field.unlocalized_key not in added_keys:
-                    localized_rows.append(LocalizedRow(field))
-                    added_keys.append(field.unlocalized_key)
-            elif key in ['Name', 'Comment']:
+            if isinstance(field, LocaleField):
+                locale_fields.append(field)
+            elif field == DesktopEntry.NAME or field == DesktopEntry.COMMENT:
                 continue
-            elif key == 'Icon':
-                icon_field = self.file.appsection.Icon
+            elif field == DesktopEntry.ICON:
+                icon_row = StringRow(self.file, DesktopEntry.ICON)
+                icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
+                icon_row.connect('changed', lambda _: self._update_icon())
 
-                self.icon_row = StringRow(icon_field)
-                self.icon_row.add_action('folder-open-symbolic', lambda _: self._upload_icon())
-                self.icon_row.connect('changed', lambda _: self._update_icon())
+                string_rows.append(icon_row)
+            elif field._type == str:
+                string_rows.append(StringRow(self.file, field)) # type: ignore
+            elif field._type == bool:
+                bool_rows.append(BoolRow(self.file, field)) # type: ignore
+            elif get_origin(field._type) == list:
+                string_rows.append(StringRow(self.file, Field(field.group, field.key, str)))
 
-                string_rows.append(self.icon_row)
-            elif type(field.get()) in [str, list]:
-                string_rows.append(StringRow(field))
-            elif type(field.get()) == bool:
-                bool_rows.append(BoolRow(field))
-
-
-        if all_locales:
-            self.locale_chooser_row = LocaleChooserRow(sorted(list(all_locales)))
-            self.locale_chooser_row.connect_localized_rows(localized_rows)
-            self.locale_chooser_row.set_current_locale()
-
-            self._update_pref_group(self.localized_group, [self.locale_chooser_row]+localized_rows)
-            self.localized_group.set_visible(True)
+        if locale_fields:
+            self.localized_strings_group.set_fields(self.file, locale_fields)
+            self.localized_strings_group.set_visible(True)
         else:
-            self.localized_group.set_visible(False)
+            self.localized_strings_group.set_visible(False)
 
         self._update_pref_group(
             pref_group=self.strings_group,
@@ -361,12 +367,12 @@ class FilePage(Adw.BreakpointBin):
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
             self.header_bar.set_show_title(True)
-            self.window_title.set_title(self.file.appsection.Name.as_str())
+            self.window_title.set_title(self.file.get_unlocalized(DesktopEntry.NAME, ''))
         else:
             self.header_bar.set_show_title(False)
 
     def _update_icon(self):
-        set_icon_from_name(self.app_icon, self.file.appsection.Icon.as_str())
+        set_icon_from_name(self.app_icon, self.file.get(DesktopEntry.ICON, ''))
 
     def _upload_icon(self):
         def callback(dialog, response):
@@ -380,7 +386,7 @@ class FilePage(Adw.BreakpointBin):
 
                 copy(path, new_path)
 
-                self.icon_row.field.set(str(new_path))
+                self.file.set(DesktopEntry.ICON, str(new_path))
                 self._update_icon()
                 self.update_page()
 
@@ -390,7 +396,7 @@ class FilePage(Adw.BreakpointBin):
             accept_label=_('Open'),
             cancel_label=_('Cancel'))
 
-        if (path := Path(self.file.appsection.Icon.as_str())).exists():
+        if (path := Path(self.file.get(DesktopEntry.ICON, ''))).exists():
             dialog.set_current_folder(Gio.File.new_for_path(str(path.parent)))
 
         dialog.connect('response', callback)
@@ -405,7 +411,7 @@ class FilePage(Adw.BreakpointBin):
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
             self.banner_listbox.remove(row)
 
-        app_name_row = StringRow(self.file.appsection.Name)
+        app_name_row = StringRow(self.file, Field(DesktopEntry.NAME.group, DesktopEntry.NAME.key, str))
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
 
@@ -417,7 +423,7 @@ class FilePage(Adw.BreakpointBin):
         else:
             app_name_row.add_css_class('title-2-row')
 
-        app_comment_row = StringRow(self.file.appsection.Comment)
+        app_comment_row = StringRow(self.file, Field(DesktopEntry.COMMENT.group, DesktopEntry.COMMENT.key, str))
         app_comment_row.add_css_class('app-banner-entry')
 
         self.banner_listbox.append(app_name_row)
@@ -432,7 +438,7 @@ class FilePage(Adw.BreakpointBin):
         key_entry = builder.get_object('key_entry')
 
         if is_localized:
-            locale = self.locale_chooser_row.get_current_locale()
+            locale = self.locale_chooser_row.get_locale()
             locale_entry.set_visible(True)
             locale_entry.set_text(locale)
 
@@ -442,16 +448,16 @@ class FilePage(Adw.BreakpointBin):
 
         def callback(widget, resp):
             if resp == 'add':
+                group = DesktopEntry.group
                 key = key_entry.get_text()
-                value = False if is_bool else ''
-
-                field = Field(key, self.file.appsection.section)
-                if is_localized and (locale := locale_entry.get_text()): 
-                    field = field.localize(
-                        locale,
-                        return_non_existing_key_as_fallback=True,
-                        return_unlocalized_as_fallback=False)
-                field.set(value)
+                
+                if is_bool:
+                    self.file.set(Field(group, key, bool), False)
+                else:
+                    if is_localized:
+                        self.file.set(LocaleField(group, key, str).localize(locale_entry.get_text()))
+                    else:
+                        self.file.set(Field(group, key, str), '')
 
                 self.update_page()
 
@@ -482,3 +488,8 @@ class FilePage(Adw.BreakpointBin):
                 css_classes=['dim-label'],
                 halign=Gtk.Align.CENTER,
             ))
+
+GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('add-string-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('add-bool-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
