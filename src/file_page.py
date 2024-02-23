@@ -1,6 +1,6 @@
 from shutil import copy
 from pathlib import Path
-from typing import Callable, Optional, Protocol, get_origin
+from typing import Callable, Optional, get_origin
 
 from gi.repository import Gtk, Adw, Gio, GObject # type: ignore
 from gettext import gettext as _
@@ -40,10 +40,10 @@ class StringRow(Adw.EntryRow):
 
     def __init__(self, file: DesktopFile, field: Field[str]) -> None:
         super().__init__(title=field.key)
-        self.set_text(file[field])
+        self.set_text(file.get(field, ''))
 
         def on_changed(widget: StringRow):
-            self.file.set(field, self.get_text())
+            file.set(field, self.get_text())
         
         def on_field_set(file: DesktopFile, field_: Field[str], value: str):
             if field_ == field and value != self.get_text():
@@ -91,14 +91,15 @@ class LocaleStringRow(Adw.EntryRow):
         self.locale = locale
         self.set_text(self.file.get(self.field.localize(self.locale), ''))
 
-
-class LocalizedStringsGroup(Adw.PreferencesGroup):
-    __gtype_name__ = 'LocalizedStringsGroup'
+class LocaleStringsGroup(Adw.PreferencesGroup):
+    __gtype_name__ = 'LocaleStringsGroup'
 
     def __init__(self) -> None:
         super().__init__(title=_('Localized values'))
 
-    def set_fields(self, file: DesktopFile, fields: list[LocaleField]):
+    def set_fields(self, file: DesktopFile, fields: list[LocaleField]):        
+        self.get_first_child().get_last_child().get_first_child().remove_all()
+        
         locales = sorted(list(set([l for f in fields for l in file.locales(f)])))
         
         locale_chooser_row = Adw.ComboRow(
@@ -113,7 +114,7 @@ class LocalizedStringsGroup(Adw.PreferencesGroup):
         for row in rows:
             self.add(row)
 
-        def update_rows(widget: LocalizedStringsGroup, pspec, user_data):
+        def update_rows(widget: LocaleStringsGroup, pspec, user_data):
             for row in rows:
                 row.set_locale(locale_chooser_row.get_selected_item())
 
@@ -145,7 +146,7 @@ class FilePage(Adw.BreakpointBin):
     app_icon = Gtk.Template.Child('icon')
     banner_listbox = Gtk.Template.Child('banner_listbox')
 
-    localized_strings_group = Gtk.Template.Child('localized_strings_group')
+    locale_strings_group = Gtk.Template.Child('locale_strings_group')
     strings_group = Gtk.Template.Child('strings_group')
     bools_group = Gtk.Template.Child('bools_group')
 
@@ -204,7 +205,7 @@ class FilePage(Adw.BreakpointBin):
             if callback is not None:
                 callback(self)
         else:
-            if self.file.write_permission and self.file.path.exists():
+            if self.file.path.exists():
                 self.file.save()
                 self.emit('file-changed')
                 self.emit('file-leave')
@@ -346,10 +347,10 @@ class FilePage(Adw.BreakpointBin):
                 string_rows.append(StringRow(self.file, Field(field.group, field.key, str)))
 
         if locale_fields:
-            self.localized_strings_group.set_fields(self.file, locale_fields)
-            self.localized_strings_group.set_visible(True)
+            self.locale_strings_group.set_fields(self.file, locale_fields)
+            self.locale_strings_group.set_visible(True)
         else:
-            self.localized_strings_group.set_visible(False)
+            self.locale_strings_group.set_visible(False)
 
         self._update_pref_group(
             pref_group=self.strings_group,
@@ -367,7 +368,7 @@ class FilePage(Adw.BreakpointBin):
     def _update_window_title(self):
         if self.scrolled_window.get_vadjustment().get_value() > 0:
             self.header_bar.set_show_title(True)
-            self.window_title.set_title(self.file.get_unlocalized(DesktopEntry.NAME, ''))
+            self.window_title.set_title(self.file.get(DesktopEntry.NAME, ''))
         else:
             self.header_bar.set_show_title(False)
 
@@ -411,7 +412,7 @@ class FilePage(Adw.BreakpointBin):
         while (row := self.banner_listbox.get_row_at_index(0)) != None:
             self.banner_listbox.remove(row)
 
-        app_name_row = StringRow(self.file, Field(DesktopEntry.NAME.group, DesktopEntry.NAME.key, str))
+        app_name_row = StringRow(self.file, DesktopEntry.NAME)
         app_name_row.set_margin_bottom(6)
         app_name_row.add_css_class('app-banner-entry')
 
@@ -423,7 +424,7 @@ class FilePage(Adw.BreakpointBin):
         else:
             app_name_row.add_css_class('title-2-row')
 
-        app_comment_row = StringRow(self.file, Field(DesktopEntry.COMMENT.group, DesktopEntry.COMMENT.key, str))
+        app_comment_row = StringRow(self.file, DesktopEntry.COMMENT)
         app_comment_row.add_css_class('app-banner-entry')
 
         self.banner_listbox.append(app_name_row)
