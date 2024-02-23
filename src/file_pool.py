@@ -2,7 +2,7 @@ from os import access, W_OK
 from pathlib import Path
 from dataclasses import dataclass, field
 
-from gi.repository import GObject, GLib
+from gi.repository import GObject, GLib # type: ignore
 
 from .config import *
 
@@ -17,8 +17,7 @@ class FilePool(GObject.Object):
     def __post_init__(self) -> None:
         super().__init__()
 
-        if not all(p.is_dir() for p in self.paths):
-            raise Exception('All paths must be directories')
+        self.paths = [p for p in self.paths if p.is_dir()]
 
     def files(self) -> list[Path]:
         files = []
@@ -57,6 +56,7 @@ class FilePool(GObject.Object):
     @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
     def __doc__(self, _): ...
 
+
 class WritableFilePool(FilePool):
     default_dir: Path = field(init=False)
 
@@ -87,6 +87,12 @@ class WritableFilePool(FilePool):
         for dir in self.paths:
             for f in dir.glob(old_name):
                 f.rename(f.with_name(new_name))
+
+GObject.signal_new('files-loading', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-empty', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('files-error', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('files-loaded', FilePool, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+
 
 USER_POOL = WritableFilePool(
     paths = [

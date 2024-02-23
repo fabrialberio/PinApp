@@ -19,33 +19,50 @@ import sys
 from locale import bindtextdomain, textdomain
 from pathlib import Path
 
-from gi.repository import Gtk, Gio, Adw
+from gi import require_version
 
-from .config import LOCALE_DIR
+require_version('GObject', '2.0')
+require_version('Gio', '2.0')
+require_version('Gtk', '4.0')
+require_version('Gdk', '4.0')
+require_version('Adw', '1')
+require_version('Pango', '1.0')
+
+from gi.repository import Gtk, Gio, Adw, Gdk # type: ignore
+
+from .config import LOCALE_DIR, ICON_PATHS
 from .window import PinAppWindow, WindowPage, WindowTab
 
 bindtextdomain('pinapp', LOCALE_DIR)
 textdomain('pinapp')
 
+theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+paths = theme.get_search_path()
+paths += [str(p) for p in ICON_PATHS]
+
+theme.set_search_path(paths)
+
+
 class PinAppApplication(Adw.Application):
     """The main application singleton class."""
+
+    window: PinAppWindow
 
     def __init__(self):
         super().__init__(
             application_id='io.github.fabrialberio.pinapp',
-            flags=Gio.ApplicationFlags.HANDLES_OPEN)
+            flags=Gio.ApplicationFlags.HANDLES_OPEN
+        )
 
+        self.create_action('exit', self.on_escape, ['Escape'])
         self.create_action('quit', lambda a, _: self.window.do_close_request(), ['<primary>q'])
         self.create_action('about', lambda a, _: self.window.show_about_window())
         self.create_action('search', lambda a, _: self.window.set_search_mode(True), ['<primary>f'])
-        
         self.create_action('reload', lambda a, _: self.window.reload_apps())
         self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])
-        
-        self.create_action('exit', self.on_escape, ['Escape'])
-
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
-        self.window: PinAppWindow = None
+
+        self.window = None
 
     def do_activate(self):
         """Called when the application is activated"""
@@ -53,7 +70,6 @@ class PinAppApplication(Adw.Application):
         self.window.present()
 
     def do_open(self, files, n_files, hint):
-      
         path = Path(files[0].get_path())
 
         self._create_window()

@@ -17,12 +17,14 @@
 
 from pathlib import Path
 from enum import Enum
+from gettext import gettext as _
 
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, GObject # type: ignore
 
 from .config import USER_APPS, new_file_name
-from .desktop_entry import DesktopEntry
+from .desktop_file import DesktopFile
 from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .file_page import FilePage
 from .apps_page import SearchView, PoolStateView, AppListView
 
 
@@ -152,7 +154,7 @@ class PinAppWindow(Adw.ApplicationWindow):
             return
 
         path = new_file_name(USER_APPS, 'pinned-app')
-        file = DesktopEntry.new_with_defaults(path)
+        file = DesktopFile.default(path)
 
         self.file_page.load_file(file)
         self.set_page(WindowPage.FILE_PAGE)

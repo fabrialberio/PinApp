@@ -1,12 +1,14 @@
 from enum import Enum
-
-from gi.repository import Gtk, Adw, Pango
-from xml.sax.saxutils import escape
 from typing import Callable
+from gettext import gettext as _
+
+from gi.repository import Gtk, Adw, Pango, GObject # type: ignore
+from xml.sax.saxutils import escape
 
 from .config import *
 from .file_pool import FilePool, USER_POOL, SYSTEM_POOL
-from .desktop_entry import DesktopEntry
+from .desktop_file import DesktopFile, DesktopEntry
+
 
 def escape_xml(string: str) -> str:
     return escape(string or '')
@@ -79,14 +81,14 @@ class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
     def __init__(self,
-            file: DesktopEntry,
+            file: DesktopFile,
             chips: list[AppChip] = []):
         self.file = file
 
         super().__init__(
-            title = escape_xml(self.file.appsection.Name.as_str()),
+            title = escape_xml(self.file.get(DesktopEntry.NAME, '')),
             title_lines = 1,
-            subtitle = escape_xml(self.file.appsection.Comment.as_str()),
+            subtitle = escape_xml(self.file.get(DesktopEntry.COMMENT, '')),
             subtitle_lines = 1,
             activatable = True,)
 
@@ -95,7 +97,7 @@ class AppRow(Adw.ActionRow):
             margin_top=6,
             margin_bottom=6,
             css_classes=['icon-dropshadow'])
-        set_icon_from_name(icon, file.appsection.Icon.as_str())
+        set_icon_from_name(icon, file.get(DesktopEntry.ICON, ''))
 
         self.add_prefix(icon)
 
@@ -107,13 +109,13 @@ class AppRow(Adw.ActionRow):
             opacity=.6))
 
 
-        if self.file.appsection.NoDisplay.as_bool() == True:
+        if self.file.get(DesktopEntry.NO_DISPLAY, False):
             icon.set_opacity(.2)
-        if self.file.appsection.as_dict().get('X-Flatpak') != None:
+        if self.file.get(DesktopEntry.X_FLATPAK, False):
             self.add_chip(AppChip.Flatpak())
-        if self.file.appsection.as_dict().get('X-SnapInstanceName') != None:
+        if self.file.get(DesktopEntry.X_SNAP_INSTANCE_NAME, False):
             self.add_chip(AppChip.Snap())
-        if self.file.appsection.Terminal.as_bool() == True:
+        if self.file.get(DesktopEntry.TERMINAL, False):
             self.add_chip(AppChip.Terminal())
 
         for c in chips:
@@ -128,7 +130,7 @@ class AppRow(Adw.ActionRow):
     # Used for sorting apps by name in SearchView
     def __lt__(self, other) -> bool:
         if isinstance(other, AppRow):
-            return self.file.__lt__(other.file)
+            return self.file.get(DesktopEntry.NAME, '').lower() < other.get(DesktopEntry.NAME, '').lower()
         else:
             raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
 
@@ -147,8 +149,7 @@ class AppListView(Adw.Bin):
             selection_mode=Gtk.SelectionMode.NONE,
             css_classes=['boxed-list'])
 
-        self._listbox.set_sort_func(lambda a, b:
-                                    (a.file.appsection.Name.as_str() or '') > (b.file.appsection.Name.as_str() or ''))
+        self._listbox.set_sort_func(lambda a, b: a.file.get(DesktopEntry.NAME, '') > b.file.get(DesktopEntry.NAME, ''))
 
         # Wrap listbox in box to allow it to shrink to fit its contents
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -164,7 +165,7 @@ class AppListView(Adw.Bin):
                     margin_end=12,
                     child=box)))
 
-    def update(self, files: list[DesktopEntry]):
+    def update(self, files: list[DesktopFile]):
         # TODO Warning: Accessing a sequence while it is being sorted or searched is not allowed
         self._listbox.remove_all()
 
@@ -228,7 +229,7 @@ class PoolStateView(Gtk.Stack):
 
     def connect_pool(self, pool: FilePool, pool_page: AppListView):
         def _on_files_loaded(_, files: list[Path]):
-            self.pool_page.update([DesktopEntry(f) for f in files])
+            self.pool_page.update([DesktopFile(p) for p in files])
             self.set_state(PoolState.LOADED)
 
         pool.connect('files-loading',
@@ -256,22 +257,21 @@ class SearchView(PoolStateView):
 
     search_entry: Gtk.SearchEntry
     pool_page: AppListView
-    _files: list[DesktopEntry]
+    _files: list[DesktopFile]
 
     def __init__(self) -> None:
         super().__init__()
 
         # Override empty page with a more appropriate one
         self.empty_status_page.set_title(_('No results found'))
-        self.empty_status_page.set_description(
-            _('Try searching for something else'))
         self.empty_status_page.set_icon_name('system-search-symbolic')
+        self.empty_status_page.set_description(_('Try searching for something else'))
 
     def connect_pool(self, pool: FilePool, pool_page: AppListView):
         super().connect_pool(pool, pool_page)
 
         def _on_files_loaded(files):
-            self._files = [DesktopEntry(f) for f in files]
+            self._files = [DesktopFile(p) for p in files]
             self.pool_page.set_filter(lambda r: True)
 
         pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
@@ -290,4 +290,7 @@ class SearchView(PoolStateView):
         self.pool_page.set_filter(lambda r: query.lower() in r.file.search_string)
 
         self.set_state(PoolState.LOADED)
-        
+
+GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('state-changed', PoolStateView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())

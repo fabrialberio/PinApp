@@ -2,7 +2,7 @@ from enum import Enum
 from sys import prefix
 from pathlib import Path
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk # type: ignore
 
 
 class RunningAs(Enum):
