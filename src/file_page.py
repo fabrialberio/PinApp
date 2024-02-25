@@ -9,6 +9,13 @@ from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField
 from .config import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 
 
+def update_pref_group(group: Adw.PreferencesGroup, rows: list[Gtk.Widget]):
+    group.get_first_child().get_last_child().get_first_child().remove_all()
+
+    for row in rows:
+        group.add(row)
+
+
 class BoolRow(Adw.ActionRow):
     __gtype_name__ = 'BoolRow'
 
@@ -25,15 +32,15 @@ class BoolRow(Adw.ActionRow):
         )
         self.add_suffix(switch)
 
-        def on_state_set(self, widget: Gtk.Switch, value: bool):
-            file.set(field, value)
+        def update_field(self, widget: Gtk.Switch):
+            file.set(field, switch.get_active())
 
-        def on_field_set(file: DesktopFile, field_: Field[bool], value: bool):
-            if field_ == field and value != self.get_active():
+        def update_state(file: DesktopFile, field_: Field[bool], value: bool):
+            if field_ == field and value != switch.get_active():
                 switch.set_active(value)
 
-        switch.connect('state-set', on_state_set)
-        file.connect('field-set', on_field_set)
+        switch.connect('state-set', update_field)
+        file.connect('field-set', update_state)
 
 class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
@@ -42,15 +49,17 @@ class StringRow(Adw.EntryRow):
         super().__init__(title=field.key)
         self.set_text(file.get(field, ''))
 
-        def on_changed(widget: StringRow):
-            file.set(field, self.get_text())
-        
-        def on_field_set(file: DesktopFile, field_: Field[str], value: str):
+        def update_field(widget: StringRow, pspec: GObject.ParamSpec):
+            if pspec.name == 'text':
+                print(f'Setting file content of field {field}')
+                file.set(field, self.get_text())
+
+        def update_text(file: DesktopFile, field_: Field[str], value: str):
             if field_ == field and value != self.get_text():
                 self.set_text(value)
 
-        self.connect('changed', on_changed)
-        file.connect('field-set', on_field_set)
+        self.connect('notify', update_field)
+        file.connect('field-set', update_text)
 
     def add_action(self, icon_name: str, callback: Callable[[Gtk.Widget], None]):
         button = Gtk.Button(
@@ -72,20 +81,21 @@ class LocaleStringRow(Adw.EntryRow):
         super().__init__(title=field.key)
 
         self.file = file
-        self.field = field
+        self.field = LocaleField(field.group, field.key, str)
         self.locale = locale
 
         self.set_locale(locale)
 
-        def on_changed(widget: StringRow):
-            self.file.set(self.field.localize(self.locale), self.get_text())
-        
-        def on_field_set(file: DesktopFile, field_: Field[str], value: str):
+        def update_field(widget: StringRow, pspec: GObject.ParamSpec):
+            if pspec.name == 'text':
+                file.set(field, self.get_text())
+
+        def update_text(file: DesktopFile, field_: Field[str], value: str):
             if field_ == field.localize(locale) and value != self.get_text():
                 self.set_text(value)
 
-        self.connect('changed', on_changed)
-        file.connect('field-set', on_field_set)
+        self.connect('notify', update_field)
+        file.connect('field-set', update_text)
 
     def set_locale(self, locale: str):
         self.locale = locale
@@ -95,30 +105,31 @@ class LocaleStringsGroup(Adw.PreferencesGroup):
     __gtype_name__ = 'LocaleStringsGroup'
 
     def __init__(self) -> None:
-        super().__init__(title=_('Localized values'))
+        super().__init__()
+        self.set_title(_('Localized values'))
 
     def set_fields(self, file: DesktopFile, fields: list[LocaleField]):        
-        self.get_first_child().get_last_child().get_first_child().remove_all()
-        
         locales = sorted(list(set([l for f in fields for l in file.locales(f)])))
         
+        if not locales:
+            raise ValueError('Tried to set fields for a group with no locales.')
+
         locale_chooser_row = Adw.ComboRow(
             title=_('Locale'),
             model=Gtk.StringList.new(locales)
         )
         locale_chooser_row.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
+        
+        rows = [LocaleStringRow(file, f, locale_chooser_row.get_selected_item().get_string()) for f in fields]
 
-        rows = [LocaleStringRow(file, f, locale_chooser_row.get_selected_item()) for f in fields]
+        update_pref_group(self, [locale_chooser_row] + rows)
 
-        self.add(locale_chooser_row)
-        for row in rows:
-            self.add(row)
+        def update_rows(widget: LocaleStringsGroup, pspec: GObject.ParamSpec):
+            if pspec.name == 'selected':
+                for row in rows:
+                    row.set_locale(locale_chooser_row.get_selected_item().get_string())
 
-        def update_rows(widget: LocaleStringsGroup, pspec, user_data):
-            for row in rows:
-                row.set_locale(locale_chooser_row.get_selected_item())
-
-        self.connect('notify', update_rows)
+        locale_chooser_row.connect('notify', update_rows)
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
@@ -329,7 +340,7 @@ class FilePage(Adw.BreakpointBin):
             if field.key in [f.key for f in DesktopEntry.fields]:
                 field = next(f for f in DesktopEntry.fields if f.key == field.key)
 
-            if isinstance(field, LocaleField):
+            if isinstance(field, LocaleField) and self.file.locales(field):
                 locale_fields.append(field)
             elif field == DesktopEntry.NAME or field == DesktopEntry.COMMENT:
                 continue
@@ -352,15 +363,8 @@ class FilePage(Adw.BreakpointBin):
         else:
             self.locale_strings_group.set_visible(False)
 
-        self._update_pref_group(
-            pref_group=self.strings_group,
-            new_children=string_rows, 
-            empty_message=_('No string values present'))
-
-        self._update_pref_group(
-            pref_group=self.bools_group, 
-            new_children=bool_rows, 
-            empty_message=_('No boolean values present'))
+        update_pref_group(self.strings_group, string_rows)
+        update_pref_group(self.bools_group, bool_rows)
 
         self._update_window_title()
         self._update_app_banner()
@@ -465,30 +469,6 @@ class FilePage(Adw.BreakpointBin):
         add_key_dialog.connect('response', callback)
         add_key_dialog.set_transient_for(self.get_root())
         add_key_dialog.present()
-
-    def _update_pref_group(self, pref_group: Adw.PreferencesGroup, new_children: list[Gtk.Widget], empty_message: 'str | None'=None):
-        '''Removes all present children of the group and adds the new ones'''
-
-        listbox = (
-            pref_group
-            .get_first_child()  # Main group GtkBox
-            .get_last_child()   # GtkBox containing the listbox
-            .get_first_child()) # GtkListbox
-
-        if listbox != None:
-            while (row := listbox.get_first_child()) != None:
-                pref_group.remove(row)
-
-        if len(new_children) > 0:
-            for c in new_children:
-                pref_group.add(c)
-        elif empty_message != None:
-            pref_group.add(Adw.ActionRow(
-                title=empty_message,
-                title_lines=1,
-                css_classes=['dim-label'],
-                halign=Gtk.Align.CENTER,
-            ))
 
 GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
