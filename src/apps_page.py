@@ -287,7 +287,7 @@ class SearchView(PoolStateView):
 
         self.set_state(PoolState.LOADING)
 
-        self.pool_page.set_filter(lambda r: query.lower() in r.file.search_string)
+        self.pool_page.set_filter(lambda r: query.lower() in r.file.search_str)
 
         self.set_state(PoolState.LOADED)
 
