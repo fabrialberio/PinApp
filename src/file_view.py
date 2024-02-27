@@ -213,7 +213,11 @@ class FileView(Adw.BreakpointBin):
         self.name_row.set_field(self.file, DesktopEntry.NAME)
         self.comment_row.set_field(self.file, DesktopEntry.COMMENT)
 
-        rows: list[FieldRow] = []
+        def update_icon(row: StringRow):
+            print('update_icon', self.icon_row.get_text())
+            set_icon_from_name(self.icon, self.icon_row.get_text())
+
+        self.icon_row.connect('changed', update_icon)
 
         for field in self.file.fields(DesktopEntry.group):
             if field in [DesktopEntry.ICON, DesktopEntry.NAME, DesktopEntry.COMMENT]:
@@ -224,7 +228,7 @@ class FileView(Adw.BreakpointBin):
 
             if field._type == bool:
                 row = BoolRow()
-                row.set_field(self.file, field)
+                row.set_field(self.file, field) # type: ignore
             elif isinstance(field, LocaleField):
                 row = LocaleStringRow()
                 row.set_field(self.file, LocaleField(field.group, field.key, str))
