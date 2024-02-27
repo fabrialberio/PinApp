@@ -26,6 +26,7 @@ pinapp_sources = [
   'desktop_file.py',
   'file_page.py',
   'file_pool.py',
+  'file_view.py',
   'main.py',
   'window.py',
 ]
