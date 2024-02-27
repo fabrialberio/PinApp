@@ -31,9 +31,8 @@ class Field(Generic[FT]):
         return self.group == other.group and self.key == other.key
 
 class LocaleField(Field[LT]):
-    def localize(self, locale: str) -> 'Field[LT]':
+    def localize(self, locale: Optional[str]) -> 'Field[LT]':
         return Field[LT](self.group, join_key_locale(self.key, locale), self._type)
-
 
 class DesktopEntry:
     '''https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s06.html'''
@@ -66,15 +65,16 @@ class DesktopEntry:
     KEYWORDS =      LocaleField[list[str]](group, 'Keywords', list[str])
     GENERIC_NAME =  LocaleField[str](group, 'GenericName', str)
     X_FLATPAK =             Field[str](group, 'X-Flatpak', str)
-    XGNOME_AUTOSTART =      Field[bool](group, 'X-GNOME-Autostart', bool)
     X_SNAP_INSTANCE_NAME =  Field[str](group, 'X-SnapInstanceName', str)
+    XGNOME_AUTOSTART =              Field[bool](group, 'X-GNOME-Autostart', bool)
+    X_GNOME_USES_NOTIFICATIONS =    Field[bool](group, 'X-GNOME-UsesNotifications', bool)
 
     fields: list[Field | LocaleField] = [
         HIDDEN, TERMINAL, NO_DISPLAY, STARTUP_NOTIFY, D_BUS_ACTIVATABLE,
         SINGLE_MAIN_WINDOW, PREFERS_NON_DEFAULT_GPU, URL, TYPE, EXEC, ICON, PATH,
         VERSION, TRY_EXEC, STARTUP_WM_CLASS, ACTIONS, MIME_TYPE, CATEGORIES,
-        IMPLEMENTS, NOT_SHOW_IN, ONLY_SHOW_IN, NAME, COMMENT, KEYWORDS,
-        GENERIC_NAME, X_FLATPAK, XGNOME_AUTOSTART, X_SNAP_INSTANCE_NAME
+        IMPLEMENTS, NOT_SHOW_IN, ONLY_SHOW_IN, NAME, COMMENT, KEYWORDS, GENERIC_NAME,
+        X_FLATPAK, XGNOME_AUTOSTART, X_SNAP_INSTANCE_NAME, X_GNOME_USES_NOTIFICATIONS
     ]
     
 
@@ -139,8 +139,9 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
-    def set(self, field: Field[FT], value: FT) -> None:
-        self.emit('field-set', field, value)
+    def set(self, field: Field[FT], value: FT, emit=True) -> None:
+        if emit:
+            self.emit('field-set', field, value)
 
         if field._type == bool:
             self._key_file.set_boolean(field.group, field.key, value)
@@ -151,7 +152,10 @@ class DesktopFile(GObject.Object):
         else:
             raise ValueError(f'Unsupported field type: "{field._type}"')
 
-    def remove(self, field: Field) -> None:
+    def remove(self, field: Field, emit=True) -> None:
+        if emit:
+            self.emit('field-removed', field)
+
         self._key_file.remove_key(field.group, field.key)
 
     def locales(self, field: LocaleField[LT]) -> list[str]:
@@ -189,3 +193,4 @@ class DesktopFile(GObject.Object):
     def __doc__(self, _): ...
 
 GObject.signal_new('field-set', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
+GObject.signal_new('field-removed', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
