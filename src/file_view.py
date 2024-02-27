@@ -66,33 +66,115 @@ class StringRow(Adw.EntryRow):
         self.connect('changed', update_field)
         file.connect('field-set', update_text)
 
+class LocaleButton(Gtk.MenuButton):
+    __gtype_name__ = 'LocaleSelectButton'
+
+    selected: Optional[str] = None
+
+    def __init__(self, file: DesktopFile, field: LocaleField[str]) -> None:
+        button_content = Adw.ButtonContent(
+            icon_name='preferences-desktop-locale-symbolic'
+        )
+        popover = Gtk.Popover()
+        popover.add_css_class('menu')
+
+        super().__init__(
+            valign=Gtk.Align.CENTER,
+            child=button_content,
+            popover=popover,
+        )
+        self.add_css_class('flat')
+
+        UNLOCALIZED_STR = _('(Unlocalized)')
+        items = [UNLOCALIZED_STR] + file.locales(field)
+
+        def setup_item(factory: Gtk.SignalListItemFactory, item: Gtk.ListItem):
+            child = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            child.append(Gtk.Label(
+                max_width_chars=20,
+                valign=Gtk.Align.CENTER
+            ))
+            child.append(Gtk.Image(icon_name='object-select-symbolic'))
+            item.set_child(child)
+
+        def bind_item(factory: Gtk.SignalListItemFactory, item: Gtk.ListItem):
+            label = item.get_child().get_first_child()
+            label.set_label(item.get_item().get_string())
+
+            icon = item.get_child().get_last_child()
+            locale = item.get_item().get_string() 
+
+            if locale == self.selected or (self.selected == None and locale == UNLOCALIZED_STR):
+                icon.set_visible(True)
+            else:
+                icon.set_visible(False)
+
+            def update_icon(widget: LocaleButton, selected: Optional[str]):
+                icon.set_visible(locale == selected or (selected == None and locale == UNLOCALIZED_STR))
+
+            self.connect('changed', update_icon)
+
+        factory = Gtk.SignalListItemFactory()
+        factory.connect('setup', setup_item)
+        factory.connect('bind', bind_item)
+
+        def item_selected(list_view: Gtk.ListView, index: int):
+            self.set_selected(items[index] if index > 0 else None)
+            popover.popdown()
+
+        list_view = Gtk.ListView(
+            single_click_activate=True,
+            model=Gtk.SingleSelection.new(Gtk.StringList.new(items)),
+            factory=factory
+        )
+        list_view.connect('activate', item_selected)
+
+        popover.set_child(Gtk.ScrolledWindow(
+            hscrollbar_policy=Gtk.PolicyType.NEVER,
+            max_content_height=400,
+            propagate_natural_width=True,
+            propagate_natural_height=True,
+            child=list_view
+        ))
+
+        def update_label(widget: LocaleButton, selected: Optional[str]):
+            if selected is not None:
+                button_content.set_label(selected)
+            else:
+                button_content.set_label('')
+
+        self.connect('changed', update_label)
+
+    def set_selected(self, locale: Optional[str]):
+        self.selected = locale
+        self.emit('changed', locale)
+
+GObject.signal_new('changed', LocaleButton, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))
+
 class LocaleStringRow(Adw.EntryRow):
     __gtype_name__ = 'LocaleStringRow'
 
     file: DesktopFile
     field: LocaleField[str]
     locale: Optional[str] = None
-    locale_select: Gtk.MenuButton
 
     def __init__(self) -> None:
         super().__init__()
-
-        self.locale_select = Gtk.MenuButton(
-            icon_name='preferences-desktop-locale-symbolic'
-        )
-        self.add_suffix(self.locale_select)
 
     def set_field(self, file: DesktopFile, field: LocaleField[str]) -> None:
         self.set_title(field.key)
 
         self.file = file
         self.field = LocaleField(field.group, field.key, str)
-        #self.locale_select.set_popover(Gtk.PopoverMenu.new_from_model())
+
+        locale_select = LocaleButton(file, field)
+        locale_select.connect('changed', lambda w, l: self.set_locale(l))
+        self.add_suffix(locale_select)
 
         self.set_locale(None)
 
         def update_field(widget: StringRow):
-            file.set(self.field, self.get_text(), emit=False)
+            file.set(self.field.localize(self.locale), self.get_text(), emit=False)
 
         def update_text(file: DesktopFile, field_: Field[str], value: str):
             if field_ == self.field.localize(self.locale) and value != self.get_text():
@@ -103,42 +185,8 @@ class LocaleStringRow(Adw.EntryRow):
 
     def set_locale(self, locale: Optional[str]):
         self.locale = locale
-        self.set_title(self.field.localize(locale).key) 
         self.set_text(self.file.get(self.field.localize(locale), ''))
 
-class LocaleStringsGroup(Adw.PreferencesGroup):
-    __gtype_name__ = 'LocaleStringsGroup'
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.set_title(_('Localized values'))
-
-    def set_fields(self, file: DesktopFile, fields: list[LocaleField]):        
-        locales = sorted(list(set([l for f in fields for l in file.locales(f)])))
-        
-        if not locales:
-            raise ValueError('Tried to set fields for a group with no locales.')
-
-        locale_chooser_row = Adw.ComboRow(
-            title=_('Locale'),
-            model=Gtk.StringList.new(locales)
-        )
-        locale_chooser_row.add_prefix(Gtk.Image(icon_name='preferences-desktop-locale-symbolic'))
-        
-        rows = []
-        for f in fields:
-            row = LocaleStringRow()
-            row.set_field(file, f, locale_chooser_row.get_selected_item().get_string())
-            rows.append(row)
-
-        update_pref_group(self, [locale_chooser_row] + rows)
-
-        def update_rows(widget: LocaleStringsGroup, pspec: GObject.ParamSpec):
-            if pspec.name == 'selected':
-                for row in rows:
-                    row.set_locale(locale_chooser_row.get_selected_item().get_string())
-
-        locale_chooser_row.connect('notify', update_rows)
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Adw.BreakpointBin):
