@@ -62,54 +62,6 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkBox' id='pills_box'>
-                    <property name='orientation'>horizontal</property>
-                    <property name='spacing'>6</property>
-                    <child>
-                      <object class='GtkToggleButton' id='hidden_pill'>
-                        <property name='hexpand'>true</property>
-                        <style>
-                          <class name='pill' />
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>view-conceal-symbolic</property>
-                            <property name='label' translatable='yes'>Hidden</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class='GtkToggleButton' id='autostart_pill'>
-                        <property name='hexpand'>true</property>
-                        <style>
-                          <class name='pill' />
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>software-update-available-symbolic</property>
-                            <property name='label' translatable='yes'>Autostart</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class='GtkToggleButton' id='terminal_pill'>
-                        <property name='hexpand'>true</property>
-                        <style>
-                          <class name='pill' />
-                        </style>
-                        <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>utilities-terminal-symbolic</property>
-                            <property name='label' translatable='yes'>Terminal</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
                   <object class='AdwPreferencesGroup' id='values_group'>
                     <child>
                       <object class='StringRow' id='icon_row'>
@@ -150,7 +102,6 @@
       <object class="AdwBreakpoint" id='compact_breakpoint'>
         <condition>max-width: 520sp</condition>
         <setter object="banner_box" property="orientation">vertical</setter>
-        <setter object="pills_box" property="orientation">vertical</setter>
         <setter object="icon" property="margin-end">0</setter>
         <setter object="icon" property="margin-bottom">24</setter>
         <setter object="icon" property="pixel-size">96</setter>
