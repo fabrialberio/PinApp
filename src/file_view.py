@@ -3,7 +3,7 @@ from gettext import gettext as _
 
 from gi.repository import Adw, Gtk, GObject # type: ignore
 
-from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField
+from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField, split_key_locale
 from .config import set_icon_from_name
 
 
@@ -45,6 +45,8 @@ class BoolRow(Adw.ActionRow):
 
         self.switch.connect('state-set', update_field)
         file.connect('field-set', update_state)
+
+    # TODO: add remove_field
 
 class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
@@ -99,7 +101,6 @@ class StringRow(Adw.EntryRow):
             self.remove_button.set_visible(not self.get_text())
         else:
             self.remove_button.set_visible(False)
-
 
 class LocaleButton(Gtk.MenuButton):
     __gtype_name__ = 'LocaleSelectButton'
@@ -199,8 +200,8 @@ class LocaleStringRow(StringRow):
         self.locale_select.connect('changed', lambda w, l: self.set_locale(l))
         self.add_suffix(self.locale_select)
 
-    def set_field(self, file: DesktopFile, field: LocaleField) -> None:
-        self.locale_field = LocaleField(field.group, field.key, str)
+    def set_field(self, file: DesktopFile, field: LocaleField[str]) -> None:
+        self.locale_field = field
         
         super().set_field(file, field.localize(None))
         self.locale_select.set_field(file, field)
@@ -229,24 +230,57 @@ class LocaleStringRow(StringRow):
         else:
             self.remove_button.set_visible(False)
 
+
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/dialog_add_field.ui')
 class AddFieldDialog(Adw.MessageDialog):
     __gtype_name__ = 'AddFieldDialog'
 
     type_combo_row: Adw.ComboRow = Gtk.Template.Child()
-    locale_entry = Gtk.Template.Child()
     key_entry = Gtk.Template.Child()
+    locale_entry = Gtk.Template.Child()
 
     def __init__(self):
         super().__init__()
 
-        self.type_combo_row.connect('notify::selected', print)
+        def on_type_selected(row: Adw.ComboRow, pspec: GObject.ParamSpec):
+            self.locale_entry.set_visible(self.type_combo_row.get_selected() == 2)
+
+        def update_response_enabled(widget: AddFieldDialog):
+            enabled = bool(self.key_entry.get_text())
+            
+            if self.type_combo_row.get_selected() == 2:
+                enabled = enabled and bool(self.locale_entry.get_text())
+
+            self.set_response_enabled('add', enabled)
+
+        def on_response(widget: AddFieldDialog, resp: str):
+            if resp == 'add':
+                key = self.key_entry.get_text()
+
+                if self.type_combo_row.get_selected() == 0:
+                    self.emit('add', Field(DesktopEntry.group, key, bool), None)
+                elif self.type_combo_row.get_selected() == 1:
+                    self.emit('add', Field(DesktopEntry.group, key, str), None)
+                else:
+                    self.emit(
+                        'add',
+                        LocaleField(DesktopEntry.group, key, str),
+                        self.locale_entry.get_text()
+                    )
+
+        self.type_combo_row.connect('notify::selected', on_type_selected)
+        self.key_entry.connect('changed', update_response_enabled)
+        self.locale_entry.connect('changed', update_response_enabled)
+        self.connect('response', on_response)
+
+GObject.signal_new('add', AddFieldDialog, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,GObject.TYPE_PYOBJECT,))
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Adw.BreakpointBin):
     __gtype_name__ = 'FileView'
 
     file: DesktopFile
+    field_row_map: dict[Field, FieldRow] = {}
 
     scrolled_window: Gtk.ScrolledWindow = Gtk.Template.Child()
     compact_breakpoint: Adw.Breakpoint = Gtk.Template.Child()
@@ -257,9 +291,16 @@ class FileView(Adw.BreakpointBin):
     values_group: Adw.PreferencesGroup = Gtk.Template.Child()
     add_field_button: Gtk.Button = Gtk.Template.Child()
 
-    def __init__(self, file: DesktopFile):
+    def __init__(self):
         super().__init__()
 
+        def update_icon(row: StringRow):
+            set_icon_from_name(self.icon, self.icon_row.get_text())
+
+        self.icon_row.connect('changed', update_icon)
+        self.add_field_button.connect('clicked', lambda b: self.show_add_field_dialog())
+        
+    def set_file(self, file: DesktopFile):
         self.file = file
 
         set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, ''))
@@ -268,11 +309,6 @@ class FileView(Adw.BreakpointBin):
         self.name_row.set_field(self.file, DesktopEntry.NAME)
         self.comment_row.set_field(self.file, DesktopEntry.COMMENT)
 
-        def update_icon(row: StringRow):
-            set_icon_from_name(self.icon, self.icon_row.get_text())
-
-        self.icon_row.connect('changed', update_icon)
-
         for field in self.file.fields(DesktopEntry.group):
             if field in [DesktopEntry.ICON, DesktopEntry.NAME, DesktopEntry.COMMENT]:
                 continue
@@ -280,6 +316,18 @@ class FileView(Adw.BreakpointBin):
             if field in DesktopEntry.fields:
                 field = next(f for f in DesktopEntry.fields if f == field)
 
+            self.add_field(field)
+
+    def add_field(self, field: Field):
+        if field in self.field_row_map.keys():
+            ... #self.set_file(self.file)
+        elif field.unlocalized() in self.field_row_map.keys():
+            ukey, locale = split_key_locale(field.key)
+
+            row: LocaleStringRow = self.field_row_map[field.unlocalized()] # type: ignore
+            row.set_field(self.file, LocaleField(field.group, ukey, field._type))
+            row.set_locale(locale)
+        else:
             if field._type == bool:
                 row = BoolRow()
                 row.set_field(self.file, field) # type: ignore
@@ -288,50 +336,24 @@ class FileView(Adw.BreakpointBin):
                 row.set_field(self.file, LocaleField(field.group, field.key, str))
             else:
                 row = StringRow()
+                row.set_field(self.file, Field(field.group, field.key, str))
 
                 if field == DesktopEntry.TYPE:
                     row.removable = False
-
-                row.set_field(self.file, Field(field.group, field.key, str))
-
-            self.values_group.add(row)
-
-        def on_add_field(button: Gtk.Button):
-            self.show_add_field_dialog()
-
-        self.add_field_button.connect('clicked', on_add_field)
+            
+            self.field_row_map[field] = row
+            self.values_group.add(row)        
 
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()
+
+        def add_field(widget: AddFieldDialog, field: Field, locale: str):
+            if isinstance(field, LocaleField):
+                field = field.localize(locale)
+            
+            self.file.set(field, field.default_value())
+            self.set_file(self.file)
+
+        dialog.connect('add', add_field)
         dialog.set_transient_for(self.get_root())
         dialog.present()
-
-        return
-        if is_localized:
-            locale = self.locale_chooser_row.get_locale()
-            locale_entry.set_visible(True)
-            locale_entry.set_text(locale)
-
-        key_entry.connect('changed', lambda _: dialog.set_response_enabled(
-            'add', 
-            bool(key_entry.get_text())))
-
-        def callback(widget, resp):
-            if resp == 'add':
-                group = DesktopEntry.group
-                key = key_entry.get_text()
-                
-                if is_bool:
-                    self.file.set(Field(group, key, bool), False)
-                else:
-                    if is_localized:
-                        self.file.set(LocaleField(group, key, str).localize(locale_entry.get_text()))
-                    else:
-                        self.file.set(Field(group, key, str), '')
-
-                self.REMOVEMEupdate_page()
-
-        dialog.connect('response', callback)
-
-    def remove_field(self, field: Field):
-        ...

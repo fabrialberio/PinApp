@@ -172,7 +172,8 @@ class FilePage(Adw.Bin):
         self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
 
-        file_view = FileView(file)
+        file_view = FileView()
+        file_view.set_file(file)
         self.toolbar_view.set_content(file_view)
         self.window_title.set_title(self.file.get(DesktopEntry.NAME, ''))
         

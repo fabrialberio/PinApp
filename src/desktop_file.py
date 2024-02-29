@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Generic, Optional, Type, TypeVar, get_origin, get_args
+from typing import Generic, Optional, Type, TypeVar
 
 from gi.repository import GObject, GLib # type: ignore
 
@@ -21,14 +21,23 @@ FT = TypeVar('FT', bool, str, list[str])
 LT = TypeVar("LT", str, list[str])
 DT = TypeVar('DT')
 
-@dataclass(frozen=True, eq=False)
+@dataclass(frozen=True, eq=False, unsafe_hash=False)
 class Field(Generic[FT]):
     group: str
     key: str
     _type: Type[FT]
 
+    def default_value(self) -> FT:
+        return self._type()
+
+    def unlocalized(self) -> 'Field[FT]':
+        return Field[FT](self.group, split_key_locale(self.key)[0], self._type)
+
     def __eq__(self, other: 'Field | LocaleField'):
         return self.group == other.group and self.key == other.key
+
+    def __hash__(self):
+        return hash((self.group, self.key))
 
 class LocaleField(Field[LT]):
     def localize(self, locale: Optional[str]) -> 'Field[LT]':
@@ -122,8 +131,6 @@ class DesktopFile(GObject.Object):
         self.save_as(self.path)
 
     def __getitem__(self, field: Field[FT]) -> FT:
-        ukey = split_key_locale(field.key)[0]
-
         if field._type == bool:
             return self._key_file.get_boolean(field.group, field.key)
         if field._type == str:
