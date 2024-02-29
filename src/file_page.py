@@ -14,17 +14,18 @@ from .config import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
 class FilePage(Adw.Bin):
     __gtype_name__ = 'FilePage'
 
-    window_title = Gtk.Template.Child('window_title')
-    header_bar = Gtk.Template.Child('header_bar')
-    back_button = Gtk.Template.Child('back_button')
-    pin_button = Gtk.Template.Child('pin_button')
+    window_title = Gtk.Template.Child()
+    header_bar = Gtk.Template.Child()
+    back_button = Gtk.Template.Child()
+    pin_button = Gtk.Template.Child()
 
-    file_menu_button = Gtk.Template.Child('file_menu_button')
-    unpin_button = Gtk.Template.Child('unpin_button')
-    rename_button = Gtk.Template.Child('rename_button')
-    duplicate_button = Gtk.Template.Child('duplicate_button')
+    file_menu_button = Gtk.Template.Child()
+    unpin_button = Gtk.Template.Child()
+    rename_button = Gtk.Template.Child()
+    duplicate_button = Gtk.Template.Child()
 
-    toolbar_view = Gtk.Template.Child('toolbar_view')
+    toolbar_view = Gtk.Template.Child()
+    file_view: Optional[FileView]
     
     banner_expanded = True
     file: DesktopFile
@@ -47,8 +48,6 @@ class FilePage(Adw.Bin):
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
         self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
-
-        #self.scrolled_window.get_vadjustment().connect('value-changed', lambda _: self._update_window_title())
 
     def pin_file(self):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
@@ -173,20 +172,21 @@ class FilePage(Adw.Bin):
         self.duplicate_button.set_sensitive(self.file.path.exists())
         self.unpin_button.set_sensitive(self.file.path.exists())
 
-        self.toolbar_view.set_content(FileView(file))
+        file_view = FileView(file)
+        self.toolbar_view.set_content(file_view)
+        self.window_title.set_title(self.file.get(DesktopEntry.NAME, ''))
+        
+        def update_title_visible(adjustment: Gtk.Adjustment):
+            self.header_bar.set_show_title(adjustment.get_value() > 0)
 
-    def _update_window_title(self):
-        return
-        if self.REMOVEMEscrolled_window.get_vadjustment().get_value() > 0:
-            self.header_bar.set_show_title(True)
-            self.window_title.set_title(self.file.get(DesktopEntry.NAME, ''))
-        else:
-            self.header_bar.set_show_title(False)
+        def update_title_text(file: DesktopFile, field: Field[str], value: str):
+            if field == DesktopEntry.NAME:
+                self.window_title.set_title(value)
+
+        file_view.scrolled_window.get_vadjustment().connect('value-changed', update_title_visible)
+        file.connect('field-set', update_title_text)
 
     """
-    def REMOVEME_update_icon(self):
-        set_icon_from_name(self.REMOVEMEapp_icon, self.file.get(DesktopEntry.ICON, ''))
-
     def _upload_icon(self):
         def callback(dialog, response):
             if response == Gtk.ResponseType.ACCEPT:
