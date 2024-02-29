@@ -139,10 +139,7 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
-    def set(self, field: Field[FT], value: FT, emit=True) -> None:
-        if emit:
-            self.emit('field-set', field, value)
-
+    def set(self, field: Field[FT], value: FT) -> None:
         if field._type == bool:
             self._key_file.set_boolean(field.group, field.key, value)
         elif field._type == str:
@@ -152,11 +149,11 @@ class DesktopFile(GObject.Object):
         else:
             raise ValueError(f'Unsupported field type: "{field._type}"')
 
-    def remove(self, field: Field, emit=True) -> None:
-        if emit:
-            self.emit('field-removed', field)
+        self.emit('field-set', field, value)
 
+    def remove(self, field: Field) -> None:
         self._key_file.remove_key(field.group, field.key)
+        self.emit('field-removed', field)
 
     def locales(self, field: LocaleField[LT]) -> list[str]:
         return [
@@ -192,5 +189,5 @@ class DesktopFile(GObject.Object):
     @__doc__.setter # Added to avoid clash when dataclass tries to set __doc__ of GObject.Object
     def __doc__(self, _): ...
 
-GObject.signal_new('field-set', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
-GObject.signal_new('field-removed', DesktopFile, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('field-set', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
+GObject.signal_new('field-removed', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))
