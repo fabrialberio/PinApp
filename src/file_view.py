@@ -150,14 +150,10 @@ class LocaleButton(Gtk.MenuButton):
             icon = item.get_child().get_last_child()
             locale = item.get_item().get_string() 
 
-            if locale == self.selected or (self.selected == None and locale == UNLOCALIZED_STR):
-                icon.set_visible(True)
-            else:
-                icon.set_visible(False)
-
             def update_icon(widget: LocaleButton, selected: Optional[str]):
-                icon.set_visible(locale == selected or (selected == None and locale == UNLOCALIZED_STR))
+                icon.set_opacity(locale == selected or (selected == None and locale == UNLOCALIZED_STR))
 
+            update_icon(self, self.selected)
             self.connect('changed', update_icon)
 
         factory = Gtk.SignalListItemFactory()
@@ -204,10 +200,10 @@ class LocaleStringRow(StringRow):
         self.add_suffix(self.locale_select)
 
     def set_field(self, file: DesktopFile, field: LocaleField) -> None:
+        self.locale_field = LocaleField(field.group, field.key, str)
+        
         super().set_field(file, field.localize(None))
         self.locale_select.set_field(file, field)
-
-        self.locale_field = LocaleField(field.group, field.key, str)
         self.set_locale(None)
 
     def set_locale(self, locale: Optional[str]):
@@ -233,14 +229,27 @@ class LocaleStringRow(StringRow):
         else:
             self.remove_button.set_visible(False)
 
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/dialog_add_field.ui')
+class AddFieldDialog(Adw.MessageDialog):
+    __gtype_name__ = 'AddFieldDialog'
+
+    type_combo_row: Adw.ComboRow = Gtk.Template.Child()
+    locale_entry = Gtk.Template.Child()
+    key_entry = Gtk.Template.Child()
+
+    def __init__(self):
+        super().__init__()
+
+        self.type_combo_row.connect('notify::selected', print)
+
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_view.ui')
 class FileView(Adw.BreakpointBin):
     __gtype_name__ = 'FileView'
 
     file: DesktopFile
 
-    scrolled_window = Gtk.Template.Child()
-    compact_breakpoint = Gtk.Template.Child()
+    scrolled_window: Gtk.ScrolledWindow = Gtk.Template.Child()
+    compact_breakpoint: Adw.Breakpoint = Gtk.Template.Child()
     icon: Gtk.Image = Gtk.Template.Child()
     name_row: LocaleStringRow = Gtk.Template.Child()
     comment_row: LocaleStringRow = Gtk.Template.Child()
@@ -293,19 +302,17 @@ class FileView(Adw.BreakpointBin):
         self.add_field_button.connect('clicked', on_add_field)
 
     def show_add_field_dialog(self):
+        dialog = AddFieldDialog()
+        dialog.set_transient_for(self.get_root())
+        dialog.present()
+
         return
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
-
-        add_key_dialog = builder.get_object('add_key_dialog')
-        locale_entry = builder.get_object('locale_entry')
-        key_entry = builder.get_object('key_entry')
-
         if is_localized:
             locale = self.locale_chooser_row.get_locale()
             locale_entry.set_visible(True)
             locale_entry.set_text(locale)
 
-        key_entry.connect('changed', lambda _: add_key_dialog.set_response_enabled(
+        key_entry.connect('changed', lambda _: dialog.set_response_enabled(
             'add', 
             bool(key_entry.get_text())))
 
@@ -324,9 +331,7 @@ class FileView(Adw.BreakpointBin):
 
                 self.REMOVEMEupdate_page()
 
-        add_key_dialog.connect('response', callback)
-        add_key_dialog.set_transient_for(self.get_root())
-        add_key_dialog.present()
+        dialog.connect('response', callback)
 
     def remove_field(self, field: Field):
         ...

@@ -1,31 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <object class='AdwMessageDialog' id='add_key_dialog'>
-    <property name='width-request'>400</property>
-    <property name='heading' translatable='yes'>Add new key</property>
-    <property name='default-response'>add</property>
-    <property name='close-response'>cancel</property>
-    <property name='extra-child'>
-      <object class='AdwPreferencesGroup'>
-        <child>
-          <object class='AdwEntryRow' id='locale_entry'>
-            <property name='title' translatable='yes'>Locale</property>
-            <property name='visible'>false</property>
-          </object>
-        </child>
-        <child>
-          <object class='AdwEntryRow' id='key_entry'>
-            <property name='title' translatable='yes'>Key name</property>
-          </object>
-        </child>
-      </object>
-    </property>
-    <responses>
-      <response id='cancel' translatable='yes'>Cancel</response>
-      <response id='add' appearance='suggested' enabled='false' translatable='yes'>Add</response>
-    </responses>
-  </object>
-
   <object class='AdwMessageDialog' id='confirm_delete_dialog'>
     <property name='heading' translatable='yes'>Unpin this app?</property>
     <property name='body' translatable='yes'>If you unpin an app, your changes will be permanently lost.</property>
