@@ -43,6 +43,7 @@
                           <object class='LocaleStringRow' id='name_row'>
                             <property name='margin-bottom'>6</property>
                             <property name='height-request'>64</property>
+                            <property name='removable'>false</property>
                             <style>
                               <class name='app-banner-entry' />
                               <!-- TODO: This should become title-2-row when breakpoint is applied -->
@@ -52,6 +53,7 @@
                         </child>
                         <child>
                           <object class='LocaleStringRow' id='comment_row'>
+                            <property name='removable'>false</property>
                             <style>
                               <class name='app-banner-entry' />
                             </style>
@@ -79,7 +81,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkButton' id='add_value_button'>
+                  <object class='GtkButton' id='add_field_button'>
                     <property name='halign'>center</property>
                     <style>
                       <class name='pill' />
