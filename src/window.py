@@ -19,7 +19,7 @@ from pathlib import Path
 from enum import Enum
 from gettext import gettext as _
 
-from gi.repository import Gtk, Adw # type: ignore
+from gi.repository import Gtk, Adw, GLib # type: ignore
 
 from .config import USER_APPS, new_file_name
 from .desktop_file import DesktopFile, DesktopEntry
@@ -153,8 +153,10 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.current_page() != WindowPage.APPS_PAGE:
             return
 
-        path = new_file_name(USER_APPS, 'pinned-app')
-        file = DesktopFile()
+        tmp_path = Path(GLib.get_tmp_dir()) / 'pinned-app'
+        tmp_path.touch()
+
+        file = DesktopFile(tmp_path)
         file.set(DesktopEntry.NAME, _('New application'))
         file.set(DesktopEntry.TYPE, 'Application')
         file.set(DesktopEntry.EXEC, DesktopEntry.EXEC.default_value())

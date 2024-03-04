@@ -56,7 +56,7 @@ class FilePage(Adw.Bin):
         is_new_file = not self.file.path.exists()
         pinned_path: Path = new_file_name(USER_APPS, self.file.path.stem)
 
-        self.file.save_as(pinned_path)
+        self.file.save(pinned_path)
         self.emit('file-changed')
 
         if is_new_file:
@@ -159,8 +159,7 @@ class FilePage(Adw.Bin):
         self.emit('file-changed')
 
     def load_path(self, path: Path):
-        file = DesktopFile()
-        file.load(path)
+        file = DesktopFile(path)
         self.load_file(file)
 
     def load_file(self, file: DesktopFile):

@@ -112,20 +112,16 @@ class DesktopFile(GObject.Object):
     path: Path
     fields: Gio.ListStore
     search_str: str
-    _saved_hash: int
     _key_file: GLib.KeyFile
+    _saved_hash: int
 
-    def __init__(self):
+    def __init__(self, path: Path):
         super().__init__()
 
-        self.fields = Gio.ListStore.new(GObject.TYPE_OBJECT)
-        self._key_file = GLib.KeyFile.new()
-
-    def edited(self) -> bool:
-        return self._saved_hash != hash(self)
-
-    def load(self, path: Path):
         self.path = path
+        self.fields = Gio.ListStore.new(GObject.TYPE_OBJECT)
+
+        self._key_file = GLib.KeyFile.new()
         self._key_file.load_from_file(
             str(path),
             GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
@@ -139,8 +135,11 @@ class DesktopFile(GObject.Object):
                 field = next((f for f in DesktopEntry.fields if f == field), field)
                 self._add_to_model(field)
 
-    def save(self, path: Path):
-        with path.open('w') as f:
+    def edited(self) -> bool:
+        return self._saved_hash != hash(self)
+
+    def save(self):
+        with self.path.open('w') as f:
             f.write(self._key_file.to_data()[0])
         
         self._saved_hash = hash(self)
@@ -190,7 +189,6 @@ class DesktopFile(GObject.Object):
         )
 
     def _add_to_model(self, field):
-        field = field.localize(None)
         found, index = self._find_in_model(field)
 
         if found:

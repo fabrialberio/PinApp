@@ -229,12 +229,7 @@ class PoolStateView(Gtk.Stack):
 
     def connect_pool(self, pool: FilePool, pool_page: AppListView):
         def _on_files_loaded(_, paths: list[Path]):
-            files = []
-
-            for p in paths:
-                file = DesktopFile()
-                file.load(p)
-                files.append(file)
+            files = [DesktopFile(p) for p in paths]
 
             self.pool_page.update(files)
             self.set_state(PoolState.LOADED)
@@ -277,14 +272,8 @@ class SearchView(PoolStateView):
     def connect_pool(self, pool: FilePool, pool_page: AppListView):
         super().connect_pool(pool, pool_page)
 
-        def _on_files_loaded(files):
-            self._files = []
-
-            for p in files:
-                file = DesktopFile()
-                file.load(p)
-                self._files.append(file)
-
+        def _on_files_loaded(paths):
+            self._files = [DesktopFile(p) for p in paths]
             self.pool_page.set_filter(lambda r: True)
 
         pool.connect('files-loaded', lambda _, files: _on_files_loaded(files))
