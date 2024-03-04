@@ -67,7 +67,7 @@ class WritableFilePool(FilePool):
 
         self.default_dir = self.paths[0]
 
-    def new_file_path(self, name: str, suffix: str, separator = '-') -> Path:
+    def new_file_path(self, name: str, suffix: str = '.desktop', separator = '-') -> Path:
         other_files = list(self.default_dir.glob(f'{name}*{suffix}'))
         other_files = [f.name.removeprefix(name).removeprefix(separator).removesuffix(suffix) for f in other_files]
         other_indexes = [int(i) if i else 0 for i in other_files if i.isdigit() or i == '']
