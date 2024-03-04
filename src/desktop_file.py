@@ -138,11 +138,14 @@ class DesktopFile(GObject.Object):
     def edited(self) -> bool:
         return self._saved_hash != hash(self)
 
-    def save(self):
-        with self.path.open('w') as f:
+    def save_as(self, path: Path):
+        with path.open('w') as f:
             f.write(self._key_file.to_data()[0])
         
         self._saved_hash = hash(self)
+
+    def save(self):
+        self.save_as(self.path)
 
     def __getitem__(self, field: Field) -> FT:
         match field.field_type:
