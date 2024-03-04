@@ -1,13 +1,13 @@
 from shutil import copy
 from pathlib import Path
-from typing import Callable, Optional, get_origin
+from typing import Callable, Optional
 
-from gi.repository import Gtk, Adw, Gio, GObject # type: ignore
+from gi.repository import Gtk, Adw, GObject # type: ignore
 from gettext import gettext as _
 
-from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField
+from .desktop_file import DesktopFile, DesktopEntry, Field
 from .file_view import FileView
-from .config import set_icon_from_name, new_file_name, USER_APPS, APP_DATA
+from .config import new_file_name, USER_APPS
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
@@ -159,7 +159,8 @@ class FilePage(Adw.Bin):
         self.emit('file-changed')
 
     def load_path(self, path: Path):
-        file = DesktopFile(path)
+        file = DesktopFile()
+        file.load(path)
         self.load_file(file)
 
     def load_file(self, file: DesktopFile):
@@ -180,7 +181,7 @@ class FilePage(Adw.Bin):
         def update_title_visible(adjustment: Gtk.Adjustment):
             self.header_bar.set_show_title(adjustment.get_value() > 0)
 
-        def update_title_text(file: DesktopFile, field: Field[str], value: str):
+        def update_title_text(file: DesktopFile, field: Field, value: str):
             if field == DesktopEntry.NAME:
                 self.window_title.set_title(value)
 
