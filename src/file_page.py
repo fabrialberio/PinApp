@@ -7,7 +7,7 @@ from gettext import gettext as _
 
 from .desktop_file import DesktopFile, DesktopEntry, Field
 from .file_view import FileView
-from .config import new_file_name, USER_APPS
+from .file_pool import USER_POOL
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
@@ -54,9 +54,9 @@ class FilePage(Adw.Bin):
         assert self.file is not None
 
         is_new_file = not self.file.path.exists()
-        pinned_path: Path = new_file_name(USER_APPS, self.file.path.stem)
+        pinned_path = USER_POOL.new_file_path(self.file.path.stem)
 
-        self.file.save(pinned_path)
+        self.file.save_as(pinned_path)
         self.emit('file-changed')
 
         if is_new_file:
@@ -120,7 +120,7 @@ class FilePage(Adw.Bin):
         name_entry.set_text(self.file.path.stem)
 
         def get_path():
-            return USER_APPS / Path(f'{Path(name_entry.get_text())}.desktop')
+            return USER_POOL.default_dir / Path(f'{Path(name_entry.get_text())}.desktop')
 
         def path_is_valid() -> bool:
             path = name_entry.get_text()
@@ -151,7 +151,7 @@ class FilePage(Adw.Bin):
     def duplicate_file(self):
         assert self.file is not None
 
-        new_path = new_file_name(USER_APPS, self.file.path.stem)
+        new_path = USER_POOL.new_file_path(self.file.path.stem)
 
         copy(self.file.path, new_path)
 
@@ -165,7 +165,7 @@ class FilePage(Adw.Bin):
     def load_file(self, file: DesktopFile):
         self.file = file
 
-        is_pinned = self.file.path.parent == USER_APPS
+        is_pinned = self.file.path.parent == USER_POOL.default_dir
         self.file_menu_button.set_visible(is_pinned)
         self.pin_button.set_visible(not is_pinned)
 
