@@ -3,7 +3,7 @@ from gettext import gettext as _
 
 from gi.repository import Adw, Gtk, GObject # type: ignore
 
-from .desktop_file import DesktopFile, DesktopEntry, Field, LocaleField, split_key_locale
+from .desktop_file import DesktopFile, DesktopEntry, Field, FieldType, split_key_locale
 from .config import set_icon_from_name
 
 
@@ -32,14 +32,14 @@ class BoolRow(Adw.ActionRow):
         super().__init__(activatable_widget=self.switch)
         self.add_suffix(self.switch)
 
-    def set_field(self, file: DesktopFile, field: Field[bool]) -> None:
+    def set_field(self, file: DesktopFile, field: Field) -> None:
         self.set_title(field.key)
         self.switch.set_active(file[field])
 
         def update_field(self, value: bool):
             file.set(field, value)
 
-        def update_state(file: DesktopFile, field_: Field[bool], value: bool):
+        def update_state(file: DesktopFile, field_: Field, value: bool):
             if field_ == field and value != self.switch.get_active():
                 self.switch.set_active(value)
 
@@ -52,7 +52,7 @@ class StringRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
     file: DesktopFile
-    field: Field[str]
+    field: Field
     remove_button: Gtk.Button
     _removable: bool = True
 
@@ -80,7 +80,7 @@ class StringRow(Adw.EntryRow):
         self.connect('changed', lambda w: self.update_remove_button_visible())
         self.add_suffix(self.remove_button)
 
-    def set_field(self, file: DesktopFile, field: Field[str]) -> None:
+    def set_field(self, file: DesktopFile, field: Field) -> None:
         self.file = file
         self.field = field
 
@@ -131,7 +131,7 @@ class LocaleButton(Gtk.MenuButton):
 
         self.connect('changed', update_label)
 
-    def set_field(self, file: DesktopFile, field: LocaleField):
+    def set_field(self, file: DesktopFile, field: Field):
         UNLOCALIZED_STR = _('(Unlocalized)')
         items = [UNLOCALIZED_STR] + file.locales(field)
 
@@ -190,7 +190,7 @@ class LocaleStringRow(StringRow):
     __gtype_name__ = 'LocaleStringRow'
 
     locale: Optional[str] = None
-    locale_field: LocaleField[str]
+    locale_field: Field
     locale_select: LocaleButton
 
     def __init__(self, removable: bool=True) -> None:
@@ -200,7 +200,7 @@ class LocaleStringRow(StringRow):
         self.locale_select.connect('changed', lambda w, l: self.set_locale(l))
         self.add_suffix(self.locale_select)
 
-    def set_field(self, file: DesktopFile, field: LocaleField[str]) -> None:
+    def set_field(self, file: DesktopFile, field: Field) -> None:
         self.locale_field = field
         
         super().set_field(file, field.localize(None))
@@ -258,13 +258,13 @@ class AddFieldDialog(Adw.MessageDialog):
                 key = self.key_entry.get_text()
 
                 if self.type_combo_row.get_selected() == 0:
-                    self.emit('add', Field(DesktopEntry.group, key, bool), None)
+                    self.emit('add', Field(DesktopEntry.group, key, FieldType.BOOL), None)
                 elif self.type_combo_row.get_selected() == 1:
-                    self.emit('add', Field(DesktopEntry.group, key, str), None)
+                    self.emit('add', Field(DesktopEntry.group, key, FieldType.STRING), None)
                 else:
                     self.emit(
                         'add',
-                        LocaleField(DesktopEntry.group, key, str),
+                        Field(DesktopEntry.group, key, FieldType.LOCALIZED_STRING),
                         self.locale_entry.get_text()
                     )
 
@@ -287,17 +287,20 @@ class FileView(Adw.BreakpointBin):
     icon: Gtk.Image = Gtk.Template.Child()
     name_row: LocaleStringRow = Gtk.Template.Child()
     comment_row: LocaleStringRow = Gtk.Template.Child()
-    icon_row: StringRow = Gtk.Template.Child()
-    values_group: Adw.PreferencesGroup = Gtk.Template.Child()
+    #icon_row: StringRow = Gtk.Template.Child()
+    #values_group: Adw.PreferencesGroup = Gtk.Template.Child()
+    fields_listbox: Adw.PreferencesGroup = Gtk.Template.Child()
     add_field_button: Gtk.Button = Gtk.Template.Child()
 
     def __init__(self):
         super().__init__()
 
+        """
         def update_icon(row: StringRow):
             set_icon_from_name(self.icon, self.icon_row.get_text())
 
         self.icon_row.connect('changed', update_icon)
+        """
         self.add_field_button.connect('clicked', lambda b: self.show_add_field_dialog())
         
     def set_file(self, file: DesktopFile):
@@ -305,11 +308,27 @@ class FileView(Adw.BreakpointBin):
 
         set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, ''))
 
-        self.icon_row.set_field(self.file, DesktopEntry.ICON)
+        #self.icon_row.set_field(self.file, DesktopEntry.ICON)
         self.name_row.set_field(self.file, DesktopEntry.NAME)
         self.comment_row.set_field(self.file, DesktopEntry.COMMENT)
 
-        for field in self.file.fields(DesktopEntry.group):
+        def create_row(field: Field) -> FieldRow:
+            match field.field_type:
+                case FieldType.BOOL:
+                    row = BoolRow()
+                case FieldType.STRING | FieldType.STRING_LIST:
+                    row = StringRow()
+                    field = Field(field.group, field.key, FieldType.STRING)
+                case FieldType.LOCALIZED_STRING | FieldType.LOCALIZED_STRING_LIST:
+                    row = LocaleStringRow()
+                    field = Field(field.group, field.key, FieldType.LOCALIZED_STRING)
+            
+            row.set_field(file, field)
+            return row
+
+        self.fields_listbox.bind_model(self.file.fields, create_row)
+
+        for field in self.file.fields:
             if field in [DesktopEntry.ICON, DesktopEntry.NAME, DesktopEntry.COMMENT]:
                 continue
 
@@ -321,34 +340,35 @@ class FileView(Adw.BreakpointBin):
     def add_field(self, field: Field):
         if field in self.field_row_map.keys():
             ... #self.set_file(self.file)
-        elif field.unlocalized() in self.field_row_map.keys():
+        elif field.localize(None) in self.field_row_map.keys():
             ukey, locale = split_key_locale(field.key)
 
-            row: LocaleStringRow = self.field_row_map[field.unlocalized()] # type: ignore
-            row.set_field(self.file, LocaleField(field.group, ukey, field._type))
+            row: LocaleStringRow = self.field_row_map[field.localize(None)] # type: ignore
+            row.set_field(self.file, Field(field.group, ukey, field.field_type))
             row.set_locale(locale)
         else:
-            if field._type == bool:
-                row = BoolRow()
-                row.set_field(self.file, field) # type: ignore
-            elif isinstance(field, LocaleField):
-                row = LocaleStringRow()
-                row.set_field(self.file, LocaleField(field.group, field.key, str))
-            else:
-                row = StringRow()
-                row.set_field(self.file, Field(field.group, field.key, str))
-
-                if field == DesktopEntry.TYPE:
-                    row.removable = False
+            match field.field_type:
+                case FieldType.BOOL:
+                    row = BoolRow()
+                    row.set_field(self.file, field)
+                case FieldType.STRING | FieldType.STRING_LIST:
+                    row = StringRow()
+                    row.set_field(self.file, Field(field.group, field.key, FieldType.STRING))
+                case FieldType.LOCALIZED_STRING | FieldType.LOCALIZED_STRING_LIST:
+                    row = LocaleStringRow()
+                    row.set_field(self.file, Field(field.group, field.key, FieldType.LOCALIZED_STRING))
+            
+            if field == DesktopEntry.TYPE:
+                row.removable = False
             
             self.field_row_map[field] = row
-            self.values_group.add(row)        
+            #self.values_group.add(row)        
 
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()
 
         def add_field(widget: AddFieldDialog, field: Field, locale: str):
-            if isinstance(field, LocaleField):
+            if field.field_type in (FieldType.LOCALIZED_STRING, FieldType.LOCALIZED_STRING_LIST):
                 field = field.localize(locale)
             
             self.file.set(field, field.default_value())

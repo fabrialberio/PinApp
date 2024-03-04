@@ -64,20 +64,26 @@
                   </object>
                 </child>
                 <child>
-                  <object class='AdwPreferencesGroup' id='values_group'>
+                  <object class='GtkListBox' id='fields_listbox'>
+                    <property name='selection-mode'>none</property>
+                    <style>
+                      <class name='boxed-list' />
+                    </style>
+                    <!--
                     <child>
-                      <object class='StringRow' id='icon_row'>
-                        <child type='suffix'>
-                          <object class='GtkButton' id='upload_icon_button'>
-                            <property name='valign'>center</property>
-                            <property name='icon-name'>document-open-symbolic</property>
-                            <style>
-                              <class name='flat' />
-                            </style>
-                          </object> 
-                        </child>
-                      </object>
-                    </child>
+                        <object class='StringRow' id='icon_row'>
+                          <child type='suffix'>
+                            <object class='GtkButton' id='upload_icon_button'>
+                              <property name='valign'>center</property>
+                              <property name='icon-name'>document-open-symbolic</property>
+                              <style>
+                                <class name='flat' />
+                              </style>
+                            </object> 
+                          </child>
+                        </object>
+                      </child>
+                    -->
                   </object>
                 </child>
                 <child>
