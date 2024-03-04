@@ -23,6 +23,7 @@ from gi.repository import Gtk, Adw # type: ignore
 
 from .config import USER_APPS, new_file_name
 from .desktop_file import DesktopFile, DesktopEntry
+from .file_page import FilePage # Required to initialize GObject
 from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
 from .apps_page import SearchView, PoolStateView, AppListView
 
