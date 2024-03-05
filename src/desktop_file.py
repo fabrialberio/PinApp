@@ -130,9 +130,8 @@ class DesktopFile(GObject.Object):
         self.search_str = self._key_file.to_data()[0].lower()
 
         for group in self._key_file.get_groups()[0]:
-            for key in self._key_file.get_keys(group)[0]:                
-                field = Field(group, key, FieldType.STRING).localize(None)
-                field = next((f for f in DesktopEntry.fields if f == field), field)
+            for key in self._key_file.get_keys(group)[0]:
+                field = Field(group, key, FieldType.STRING)
                 self._add_to_model(field)
 
     def edited(self) -> bool:
@@ -181,19 +180,18 @@ class DesktopFile(GObject.Object):
     def locales(self, field: Field) -> list[str]:
         return [
             l\
-            for k, l in map(split_key_locale, self._key_file.get_keys(field.group)[0])\
-            if k == field.key and l is not None
+            for k, l in (split_key_locale(f.key) for f in self.fields)
+            if k == field.localize(None).key and l is not None
         ]
 
-    def _find_in_model(self, field) -> tuple[bool, int]:
+    def _find_in_model(self, field: Field) -> tuple[bool, int]:
         return self.fields.find_with_equal_func_full(
             field,
             lambda a, b: pygobject_new_full(a, False) == pygobject_new_full(b, False)
         )
 
-    def _add_to_model(self, field):
+    def _add_to_model(self, field: Field):
         found, index = self._find_in_model(field)
-
         if found:
             if field.field_type != self.fields.get_item(index).field_type:
                 self.fields.remove(index)
