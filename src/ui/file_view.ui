@@ -64,6 +64,55 @@
                   </object>
                 </child>
                 <child>
+                  <object class='GtkBox' id='pills_box'>
+                    <property name='orientation'>horizontal</property>
+                    <property name='spacing'>6</property>
+                    <child>
+                      <object class='GtkToggleButton' id='hidden_toggle'>
+                        <property name='hexpand'>true</property>
+                        <style>
+                          <class name='pill' />
+                        </style>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='icon-name'>view-conceal-symbolic</property>
+                            <property name='label' translatable='yes'>Hidden</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='GtkToggleButton' id='terminal_toggle'>
+                        <property name='hexpand'>true</property>
+                        <style>
+                          <class name='pill' />
+                        </style>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='icon-name'>utilities-terminal-symbolic</property>
+                            <property name='label' translatable='yes'>Terminal</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='GtkToggleButton' id='autostart_toggle'>
+                        <property name='hexpand'>true</property>
+                        <property name='sensitive'>false</property>
+                        <style>
+                          <class name='pill' />
+                        </style>
+                        <child>
+                          <object class='AdwButtonContent'>
+                            <property name='icon-name'>media-playback-start-symbolic</property>
+                            <property name='label' translatable='yes'>Autostart</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class='GtkListBox' id='fields_listbox'>
                     <property name='selection-mode'>none</property>
                     <style>
@@ -95,6 +144,7 @@
       <object class="AdwBreakpoint" id='compact_breakpoint'>
         <condition>max-width: 520sp</condition>
         <setter object="banner_box" property="orientation">vertical</setter>
+        <setter object="pills_box" property="orientation">vertical</setter>
         <setter object="icon" property="margin-end">0</setter>
         <setter object="icon" property="margin-bottom">24</setter>
         <setter object="icon" property="pixel-size">96</setter>

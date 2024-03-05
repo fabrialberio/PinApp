@@ -175,6 +175,7 @@ class DesktopFile(GObject.Object):
 
     def remove(self, field: Field) -> None:
         self._key_file.remove_key(field.group, field.key)
+        self.emit('field-removed', field)
         self._remove_from_model(field)
 
     def locales(self, field: Field) -> list[str]:
@@ -208,3 +209,4 @@ class DesktopFile(GObject.Object):
         return hash(self._key_file.to_data()[0])
 
 GObject.signal_new('field-set', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
+GObject.signal_new('field-removed', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))

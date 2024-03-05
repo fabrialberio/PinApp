@@ -31,7 +31,6 @@ class BoolRow(Adw.ActionRow):
     file: DesktopFile
     field: Field
     switch: Gtk.Switch
-    remove_button: RemoveButton
 
     def __init__(self) -> None:
         self.switch = Gtk.Switch(
@@ -40,9 +39,9 @@ class BoolRow(Adw.ActionRow):
         )
         super().__init__(activatable_widget=self.switch)
 
-        self.remove_button = RemoveButton()
-        self.remove_button.connect('clicked', lambda w: self.remove_field())
-        self.add_suffix(self.remove_button)
+        remove_button = RemoveButton()
+        remove_button.connect('clicked', lambda w: self.remove_field())
+        self.add_suffix(remove_button)
         self.add_suffix(self.switch)
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
@@ -291,6 +290,8 @@ class FileView(Adw.BreakpointBin):
     icon: Gtk.Image = Gtk.Template.Child()
     name_row: LocaleStringRow = Gtk.Template.Child()
     comment_row: LocaleStringRow = Gtk.Template.Child()
+    hidden_toggle: Gtk.ToggleButton = Gtk.Template.Child()
+    terminal_toggle: Gtk.ToggleButton = Gtk.Template.Child()
     fields_listbox: Adw.PreferencesGroup = Gtk.Template.Child()
     add_field_button: Gtk.Button = Gtk.Template.Child()
 
@@ -303,6 +304,8 @@ class FileView(Adw.BreakpointBin):
         self.file = file
 
         set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, ''))
+        self._connect_toggle(self.hidden_toggle, DesktopEntry.NO_DISPLAY)
+        self._connect_toggle(self.terminal_toggle, DesktopEntry.TERMINAL)
 
         self.name_row.set_field(self.file, DesktopEntry.NAME)
         self.comment_row.set_field(self.file, DesktopEntry.COMMENT)
@@ -381,3 +384,25 @@ class FileView(Adw.BreakpointBin):
         dialog.connect('add', add_field)
         dialog.set_transient_for(self.get_root())
         dialog.present()
+
+    def _connect_toggle(self, button: Gtk.ToggleButton, field: Field):
+        button.set_active(self.file.get(field, False))
+
+        def update_field(button: Gtk.ToggleButton):
+            self.file.set(field, button.get_active())
+
+        def update_style(button: Gtk.ToggleButton, pspec: GObject.ParamSpec):
+            if button.get_active():
+                button.add_css_class('suggested-action')
+            else:
+                button.remove_css_class('suggested-action')
+
+        def update_toggled(file: DesktopFile, field_: Field, value=False):
+            if field_ == field and value != button.get_active():
+                button.set_active(value)
+
+        update_style(button, None)
+        button.connect('toggled', update_field)
+        button.connect('notify::active', update_style)
+        self.file.connect('field-set', update_toggled)
+        self.file.connect('field-removed', update_toggled)
