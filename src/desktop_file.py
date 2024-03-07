@@ -161,6 +161,9 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
+    def default_locale(self, field: Field) -> Optional[str]:
+        return self._key_file.get_locale_for_key(field.group, field.key)
+
     def set(self, field: Field, value: FT) -> None:
         match field.field_type:
             case FieldType.BOOL:
