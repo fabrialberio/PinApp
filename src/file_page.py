@@ -105,7 +105,7 @@ class FilePage(Adw.Bin):
 
         def callback(widget, resp):
             if resp == 'delete':
-                self.file.delete()
+                self.file.path.unlink()
                 self.emit('file-leave')
                 self.emit('file-changed')
 
