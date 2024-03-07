@@ -187,9 +187,12 @@ class LocaleButton(Gtk.MenuButton):
             child=list_view
         ))
 
+        self.set_selected(file.default_locale(field))
+
     def set_selected(self, locale: Optional[str]):
-        self.selected = locale
-        self.emit('changed', locale)
+        if locale != self.selected:
+            self.selected = locale
+            self.emit('changed', locale)
 
 GObject.signal_new('changed', LocaleButton, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))
 
@@ -208,11 +211,11 @@ class LocaleStringRow(StringRow):
         self.add_suffix(self.locale_select)
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
+        field = field.localize(None)
         self.locale_field = field
         
-        super().set_field(file, field.localize(None))
+        super().set_field(file, field)
         self.locale_select.set_field(file, field)
-        self.set_locale(None)
 
     def set_locale(self, locale: Optional[str]):
         self.locale = locale
