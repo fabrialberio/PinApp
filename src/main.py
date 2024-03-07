@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+from typing import Callable
 from locale import bindtextdomain, textdomain
 from pathlib import Path
 
@@ -28,7 +29,7 @@ require_version('Gdk', '4.0')
 require_version('Adw', '1')
 require_version('Pango', '1.0')
 
-from gi.repository import Gtk, Gio, Adw, Gdk # type: ignore
+from gi.repository import Gtk, Gio, Adw, Gdk, GLib # type: ignore
 
 from .config import LOCALE_DIR, ICON_PATHS
 from .window import PinAppWindow, WindowPage, WindowTab
@@ -37,67 +38,73 @@ bindtextdomain('pinapp', LOCALE_DIR)
 textdomain('pinapp')
 
 theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
-paths = theme.get_search_path()
-paths += [str(p) for p in ICON_PATHS]
-
-theme.set_search_path(paths)
+theme.set_search_path(theme.get_search_path() + [str(p) for p in ICON_PATHS])
 
 
-class PinAppApplication(Adw.Application):
-    """The main application singleton class."""
-
-    window: PinAppWindow
-
+class PinApp(Adw.Application):  
     def __init__(self):
         super().__init__(
             application_id='io.github.fabrialberio.pinapp',
             flags=Gio.ApplicationFlags.HANDLES_OPEN
         )
 
-        self.create_action('exit', self.on_escape, ['Escape'])
-        self.create_action('quit', lambda a, _: self.window.do_close_request(), ['<primary>q'])
-        self.create_action('about', lambda a, _: self.window.show_about_window())
-        self.create_action('search', lambda a, _: self.window.set_search_mode(True), ['<primary>f'])
-        self.create_action('reload', lambda a, _: self.window.reload_apps())
-        self.create_action('new-file', lambda a, _: self.window.new_file(), ['<primary>n'])
+        def activate(app: PinApp):
+            self.get_window().present()
+
+        def open(app: PinApp, files: list[Gio.File], n_files: int, hint: str):
+            path = Path(files[0].get_path())
+            if path is None:
+                return
+
+            window = self.get_window()
+            window.file_page.load_path(path)
+            window.set_page(WindowPage.FILE_PAGE)
+            window.present()
+
+        def on_escape(action: Gio.SimpleAction, param: GLib.Variant):
+            window = self.get_window()
+
+            match window.current_page():
+                case WindowPage.FILE_PAGE:
+                    window.file_page.on_leave()
+                case WindowPage.APPS_PAGE:
+                    match window.current_tab():
+                        case WindowTab.INSTALLED:
+                            window.set_tab(WindowTab.PINS)
+                        case WindowTab.SEARCH:
+                            window.set_search_mode(False)
+
+        def on_quit(action: Gio.SimpleAction, param: GLib.Variant):
+            self.get_window().do_close_request()
+
+        def on_about(action: Gio.SimpleAction, param: GLib.Variant):
+            self.get_window().show_about_window()
+
+        def on_search(action: Gio.SimpleAction, parameter: GLib.Variant):
+            self.get_window().set_search_mode(True)
+
+        def on_new_file(action: Gio.SimpleAction, param: GLib.Variant):
+            self.get_window().new_file()
+
+        self.connect('activate', activate)
+        self.connect('open', open)
+        self.create_action('exit', on_escape, ['Escape'])
+        self.create_action('quit', on_quit, ['<primary>q'])
+        self.create_action('about', on_about)
+        self.create_action('search', on_search, ['<primary>f'])
+        self.create_action('new-file', on_new_file, ['<primary>n'])
         self.set_accels_for_action('win.show-help-overlay', ['<primary>question'])
 
-        self.window = None
+    def get_window(self) -> PinAppWindow:
+        return self.props.active_window or PinAppWindow(application=self)
 
-    def do_activate(self):
-        """Called when the application is activated"""
-        self._create_window()
-        self.window.present()
-
-    def do_open(self, files, n_files, hint):
-        path = Path(files[0].get_path())
-
-        self._create_window()
-        self.window.load_path(path)
-        self.window.present()
-
-    def on_escape(self, *args):
-        if self.window.current_page() == WindowPage.FILE_PAGE:
-            self.window.file_page.on_leave()
-        elif self.window.current_page() == WindowPage.APPS_PAGE:
-            if self.window.current_tab() == WindowTab.INSTALLED:
-                self.window.set_tab(WindowTab.PINS)
-            elif self.window.current_tab() == WindowTab.SEARCH:
-                self.window.set_search_mode(False)
-
-    def create_action(self, name, callback, shortcuts=None):
+    def create_action(self, name: str, callback: Callable, accels: list[str]=[]):
         action = Gio.SimpleAction.new(name, None)
-        action.connect("activate", callback)
+        action.connect('activate', callback)
         self.add_action(action)
-        if shortcuts:
-            self.set_accels_for_action(f"app.{name}", shortcuts)
+        self.set_accels_for_action(f'app.{name}', accels)
 
-    def _create_window(self):
-        self.window = self.props.active_window
-        if not self.window:
-            self.window = PinAppWindow(application=self)
 
 def main(version):
-    """The application's entry point."""
-    app = PinAppApplication()
+    app = PinApp()
     return app.run(sys.argv)
