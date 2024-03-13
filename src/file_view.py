@@ -73,7 +73,7 @@ class StringRow(Adw.EntryRow):
 
     @GObject.Property(type=bool, default=True)
     def removable(self) -> bool: # type: ignore
-        return self._removable
+        return self._removable and self.file.get(self.field, False)
     
     @removable.setter
     def removable(self, value: bool):
@@ -99,6 +99,7 @@ class StringRow(Adw.EntryRow):
             self.file.set(self.field, self.get_text())
 
         self.connect('changed', update_field)
+        self.update_remove_button_visible()
 
     def remove_field(self):
         self.file.remove(self.field)
