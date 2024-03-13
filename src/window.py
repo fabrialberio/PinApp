@@ -75,7 +75,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         )
         button.connect('clicked', lambda _: self.new_file())
 
-        #self.pins_tab.empty_status_page.set_child(button)
+        self.pins_tab.placeholder.set_child(button)
 
         self.new_file_button.connect('clicked', lambda _: self.new_file())
 
