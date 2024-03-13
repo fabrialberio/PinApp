@@ -3,15 +3,11 @@ from typing import Callable
 from gettext import gettext as _
 
 from gi.repository import Gtk, Adw, Pango, GObject # type: ignore
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape as escape_xml
 
 from .config import *
 from .file_pool import FilePool, USER_POOL, SYSTEM_POOL
 from .desktop_file import DesktopFile, DesktopEntry
-
-
-def escape_xml(string: str) -> str:
-    return escape(string or '')
 
 
 class AppChip(Gtk.Box):
@@ -51,7 +47,7 @@ class AppChip(Gtk.Box):
 
     def __init__(self,
             icon_name: str,
-            label: str = None,
+            label: str = '',
             show_label: bool = True,
             color: Color = Color.GRAY
         ) -> None:
@@ -108,7 +104,6 @@ class AppRow(Adw.ActionRow):
             icon_name='go-next-symbolic',
             opacity=.6))
 
-
         if self.file.get(DesktopEntry.NO_DISPLAY, False):
             icon.set_opacity(.2)
         if self.file.get(DesktopEntry.X_FLATPAK, False):
@@ -126,134 +121,53 @@ class AppRow(Adw.ActionRow):
     def add_chip(self, chip: AppChip):
         self.chip_box.append(chip)
 
-
-    # Used for sorting apps by name in SearchView
-    def __lt__(self, other) -> bool:
-        if isinstance(other, AppRow):
-            return self.file.get(DesktopEntry.NAME, '').lower() < other.get(DesktopEntry.NAME, '').lower()
-        else:
-            raise TypeError(f"'<' not supported between instances of {type(self)} and {type(other)}")
+GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
 class AppListView(Adw.Bin):
     __gtype_name__ = 'AppListView'
 
-    show_pinned_chip: bool = False
-    _listbox: Gtk.ListBox
+    listbox: Gtk.ListBox
 
-    def __init__(self, show_pinned_chip: bool = False) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
-        self.show_pinned_chip = show_pinned_chip
-
-        self._listbox = Gtk.ListBox(
+        self.listbox = Gtk.ListBox(
             selection_mode=Gtk.SelectionMode.NONE,
-            css_classes=['boxed-list'])
+            css_classes=['boxed-list']
+        )
 
-        self._listbox.set_sort_func(lambda a, b: a.file.get(DesktopEntry.NAME, '') > b.file.get(DesktopEntry.NAME, ''))
-
-        # Wrap listbox in box to allow it to shrink to fit its contents
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.append(self._listbox)
+        box.append(self.listbox)
 
-        self.set_child(
-            Gtk.ScrolledWindow(
-                vexpand=True,
-                child=Adw.Clamp(
-                    margin_top=12,
-                    margin_bottom=12,
-                    margin_start=12,
-                    margin_end=12,
-                    child=box)))
+        self.set_child(Gtk.ScrolledWindow(
+            vexpand=True,
+            child=Adw.Clamp(
+                margin_top=12,
+                margin_bottom=12,
+                margin_start=12,
+                margin_end=12,
+                child=box
+            )
+        ))
 
-    def update(self, files: list[DesktopFile]):
-        # TODO Warning: Accessing a sequence while it is being sorted or searched is not allowed
-        self._listbox.remove_all()
-
-        for f in files:
-            row = AppRow(f, chips=[AppChip.Pinned()] if self.show_pinned_chip else [])
+    def bind_model(self, model: Gtk.StringList, show_pinned_chip: bool = False) -> None:
+        def create_row(string: Gtk.StringObject):
+            row = AppRow(
+                DesktopFile(Path(string.get_string())),
+                chips=[AppChip.Pinned()] if show_pinned_chip else [],
+            )
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
-            self._listbox.append(row)
+            return row
 
-    # More performant than update, used for search
+        self.listbox.bind_model(model, create_row)
+
     def set_filter(self, predicate: Callable[[AppRow], bool]):
-        self._listbox.set_filter_func(predicate)
+        self.listbox.set_filter_func(predicate)
 
-class PoolState(Enum):
-    LOADED = 'pool_page'
-    EMPTY = 'empty_page'
-    LOADING = 'loading_page'
-    ERROR = 'error_page'
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
-
-class PoolStateView(Gtk.Stack):
-    __gtype_name__ = 'PoolStateView'
-
-    pool: FilePool
-    pool_page: AppListView
-    state: PoolState | None = None
-
-    def __init__(self, pool: FilePool = None, pool_page: AppListView = None) -> None:
-        super().__init__()
-
-        if pool and pool_page:
-            self.connect_pool(pool, pool_page)
-
-        self.empty_status_page = Adw.StatusPage(
-            title=_('No apps found'),
-            icon_name='folder-open-symbolic')
-        self.add_named(self.empty_status_page, PoolState.EMPTY.value)
-
-        self.loading_status_page = Adw.StatusPage(
-            title=_('Loading apps'))
-        self.add_named(self.loading_status_page, PoolState.LOADING.value)
-
-        self.error_status_page = Adw.StatusPage(
-            title=_('Error loading apps'),
-            icon_name='dialog-error-symbolic')
-        self.add_named(self.error_status_page, PoolState.ERROR.value)
-
-        box = (self.loading_status_page
-               .get_first_child()  # GtkScrolledWindow
-               .get_first_child()  # GtkWiewport
-               .get_first_child()  # GtkBox
-               .get_first_child()  # AdwClamp
-               .get_first_child())  # GtkBox
-        box.remove(box.get_first_child())  # Removes the GtkImage with the icon
-        box.prepend(Gtk.Spinner(
-            width_request=32,
-            height_request=32,
-            opacity=.8,
-            spinning=True))  # Replaces it with a spinner
-
-        self.set_state(PoolState.EMPTY)
-
-    def connect_pool(self, pool: FilePool, pool_page: AppListView):
-        def _on_files_loaded(_, paths: list[Path]):
-            files = [DesktopFile(p) for p in paths]
-
-            self.pool_page.update(files)
-            self.set_state(PoolState.LOADED)
-
-        pool.connect('files-loading',
-                     lambda _: self.set_state(PoolState.LOADING))
-        pool.connect('files-loaded', _on_files_loaded)
-        pool.connect('files-empty', lambda _: self.set_state(PoolState.EMPTY))
-        pool.connect('files-error', lambda _,
-                     e: self.set_state(PoolState.ERROR))
-
-        self.pool_page = pool_page
-        self.add_named(pool_page, PoolState.LOADED.value)
-
-    def set_state(self, state: PoolState):
-        if state.value == self.get_visible_child_name():
-            return
-
-        self.state = state
-        self.set_visible_child_name(state.value)
-        self.emit('state-changed')
-
-
-class SearchView(PoolStateView):
+"""
+class SearchView(AppListView):
     '''Adds all apps from both PinsView and InstalledView, adds chips to them and filters them on search'''
     __gtype_name__ = 'SearchView'
 
@@ -270,7 +184,7 @@ class SearchView(PoolStateView):
         self.empty_status_page.set_description(_('Try searching for something else'))
 
     def connect_pool(self, pool: FilePool, pool_page: AppListView):
-        super().connect_pool(pool, pool_page)
+        super().bind_pool(pool, pool_page)
 
         def _on_files_loaded(paths):
             self._files = [DesktopFile(p) for p in paths]
@@ -284,15 +198,5 @@ class SearchView(PoolStateView):
             'search-changed', lambda e: self.search(e.get_text()))
 
     def search(self, query: str):
-        if self.state == PoolState.LOADING:
-            return
-
-        self.set_state(PoolState.LOADING)
-
         self.pool_page.set_filter(lambda r: query.lower() in r.file.search_str)
-
-        self.set_state(PoolState.LOADED)
-
-GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
-GObject.signal_new('state-changed', PoolStateView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+"""

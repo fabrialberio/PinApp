@@ -23,22 +23,20 @@
 
                     <child>
                       <object class='AdwHeaderBar' id='header_bar'>
+                        <property name='sensitive'>false</property>
                         <property name='centering-policy'>strict</property>
-                        <!-- View Switcher -->
                         <property name='title-widget'>
                           <object class='AdwViewSwitcher' id='view_switcher'>
                             <property name='stack'>view_stack</property>
                             <property name='policy'>wide</property>
                           </object>
                         </property>
-                        <!-- New file button -->
                         <child type='start'>
                           <object class='GtkButton' id='new_file_button'>
                             <property name='icon-name'>list-add-symbolic</property>
                             <property name='tooltip-text' translatable='yes'>Add new app</property>
                           </object>
                         </child>
-                        <!-- Menu button -->
                         <child type='end'>
                           <object class='GtkMenuButton' id='menu_button'>
                             <property name='tooltip-text' translatable='yes'>Show menu</property>
@@ -75,21 +73,50 @@
                   <object class='AdwViewStack' id='view_stack'>
                     <child>
                       <object class='AdwViewStackPage'>
-                        <property name='icon-name'>pin-symbolic</property>
-                        <property name='title' translatable='yes'>Your pins</property>
-                        <property name='name'>pins_tab</property>
+                        <property name='name'>loading_tab</property>
                         <property name='child'>
-                          <object class='PoolStateView' id='pins_tab'/>
+                          <object class='GtkBox'>
+                            <property name='valign'>center</property>
+                            <property name='halign'>center</property>
+                            <property name='spacing'>12</property>
+                            <property name='orientation'>vertical</property>
+                            <child>
+                              <object class='GtkSpinner'>
+                                <property name='opacity'>.8</property>
+                                <property name='spinning'>true</property>
+                                <property name='width_request'>32</property>
+                                <property name='height_request'>32</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class='GtkLabel'>
+                                <property name='label' translatable='yes'>Loading apps…</property>
+                                <style>
+                                  <class name='title-1' />
+                                </style>
+                              </object>
+                            </child>
+                          </object>
                         </property>
                       </object>
                     </child>
                     <child>
                       <object class='AdwViewStackPage'>
+                        <property name='name'>pins_tab</property>
+                        <property name='icon-name'>pin-symbolic</property>
+                        <property name='title' translatable='yes'>Your pins</property>
+                        <property name='child'>
+                          <object class='AppListView' id='pins_tab'/>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class='AdwViewStackPage'>
+                        <property name='name'>installed_tab</property>
                         <property name='icon-name'>installed-symbolic</property>
                         <property name='title' translatable='yes'>Installed</property>
-                        <property name='name'>installed_tab</property>
                         <property name='child'>
-                          <object class='PoolStateView' id='installed_tab'/>
+                          <object class='AppListView' id='installed_tab'/>
                         </property>
                       </object>
                     </child>
@@ -97,7 +124,7 @@
                       <object class='AdwViewStackPage'>
                         <property name='name'>search_tab</property>
                         <property name='child'>
-                          <object class='SearchView' id='search_tab'/>
+                          <object class='AppListView' id='search_tab'/>
                         </property>
                       </object>
                     </child>
@@ -132,7 +159,6 @@
     </child>
   </template>
 
-  <!-- Primary menu model -->
   <menu id='primary_menu'>
     <section>
       <item>
