@@ -86,13 +86,15 @@ class AppRow(Adw.ActionRow):
             title_lines = 1,
             subtitle = escape_xml(self.file.get(DesktopEntry.COMMENT, '')),
             subtitle_lines = 1,
-            activatable = True,)
+            activatable = True
+        )
 
         icon = Gtk.Image(
             pixel_size=32,
             margin_top=6,
             margin_bottom=6,
-            css_classes=['icon-dropshadow'])
+            css_classes=['icon-dropshadow']
+        )
         set_icon_from_name(icon, file.get(DesktopEntry.ICON, ''))
 
         self.add_prefix(icon)
@@ -102,7 +104,8 @@ class AppRow(Adw.ActionRow):
 
         self.add_suffix(Gtk.Image(
             icon_name='go-next-symbolic',
-            opacity=.6))
+            opacity=.6
+        ))
 
         if self.file.get(DesktopEntry.NO_DISPLAY, False):
             icon.set_opacity(.2)
@@ -123,10 +126,25 @@ class AppRow(Adw.ActionRow):
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
+def get_files_model(string_list: Gtk.StringList):
+    def create_file(item: Gtk.StringObject):
+        return DesktopFile(Path(item.get_string()))
+    
+    def sort_files(first: DesktopFile, second: DesktopFile, data: None):
+        lt = first.get(DesktopEntry.NAME, '') < second.get(DesktopEntry.NAME, '') # type: ignore
+        return -1 if lt else 1
+
+    return Gtk.SortListModel.new(
+        Gtk.MapListModel.new(string_list, create_file),
+        Gtk.CustomSorter.new(sort_files)
+    )
+
 class AppListView(Adw.Bin):
     __gtype_name__ = 'AppListView'
 
     listbox: Gtk.ListBox
+    scrolled_window: Gtk.ScrolledWindow
+    placeholder: Adw.StatusPage
 
     def __init__(self) -> None:
         super().__init__()
@@ -136,10 +154,15 @@ class AppListView(Adw.Bin):
             css_classes=['boxed-list']
         )
 
+        self.placeholder = Adw.StatusPage(
+            title=_('No apps found'),
+            icon_name='folder-open-symbolic',
+        )
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.append(self.listbox)
 
-        self.set_child(Gtk.ScrolledWindow(
+        self.scrolled_window = Gtk.ScrolledWindow(
             vexpand=True,
             child=Adw.Clamp(
                 margin_top=12,
@@ -148,18 +171,31 @@ class AppListView(Adw.Bin):
                 margin_end=12,
                 child=box
             )
-        ))
+        )
 
-    def bind_model(self, model: Gtk.StringList, show_pinned_chip: bool = False) -> None:
-        def create_row(string: Gtk.StringObject):
+        self.set_child(self.scrolled_window)
+
+    def bind_model(self, string_list: Gtk.StringList, show_pinned_chip: bool = False) -> None:
+        model = get_files_model(string_list)
+        
+        def create_row(file: DesktopFile):
             row = AppRow(
-                DesktopFile(Path(string.get_string())),
+                file,
                 chips=[AppChip.Pinned()] if show_pinned_chip else [],
             )
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
         self.listbox.bind_model(model, create_row)
+
+        def update_show_placeholder(model: Gtk.StringList, *args):
+            new_child = self.placeholder if model.get_n_items() == 0 else self.scrolled_window
+
+            if self.get_child() != new_child:
+                self.set_child(new_child)
+
+        update_show_placeholder(model)        
+        model.connect('items-changed', update_show_placeholder)
 
     def set_filter(self, predicate: Callable[[AppRow], bool]):
         self.listbox.set_filter_func(predicate)

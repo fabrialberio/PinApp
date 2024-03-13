@@ -1,7 +1,7 @@
 from os import access, W_OK
 from pathlib import Path
 
-from gi.repository import GObject, GLib, Gio # type: ignore
+from gi.repository import GObject, GLib # type: ignore
 
 from .config import *
 
@@ -10,7 +10,7 @@ class FilePool(GObject.Object):
     __gtype_name__ = 'FilePool'
 
     dirs: list[Path]
-    files: Gio.ListStore
+    files: Gtk.StringList
     glob_pattern: str
 
     def __init__(self, dirs: list[Path], glob_pattern: str) -> None:
@@ -28,8 +28,6 @@ class FilePool(GObject.Object):
             for p in set(stored) - set(loaded):
                 for i in range(self.files.get_n_items()):
                     if self.files.get_string(i) == p:
-                        print(f'Removing {p}, at index {i}')
-                        
                         self.files.remove(i)
                         break
 
