@@ -37,3 +37,13 @@
 	font-weight: 800;
 	font-size: 15pt;
 }
+
+.pill-toggle-active {
+	background-color: @blue_3;
+	color: @white;
+}
+
+.pill-toggle-active:hover {
+	background-color: @blue_2;
+	color: @white;
+}

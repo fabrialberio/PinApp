@@ -188,7 +188,7 @@ class LocaleButton(Gtk.MenuButton):
             child=list_view
         ))
 
-        self.set_selected(file.default_locale(field))
+        self.set_selected(file.localize_current(field).locale())
 
     def set_selected(self, locale: Optional[str]):
         if locale != self.selected:
@@ -397,9 +397,9 @@ class FileView(Adw.BreakpointBin):
 
         def update_style(button: Gtk.ToggleButton, pspec: GObject.ParamSpec):
             if button.get_active():
-                button.add_css_class('suggested-action')
+                button.add_css_class('pill-toggle-active')
             else:
-                button.remove_css_class('suggested-action')
+                button.remove_css_class('pill-toggle-active')
 
         def update_toggled(file: DesktopFile, field_: Field, value=False):
             if field_ == field and value != button.get_active():
