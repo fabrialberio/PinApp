@@ -1,128 +1,44 @@
-from enum import Enum
 from typing import Callable
 from gettext import gettext as _
 
-from gi.repository import Gtk, Adw, Pango, GObject # type: ignore
+from gi.repository import Gtk, Adw, GObject # type: ignore
 from xml.sax.saxutils import escape as escape_xml
 
 from .config import *
-from .file_pool import FilePool, USER_POOL, SYSTEM_POOL
 from .desktop_file import DesktopFile, DesktopEntry
 
 
-class AppChip(Gtk.Box):
-    __gtype_name__ = 'AppChip'
-
-    class Color(Enum):
-        GRAY = 'chip-gray'
-        BLUE = 'chip-blue'
-        YELLOW = 'chip-yellow'
-        ORANGE = 'chip-orange'
-
-    @classmethod
-    def Pinned(cls):
-        return cls(
-            icon_name='view-pin-symbolic',
-            color=AppChip.Color.YELLOW)
-
-    @classmethod
-    def Terminal(cls):
-        return cls(icon_name='utilities-terminal-symbolic')
-
-    @classmethod
-    def Flatpak(cls, show_label=False):
-        return cls(
-            icon_name='flatpak-symbolic',
-            label='Flatpak',
-            color=AppChip.Color.BLUE,
-            show_label=show_label)
-    
-    @classmethod
-    def Snap(cls, show_label=False):
-        return cls(
-            icon_name='snap-symbolic',
-            label='Snap',
-            color=AppChip.Color.ORANGE,
-            show_label=show_label)
-
-    def __init__(self,
-            icon_name: str,
-            label: str = '',
-            show_label: bool = True,
-            color: Color = Color.GRAY
-        ) -> None:
-        super().__init__(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            valign=Gtk.Align.CENTER,
-            spacing=8,
-            css_classes=['chip-box', color.value],
-            tooltip_text = label)
-
-        self.append(Gtk.Image(
-            pixel_size=16,
-            icon_name=icon_name))
-
-        if label != None and show_label:
-            label_attrs = Pango.AttrList()
-            font_desc = Pango.FontDescription()
-            font_desc.set_weight(Pango.Weight.BOLD)
-            font_desc.set_variant(Pango.Variant.ALL_SMALL_CAPS)
-            label_attrs.insert(Pango.AttrFontDesc.new(font_desc))
-
-            self.append(Gtk.Label(
-                label=label,
-                attributes=label_attrs))
-
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/app_row.ui')
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
 
-    def __init__(self,
-            file: DesktopFile,
-            chips: list[AppChip] = []):
+    icon: Gtk.Image = Gtk.Template.Child()
+    pinned_chip: Gtk.Box = Gtk.Template.Child()
+    terminal_chip: Gtk.Box = Gtk.Template.Child()
+    flatpak_chip: Gtk.Box = Gtk.Template.Child()
+    snap_chip: Gtk.Box = Gtk.Template.Child()
+
+    def __init__(self, file: DesktopFile):
+        super().__init__()
+
         self.file = file
 
-        super().__init__(
-            title = escape_xml(self.file.get(DesktopEntry.NAME, '')),
-            title_lines = 1,
-            subtitle = escape_xml(self.file.get(DesktopEntry.COMMENT, '')),
-            subtitle_lines = 1,
-            activatable = True
-        )
+        self.connect('activated', lambda _: self.emit('file-open', self.file))
+        self.file.connect('field-set', lambda d, f, v: self.update())
+        self.update()
 
-        icon = Gtk.Image(
-            pixel_size=32,
-            margin_top=6,
-            margin_bottom=6,
-            css_classes=['icon-dropshadow']
-        )
-        set_icon_from_name(icon, file.get(DesktopEntry.ICON, ''))
+    def update(self):
+        self.set_title(escape_xml(self.file.get(
+            self.file.localize_current(DesktopEntry.NAME), ''))) # type: ignore
+        self.set_subtitle(escape_xml(self.file.get(
+            self.file.localize_current(DesktopEntry.COMMENT), ''))) # type: ignore
 
-        self.add_prefix(icon)
+        set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, '')) # type: ignore
 
-        self.chip_box = Gtk.Box(spacing=6)
-        self.add_suffix(self.chip_box)
-
-        self.add_suffix(Gtk.Image(
-            icon_name='go-next-symbolic',
-            opacity=.6
-        ))
-
-        if self.file.get(DesktopEntry.NO_DISPLAY, False):
-            icon.set_opacity(.2)
-        if self.file.get(DesktopEntry.X_FLATPAK, False):
-            self.add_chip(AppChip.Flatpak())
-        if self.file.get(DesktopEntry.X_SNAP_INSTANCE_NAME, False):
-            self.add_chip(AppChip.Snap())
-        if self.file.get(DesktopEntry.TERMINAL, False):
-            self.add_chip(AppChip.Terminal())
-
-        for c in chips:
-            self.add_chip(c)
-
-        self.connect('activated', lambda _: self.emit('file-open', file))
-
-    def add_chip(self, chip: AppChip):
-        self.chip_box.append(chip)
+        self.icon.set_opacity(.2 if self.file.get(DesktopEntry.NO_DISPLAY, False) else 1)
+        self.terminal_chip.set_visible(self.file.get(DesktopEntry.TERMINAL, False))
+        self.flatpak_chip.set_visible(self.file.get(DesktopEntry.X_FLATPAK, False))
+        self.snap_chip.set_visible(self.file.get(DesktopEntry.X_SNAP_INSTANCE_NAME, False))
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
@@ -131,7 +47,8 @@ def get_files_model(string_list: Gtk.StringList):
         return DesktopFile(Path(item.get_string()))
     
     def sort_files(first: DesktopFile, second: DesktopFile, data: None):
-        lt = first.get(DesktopEntry.NAME, '') < second.get(DesktopEntry.NAME, '') # type: ignore
+        lt = first.get(first.localize_current(DesktopEntry.NAME), '') < \
+            second.get(second.localize_current(DesktopEntry.NAME), '') # type: ignore
         return -1 if lt else 1
 
     return Gtk.SortListModel.new(
@@ -175,14 +92,12 @@ class AppListView(Adw.Bin):
 
         self.set_child(self.scrolled_window)
 
-    def bind_model(self, string_list: Gtk.StringList, show_pinned_chip: bool = False) -> None:
+    def bind_model(self, string_list: Gtk.StringList, show_pinned_chip=False) -> None:
         model = get_files_model(string_list)
         
         def create_row(file: DesktopFile):
-            row = AppRow(
-                file,
-                chips=[AppChip.Pinned()] if show_pinned_chip else [],
-            )
+            row = AppRow(file)
+            row.pinned_chip.set_visible(show_pinned_chip)
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
@@ -194,8 +109,8 @@ class AppListView(Adw.Bin):
             if self.get_child() != new_child:
                 self.set_child(new_child)
 
-        update_show_placeholder(model)        
         model.connect('items-changed', update_show_placeholder)
+        update_show_placeholder(model)        
 
     def set_filter(self, predicate: Callable[[AppRow], bool]):
         self.listbox.set_filter_func(predicate)
