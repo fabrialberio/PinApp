@@ -34,12 +34,6 @@ from gi.repository import Gtk, Gio, Adw, Gdk, GLib # type: ignore
 from .config import LOCALE_DIR, ICON_PATHS
 from .window import PinAppWindow, WindowPage, WindowTab
 
-bindtextdomain('pinapp', LOCALE_DIR)
-textdomain('pinapp')
-
-theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
-theme.set_search_path(theme.get_search_path() + [str(p) for p in ICON_PATHS])
-
 
 class PinApp(Adw.Application):  
     def __init__(self):
@@ -104,7 +98,12 @@ class PinApp(Adw.Application):
         self.add_action(action)
         self.set_accels_for_action(f'app.{name}', accels)
 
-
 def main(version):
+    bindtextdomain('pinapp', LOCALE_DIR)
+    textdomain('pinapp')
+
+    theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+    theme.set_search_path(theme.get_search_path() + [str(p) for p in ICON_PATHS])
+
     app = PinApp()
     return app.run(sys.argv)
