@@ -18,24 +18,6 @@
       <object class='GtkBox'>
         <property name='spacing'>6</property>
         <child>
-          <object class='GtkBox' id='pinned_chip'>
-            <property name='valign'>center</property>
-            <property name='spacing'>8</property>
-            <property name='visible'>false</property>
-            <property name='orientation'>horizontal</property>
-            <style>
-              <class name='chip-box' />
-              <class name='chip-yellow' />
-            </style>
-            <child>
-              <object class='GtkImage'>
-                <property name='icon-name'>view-pin-symbolic</property>
-                <property name='pixel-size'>16</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
           <object class='GtkBox' id='terminal_chip'>
             <property name='valign'>center</property>
             <property name='spacing'>8</property>
@@ -84,6 +66,24 @@
             <child>
               <object class='GtkImage'>
                 <property name='icon-name'>snap-symbolic</property>
+                <property name='pixel-size'>16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class='GtkBox' id='pinned_chip'>
+            <property name='valign'>center</property>
+            <property name='spacing'>8</property>
+            <property name='visible'>false</property>
+            <property name='orientation'>horizontal</property>
+            <style>
+              <class name='chip-box' />
+              <class name='chip-yellow' />
+            </style>
+            <child>
+              <object class='GtkImage'>
+                <property name='icon-name'>view-pin-symbolic</property>
                 <property name='pixel-size'>16</property>
               </object>
             </child>
