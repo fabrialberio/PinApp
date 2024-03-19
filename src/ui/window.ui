@@ -124,7 +124,7 @@
                       <object class='AdwViewStackPage'>
                         <property name='name'>search_tab</property>
                         <property name='child'>
-                          <object class='AppListView' id='search_tab'/>
+                          <object class='SearchView' id='search_tab'/>
                         </property>
                       </object>
                     </child>

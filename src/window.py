@@ -21,11 +21,10 @@ from gettext import gettext as _
 
 from gi.repository import Gtk, Adw, GLib # type: ignore
 
-from .config import USER_APPS, new_file_name
 from .desktop_file import DesktopFile, DesktopEntry
 from .file_page import FilePage # Required to initialize GObject
 from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
-from .apps_page import AppListView #, SearchView
+from .apps_page import AppListView, SearchView
 
 
 class WindowTab(Enum):
@@ -51,7 +50,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     view_stack: Adw.ViewStack = Gtk.Template.Child()
     pins_tab: AppListView = Gtk.Template.Child()
     installed_tab: AppListView = Gtk.Template.Child()
-    search_tab: AppListView = Gtk.Template.Child()
+    search_tab: SearchView = Gtk.Template.Child()
     search_bar: Gtk.SearchBar = Gtk.Template.Child()
     search_entry: Gtk.SearchEntry = Gtk.Template.Child()
     search_button: Gtk.Button = Gtk.Template.Child()
@@ -61,9 +60,9 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.pins_tab.bind_model(USER_POOL.files)
-        self.installed_tab.bind_model(SYSTEM_POOL.files)
-        #self.search_tab...
+        self.pins_tab.bind_string_list(USER_POOL.files)
+        self.installed_tab.bind_string_list(SYSTEM_POOL.files)
+        self.search_tab.bind_string_list(SEARCH_POOL.files)
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,
@@ -73,15 +72,21 @@ class PinAppWindow(Adw.ApplicationWindow):
                 icon_name='list-add-symbolic'
             )
         )
-        button.connect('clicked', lambda _: self.new_file())
-
         self.pins_tab.placeholder.set_child(button)
+        
+        def new_file(widget: Gtk.Widget):
+            self.new_file()
 
-        self.new_file_button.connect('clicked', lambda _: self.new_file())
+        button.connect('clicked', new_file)
+        self.new_file_button.connect('clicked', new_file)
 
-        self.pins_tab.connect('file-open', lambda _, f: self.open_file(f))
-        self.installed_tab.connect('file-open', lambda _, f: self.open_file(f))
-        #self.search_tab.connect('file-open', lambda _, f: self.open_file(f))
+        def open_file(widget: Gtk.Widget, file: DesktopFile):
+            self.file_page.load_file(file)
+            self.set_page(WindowPage.FILE_PAGE)
+
+        self.pins_tab.connect('file-open', open_file)
+        self.installed_tab.connect('file-open', open_file)
+        self.search_tab.connect('file-open', open_file)
 
         self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_pins())
@@ -93,22 +98,17 @@ class PinAppWindow(Adw.ApplicationWindow):
         help_overlay.set_transient_for(self)
         self.set_help_overlay(help_overlay)
 
-        user_pool_loaded = False
-        system_pool_loaded = False
-
-        def on_loaded(pool):
+        def on_pins_loaded(pool):
             if self.current_tab() == WindowTab.LOADING:
                 self.set_tab(self.last_tab)
+                self.header_bar.set_sensitive(True)
 
-            self.header_bar.set_sensitive(True)
-
-        USER_POOL.connect('loaded', on_loaded)
+        USER_POOL.connect('loaded', on_pins_loaded)
 
         self._init_search()
         self.reload_apps()
 
     def _init_search(self):
-        return
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.connect_entry(self.search_entry)
         self.search_tab.connect_entry(self.search_entry)
@@ -156,10 +156,6 @@ class PinAppWindow(Adw.ApplicationWindow):
             if self.current_tab() == WindowTab.SEARCH:
                 self.set_tab(self.last_tab)
             self.search_bar.set_search_mode(False)
-
-    def open_file(self, file):
-        self.file_page.load_file(file)
-        self.set_page(WindowPage.FILE_PAGE)
 
     def new_file(self):
         if self.current_page() != WindowPage.APPS_PAGE:
