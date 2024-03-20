@@ -60,7 +60,7 @@ class FilePage(Adw.Bin):
         if is_new_file:
             self.emit('file-leave')
         else:
-            self.load_path(pinned_path)
+            self.load_file(DesktopFile(pinned_path))
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
@@ -136,7 +136,7 @@ class FilePage(Adw.Bin):
 
                 if self.file.path.exists():
                     self.file.path.rename(new_path)
-                    self.load_path(new_path)
+                    self.load_file(DesktopFile(new_path))
                 else:
                     self.file.path = new_path
 
@@ -153,12 +153,8 @@ class FilePage(Adw.Bin):
 
         copy(self.file.path, new_path)
 
-        self.load_path(new_path)
+        self.load_file(DesktopFile(new_path))
         self.emit('file-changed')
-
-    def load_path(self, path: Path):
-        file = DesktopFile(path)
-        self.load_file(file)
 
     def load_file(self, file: DesktopFile):
         self.file = file
