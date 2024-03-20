@@ -5,6 +5,8 @@ from enum import Enum, auto
 from gi.repository import GObject, GLib, Gio # type: ignore
 from gi._gi import pygobject_new_full
 
+from .file_pool import USER_POOL
+
 
 def split_key_locale(key: str) -> tuple[str, Optional[str]]:
     if '[' in key and key.endswith(']'):
@@ -136,6 +138,9 @@ class DesktopFile(GObject.Object):
 
     def edited(self) -> bool:
         return self._saved_hash != hash(self)
+
+    def pinned(self) -> bool:
+        return self.path.parent in USER_POOL.dirs
 
     def save_as(self, path: Path):
         with path.open('w') as f:

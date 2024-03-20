@@ -38,9 +38,6 @@ class FilePool(GObject.Object):
 
         GLib.Thread.new('load_files', target)
 
-    def contains(self, path: Path) -> bool:
-        return path.parent in self.dirs
-
 GObject.signal_new('loaded', FilePool, GObject.SignalFlags.RUN_FIRST, None, ())
 
 

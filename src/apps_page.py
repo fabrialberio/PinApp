@@ -99,7 +99,7 @@ class AppListView(Adw.Bin):
                 return Adw.ActionRow()
 
             row = AppRow(file)
-            row.pinned_chip.set_visible(self.show_pinned_chip and USER_POOL.contains(file.path))
+            row.pinned_chip.set_visible(self.show_pinned_chip and file.pinned())
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
