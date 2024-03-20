@@ -51,28 +51,22 @@ class FilePage(Adw.Bin):
         '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
         assert self.file is not None
 
-        is_new_file = not self.file.path.exists()
         pinned_path = USER_POOL.new_file_path(self.file.path.stem)
 
         self.file.save_as(pinned_path)
         self.emit('file-changed')
 
-        if is_new_file:
-            self.emit('file-leave')
-        else:
-            self.load_file(DesktopFile(pinned_path))
+        self.load_file(DesktopFile(pinned_path))
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
         if self.allow_leave or self.file is None:
-            self.emit('file-leave')
             if callback is not None:
                 callback(self)
         else:
             if self.file.path.exists():
                 self.file.save()
                 self.emit('file-changed')
-                self.emit('file-leave')
 
                 if callback is not None:
                     callback(self)
@@ -83,7 +77,6 @@ class FilePage(Adw.Bin):
 
                 def on_resp(widget, resp):
                     if resp == 'discard':
-                        self.emit('file-leave')
                         if callback is not None:
                             callback(self)
                     elif resp == 'pin':
@@ -104,7 +97,6 @@ class FilePage(Adw.Bin):
         def callback(widget, resp):
             if resp == 'delete':
                 self.file.path.unlink()
-                self.emit('file-leave')
                 self.emit('file-changed')
 
         dialog.connect('response', callback)
@@ -213,7 +205,6 @@ class FilePage(Adw.Bin):
         dialog.show()
     """
 
-GObject.signal_new('file-leave', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('add-string-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
 GObject.signal_new('add-bool-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())

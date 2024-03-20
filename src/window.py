@@ -89,7 +89,6 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.search_tab.connect('file-open', open_file)
         self.navigation_view.connect('popped', lambda v, p: self.file_page.on_leave())
 
-        self.file_page.connect('file-leave', lambda _: self.set_page(WindowPage.APPS_PAGE))
         self.file_page.connect('file-changed', lambda _: self.reload_pins())
 
         self.connect('close-request', lambda _: self.do_close_request())
