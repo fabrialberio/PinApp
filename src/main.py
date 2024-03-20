@@ -60,7 +60,7 @@ class PinApp(Adw.Application):
 
             match window.current_page():
                 case WindowPage.FILE_PAGE:
-                    window.file_page.on_leave()
+                    window.set_page(WindowPage.APPS_PAGE)
                 case WindowPage.APPS_PAGE:
                     match window.current_tab():
                         case WindowTab.INSTALLED:

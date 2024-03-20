@@ -16,7 +16,6 @@ class FilePage(Adw.Bin):
 
     window_title = Gtk.Template.Child()
     header_bar = Gtk.Template.Child()
-    back_button = Gtk.Template.Child()
     pin_button = Gtk.Template.Child()
 
     file_menu_button = Gtk.Template.Child()
@@ -43,7 +42,6 @@ class FilePage(Adw.Bin):
 
         self.file = None
 
-        self.back_button.connect('clicked', lambda _: self.on_leave())
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
         self.rename_button.connect('clicked', lambda _: self.rename_file())
