@@ -52,10 +52,8 @@ class FilePage(Adw.Bin):
         assert self.file is not None
 
         pinned_path = USER_POOL.new_file_path(self.file.path.stem)
-
         self.file.save_as(pinned_path)
-        self.emit('file-changed')
-
+        
         self.load_file(DesktopFile(pinned_path))
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
@@ -66,8 +64,8 @@ class FilePage(Adw.Bin):
         else:
             if self.file.path.exists():
                 self.file.save()
-                self.emit('file-changed')
-
+                USER_POOL.load()
+                
                 if callback is not None:
                     callback(self)
             else:
@@ -97,7 +95,8 @@ class FilePage(Adw.Bin):
         def callback(widget, resp):
             if resp == 'delete':
                 self.file.path.unlink()
-                self.emit('file-changed')
+                USER_POOL.load()
+                self.emit('pop-request')
 
         dialog.connect('response', callback)
         dialog.set_transient_for(self.get_root())
@@ -132,7 +131,7 @@ class FilePage(Adw.Bin):
                 else:
                     self.file.path = new_path
 
-                self.emit('file-changed')
+                USER_POOL.load()
 
         dialog.connect('response', on_resp)
         dialog.set_transient_for(self.get_root())
@@ -146,7 +145,7 @@ class FilePage(Adw.Bin):
         copy(self.file.path, new_path)
 
         self.load_file(DesktopFile(new_path))
-        self.emit('file-changed')
+        USER_POOL.load()
 
     def load_file(self, file: DesktopFile):
         self.file = file
@@ -205,6 +204,4 @@ class FilePage(Adw.Bin):
         dialog.show()
     """
 
-GObject.signal_new('file-changed', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('add-string-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-GObject.signal_new('add-bool-field', FilePage, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+GObject.signal_new('pop-request', FilePage, GObject.SignalFlags.RUN_FIRST, GObject.TYPE_NONE, ())

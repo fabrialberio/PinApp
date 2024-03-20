@@ -88,8 +88,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.installed_tab.connect('file-open', open_file)
         self.search_tab.connect('file-open', open_file)
         self.navigation_view.connect('popped', lambda v, p: self.file_page.on_leave())
-
-        self.file_page.connect('file-changed', lambda _: self.reload_pins())
+        self.file_page.connect('pop-request', lambda w: self.set_page(WindowPage.APPS_PAGE))
 
         self.connect('close-request', lambda _: self.do_close_request())
 
@@ -106,7 +105,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         USER_POOL.connect('loaded', on_pins_loaded)
 
         self._init_search()
-        self.reload_apps()
+        self.load_apps()
 
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
@@ -173,11 +172,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.file_page.load_file(file)
         self.set_page(WindowPage.FILE_PAGE)
 
-    def reload_pins(self):
-        self.set_tab(WindowTab.PINS)
-        USER_POOL.load()
-
-    def reload_apps(self):
+    def load_apps(self):
         USER_POOL.load()
         SYSTEM_POOL.load()
         SEARCH_POOL.load()
