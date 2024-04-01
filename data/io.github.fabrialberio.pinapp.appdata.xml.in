@@ -8,6 +8,9 @@
 	<project_license>GPL-3.0-or-later</project_license>
 	<summary>Create and edit app shortcuts</summary>
     <developer_name translate="no">Fabrizio Alberio</developer_name>
+	<developer id="io.github.fabrialberio">
+		<name translate="no">Fabrizio Alberio</name>
+	</developer>
 	<description>
 		<p>PinApp is a simple application that lets you customize your app list.</p>
 		<p>Some of the possible uses are</p>
