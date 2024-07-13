@@ -121,15 +121,15 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkButton' id='add_field_button'>
-                    <property name='halign'>center</property>
+                  <object class='GtkListBox'>
+                    <property name='selection-mode'>none</property>
                     <style>
-                      <class name='pill' />
+                      <class name='boxed-list' />
                     </style>
                     <child>
-                      <object class='AdwButtonContent'>
-                        <property name='label' translatable='yes'>Add</property>
-                        <property name='icon-name'>list-add</property>
+                      <object class='AdwButtonRow' id='add_field_button'>
+                        <property name='title' translatable='yes'>Add field</property>
+                        <property name='start-icon-name'>list-add</property>
                       </object>
                     </child>
                   </object>
