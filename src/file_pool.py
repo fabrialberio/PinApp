@@ -22,16 +22,16 @@ class FilePool(GObject.Object):
 
     def load(self) -> None:
         def target():
-            loaded = [str(p) for dir in self.dirs for p in dir.rglob(self.glob_pattern)]
-            stored = [self.files.get_string(i) for i in range(self.files.get_n_items())]
+            loaded = set(str(p) for dir in self.dirs for p in dir.rglob(self.glob_pattern))
+            stored = set(self.files.get_string(i) for i in range(self.files.get_n_items()))
 
-            for p in set(stored) - set(loaded):
+            for p in stored - loaded:
                 for i in range(self.files.get_n_items()):
                     if self.files.get_string(i) == p:
                         self.files.remove(i)
                         break
 
-            for p in set(loaded) - set(stored):
+            for p in loaded - stored:
                 self.files.append(p)
 
             self.emit('loaded')
