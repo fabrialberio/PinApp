@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from shutil import copy
 from pathlib import Path
 from typing import Callable, Optional
@@ -8,6 +9,13 @@ from gettext import gettext as _
 from .desktop_file import DesktopFile, DesktopEntry, Field
 from .file_view import FileView
 from .file_pool import USER_POOL
+
+
+class FilePageState(Enum):
+    EMPTY = auto()
+    NEW_FILE = auto()
+    LOADED_PINNED = auto()
+    LOADED_SYSTEM = auto()
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
@@ -26,21 +34,12 @@ class FilePage(Adw.Bin):
     toolbar_view = Gtk.Template.Child()
     file_view: Optional[FileView]
     
+    file: Optional[DesktopFile] = None
+    file_state = FilePageState.EMPTY
     banner_expanded = True
-    file: DesktopFile
-
-    @property
-    def allow_leave(self) -> bool:
-        if self.file is not None:
-            return not self.file.edited()
-        else:
-            return True
-
 
     def __init__(self):
         super().__init__()
-
-        self.file = None
 
         self.pin_button.connect('clicked', lambda _: self.pin_file())
         self.unpin_button.connect('clicked', lambda _: self.unpin_file())
@@ -48,37 +47,36 @@ class FilePage(Adw.Bin):
         self.duplicate_button.connect('clicked', lambda _: self.duplicate_file())
 
     def pin_file(self):
-        '''Saves a file to the user folder. Used when the file does not exist or it does not have write access.'''
-        assert self.file is not None
-
-        pinned_path = USER_POOL.new_file_path(self.file.path.stem)
-        self.file.save_as(pinned_path)
-        
-        self.load_file(DesktopFile(pinned_path))
+        '''Copies a file to the user folder.'''
+        match self.file_state:
+            case FilePageState.LOADED_SYSTEM:
+                pinned_path = USER_POOL.new_file_path(self.file.path.stem) # type: ignore
+                self.file.save_as(pinned_path) # type: ignore
+                self.load_file(DesktopFile(pinned_path))
+            case _:
+                raise ValueError(f'Cannot pin `DesktopFile` at "{self.file.path}", it is already pinned.') # type: ignore
 
     def on_leave(self, callback: 'Optional[Callable[[FilePage], None]]' = None):
         '''Called when the page is about to be closed, e.g. when `Escape` is pressed or when the app is closed'''
-        if self.allow_leave or self.file is None:
-            if callback is not None:
-                callback(self)
-        else:
-            if self.file.path.exists():
-                self.file.save()
-                USER_POOL.load()
-                
+        match self.file_state:
+            case FilePageState.EMPTY:
                 if callback is not None:
                     callback(self)
-            else:
+            case FilePageState.NEW_FILE | FilePageState.LOADED_PINNED:
+                self.file.save() # type: ignore
+                USER_POOL.load()
+
+                if callback is not None:
+                    callback(self)
+            case FilePageState.LOADED_SYSTEM:
                 builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
 
                 dialog = builder.get_object('save_changes_dialog')
 
                 def on_resp(widget, resp):
-                    if resp == 'discard':
-                        if callback is not None:
-                            callback(self)
-                    elif resp == 'pin':
+                    if resp == 'pin':
                         self.pin_file()
+                    if resp == 'pin' or resp == 'discard':
                         if callback is not None:
                             callback(self)
 
@@ -87,34 +85,42 @@ class FilePage(Adw.Bin):
                 dialog.present()
 
     def unpin_file(self):
-        '''Deletes a file. It is used when the file has write access.'''
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
-        
-        dialog = builder.get_object('confirm_delete_dialog')
+        '''Deletes a pinned file.'''
+        match self.file_state:
+            case FilePageState.LOADED_PINNED:
+                builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
 
-        def callback(widget, resp):
-            if resp == 'delete':
-                self.file.path.unlink()
-                USER_POOL.load()
-                self.emit('pop-request')
+                dialog = builder.get_object('confirm_delete_dialog')
 
-        dialog.connect('response', callback)
-        dialog.set_transient_for(self.get_root())
-        dialog.present()
+                def callback(widget, resp):
+                    if resp == 'delete':
+                        self.file.path.unlink() # type: ignore
+                        USER_POOL.load()
+                        self.emit('pop-request')
+
+                dialog.connect('response', callback)
+                dialog.set_transient_for(self.get_root())
+                dialog.present()
+            case _:
+                raise ValueError(f'Cannot unpin `DesktopFile` at "{self.file.path}", it is not pinned.') # type: ignore
 
     def rename_file(self):
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
-        dialog = builder.get_object('rename_dialog')
-        name_entry = builder.get_object('name_entry')
-        name_entry.set_text(self.file.path.stem)
+        match self.file_state:
+            case FilePageState.NEW_FILE | FilePageState.LOADED_PINNED:
+                builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
+                dialog = builder.get_object('rename_dialog')
+                name_entry = builder.get_object('name_entry')
+                name_entry.set_text(self.file.path.stem) # type: ignore
+            case _:
+                raise ValueError(f'Cannot rename `DesktopFile` at "{self.file.path}"') # type: ignore
 
-        def get_path():
-            return USER_POOL.default_dir / Path(f'{Path(name_entry.get_text())}.desktop')
+        def get_new_path(name: str):
+            return USER_POOL.default_dir / Path(f'{Path(name)}.desktop')
 
         def path_is_valid() -> bool:
-            path = name_entry.get_text()
+            name = name_entry.get_text()
 
-            return '/' not in path and not get_path().exists()
+            return '/' not in name and not get_new_path(name).exists()
 
         name_entry.connect('changed', lambda _: dialog.set_response_enabled(
             'rename',
@@ -123,13 +129,13 @@ class FilePage(Adw.Bin):
 
         def on_resp(widget, resp):
             if resp == 'rename':
-                new_path = get_path()
+                new_path = get_new_path(name_entry.get_text())
 
-                if self.file.path.exists():
-                    self.file.path.rename(new_path)
+                if self.file.path.exists(): # type: ignore
+                    self.file.path.rename(new_path) # type: ignore
                     self.load_file(DesktopFile(new_path))
                 else:
-                    self.file.path = new_path
+                    self.file.path = new_path # type: ignore
 
                 USER_POOL.load()
 
@@ -147,21 +153,30 @@ class FilePage(Adw.Bin):
         self.load_file(DesktopFile(new_path))
         USER_POOL.load()
 
-    def load_file(self, file: DesktopFile):
+    def load_file(self, file: DesktopFile, is_new = False):
         self.file = file
 
-        is_pinned = self.file.path.parent == USER_POOL.default_dir
-        self.file_menu_button.set_visible(is_pinned)
-        self.pin_button.set_visible(not is_pinned)
+        if is_new:
+            self.file_state = FilePageState.NEW_FILE
+        elif file.pinned():
+            self.file_state = FilePageState.LOADED_PINNED
+        else:
+            self.file_state = FilePageState.LOADED_SYSTEM
 
-        self.duplicate_button.set_sensitive(self.file.path.exists())
-        self.unpin_button.set_sensitive(self.file.path.exists())
-
-        file_view = FileView()
-        file_view.set_file(file)
+        file_view = FileView(file)
         self.toolbar_view.set_content(file_view)
-        self.window_title.set_title(self.file.get(DesktopEntry.NAME, ''))
-        
+        self.pin_button.set_visible(self.file_state != FilePageState.LOADED_PINNED)
+        self.file_menu_button.set_visible(self.file_state != FilePageState.LOADED_SYSTEM)
+
+        match self.file_state:
+            case FilePageState.NEW_FILE:
+                self.unpin_button.set_sensitive(False)
+                self.duplicate_button.set_sensitive(False)
+            case FilePageState.LOADED_PINNED | FilePageState.LOADED_SYSTEM:
+                self.unpin_button.set_sensitive(True)
+                self.duplicate_button.set_sensitive(True)
+                self.window_title.set_title(self.file.get(DesktopEntry.NAME, '')) # type: ignore
+
         def update_title_visible(adjustment: Gtk.Adjustment):
             self.header_bar.set_show_title(adjustment.get_value() > 0)
 

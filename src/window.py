@@ -87,6 +87,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.pins_tab.connect('file-open', open_file)
         self.installed_tab.connect('file-open', open_file)
         self.search_tab.connect('file-open', open_file)
+        # TODO: Is 'popped' the right signal?
         self.navigation_view.connect('popped', lambda v, p: self.file_page.on_leave())
         self.file_page.connect('pop-request', lambda w: self.set_page(WindowPage.APPS_PAGE))
 
@@ -117,17 +118,16 @@ class PinAppWindow(Adw.ApplicationWindow):
             if self.search_bar.get_search_mode() is True and self.current_tab() != WindowTab.SEARCH:
                 self.search_bar.set_search_mode(False)
 
-        self.search_entry.connect(
-            'search-changed', lambda e: self.set_search_mode(True))
-        self.search_button.connect(
-            'toggled', lambda b: self.set_search_mode(b.get_active()))
+        self.search_entry.connect('search-changed', lambda e: self.set_search_mode(True))
+        self.search_button.connect('toggled', lambda b: self.set_search_mode(b.get_active()))
         self.view_stack.connect('notify', tab_changed_cb)
 
     def set_page(self, new_page: WindowPage):
-        if new_page == WindowPage.APPS_PAGE:
-            self.navigation_view.pop_to_tag(WindowPage.APPS_PAGE.value)
-        elif new_page == WindowPage.FILE_PAGE:
-            self.navigation_view.push_by_tag(WindowPage.FILE_PAGE.value)
+        match new_page:
+            case WindowPage.APPS_PAGE:
+                self.navigation_view.pop_to_tag(WindowPage.APPS_PAGE.value)
+            case WindowPage.FILE_PAGE:
+                self.navigation_view.push_by_tag(WindowPage.FILE_PAGE.value)
 
     def current_page(self) -> WindowPage:
         return WindowPage(self.navigation_view.get_visible_page().get_tag())
@@ -169,7 +169,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         file.set(DesktopEntry.EXEC, DesktopEntry.EXEC.default_value())
         file.set(DesktopEntry.ICON, DesktopEntry.ICON.default_value())
 
-        self.file_page.load_file(file)
+        self.file_page.load_file(file, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)
 
     def load_apps(self):
@@ -184,14 +184,13 @@ class PinAppWindow(Adw.ApplicationWindow):
             self.destroy()
 
         if self.current_page() == WindowPage.FILE_PAGE:
+            # TODO: Fix this
             if self.file_page.allow_leave:
                 self.close()
                 quit()
                 return False
             else:
                 def callback(_):
-                    global block_close
-                    block_close = False
                     quit()
 
                 self.file_page.on_leave(callback=callback)
