@@ -72,6 +72,13 @@ class WritableFilePool(FilePool):
             for f in dir.glob(old_name):
                 f.rename(f.with_name(new_name))
 
+TMP_POOL = WritableFilePool(
+    dirs = [
+        Path(GLib.get_tmp_dir())
+    ],
+    glob_pattern = '*.desktop'
+)
+
 USER_POOL = WritableFilePool(
     dirs = [
         USER_DATA / 'applications',

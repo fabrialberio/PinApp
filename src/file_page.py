@@ -8,7 +8,7 @@ from gettext import gettext as _
 
 from .desktop_file import DesktopFile, DesktopEntry, Field
 from .file_view import FileView
-from .file_pool import USER_POOL
+from .file_pool import TMP_POOL, USER_POOL
 
 
 class FilePageState(Enum):
@@ -115,7 +115,13 @@ class FilePage(Adw.Bin):
                 raise ValueError(f'Cannot rename `DesktopFile` at "{self.file.path}"') # type: ignore
 
         def get_new_path(name: str):
-            return USER_POOL.default_dir / Path(f'{Path(name)}.desktop')
+            match self.file_state:
+                case FilePageState.NEW_FILE:
+                    dir = TMP_POOL.default_dir
+                case FilePageState.LOADED_PINNED:
+                    dir = USER_POOL.default_dir
+
+            return dir / Path(f'{Path(name)}.desktop')
 
         def path_is_valid() -> bool:
             name = name_entry.get_text()
@@ -132,6 +138,7 @@ class FilePage(Adw.Bin):
                 new_path = get_new_path(name_entry.get_text())
 
                 if self.file.path.exists(): # type: ignore
+                    self.file.save() # type: ignore
                     self.file.path.rename(new_path) # type: ignore
                     self.load_file(DesktopFile(new_path))
                 else:

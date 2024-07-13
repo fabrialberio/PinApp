@@ -23,7 +23,7 @@ from gi.repository import Gtk, Adw, GLib # type: ignore
 
 from .desktop_file import DesktopFile, DesktopEntry
 from .file_page import FilePage # Required to initialize GObject
-from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .file_pool import TMP_POOL, USER_POOL, SYSTEM_POOL, SEARCH_POOL
 from .apps_page import AppListView, SearchView
 
 
@@ -160,7 +160,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.current_page() != WindowPage.APPS_PAGE:
             return
 
-        tmp_path = Path(GLib.get_tmp_dir()) / 'pinned-app'
+        tmp_path = TMP_POOL.new_file_path('pinned-app')
         tmp_path.touch()
 
         file = DesktopFile(tmp_path)
