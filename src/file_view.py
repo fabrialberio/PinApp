@@ -297,12 +297,13 @@ class FileView(Adw.BreakpointBin):
     hidden_toggle: Gtk.ToggleButton = Gtk.Template.Child()
     terminal_toggle: Gtk.ToggleButton = Gtk.Template.Child()
     fields_listbox: Adw.PreferencesGroup = Gtk.Template.Child()
-    add_field_button: Gtk.Button = Gtk.Template.Child()
+    add_field_button: Adw.ButtonRow = Gtk.Template.Child()
 
-    def __init__(self):
+    def __init__(self, file: DesktopFile):
         super().__init__()
 
-        self.add_field_button.connect('clicked', lambda b: self.show_add_field_dialog())
+        self.set_file(file)
+        self.add_field_button.connect('activated', lambda b: self.show_add_field_dialog())
         
     def set_file(self, file: DesktopFile):
         self.file = file
