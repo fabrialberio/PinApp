@@ -125,7 +125,8 @@ class PinAppWindow(Adw.ApplicationWindow):
     def set_page(self, new_page: WindowPage):
         match new_page:
             case WindowPage.APPS_PAGE:
-                self.navigation_view.pop_to_tag(WindowPage.APPS_PAGE.value)
+                if self.navigation_view.find_page(WindowPage.FILE_PAGE.value).get_can_pop():
+                    self.navigation_view.pop_to_tag(WindowPage.APPS_PAGE.value)
             case WindowPage.FILE_PAGE:
                 self.navigation_view.push_by_tag(WindowPage.FILE_PAGE.value)
 
