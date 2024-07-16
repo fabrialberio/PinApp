@@ -166,6 +166,18 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
+    def get_bool(self, field: Field, default: Optional[bool] = None) -> Optional[bool]:
+        try:
+            return self._key_file.get_boolean(field.group, field.key)
+        except GLib.GError:
+            return default
+
+    def get_str(self, field: Field, default: Optional[str] = None) -> Optional[str]:
+        try:
+            return self._key_file.get_string(field.group, field.key)
+        except GLib.GError:
+            return default
+
     def localize_current(self, field: Field) -> Field:
         return field.localize(self._key_file.get_locale_for_key(field.group, field.key))
 
@@ -178,6 +190,16 @@ class DesktopFile(GObject.Object):
             case FieldType.STRING_LIST | FieldType.LOCALIZED_STRING_LIST:
                 self._key_file.set_string_list(field.group, field.key, value)
 
+        self.emit('field-set', field, value)
+        self._add_to_model(field)
+
+    def set_bool(self, field: Field, value: bool) -> None:
+        self._key_file.set_boolean(field.group, field.key, value)
+        self.emit('field-set', field, value)
+        self._add_to_model(field)
+
+    def set_str(self, field: Field, value: str) -> None:
+        self._key_file.set_string(field.group, field.key, value)
         self.emit('field-set', field, value)
         self._add_to_model(field)
 
