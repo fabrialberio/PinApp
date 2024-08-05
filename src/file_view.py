@@ -69,7 +69,9 @@ class FieldRow(Adw.EntryRow):
     def update_appearance(self):
         field_value = self.file.get_str(self.field, None)
 
-        if self._field_state == field_value == self.get_text(): # Everything is up-to-date
+        if field_value is None:
+            ...
+        elif self._field_state == field_value == self.get_text(): # Everything is up-to-date
             ...
         elif self._field_state == self.get_text():              # Field has been changed externally
             self.set_text(field_value)
