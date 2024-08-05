@@ -151,6 +151,13 @@ class DesktopFile(GObject.Object):
     def save(self):
         self.save_as(self.path)
 
+    def has_field(self, field: Field) -> bool:
+        try:
+            self._key_file.get_value(field.group, field.key)
+            return True
+        except GLib.GError:
+            return False
+
     def __getitem__(self, field: Field) -> FT:
         match field.field_type:
             case FieldType.BOOL:
@@ -166,13 +173,13 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
-    def get_bool(self, field: Field, default: Optional[bool] = None) -> Optional[bool]:
+    def get_bool[D](self, field: Field, default: D = False) -> bool | D:
         try:
             return self._key_file.get_boolean(field.group, field.key)
         except GLib.GError:
             return default
 
-    def get_str(self, field: Field, default: Optional[str] = None) -> Optional[str]:
+    def get_str[D](self, field: Field, default: D = '') -> str | D:
         try:
             return self._key_file.get_string(field.group, field.key)
         except GLib.GError:
