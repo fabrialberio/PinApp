@@ -1,4 +1,4 @@
-from typing import Optional, Protocol
+from typing import Optional
 from gettext import gettext as _
 
 from gi.repository import Adw, Gtk, GObject # type: ignore
@@ -18,7 +18,7 @@ class RemoveButton(Gtk.Button):
         )
         self.add_css_class('flat')
 
-class FieldRow(Adw.EntryRow):
+class StrinRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
     file: DesktopFile
@@ -52,7 +52,7 @@ class FieldRow(Adw.EntryRow):
         self.set_title(self.field.key)
         self.set_text(self.file.get_str(self.field))
 
-        def on_text_changed(editable: FieldRow):
+        def on_text_changed(editable: StrinRow):
             self.update_appearance()
 
         def on_field_set(file: DesktopFile, field_: Field, value: str):
@@ -82,7 +82,7 @@ class FieldRow(Adw.EntryRow):
 
         self.remove_button.set_visible(self.removable and not self.get_text())
 
-class BoolOrStringRow(FieldRow):
+class BoolOrStringRow(StrinRow):
     __gtype_name__ = 'BoolOrStringRow'
 
     switch: Gtk.Switch
@@ -215,7 +215,7 @@ class LocaleButton(Gtk.MenuButton):
 
 GObject.signal_new('changed', LocaleButton, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))
 
-class LocaleStringRow(FieldRow):
+class LocaleStringRow(StrinRow):
     __gtype_name__ = 'LocaleStringRow'
 
     locale: Optional[str] = None
@@ -310,7 +310,7 @@ class FileView(Adw.BreakpointBin):
     __gtype_name__ = 'FileView'
 
     file: DesktopFile
-    field_row_map: dict[Field, FieldRow] = {}
+    field_row_map: dict[Field, StrinRow] = {}
 
     scrolled_window: Gtk.ScrolledWindow = Gtk.Template.Child()
     icon: Gtk.Image = Gtk.Template.Child()
@@ -347,7 +347,7 @@ class FileView(Adw.BreakpointBin):
 
             return True
 
-        def create_row(field: Field) -> FieldRow:
+        def create_row(field: Field) -> StrinRow:
             if self.file.locales(field):
                 row = LocaleStringRow()
             else:
@@ -361,7 +361,7 @@ class FileView(Adw.BreakpointBin):
                 )
                 button.add_css_class('flat')
 
-                def update_icon(row: FieldRow):
+                def update_icon(row: StrinRow):
                     set_icon_from_name(self.icon, row.get_text())
 
                 def show_choose_icon_dialog(button: Gtk.Button):
