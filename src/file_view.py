@@ -18,62 +18,18 @@ class RemoveButton(Gtk.Button):
         )
         self.add_css_class('flat')
 
-class FieldRow(Protocol):
-    file: DesktopFile
-    field: Field
-
-    def set_field(self, file: DesktopFile, field: Field) -> None:
-        ...
-
-class BoolRow(Adw.ActionRow):
-    __gtype_name__ = 'BoolRow'
-
-    file: DesktopFile
-    field: Field
-    switch: Gtk.Switch
-
-    def __init__(self) -> None:
-        self.switch = Gtk.Switch(
-            active=False,
-            valign=Gtk.Align.CENTER,
-        )
-        super().__init__(activatable_widget=self.switch)
-
-        remove_button = RemoveButton()
-        remove_button.connect('clicked', lambda w: self.remove_field())
-        self.add_suffix(remove_button)
-        self.add_suffix(self.switch)
-
-    def set_field(self, file: DesktopFile, field: Field) -> None:
-        self.file = file
-        self.field = field
-        self.set_title(field.key)
-        self.switch.set_active(self.file[self.field])
-
-        def update_field(switch: Gtk.Switch, value: bool):
-            self.file.set(self.field, value)
-
-        def update_state(file: DesktopFile, field: Field, value: bool):
-            if field == self.field and value != self.switch.get_active():
-                self.switch.set_active(value)
-
-        self.switch.connect('state-set', update_field)
-        file.connect('field-set', update_state)
-
-    def remove_field(self):
-        self.file.remove(self.field)
-
-class StringRow(Adw.EntryRow):
+class FieldRow(Adw.EntryRow):
     __gtype_name__ = 'StringRow'
 
     file: DesktopFile
     field: Field
     remove_button: Gtk.Button
     _removable: bool = True
+    _field_state: str
 
     @GObject.Property(type=bool, default=True)
     def removable(self) -> bool: # type: ignore
-        return self._removable and self.file.get(self.field, False)
+        return self._removable and self.file.has_field(self.field)
     
     @removable.setter
     def removable(self, value: bool):
@@ -84,31 +40,91 @@ class StringRow(Adw.EntryRow):
 
         self._removable = removable
         self.remove_button = RemoveButton()
-        self.remove_button.connect('clicked', lambda w: self.remove_field())
+        self.remove_button.connect('clicked', lambda w: self.on_remove_button_clicked())
 
-        self.connect('changed', lambda w: self.update_remove_button_visible())
         self.add_suffix(self.remove_button)
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
         self.file = file
         self.field = field
+        self._field_state = self.file.get_str(self.field)
+
         self.set_title(self.field.key)
-        self.set_text(self.file.get(self.field, ''))
+        self.set_text(self.file.get_str(self.field))
 
-        def update_field(widget: StringRow):
-            self.file.set(self.field, self.get_text())
+        def on_text_changed(editable: FieldRow):
+            self.update_appearance()
 
-        self.connect('changed', update_field)
-        self.update_remove_button_visible()
+        def on_field_set(file: DesktopFile, field_: Field, value: str):
+            if field_ == self.field:
+                self.update_appearance()
 
-    def remove_field(self):
+        self.connect('changed', on_text_changed)
+        self.file.connect('field-set', on_field_set)
+        self.update_appearance()
+
+    def on_remove_button_clicked(self):
         self.file.remove(self.field)
 
-    def update_remove_button_visible(self):
-        if self.removable:
-            self.remove_button.set_visible(not self.get_text())
-        else:
-            self.remove_button.set_visible(False)
+    def update_appearance(self):
+        field_value = self.file.get_str(self.field, None)
+
+        if self._field_state == field_value == self.get_text(): # Everything is up-to-date
+            ...
+        elif self._field_state == self.get_text():              # Field has been changed externally
+            self.set_text(field_value)
+            self._field_state = field_value
+        elif self._field_state == field_value:                  # Text has been changed by user
+            self.file.set_str(self.field, self.get_text())
+            self._field_state = self.get_text()
+
+        self.remove_button.set_visible(self.removable and not self.get_text())
+
+class BoolOrStringRow(FieldRow):
+    __gtype_name__ = 'BoolOrStringRow'
+
+    switch: Gtk.Switch
+    _field_bool_state: bool
+
+    def __init__(self, removable: bool = True) -> None:
+        super().__init__(removable)
+
+        self.switch = Gtk.Switch(
+            valign=Gtk.Align.CENTER,
+            visible=False,
+        )
+        self.add_suffix(self.switch)
+
+    def set_field(self, file: DesktopFile, field: Field) -> None:
+        self._field_bool_state = file.get_bool(field)        
+        self.switch.set_active(file.get_bool(field))
+        
+        super().set_field(file, field)  
+
+        def on_switch_toggled(switch: Gtk.Switch, value: bool):
+            self.update_appearance()
+
+        self.switch.connect('state-set', on_switch_toggled)
+        self.update_appearance()
+
+    def update_appearance(self):
+        super().update_appearance()
+
+        field_bool_value = self.file.get_bool(self.field, None)
+
+        if field_bool_value is None:
+            ...
+        elif field_bool_value == self._field_bool_state == self.switch.get_active():  # Everything is up-to-date
+            ...
+        elif self._field_bool_state == self.switch.get_active():                    # Field has been changed externally
+            self.switch.set_active(field_bool_value)
+            self._field_bool_state = field_bool_value
+        elif self._field_bool_state == field_bool_value:                            # Switch has been changed by user
+            self.file.set_bool(self.field, self.switch.get_active())
+            self._field_bool_state = self.switch.get_active()
+
+        self.switch.set_visible(field_bool_value is not None)
+        self.remove_button.set_visible(self.removable and (self.switch.get_visible() or not self.get_text()))
 
 class LocaleButton(Gtk.MenuButton):
     __gtype_name__ = 'LocaleSelectButton'
@@ -197,7 +213,7 @@ class LocaleButton(Gtk.MenuButton):
 
 GObject.signal_new('changed', LocaleButton, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))
 
-class LocaleStringRow(StringRow):
+class LocaleStringRow(FieldRow):
     __gtype_name__ = 'LocaleStringRow'
 
     locale: Optional[str] = None
@@ -224,14 +240,16 @@ class LocaleStringRow(StringRow):
         self.set_text(self.file.get(self.field, ''))
         self.update_remove_button_visible()
 
-    def remove_field(self):
+    def on_remove_button_clicked(self):
         self.file.remove(self.field)
 
         if self.locale is not None and self.file.locales(self.locale_field):
             self.locale_select.set_selected(None)
             #self.locale_select.set_field(self.file, self.locale_field)
 
-    def update_remove_button_visible(self):
+    def update_appearance(self):
+        super().update_appearance()
+
         if self.locale is not None:
             self.remove_button.set_visible(not self.get_text())
         elif self.locale is None and self.removable and not self.file.locales(self.locale_field):
@@ -326,18 +344,15 @@ class FileView(Adw.BreakpointBin):
             return True
 
         def create_row(field: Field) -> FieldRow:
-            if field.localize(None) in DesktopEntry.fields:
+            if self.file.locales(field):
+                field.field_type = FieldType.LOCALIZED_STRING
+            elif field.localize(None) in DesktopEntry.fields:
                 index = DesktopEntry.fields.index(field.localize(None))
                 field.field_type = DesktopEntry.fields[index].field_type
 
-            if self.file.locales(field):
-                field.field_type = FieldType.LOCALIZED_STRING
-
             match field.field_type:
-                case FieldType.BOOL:
-                    row = BoolRow()
-                case FieldType.STRING | FieldType.STRING_LIST:
-                    row = StringRow()
+                case FieldType.BOOL | FieldType.STRING | FieldType.STRING_LIST:
+                    row = BoolOrStringRow()
                     field.field_type = FieldType.STRING
                 case FieldType.LOCALIZED_STRING | FieldType.LOCALIZED_STRING_LIST:
                     row = LocaleStringRow()
@@ -351,7 +366,7 @@ class FileView(Adw.BreakpointBin):
                 )
                 button.add_css_class('flat')
 
-                def update_icon(row: StringRow):
+                def update_icon(row: FieldRow):
                     set_icon_from_name(self.icon, row.get_text())
 
                 def show_choose_icon_dialog(button: Gtk.Button):
@@ -391,21 +406,21 @@ class FileView(Adw.BreakpointBin):
         dialog.present()
 
     def _connect_toggle(self, button: Gtk.ToggleButton, field: Field):
-        button.set_active(self.file.get(field, False))
-
         def update_field(button: Gtk.ToggleButton):
-            self.file.set(field, button.get_active())
+            self.file.set_bool(field, button.get_active())
 
         def update_style(button: Gtk.ToggleButton, pspec: GObject.ParamSpec):
+            # TODO: Replace with accent to support custom accent colors
             if button.get_active():
                 button.add_css_class('pill-toggle-active')
             else:
                 button.remove_css_class('pill-toggle-active')
 
-        def update_toggled(file: DesktopFile, field_: Field, value=False):
-            if field_ == field and value != button.get_active():
-                button.set_active(value)
+        def update_toggled(file: DesktopFile, field_: Field, value_: bool = False):
+            if field_ == field:
+                button.set_active(self.file.get_bool(field))
 
+        update_toggled(self.file, field, False)
         update_style(button, None)
         button.connect('toggled', update_field)
         button.connect('notify::active', update_style)
