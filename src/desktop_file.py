@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Optional
-from enum import Enum, auto
 
 from gi.repository import GObject, GLib, Gio # type: ignore
 from gi._gi import pygobject_new_full
@@ -21,9 +20,6 @@ def localize_key(key: str, locale: Optional[str]) -> str:
         return f"{ukey}[{locale}]"
     return ukey
 
-
-FT = bool | str | list[str]
-LT = str | list[str]
 
 class Field(GObject.Object):
     group: str
@@ -144,11 +140,8 @@ class DesktopFile(GObject.Object):
         self.save_as(self.path)
 
     def has_field(self, field: Field) -> bool:
-        try:
-            self._key_file.get_value(field.group, field.key)
-            return True
-        except GLib.GError:
-            return False
+        found, index = self._find_in_model(field)
+        return found
 
     def get_bool[D](self, field: Field, default: D = False) -> bool | D:
         try:
