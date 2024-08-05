@@ -3,7 +3,7 @@ from gettext import gettext as _
 
 from gi.repository import Adw, Gtk, GObject # type: ignore
 
-from .desktop_file import DesktopFile, DesktopEntry, Field, FieldType
+from .desktop_file import DesktopFile, DesktopEntry, Field
 from .config import set_icon_from_name
 
 
@@ -239,7 +239,7 @@ class LocaleStringRow(FieldRow):
     def set_locale(self, locale: Optional[str]):
         self.locale = locale
         self.field = self.locale_field.localize(locale)
-        self.set_text(self.file.get(self.field, ''))
+        self.set_text(self.file.get_str(self.field))
         self.update_remove_button_visible()
 
     def on_remove_button_clicked(self):
@@ -261,6 +261,8 @@ class LocaleStringRow(FieldRow):
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/dialog_add_field.ui')
 class AddFieldDialog(Adw.MessageDialog):
+    # TODO: Update for new field rows
+
     __gtype_name__ = 'AddFieldDialog'
 
     type_combo_row: Adw.ComboRow = Gtk.Template.Child()
@@ -286,13 +288,13 @@ class AddFieldDialog(Adw.MessageDialog):
                 key = self.key_entry.get_text()
 
                 if self.type_combo_row.get_selected() == 0:
-                    self.emit('add', Field(DesktopEntry.group, key, FieldType.BOOL), None)
+                    self.emit('add', Field(DesktopEntry.group, key), None)
                 elif self.type_combo_row.get_selected() == 1:
-                    self.emit('add', Field(DesktopEntry.group, key, FieldType.STRING), None)
+                    self.emit('add', Field(DesktopEntry.group, key), None)
                 else:
                     self.emit(
                         'add',
-                        Field(DesktopEntry.group, key, FieldType.LOCALIZED_STRING),
+                        Field(DesktopEntry.group, key),
                         self.locale_entry.get_text()
                     )
 
@@ -328,7 +330,7 @@ class FileView(Adw.BreakpointBin):
     def set_file(self, file: DesktopFile):
         self.file = file
 
-        set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, ''))
+        set_icon_from_name(self.icon, self.file.get_str(DesktopEntry.ICON))
         self._connect_toggle(self.hidden_toggle, DesktopEntry.NO_DISPLAY)
         self._connect_toggle(self.terminal_toggle, DesktopEntry.TERMINAL)
 
@@ -347,19 +349,10 @@ class FileView(Adw.BreakpointBin):
 
         def create_row(field: Field) -> FieldRow:
             if self.file.locales(field):
-                field.field_type = FieldType.LOCALIZED_STRING
-            elif field.localize(None) in DesktopEntry.fields:
-                index = DesktopEntry.fields.index(field.localize(None))
-                field.field_type = DesktopEntry.fields[index].field_type
+                row = LocaleStringRow()
+            else:
+                row = BoolOrStringRow()
 
-            match field.field_type:
-                case FieldType.BOOL | FieldType.STRING | FieldType.STRING_LIST:
-                    row = BoolOrStringRow()
-                    field.field_type = FieldType.STRING
-                case FieldType.LOCALIZED_STRING | FieldType.LOCALIZED_STRING_LIST:
-                    row = LocaleStringRow()
-                    field.field_type = FieldType.LOCALIZED_STRING
-            
             if field == DesktopEntry.ICON:
                 button = Gtk.Button(
                     valign=Gtk.Align.CENTER,
@@ -394,13 +387,12 @@ class FileView(Adw.BreakpointBin):
         dialog = AddFieldDialog()
 
         def add_field(widget: AddFieldDialog, field: Field, locale: str):
-            if field.field_type in (FieldType.LOCALIZED_STRING, FieldType.LOCALIZED_STRING_LIST):
-                if locale is not None:
-                    if field not in self.file.fields:
-                        self.file.set(field, field.default_value())
-                    field = field.localize(locale)
+            if locale is not None:
+                if not self.file.has_field(field):
+                    self.file.set_str(field, '')
+                field = field.localize(locale)
 
-            self.file.set(field, field.default_value())
+            self.file.set_str(field, '')
             self.set_file(self.file)
 
         dialog.connect('add', add_field)

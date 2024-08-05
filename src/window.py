@@ -165,10 +165,10 @@ class PinAppWindow(Adw.ApplicationWindow):
         tmp_path.touch()
 
         file = DesktopFile(tmp_path)
-        file.set(DesktopEntry.NAME, _('New application'))
-        file.set(DesktopEntry.TYPE, 'Application')
-        file.set(DesktopEntry.EXEC, DesktopEntry.EXEC.default_value())
-        file.set(DesktopEntry.ICON, DesktopEntry.ICON.default_value())
+        file.set_str(DesktopEntry.NAME, _('New application'))
+        file.set_str(DesktopEntry.TYPE, 'Application')
+        file.set_str(DesktopEntry.EXEC, '')
+        file.set_str(DesktopEntry.ICON, '')
 
         self.file_page.load_file(file, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)

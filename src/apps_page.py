@@ -29,17 +29,15 @@ class AppRow(Adw.ActionRow):
         self.update()
 
     def update(self):
-        self.set_title(escape_xml(self.file.get(
-            self.file.localize_current(DesktopEntry.NAME), ''))) # type: ignore
-        self.set_subtitle(escape_xml(self.file.get(
-            self.file.localize_current(DesktopEntry.COMMENT), ''))) # type: ignore
+        self.set_title(escape_xml(self.file.get_str(self.file.localize_current(DesktopEntry.NAME))))
+        self.set_subtitle(escape_xml(self.file.get_str(self.file.localize_current(DesktopEntry.COMMENT))))
 
-        set_icon_from_name(self.icon, self.file.get(DesktopEntry.ICON, '')) # type: ignore
+        set_icon_from_name(self.icon, self.file.get_str(DesktopEntry.ICON))
 
-        self.icon.set_opacity(.2 if self.file.get(DesktopEntry.NO_DISPLAY, False) else 1)
-        self.terminal_chip.set_visible(self.file.get(DesktopEntry.TERMINAL, False))
-        self.flatpak_chip.set_visible(self.file.get(DesktopEntry.X_FLATPAK, False))
-        self.snap_chip.set_visible(self.file.get(DesktopEntry.X_SNAP_INSTANCE_NAME, False))
+        self.icon.set_opacity(.2 if self.file.get_bool(DesktopEntry.NO_DISPLAY) else 1)
+        self.terminal_chip.set_visible(self.file.get_bool(DesktopEntry.TERMINAL))
+        self.flatpak_chip.set_visible(self.file.get_bool(DesktopEntry.X_FLATPAK))
+        self.snap_chip.set_visible(self.file.get_bool(DesktopEntry.X_SNAP_INSTANCE_NAME))
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
 
@@ -87,13 +85,13 @@ class AppListView(Adw.Bin):
         file_model = Gtk.MapListModel.new(string_list, create_file)
 
         def sort_files(first: DesktopFile, second: DesktopFile, data: None):
-            lt = first.get(first.localize_current(DesktopEntry.NAME), '') < \
-                second.get(second.localize_current(DesktopEntry.NAME), '') # type: ignore
+            lt = first.get_str(first.localize_current(DesktopEntry.NAME)) < \
+                second.get_str(second.localize_current(DesktopEntry.NAME))
             return -1 if lt else 1
 
         self.bind_model(Gtk.SortListModel.new(file_model, Gtk.CustomSorter.new(sort_files)))
 
-    def bind_model(self, model: Gio.ListModel) -> None:
+    def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
         def create_row(file: DesktopFile):
             if file is None:
                 return Adw.ActionRow()

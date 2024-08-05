@@ -182,7 +182,7 @@ class FilePage(Adw.Bin):
             case FilePageState.LOADED_PINNED | FilePageState.LOADED_SYSTEM:
                 self.unpin_button.set_sensitive(True)
                 self.duplicate_button.set_sensitive(True)
-                self.window_title.set_title(self.file.get(DesktopEntry.NAME, '')) # type: ignore
+                self.window_title.set_title(self.file.get_str(DesktopEntry.NAME)) # type: ignore
 
         def update_title_visible(adjustment: Gtk.Adjustment):
             self.header_bar.set_show_title(adjustment.get_value() > 0)
@@ -207,7 +207,7 @@ class FilePage(Adw.Bin):
 
                 copy(path, new_path)
 
-                self.file.set(DesktopEntry.ICON, str(new_path))
+                self.file.set_str(DesktopEntry.ICON, str(new_path))
                 self.REMOVEME_update_icon()
                 self.REMOVEMEupdate_page()
 
@@ -217,7 +217,7 @@ class FilePage(Adw.Bin):
             accept_label=_('Open'),
             cancel_label=_('Cancel'))
 
-        if (path := Path(self.file.get(DesktopEntry.ICON, ''))).exists():
+        if (path := Path(self.file.get_str(DesktopEntry.ICON))).exists():
             dialog.set_current_folder(Gio.File.new_for_path(str(path.parent)))
 
         dialog.connect('response', callback)
