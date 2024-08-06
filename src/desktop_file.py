@@ -44,59 +44,24 @@ class Field(GObject.Object):
     def __hash__(self):
         return hash((self.group, self.key))
 
+
 class DesktopEntry:
-    '''https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s06.html'''
+    '''https://specifications.freedesktop.org/desktop-entry-spec/latest/recognized-keys.html'''
 
     group = 'Desktop Entry'
     
-    HIDDEN =                    Field(group, 'Hidden')
-    TERMINAL =                  Field(group, 'Terminal')
-    NO_DISPLAY =                Field(group, 'NoDisplay')
-    STARTUP_NOTIFY =            Field(group, 'StartupNotify')
-    D_BUS_ACTIVATABLE =         Field(group, 'DBusActivatable')
-    SINGLE_MAIN_WINDOW =        Field(group, 'SingleMainWindow')
-    PREFERS_NON_DEFAULT_GPU =   Field(group, 'PrefersNonDefaultGPU')
-    URL =               Field(group, 'URL')
-    TYPE =              Field(group, 'Type')
-    EXEC =              Field(group, 'Exec')
-    ICON =              Field(group, 'Icon')
-    PATH =              Field(group, 'Path')
-    VERSION =           Field(group, 'Version')
-    TRY_EXEC =          Field(group, 'TryExec')
-    STARTUP_WM_CLASS =  Field(group, 'StartupWMClass')
-    ACTIONS =       Field(group, 'Actions')
-    MIME_TYPE =     Field(group, 'MimeType')
-    CATEGORIES =    Field(group, 'Categories')
-    IMPLEMENTS =    Field(group, 'Implements')
-    NOT_SHOW_IN =   Field(group, 'NotShowIn')
-    ONLY_SHOW_IN =  Field(group, 'OnlyShowIn')
-    NAME =          Field(group, 'Name')
-    COMMENT =       Field(group, 'Comment')
-    KEYWORDS =      Field(group, 'Keywords')
-    GENERIC_NAME =  Field(group, 'GenericName')
-    X_FLATPAK =             Field(group, 'X-Flatpak')
+    NAME =      Field(group, 'Name')
+    COMMENT =   Field(group, 'Comment')
+    TYPE =      Field(group, 'Type')
+    EXEC =      Field(group, 'Exec')
+    ICON =      Field(group, 'Icon')
+    TERMINAL =  Field(group, 'Terminal')
+    NO_DISPLAY =    Field(group, 'NoDisplay')
+    ACTIONS =   Field(group, 'Actions')
+    X_FLATPAK = Field(group, 'X-Flatpak')
+    X_GNOME_AUTOSTART =     Field(group, 'X-GNOME-Autostart')
     X_SNAP_INSTANCE_NAME =  Field(group, 'X-SnapInstanceName')
-    XGNOME_AUTOSTART =              Field(group, 'X-GNOME-Autostart')
-    X_GNOME_USES_NOTIFICATIONS =    Field(group, 'X-GNOME-UsesNotifications')
 
-
-    fields: list[Field] = [
-        HIDDEN, TERMINAL, NO_DISPLAY, STARTUP_NOTIFY, D_BUS_ACTIVATABLE,
-        SINGLE_MAIN_WINDOW, PREFERS_NON_DEFAULT_GPU, URL, TYPE, EXEC, ICON, PATH,
-        VERSION, TRY_EXEC, STARTUP_WM_CLASS, ACTIONS, MIME_TYPE, CATEGORIES,
-        IMPLEMENTS, NOT_SHOW_IN, ONLY_SHOW_IN, NAME, COMMENT, KEYWORDS, GENERIC_NAME,
-        X_FLATPAK, XGNOME_AUTOSTART, X_SNAP_INSTANCE_NAME, X_GNOME_USES_NOTIFICATIONS
-    ]
-    
-    
-    fields: list[Field] = [
-        HIDDEN, TERMINAL, NO_DISPLAY, STARTUP_NOTIFY, D_BUS_ACTIVATABLE,
-        SINGLE_MAIN_WINDOW, PREFERS_NON_DEFAULT_GPU, URL, TYPE, EXEC, ICON, PATH,
-        VERSION, TRY_EXEC, STARTUP_WM_CLASS, ACTIONS, MIME_TYPE, CATEGORIES,
-        IMPLEMENTS, NOT_SHOW_IN, ONLY_SHOW_IN, NAME, COMMENT, KEYWORDS, GENERIC_NAME,
-        X_FLATPAK, XGNOME_AUTOSTART, X_SNAP_INSTANCE_NAME, X_GNOME_USES_NOTIFICATIONS
-    ]
-    
 
 class DesktopFile(GObject.Object):
     path: Path
@@ -155,9 +120,6 @@ class DesktopFile(GObject.Object):
         except GLib.GError:
             return default
 
-    def localize_current(self, field: Field) -> Field:
-        return field.localize(self._key_file.get_locale_for_key(field.group, field.key))
-
     def set_bool(self, field: Field, value: bool) -> None:
         self._key_file.set_boolean(field.group, field.key, value)
         self.emit('field-set', field, value)
@@ -172,6 +134,9 @@ class DesktopFile(GObject.Object):
         self._key_file.remove_key(field.group, field.key)
         self.emit('field-removed', field)
         self._remove_from_model(field)
+
+    def localize_current(self, field: Field) -> Field:
+        return field.localize(self._key_file.get_locale_for_key(field.group, field.key))
 
     def locales(self, field: Field) -> list[str]:
         return [
