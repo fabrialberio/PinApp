@@ -8,28 +8,13 @@
     <property name='extra-child'>
       <object class='AdwPreferencesGroup'>
         <child>
-          <object class='AdwComboRow' id='type_combo_row'>
-            <property name='title' translatable='yes'>Type</property>
-            <property name='model'>
-              <object class='GtkStringList'>
-                <items>
-                  <item translatable='yes'>Boolean</item>
-                  <item translatable='yes'>String</item>
-                  <item translatable='yes'>Localized string</item>
-                </items>
-              </object>
-            </property>
-          </object>
-        </child>
-        <child>
           <object class='AdwEntryRow' id='key_entry'>
             <property name='title' translatable='yes'>Key</property>
           </object>
         </child>
         <child>
           <object class='AdwEntryRow' id='locale_entry'>
-            <property name='title' translatable='yes'>Locale</property>
-            <property name='visible'>false</property>
+            <property name='title' translatable='yes'>Locale (optional)</property>
           </object>
         </child>
       </object>

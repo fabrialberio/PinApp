@@ -40,7 +40,7 @@
                           <class name='app-banner-listbox' />
                         </style>
                         <child>
-                          <object class='LocaleStringRow' id='name_row'>
+                          <object class='FieldRow' id='name_row'>
                             <property name='margin-bottom'>6</property>
                             <property name='height-request'>64</property>
                             <property name='removable'>false</property>
@@ -52,7 +52,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class='LocaleStringRow' id='comment_row'>
+                          <object class='FieldRow' id='comment_row'>
                             <property name='removable'>false</property>
                             <style>
                               <class name='app-banner-entry' />
