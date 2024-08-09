@@ -2,7 +2,7 @@ from enum import Enum
 from sys import prefix
 from pathlib import Path
 
-from gi.repository import Gtk, Gdk # type: ignore
+from gi.repository import Gtk, Gdk, GLib # type: ignore
 
 
 class RunningAs(Enum):
@@ -19,7 +19,7 @@ APP_DATA = APP_DIR / 'data'
 
 (APP_DATA / 'icons').mkdir(parents=True, exist_ok=True) # Create icons dir if it doesn't exist
 
-USER_DATA = Path.home() / '.local/share'
+USER_DATA = Path(GLib.get_user_data_dir())
 SYSTEM_DATA = Path('/usr/share')
 FLATPAK_USER = Path.home() / '.local/share/flatpak'
 FLATPAK_SYSTEM = Path('/var/lib/flatpak')
