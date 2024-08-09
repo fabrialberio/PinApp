@@ -17,6 +17,12 @@ class FilePageState(Enum):
     LOADED_PINNED = auto()
     LOADED_SYSTEM = auto()
 
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/dialog_rename_file.ui')
+class RenameFileDialog(Adw.MessageDialog):
+    __gtype_name__ = 'RenameFileDialog'
+
+    name_entry = Gtk.Template.Child()
+
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/file_page.ui')
 class FilePage(Adw.Bin):
@@ -107,28 +113,20 @@ class FilePage(Adw.Bin):
     def rename_file(self):
         match self.file_state:
             case FilePageState.NEW_FILE | FilePageState.LOADED_PINNED:
-                builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/file_page_dialogs.ui')
-                dialog = builder.get_object('rename_dialog')
-                name_entry = builder.get_object('name_entry')
-                name_entry.set_text(self.file.path.stem) # type: ignore
+                dialog = RenameFileDialog()
+                dialog.name_entry.set_text(self.gfile.get_basename().removesuffix('.desktop')) # type: ignore
             case _:
-                raise ValueError(f'Cannot rename `DesktopFile` at "{self.file.path}"') # type: ignore
+                raise ValueError(f'Cannot rename `DesktopFile` at "{self.gfile.get_path()}"') # type: ignore
 
-        def get_new_path(name: str):
-            match self.file_state:
-                case FilePageState.NEW_FILE:
-                    dir = TMP_POOL.default_dir
-                case FilePageState.LOADED_PINNED:
-                    dir = USER_POOL.default_dir
-
-            return dir / Path(f'{Path(name)}.desktop')
+        def get_new_path(name: str) -> str:
+            return f'{self.gfile.get_parent().get_path()}/{name}.desktop' # type: ignore
 
         def path_is_valid() -> bool:
-            name = name_entry.get_text()
+            name = dialog.name_entry.get_text()
 
-            return '/' not in name and not get_new_path(name).exists()
+            return '/' not in name and not Gio.File.new_for_path(rename_path(name)).query_exists()
 
-        name_entry.connect('changed', lambda _: dialog.set_response_enabled(
+        dialog.name_entry.connect('changed', lambda _: dialog.set_response_enabled(
             'rename',
             path_is_valid()
         ))
