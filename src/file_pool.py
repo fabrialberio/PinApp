@@ -1,10 +1,29 @@
 from os import access, W_OK
 from pathlib import Path
 
-from gi.repository import GObject, GLib # type: ignore
+from gi.repository import GObject, GLib, Gio # type: ignore
 
 from .config import *
 
+
+def create_gfile_checked_samedir(path: str) -> Gio.File:
+    index = 0
+    
+    while True:
+        suffix = path.split('.')[-1]
+        new_path = f'{path.removesuffix(suffix)}{f'-{index}' if index > 0 else ''}{suffix}'
+        new_gfile = Gio.File.new_for_path(new_path)
+
+        try:
+            new_gfile.create(Gio.FileCreateFlags.NONE)
+            break
+        except GLib.GError:
+            index += 1
+    
+    return new_gfile
+
+def create_gfile_checked(basename: str, parent: str) -> Gio.File:
+    return create_gfile_checked_samedir(f'{parent}/{basename}')
 
 class FilePool(GObject.Object):
     __gtype_name__ = 'FilePool'
