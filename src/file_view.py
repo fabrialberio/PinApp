@@ -345,6 +345,9 @@ class FileView(Adw.BreakpointBin):
             create_row
         )
 
+    def save_file(self):
+        self.file.save()
+
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()
 
