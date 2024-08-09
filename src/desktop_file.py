@@ -63,42 +63,48 @@ class DesktopEntry:
 
 
 class DesktopFile(GObject.Object):
-    gfile: Gio.File
     fields: Gio.ListStore
     search_str: str
     _key_file: GLib.KeyFile
-    _saved_hash: int
+    _init_hash: int
 
-    def __init__(self, gfile: Gio.File):
-        super().__init__()
+    @classmethod
+    def new(cls) -> 'DesktopFile':
+        return cls(GLib.KeyFile.new())
 
-        self.gfile = gfile
-        self.fields = Gio.ListStore.new(GObject.TYPE_OBJECT)
-
-        self._key_file = GLib.KeyFile.new()
-        self._key_file.load_from_file(
-            gfile.get_path(),
+    @classmethod
+    def load_from_path(cls, path: str) -> 'DesktopFile':
+        key_file = GLib.KeyFile.new()
+        key_file.load_from_file(
+            path,
             GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
         )
-        self._saved_hash = hash(self)
-        self.search_str = self._key_file.to_data()[0].lower()
+        return cls(key_file)
+
+    def __init__(self, key_file: GLib.KeyFile):
+        super().__init__()
+
+        self.fields = Gio.ListStore.new(GObject.TYPE_OBJECT)
+        self._key_file = key_file
+        self.search_str = self.to_data()
+        self._init_hash = hash(self.search_str)
 
         for group in self._key_file.get_groups()[0]:
             for key in self._key_file.get_keys(group)[0]:
                 field = Field(group, key)
                 self._add_to_model(field)
 
-    def edited(self) -> bool:
-        return self._saved_hash != hash(self)
-
-    def pinned(self) -> bool:
-        return self.gfile.get_parent().get_path() == str(USER_APPS)
-
-    def save_as(self, gfile: Gio.File):
-        with open(gfile.get_path(), 'w') as f:
-            f.write(self._key_file.to_data()[0])
+    def write_to_path(self, path: str):
+        with open(path, 'w') as f:
+            f.write(self.to_data())
         
-        self._saved_hash = hash(self)
+        self._init_hash = hash(self)
+
+    def to_data(self) -> str:
+        return self._key_file.to_data()[0]
+
+    def edited(self) -> bool:
+        return self._init_hash != hash(self.to_data())
 
     def has_field(self, field: Field) -> bool:
         found, index = self._find_in_model(field)
@@ -136,8 +142,7 @@ class DesktopFile(GObject.Object):
 
     def locales(self, field: Field) -> list[str]:
         return [
-            l\
-            for k, l in (split_key_locale(f.key) for f in self.fields)
+            l for k, l in (split_key_locale(f.key) for f in self.fields)
             if k == field.localize(None).key and l is not None
         ]
 
@@ -156,9 +161,6 @@ class DesktopFile(GObject.Object):
         found, index = self._find_in_model(field)
         if found:
             self.fields.remove(index)
-
-    def __hash__(self) -> int:
-        return hash(self._key_file.to_data()[0])
 
 GObject.signal_new('field-set', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
 GObject.signal_new('field-removed', DesktopFile, GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,))

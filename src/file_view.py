@@ -346,7 +346,7 @@ class FileView(Adw.BreakpointBin):
         )
 
     def save_file(self, gfile: Gio.File):
-        self.file.save_as(gfile)
+        self.file.write_to_path(gfile.get_path())
 
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()

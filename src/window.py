@@ -162,12 +162,12 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         gfile = create_gfile_checked('pinned-app.desktop', GLib.get_tmp_dir())
 
-        desktop_file = DesktopFile(gfile)
+        desktop_file = DesktopFile.new()
         desktop_file.set_str(DesktopEntry.NAME, _('New application'))
         desktop_file.set_str(DesktopEntry.TYPE, GLib.KEY_FILE_DESKTOP_TYPE_APPLICATION)
         desktop_file.set_str(DesktopEntry.EXEC, '')
         desktop_file.set_str(DesktopEntry.ICON, '')
-        desktop_file.save_as(gfile)
+        desktop_file.write_to_path(gfile.get_path())
 
         self.file_page.load_file(gfile, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)

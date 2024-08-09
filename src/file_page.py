@@ -156,11 +156,11 @@ class FilePage(Adw.Bin):
 
     def load_file(self, gfile: Gio.File, is_new = False):
         self.gfile = gfile
-        desktop_file = DesktopFile(gfile)
+        desktop_file = DesktopFile.load_from_path(gfile.get_path())
 
         if is_new:
             self.file_state = FilePageState.NEW_FILE
-        elif desktop_file.pinned():
+        elif gfile.get_parent().get_path() == str(USER_APPS):
             self.file_state = FilePageState.LOADED_PINNED
         else:
             self.file_state = FilePageState.LOADED_SYSTEM

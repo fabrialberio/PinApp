@@ -20,12 +20,12 @@ class AppRow(Adw.ActionRow):
     flatpak_chip: Gtk.Box = Gtk.Template.Child()
     snap_chip: Gtk.Box = Gtk.Template.Child()
 
-    def __init__(self, file: DesktopFile):
+    def __init__(self, gfile: Gio.File):
         super().__init__()
 
-        self.file = file
+        self.file = DesktopFile.load_from_path(gfile.get_path())
 
-        self.connect('activated', lambda _: self.emit('file-open', self.file.gfile))
+        self.connect('activated', lambda _: self.emit('file-open', gfile))
         self.file.connect('field-set', lambda d, f, v: self.update())
         self.update()
 
@@ -81,24 +81,26 @@ class AppListView(Adw.Bin):
 
     def bind_string_list(self, string_list: Gtk.StringList) -> None:        
         def create_file(string: Gtk.StringObject):
-            return DesktopFile(Gio.File.new_for_path(string.get_string()))
-        
-        file_model = Gtk.MapListModel.new(string_list, create_file)
+            return Gio.File.new_for_path(string.get_string())
+
+        gfile_model = Gtk.MapListModel.new(string_list, create_file)
 
         def sort_files(first: DesktopFile, second: DesktopFile, data: None):
-            lt = first.get_str(first.localize_current(DesktopEntry.NAME)) < \
-                second.get_str(second.localize_current(DesktopEntry.NAME))
+            # TODO: Re-implement sorting by desktop entry name?
+            lt = first.get_path() < second.get_path()
             return -1 if lt else 1
 
-        self.bind_model(Gtk.SortListModel.new(file_model, Gtk.CustomSorter.new(sort_files)))
+        self.bind_model(Gtk.SortListModel.new(gfile_model, Gtk.CustomSorter.new(sort_files)))
 
     def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
-        def create_row(file: DesktopFile):
-            if file is None:
+        def create_row(gfile: Gio.File):
+            if gfile is None:
                 return Adw.ActionRow()
 
-            row = AppRow(file)
-            row.pinned_chip.set_visible(self.show_pinned_chip and file.pinned())
+            row = AppRow(gfile)
+
+            pinned = gfile.get_parent().get_path() == str(USER_APPS)
+            row.pinned_chip.set_visible(self.show_pinned_chip and pinned)
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
@@ -116,7 +118,7 @@ class AppListView(Adw.Bin):
     def set_filter(self, predicate: Callable[[AppRow], bool]):
         self.listbox.set_filter_func(predicate)
 
-GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))
 
 class SearchView(AppListView):
     __gtype_name__ = 'SearchView'
