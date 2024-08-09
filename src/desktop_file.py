@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import Optional
 
 from gi.repository import GObject, GLib, Gio # type: ignore
 from gi._gi import pygobject_new_full
 
-from .file_pool import USER_POOL
+from .config import USER_APPS
 
 
 def split_key_locale(key: str) -> tuple[str, Optional[str]]:
@@ -64,21 +63,21 @@ class DesktopEntry:
 
 
 class DesktopFile(GObject.Object):
-    path: Path
+    gfile: Gio.File
     fields: Gio.ListStore
     search_str: str
     _key_file: GLib.KeyFile
     _saved_hash: int
 
-    def __init__(self, path: Path):
+    def __init__(self, gfile: Gio.File):
         super().__init__()
 
-        self.path = path
+        self.gfile = gfile
         self.fields = Gio.ListStore.new(GObject.TYPE_OBJECT)
 
         self._key_file = GLib.KeyFile.new()
         self._key_file.load_from_file(
-            str(path),
+            gfile.get_path(),
             GLib.KeyFileFlags.KEEP_COMMENTS | GLib.KeyFileFlags.KEEP_TRANSLATIONS
         )
         self._saved_hash = hash(self)
@@ -93,16 +92,16 @@ class DesktopFile(GObject.Object):
         return self._saved_hash != hash(self)
 
     def pinned(self) -> bool:
-        return self.path.parent in USER_POOL.dirs
+        return self.gfile.get_parent().get_path() == str(USER_APPS)
 
-    def save_as(self, path: Path):
-        with path.open('w') as f:
+    def save_as(self, gfile: Gio.File):
+        with open(gfile.get_path(), 'w') as f:
             f.write(self._key_file.to_data()[0])
         
         self._saved_hash = hash(self)
 
     def save(self):
-        self.save_as(self.path)
+        self.save_as(self.gfile)
 
     def has_field(self, field: Field) -> bool:
         found, index = self._find_in_model(field)
