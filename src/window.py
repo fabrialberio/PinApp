@@ -164,10 +164,10 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         desktop_file = DesktopFile(gfile)
         desktop_file.set_str(DesktopEntry.NAME, _('New application'))
-        desktop_file.set_str(DesktopEntry.TYPE, 'Application')
+        desktop_file.set_str(DesktopEntry.TYPE, GLib.KEY_FILE_DESKTOP_TYPE_APPLICATION)
         desktop_file.set_str(DesktopEntry.EXEC, '')
         desktop_file.set_str(DesktopEntry.ICON, '')
-        desktop_file.save()
+        desktop_file.save_as(gfile)
 
         self.file_page.load_file(gfile, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)

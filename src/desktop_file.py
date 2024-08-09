@@ -47,16 +47,16 @@ class Field(GObject.Object):
 class DesktopEntry:
     '''https://specifications.freedesktop.org/desktop-entry-spec/latest/recognized-keys.html'''
 
-    group = 'Desktop Entry'
+    group = GLib.KEY_FILE_DESKTOP_GROUP
     
-    NAME =      Field(group, 'Name')
-    COMMENT =   Field(group, 'Comment')
-    TYPE =      Field(group, 'Type')
-    EXEC =      Field(group, 'Exec')
-    ICON =      Field(group, 'Icon')
-    TERMINAL =  Field(group, 'Terminal')
-    NO_DISPLAY =    Field(group, 'NoDisplay')
-    ACTIONS =   Field(group, 'Actions')
+    NAME =      Field(group, GLib.KEY_FILE_DESKTOP_KEY_NAME)
+    COMMENT =   Field(group, GLib.KEY_FILE_DESKTOP_KEY_COMMENT)
+    TYPE =      Field(group, GLib.KEY_FILE_DESKTOP_KEY_TYPE)
+    EXEC =      Field(group, GLib.KEY_FILE_DESKTOP_KEY_EXEC)
+    ICON =      Field(group, GLib.KEY_FILE_DESKTOP_KEY_ICON)
+    TERMINAL =  Field(group, GLib.KEY_FILE_DESKTOP_KEY_TERMINAL)
+    NO_DISPLAY =    Field(group, GLib.KEY_FILE_DESKTOP_KEY_NO_DISPLAY)
+    ACTIONS =   Field(group, GLib.KEY_FILE_DESKTOP_KEY_ACTIONS)
     X_FLATPAK = Field(group, 'X-Flatpak')
     X_GNOME_AUTOSTART =     Field(group, 'X-GNOME-Autostart')
     X_SNAP_INSTANCE_NAME =  Field(group, 'X-SnapInstanceName')
@@ -99,9 +99,6 @@ class DesktopFile(GObject.Object):
             f.write(self._key_file.to_data()[0])
         
         self._saved_hash = hash(self)
-
-    def save(self):
-        self.save_as(self.gfile)
 
     def has_field(self, field: Field) -> bool:
         found, index = self._find_in_model(field)

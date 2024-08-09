@@ -1,7 +1,7 @@
 from typing import Optional
 from gettext import gettext as _
 
-from gi.repository import Adw, Gtk, GObject # type: ignore
+from gi.repository import Adw, Gtk, Gio, GObject # type: ignore
 
 from .desktop_file import DesktopFile, DesktopEntry, Field
 from .config import set_icon_from_name
@@ -345,8 +345,8 @@ class FileView(Adw.BreakpointBin):
             create_row
         )
 
-    def save_file(self):
-        self.file.save()
+    def save_file(self, gfile: Gio.File):
+        self.file.save_as(gfile)
 
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()

@@ -67,7 +67,7 @@ class FilePage(Adw.Bin):
                     callback(self)
             case FilePageState.NEW_FILE | FilePageState.LOADED_PINNED:
                 # TODO: If new file is not pinned, delete it from tmp
-                self.file_view.save_file() # type: ignore
+                self.file_view.save_file(self.gfile) # type: ignore
                 USER_POOL.load()
 
                 if callback is not None:
@@ -137,7 +137,7 @@ class FilePage(Adw.Bin):
                     case FilePageState.NEW_FILE:
                         self.gfile = renamed_gfile
                     case FilePageState.LOADED_PINNED:
-                        self.file_view.save_file() # type: ignore
+                        self.file_view.save_file(self.gfile) # type: ignore
                         self.gfile.move(renamed_gfile, Gio.FileCopyFlags.NONE) # type: ignore
                         self.load_file(renamed_gfile)
 
