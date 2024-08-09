@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pathlib import Path
 from enum import Enum
 from gettext import gettext as _
 
-from gi.repository import Gtk, Adw, GLib # type: ignore
+from gi.repository import Gtk, Adw, Gio, GLib # type: ignore
 
 from .desktop_file import DesktopFile, DesktopEntry
 from .file_page import FilePage # Required to initialize GObject
-from .file_pool import TMP_POOL, USER_POOL, SYSTEM_POOL, SEARCH_POOL
+from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL, create_gfile_checked
 from .apps_page import AppListView, SearchView
 
 
@@ -80,8 +79,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         button.connect('clicked', new_file)
         self.new_file_button.connect('clicked', new_file)
 
-        def open_file(widget: Gtk.Widget, file: DesktopFile):
-            self.file_page.load_file(file)
+        def open_file(widget: Gtk.Widget, gfile: Gio.File):
+            self.file_page.load_file(gfile)
             self.set_page(WindowPage.FILE_PAGE)
 
         self.pins_tab.connect('file-open', open_file)
@@ -161,16 +160,16 @@ class PinAppWindow(Adw.ApplicationWindow):
         if self.current_page() != WindowPage.APPS_PAGE:
             return
 
-        tmp_path = TMP_POOL.new_file_path('pinned-app')
-        tmp_path.touch()
+        gfile = create_gfile_checked('pinned-app.desktop', GLib.get_tmp_dir())
 
-        file = DesktopFile(tmp_path)
-        file.set_str(DesktopEntry.NAME, _('New application'))
-        file.set_str(DesktopEntry.TYPE, 'Application')
-        file.set_str(DesktopEntry.EXEC, '')
-        file.set_str(DesktopEntry.ICON, '')
+        desktop_file = DesktopFile(gfile)
+        desktop_file.set_str(DesktopEntry.NAME, _('New application'))
+        desktop_file.set_str(DesktopEntry.TYPE, 'Application')
+        desktop_file.set_str(DesktopEntry.EXEC, '')
+        desktop_file.set_str(DesktopEntry.ICON, '')
+        desktop_file.save()
 
-        self.file_page.load_file(file, is_new = True)
+        self.file_page.load_file(gfile, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)
 
     def load_apps(self):

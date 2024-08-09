@@ -5,13 +5,14 @@ from gi.repository import Gtk, Adw, Gio, GObject # type: ignore
 from xml.sax.saxutils import escape as escape_xml
 
 from .config import *
-from .file_pool import USER_POOL
 from .desktop_file import DesktopFile, DesktopEntry
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/app_row.ui')
 class AppRow(Adw.ActionRow):
     __gtype_name__ = 'AppRow'
+
+    file: DesktopFile
 
     icon: Gtk.Image = Gtk.Template.Child()
     pinned_chip: Gtk.Box = Gtk.Template.Child()
@@ -24,7 +25,7 @@ class AppRow(Adw.ActionRow):
 
         self.file = file
 
-        self.connect('activated', lambda _: self.emit('file-open', self.file))
+        self.connect('activated', lambda _: self.emit('file-open', self.file.gfile))
         self.file.connect('field-set', lambda d, f, v: self.update())
         self.update()
 
@@ -39,7 +40,7 @@ class AppRow(Adw.ActionRow):
         self.flatpak_chip.set_visible(self.file.get_bool(DesktopEntry.X_FLATPAK))
         self.snap_chip.set_visible(self.file.get_bool(DesktopEntry.X_SNAP_INSTANCE_NAME))
 
-GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))
 
 class AppListView(Adw.Bin):
     __gtype_name__ = 'AppListView'
@@ -80,7 +81,7 @@ class AppListView(Adw.Bin):
 
     def bind_string_list(self, string_list: Gtk.StringList) -> None:        
         def create_file(string: Gtk.StringObject):
-            return DesktopFile(Path(string.get_string()))
+            return DesktopFile(Gio.File.new_for_path(string.get_string()))
         
         file_model = Gtk.MapListModel.new(string_list, create_file)
 
