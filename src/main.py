@@ -18,7 +18,6 @@
 import sys
 from typing import Callable
 from locale import bindtextdomain, textdomain
-from pathlib import Path
 
 from gi import require_version
 
@@ -45,13 +44,12 @@ class PinApp(Adw.Application):
         def activate(app: PinApp):
             self.get_window().present()
 
-        def open(app: PinApp, files: list[Gio.File], n_files: int, hint: str):
-            path = Path(files[0].get_path())
-            if path is None:
+        def open(app: PinApp, gfiles: list[Gio.File], n_files: int, hint: str):
+            if not gfiles[0].query_exists():
                 return
 
             window = self.get_window()
-            window.file_page.load_path(path)
+            window.file_page.load_file(gfiles[0])
             window.set_page(WindowPage.FILE_PAGE)
             window.present()
 
