@@ -97,24 +97,16 @@ TMP_POOL = WritableFilePool(
 )
 
 USER_POOL = WritableFilePool(
-    dirs = [
-        USER_DATA / 'applications',
-    ],
+    dirs = [USER_APPS],
     glob_pattern = '*.desktop'
 )
 
 SYSTEM_POOL = FilePool(
-    dirs = [
-        SYSTEM_DATA / 'applications',
-        FLATPAK_USER / 'exports/share/applications',
-        FLATPAK_SYSTEM / 'exports/share/applications',
-        HOST_DATA / 'applications',
-        Path('/var/lib/snapd/desktop/applications'),
-    ],
+    dirs = APP_PATHS,
     glob_pattern = '*.desktop'
 )
 
 SEARCH_POOL = FilePool(
-    dirs = USER_POOL.dirs + SYSTEM_POOL.dirs,
+    dirs = [USER_APPS] + APP_PATHS,
     glob_pattern = '*.desktop'
 )
