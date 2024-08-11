@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <template class='AppListView' parent='AdwBin'>
+    <child>
+      <object class='AdwViewStack' id='view_stack'>
+        <child>
+          <object class='AdwViewStackPage'>
+            <property name='name'>loading</property>
+            <property name='child'>
+              <object class='AdwStatusPage' id='status_loading'>
+                <property name='title' translatable='yes'>Loading apps…</property>
+                <style>
+                  <class name='spinner' />
+                </style>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class='AdwViewStackPage'>
+            <property name='name'>placeholder</property>
+            <property name='child'>
+              <object class='AdwStatusPage' id='status_placeholder'>
+                <property name='title' translatable='yes'>No apps found</property>
+                <property name='icon-name'>folder-open-symbolic</property>
+                <property name='child'>
+                  <object class='GtkButton' id='new_app_button'>
+                    <property name='halign'>center</property>
+                    <property name='visible'>false</property>
+                    <style>
+                      <class name='suggested-action' />
+                      <class name='pill' />
+                    </style>
+                    <property name='child'>
+                      <object class='AdwButtonContent'>
+                        <property name='label' translatable='yes'>Add new app</property>
+                        <property name='icon-name'>list-add-symbolic</property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class='AdwViewStackPage'>
+            <property name='name'>apps</property>
+            <property name='child'>
+              <object class='GtkScrolledWindow'>
+                <property name='vexpand'>true</property>
+                <property name='child'>
+                  <object class='AdwClamp'>
+                    <property name='margin-top'>12</property>
+                    <property name='margin-bottom'>12</property>
+                    <property name='margin-start'>12</property>
+                    <property name='margin-end'>12</property>
+                    <property name='child'>
+                      <object class='GtkBox'>
+                        <property name='orientation'>vertical</property>
+                        <child>
+                          <object class='GtkListBox' id='listbox'>
+                            <property name='selection-mode'>none</property>
+                            <style>
+                              <class name='boxed-list' />
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

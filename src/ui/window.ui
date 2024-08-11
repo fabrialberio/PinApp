@@ -23,7 +23,6 @@
 
                     <child>
                       <object class='AdwHeaderBar' id='header_bar'>
-                        <property name='sensitive'>false</property>
                         <property name='centering-policy'>strict</property>
                         <property name='title-widget'>
                           <object class='AdwViewSwitcher' id='view_switcher'>
@@ -73,35 +72,6 @@
                   <object class='AdwViewStack' id='view_stack'>
                     <child>
                       <object class='AdwViewStackPage'>
-                        <property name='name'>loading_tab</property>
-                        <property name='child'>
-                          <object class='GtkBox'>
-                            <property name='valign'>center</property>
-                            <property name='halign'>center</property>
-                            <property name='spacing'>12</property>
-                            <property name='orientation'>vertical</property>
-                            <child>
-                              <object class='GtkSpinner'>
-                                <property name='opacity'>.8</property>
-                                <property name='spinning'>true</property>
-                                <property name='width_request'>32</property>
-                                <property name='height_request'>32</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class='GtkLabel'>
-                                <property name='label' translatable='yes'>Loading apps…</property>
-                                <style>
-                                  <class name='title-1' />
-                                </style>
-                              </object>
-                            </child>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class='AdwViewStackPage'>
                         <property name='name'>pins_tab</property>
                         <property name='icon-name'>pin-symbolic</property>
                         <property name='title' translatable='yes'>Your pins</property>
@@ -124,7 +94,7 @@
                       <object class='AdwViewStackPage'>
                         <property name='name'>search_tab</property>
                         <property name='child'>
-                          <object class='SearchView' id='search_tab'/>
+                          <object class='AppListView' id='search_tab'/>
                         </property>
                       </object>
                     </child>

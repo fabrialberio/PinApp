@@ -22,12 +22,12 @@ from gi.repository import Gtk, Adw, Gio, GLib # type: ignore
 
 from .desktop_file import DesktopFile, DesktopEntry
 from .file_page import FilePage # Required to initialize GObject
-from .file_pool import USER_POOL, SYSTEM_POOL, SEARCH_POOL, create_gfile_checked
-from .apps_page import AppListView, SearchView
+from .config import USER_APPS, APP_PATHS
+from .file_pool import create_gfile_checked
+from .apps_page import AppListView
 
 
 class WindowTab(Enum):
-    LOADING = 'loading_tab'
     PINS = 'pins_tab'
     INSTALLED = 'installed_tab'
     SEARCH = 'search_tab'
@@ -49,7 +49,7 @@ class PinAppWindow(Adw.ApplicationWindow):
     view_stack: Adw.ViewStack = Gtk.Template.Child()
     pins_tab: AppListView = Gtk.Template.Child()
     installed_tab: AppListView = Gtk.Template.Child()
-    search_tab: SearchView = Gtk.Template.Child()
+    search_tab: AppListView = Gtk.Template.Child()
     search_bar: Gtk.SearchBar = Gtk.Template.Child()
     search_entry: Gtk.SearchEntry = Gtk.Template.Child()
     search_button: Gtk.Button = Gtk.Template.Child()
@@ -59,24 +59,41 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.pins_tab.bind_gfile_list(USER_POOL.gfiles)
-        self.installed_tab.bind_gfile_list(SYSTEM_POOL.gfiles)
-        self.search_tab.bind_gfile_list(SEARCH_POOL.gfiles)
+        file_attrs = ','.join((
+            Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+            Gio.FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,
+            Gio.FILE_ATTRIBUTE_STANDARD_EDIT_NAME,
+        ))
 
-        button = Gtk.Button(
-            halign=Gtk.Align.CENTER,
-            css_classes=['suggested-action', 'pill'],
-            child=Adw.ButtonContent(
-                label=_('Add new app'),
-                icon_name='list-add-symbolic'
-            )
-        )
-        self.pins_tab.placeholder.set_child(button)
-        
+        user_apps_gfile = Gio.File.new_for_path(str(USER_APPS))
+        user_dir_list = Gtk.DirectoryList.new(file_attrs, user_apps_gfile)
+        user_dir_list.connect('notify::loading', self.pins_tab.items_changed)
+
+        system_apps_gfiles = map(Gio.File.new_for_path, map(str, APP_PATHS))
+        system_list_store = Gio.ListStore.new(Gtk.DirectoryList)
+        search_list_store = Gio.ListStore.new(Gtk.DirectoryList)
+        for gfile in system_apps_gfiles:
+            dir_list = Gtk.DirectoryList.new(file_attrs, gfile)
+            system_list_store.append(dir_list)
+            search_list_store.append(dir_list)
+
+            dir_list.connect('notify::loading', self.installed_tab.items_changed)
+            dir_list.connect('notify::loading', self.search_tab.items_changed)
+
+        system_dir_list = Gtk.FlattenListModel.new(system_list_store)      
+
+        search_list_store.append(user_dir_list)
+        search_dir_list = Gtk.FlattenListModel.new(search_list_store)
+
+        self.pins_tab.bind_dir_list(user_dir_list)
+        self.installed_tab.bind_dir_list(system_dir_list)
+        self.search_tab.bind_dir_list(search_dir_list)
+
         def new_file(widget: Gtk.Widget):
             self.new_file()
 
-        button.connect('clicked', new_file)
+        self.pins_tab.new_app_button.set_visible(True)
+        self.pins_tab.new_app_button.connect('clicked', new_file)
         self.new_file_button.connect('clicked', new_file)
 
         def open_file(widget: Gtk.Widget, gfile: Gio.File):
@@ -97,13 +114,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         help_overlay.set_transient_for(self)
         self.set_help_overlay(help_overlay)
 
-        def on_pins_loaded(pool):
-            if self.current_tab() == WindowTab.LOADING:
-                self.set_tab(self.last_tab)
-                self.header_bar.set_sensitive(True)
-
-        USER_POOL.connect('loaded', on_pins_loaded)
-
+        self.set_tab(WindowTab.PINS)
         self._init_search()
         self.load_apps()
 
@@ -173,9 +184,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.set_page(WindowPage.FILE_PAGE)
 
     def load_apps(self):
-        USER_POOL.load()
-        SYSTEM_POOL.load()
-        SEARCH_POOL.load()
+        return
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''

@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Callable
 from gettext import gettext as _
 
@@ -6,6 +7,12 @@ from xml.sax.saxutils import escape as escape_xml
 
 from .config import *
 from .desktop_file import DesktopFile, DesktopEntry
+
+
+class AppsViewState(Enum):
+    LOADING = 'loading'
+    EMPTY = 'placeholder'
+    APPS = 'apps'
 
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/app_row.ui')
@@ -22,6 +29,11 @@ class AppRow(Adw.ActionRow):
 
     def __init__(self, gfile: Gio.File):
         super().__init__()
+
+        if not gfile.query_exists():
+            self.set_title(gfile.get_path())
+            self.set_subtitle('Does not exist')
+            return
 
         self.file = DesktopFile.load_from_path(gfile.get_path())
 
@@ -42,45 +54,35 @@ class AppRow(Adw.ActionRow):
 
 GObject.signal_new('file-open', AppRow, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))
 
+
+@Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/apps_view.ui')
 class AppListView(Adw.Bin):
     __gtype_name__ = 'AppListView'
 
-    listbox: Gtk.ListBox
-    placeholder: Adw.StatusPage
-    scrolled_window: Gtk.ScrolledWindow
+    state: AppsViewState
     show_pinned_chip = False
+
+    listbox: Gtk.ListBox = Gtk.Template.Child()
+    view_stack: Adw.ViewStack = Gtk.Template.Child()
+    new_app_button: Gtk.Button = Gtk.Template.Child()
+    status_placeholder: Adw.StatusPage = Gtk.Template.Child()
 
     def __init__(self) -> None:
         super().__init__()
 
-        self.listbox = Gtk.ListBox(
-            selection_mode=Gtk.SelectionMode.NONE,
-            css_classes=['boxed-list']
-        )
+        self.set_state(AppsViewState.EMPTY)
 
-        self.placeholder = Adw.StatusPage(
-            title=_('No apps found'),
-            icon_name='folder-open-symbolic',
-        )
+    def set_state(self, state: AppsViewState):
+        self.view_stack.set_visible_child_name(state.value)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.append(self.listbox)
+    def bind_dir_list(self, dir_list: Gtk.DirectoryList) -> None:
+        def match_file(gfile_info: Gio.FileInfo):
+            return gfile_info.get_content_type() == 'application/x-desktop'
 
-        self.scrolled_window = Gtk.ScrolledWindow(
-            vexpand=True,
-            child=Adw.Clamp(
-                margin_top=12,
-                margin_bottom=12,
-                margin_start=12,
-                margin_end=12,
-                child=box
-            )
-        )
+        files_model = Gtk.FilterListModel.new(dir_list, Gtk.CustomFilter.new(match_file))
 
-        self.set_child(self.scrolled_window)
-
-    def bind_gfile_list(self, gfile_list: Gio.ListStore) -> None:   
-        def create_row(gfile: Gio.File):
+        def create_row(gfile_info: Gio.FileInfo):
+            gfile = gfile_info.get_attribute_object('standard::file')
             row = AppRow(gfile)
 
             pinned = gfile.get_parent().get_path() == str(USER_APPS)
@@ -88,7 +90,7 @@ class AppListView(Adw.Bin):
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
-        self.bind_model(Gtk.MapListModel.new(gfile_list, create_row))
+        self.bind_model(Gtk.MapListModel.new(files_model, create_row))
 
     def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
         def sort_files(first: Gio.File, second: Gio.File, data: None):
@@ -100,38 +102,17 @@ class AppListView(Adw.Bin):
         
         self.listbox.bind_model(Gtk.SortListModel.new(model, Gtk.CustomSorter.new(sort_files)), lambda r: r)
 
-        def update_show_placeholder(model: Gtk.StringList, *args):
-            new_child = self.placeholder if model.get_n_items() == 0 else self.scrolled_window
-
-            if self.get_child() != new_child:
-                self.set_child(new_child)
-
-        model.connect('items-changed', update_show_placeholder)
-        update_show_placeholder(model)        
+    def items_changed(self, dir_list: Gtk.DirectoryList, *args):
+        if dir_list.is_loading():
+            self.set_state(AppsViewState.LOADING)
+        elif dir_list.get_n_items() == 0:
+            self.set_state(AppsViewState.EMPTY)
+        else:
+            self.set_state(AppsViewState.APPS)
 
     def set_filter(self, predicate: Callable[[AppRow], bool]):
+        raise NotImplemented
         self.listbox.set_filter_func(predicate)
-
-GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))
-
-class SearchView(AppListView):
-    __gtype_name__ = 'SearchView'
-
-    custom_filter: Gtk.CustomFilter
-    show_pinned_chip = True
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.placeholder = Adw.StatusPage(
-            title=_('No results found'),
-            icon_name='system-search-symbolic',
-            description=_('Try searching for something else')
-        )
-
-    def bind_row_model(self, row_model: Gio.ListModel) -> None:
-        self.custom_filter = Gtk.CustomFilter.new(lambda f: True)
-        return super().bind_model(Gtk.FilterListModel.new(row_model, self.custom_filter))
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         def search(entry: Gtk.SearchEntry):
@@ -140,3 +121,5 @@ class SearchView(AppListView):
             )
 
         search_entry.connect('search-changed', search)
+
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))

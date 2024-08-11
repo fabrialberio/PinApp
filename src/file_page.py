@@ -6,7 +6,8 @@ from gettext import gettext as _
 
 from .desktop_file import DesktopFile, DesktopEntry, Field
 from .file_view import FileView
-from .file_pool import USER_POOL, USER_APPS, create_gfile_checked
+from .config import USER_APPS
+from .file_pool import create_gfile_checked
 
 
 class FilePageState(Enum):
@@ -14,6 +15,7 @@ class FilePageState(Enum):
     NEW_FILE = auto()
     LOADED_PINNED = auto()
     LOADED_SYSTEM = auto()
+
 
 @Gtk.Template(resource_path='/io/github/fabrialberio/pinapp/dialog_rename_file.ui')
 class RenameFileDialog(Adw.MessageDialog):
@@ -68,7 +70,6 @@ class FilePage(Adw.Bin):
             case FilePageState.NEW_FILE | FilePageState.LOADED_PINNED:
                 # TODO: If new file is not pinned, delete it from tmp
                 self.file_view.save_file(self.gfile) # type: ignore
-                USER_POOL.load()
 
                 if callback is not None:
                     callback(self)
@@ -98,7 +99,6 @@ class FilePage(Adw.Bin):
                 def callback(widget, resp):
                     if resp == 'delete': # TODO: The file isn't actually deleted
                         self.gfile.delete() # type: ignore
-                        USER_POOL.load()
                         self.emit('pop-request')
 
                 dialog.connect('response', callback)
@@ -141,8 +141,6 @@ class FilePage(Adw.Bin):
                         self.gfile.move(renamed_gfile, Gio.FileCopyFlags.NONE) # type: ignore
                         self.load_file(renamed_gfile)
 
-                USER_POOL.load()
-
         dialog.connect('response', on_resp)
         dialog.set_transient_for(self.get_root())
         dialog.show()
@@ -152,7 +150,6 @@ class FilePage(Adw.Bin):
         self.gfile.copy(new_gfile, Gio.FileCopyFlags.OVERWRITE) # type: ignore
 
         self.load_file(new_gfile)
-        USER_POOL.load()
 
     def load_file(self, gfile: Gio.File, is_new = False):
         self.gfile = gfile
