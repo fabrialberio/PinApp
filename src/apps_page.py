@@ -79,24 +79,9 @@ class AppListView(Adw.Bin):
 
         self.set_child(self.scrolled_window)
 
-    def bind_string_list(self, string_list: Gtk.StringList) -> None:        
-        def create_file(string: Gtk.StringObject):
-            return Gio.File.new_for_path(string.get_string())
-
-        gfile_model = Gtk.MapListModel.new(string_list, create_file)
-
-        def sort_files(first: DesktopFile, second: DesktopFile, data: None):
-            # TODO: Re-implement sorting by desktop entry name?
-            lt = first.get_path() < second.get_path()
-            return -1 if lt else 1
-
-        self.bind_model(Gtk.SortListModel.new(gfile_model, Gtk.CustomSorter.new(sort_files)))
-
-    def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
-        def create_row(gfile: Gio.File):
-            if gfile is None:
-                return Adw.ActionRow()
-
+    def bind_string_list(self, string_list: Gtk.StringList) -> None:   
+        def create_row(string: Gtk.StringObject):
+            gfile = Gio.File.new_for_path(string.get_string())
             row = AppRow(gfile)
 
             pinned = gfile.get_parent().get_path() == str(USER_APPS)
@@ -104,7 +89,17 @@ class AppListView(Adw.Bin):
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
-        self.listbox.bind_model(model, create_row)
+        self.bind_model(Gtk.MapListModel.new(string_list, create_row))
+
+    def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
+        def sort_files(first: Gio.File, second: Gio.File, data: None):
+            first_name = first.file.localize_current(DesktopEntry.NAME)
+            second_name = second.file.localize_current(DesktopEntry.NAME)
+
+            lt = first.file.get_str(first_name) < second.file.get_str(second_name)
+            return -1 if lt else 1
+        
+        self.listbox.bind_model(Gtk.SortListModel.new(model, Gtk.CustomSorter.new(sort_files)), lambda r: r)
 
         def update_show_placeholder(model: Gtk.StringList, *args):
             new_child = self.placeholder if model.get_n_items() == 0 else self.scrolled_window
@@ -135,9 +130,9 @@ class SearchView(AppListView):
             description=_('Try searching for something else')
         )
 
-    def bind_model(self, model: Gio.ListModel) -> None:
+    def bind_row_model(self, row_model: Gio.ListModel) -> None:
         self.custom_filter = Gtk.CustomFilter.new(lambda f: True)
-        return super().bind_model(Gtk.FilterListModel.new(model, self.custom_filter))
+        return super().bind_model(Gtk.FilterListModel.new(row_model, self.custom_filter))
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         def search(entry: Gtk.SearchEntry):
