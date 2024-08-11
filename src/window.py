@@ -59,9 +59,9 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.pins_tab.bind_string_list(USER_POOL.files)
-        self.installed_tab.bind_string_list(SYSTEM_POOL.files)
-        self.search_tab.bind_string_list(SEARCH_POOL.files)
+        self.pins_tab.bind_gfile_list(USER_POOL.gfiles)
+        self.installed_tab.bind_gfile_list(SYSTEM_POOL.gfiles)
+        self.search_tab.bind_gfile_list(SEARCH_POOL.gfiles)
 
         button = Gtk.Button(
             halign=Gtk.Align.CENTER,

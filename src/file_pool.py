@@ -18,7 +18,7 @@ def create_gfile_checked_samedir(path: str) -> Gio.File:
         except GLib.GError:
             continue
 
-    raise IOError('Failed to create gfile after trying all indexes.')
+    raise IOError('Failed to create gfile after trying one million indexes.')
 
 def create_gfile_checked(basename: str, parent: str) -> Gio.File:
     return create_gfile_checked_samedir(f'{parent}/{basename}')
@@ -27,7 +27,7 @@ class FilePool(GObject.Object):
     __gtype_name__ = 'FilePool'
 
     dirs: list[Path]
-    files: Gtk.StringList
+    gfiles: Gio.ListStore
     glob_pattern: str
 
     def __init__(self, dirs: list[Path], glob_pattern: str) -> None:
@@ -35,21 +35,21 @@ class FilePool(GObject.Object):
 
         self.dirs = [p for p in dirs if p.is_dir()]
         self.glob_pattern = glob_pattern
-        self.files = Gtk.StringList()
+        self.gfiles = Gio.ListStore.new(Gio.File)
 
     def load(self) -> None:
         def target():
             loaded = set(str(p) for dir in self.dirs for p in dir.rglob(self.glob_pattern))
-            stored = set(self.files.get_string(i) for i in range(self.files.get_n_items()))
+            stored = set(self.gfiles.get_string(i) for i in range(self.gfiles.get_n_items()))
 
             for p in stored - loaded:
-                for i in range(self.files.get_n_items()):
-                    if self.files.get_string(i) == p:
-                        self.files.remove(i)
+                for i in range(self.gfiles.get_n_items()):
+                    if self.gfiles.get_item(i).get_path() == p:
+                        self.gfiles.remove(i)
                         break
 
             for p in loaded - stored:
-                self.files.append(p)
+                self.gfiles.append(Gio.File.new_for_path(p))
 
             self.emit('loaded')
 

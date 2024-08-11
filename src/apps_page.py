@@ -79,9 +79,8 @@ class AppListView(Adw.Bin):
 
         self.set_child(self.scrolled_window)
 
-    def bind_string_list(self, string_list: Gtk.StringList) -> None:   
-        def create_row(string: Gtk.StringObject):
-            gfile = Gio.File.new_for_path(string.get_string())
+    def bind_gfile_list(self, gfile_list: Gio.ListStore) -> None:   
+        def create_row(gfile: Gio.File):
             row = AppRow(gfile)
 
             pinned = gfile.get_parent().get_path() == str(USER_APPS)
@@ -89,7 +88,7 @@ class AppListView(Adw.Bin):
             row.connect('file-open', lambda _, f: self.emit('file-open', f))
             return row
 
-        self.bind_model(Gtk.MapListModel.new(string_list, create_row))
+        self.bind_model(Gtk.MapListModel.new(gfile_list, create_row))
 
     def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
         def sort_files(first: Gio.File, second: Gio.File, data: None):
