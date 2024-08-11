@@ -149,7 +149,7 @@ class FilePage(Adw.Bin):
 
     def duplicate_file(self):
         new_gfile = create_gfile_checked(self.gfile.get_basename(), str(USER_APPS)) # type: ignore
-        self.gfile.copy(new_gfile, Gio.FileCopyFlags.NONE) # type: ignore
+        self.gfile.copy(new_gfile, Gio.FileCopyFlags.OVERWRITE) # type: ignore
 
         self.load_file(new_gfile)
         USER_POOL.load()
