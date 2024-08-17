@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
+from typing import Optional
 from gettext import gettext as _
 
 from gi.repository import Gtk, Adw, Gio, GLib # type: ignore
@@ -59,6 +60,35 @@ class PinAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.pins_tab.new_app_button.set_visible(True)
+        self.pins_tab.new_app_button.connect('clicked', self.new_file)
+        self.new_file_button.connect('clicked', self.new_file)
+
+        def open_file(widget: Gtk.Widget, gfile: Gio.File):
+            self.file_page.load_file(gfile)
+            self.set_page(WindowPage.FILE_PAGE)
+
+        self.pins_tab.connect('file-open', open_file)
+        self.installed_tab.connect('file-open', open_file)
+        self.search_tab.connect('file-open', open_file)
+        
+        # TODO: Is 'popped' the right signal?
+        self.navigation_view.connect('popped', lambda v, p: self.file_page.on_leave())
+        self.file_page.connect('pop-request', lambda w: self.set_page(WindowPage.APPS_PAGE))
+        self.connect('close-request', lambda _: self.do_close_request())
+
+        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
+        help_overlay = builder.get_object('help_overlay')
+        help_overlay.set_transient_for(self)
+        self.set_help_overlay(help_overlay)
+
+        self._init_app_views()
+        self._init_search()
+        self.set_tab(WindowTab.PINS)
+
+    def _init_app_views(self):
+        # TODO: Make everything async again?
+
         file_attrs = ','.join((
             Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
             Gio.FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,
@@ -89,34 +119,6 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.installed_tab.bind_dir_list(system_dir_list)
         self.search_tab.bind_dir_list(search_dir_list)
 
-        def new_file(widget: Gtk.Widget):
-            self.new_file()
-
-        self.pins_tab.new_app_button.set_visible(True)
-        self.pins_tab.new_app_button.connect('clicked', new_file)
-        self.new_file_button.connect('clicked', new_file)
-
-        def open_file(widget: Gtk.Widget, gfile: Gio.File):
-            self.file_page.load_file(gfile)
-            self.set_page(WindowPage.FILE_PAGE)
-
-        self.pins_tab.connect('file-open', open_file)
-        self.installed_tab.connect('file-open', open_file)
-        self.search_tab.connect('file-open', open_file)
-        # TODO: Is 'popped' the right signal?
-        self.navigation_view.connect('popped', lambda v, p: self.file_page.on_leave())
-        self.file_page.connect('pop-request', lambda w: self.set_page(WindowPage.APPS_PAGE))
-
-        self.connect('close-request', lambda _: self.do_close_request())
-
-        builder = Gtk.Builder.new_from_resource('/io/github/fabrialberio/pinapp/apps_page_dialogs.ui')
-        help_overlay = builder.get_object('help_overlay')
-        help_overlay.set_transient_for(self)
-        self.set_help_overlay(help_overlay)
-
-        self.set_tab(WindowTab.PINS)
-        self._init_search()
-        self.load_apps()
 
     def _init_search(self):
         self.search_bar.set_key_capture_widget(self)
@@ -167,7 +169,7 @@ class PinAppWindow(Adw.ApplicationWindow):
                 self.set_tab(self.last_tab)
             self.search_bar.set_search_mode(False)
 
-    def new_file(self):
+    def new_file(self, _button: Optional[Gtk.Button] = None):
         if self.current_page() != WindowPage.APPS_PAGE:
             return
 
@@ -182,9 +184,6 @@ class PinAppWindow(Adw.ApplicationWindow):
 
         self.file_page.load_file(gfile, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)
-
-    def load_apps(self):
-        return
 
     def do_close_request(self, *args):
         '''Return `False` if the window can close, otherwise `True`'''
