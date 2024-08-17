@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import Callable
+from typing import Optional
 from gettext import gettext as _
 
 from gi.repository import Gtk, Adw, Gio, GObject # type: ignore
 from xml.sax.saxutils import escape as escape_xml
 
 from .config import *
-from .desktop_file import DesktopFile, DesktopEntry
+from .desktop_file import DesktopFile, DesktopEntry, Field
 
 
 class AppsViewState(Enum):
@@ -38,12 +38,17 @@ class AppRow(Adw.ActionRow):
         self.file = DesktopFile.load_from_path(gfile.get_path())
 
         self.connect('activated', lambda _: self.emit('file-open', gfile))
-        self.file.connect('field-set', lambda d, f, v: self.update())
+        self.file.connect('field-set', self.update)
         self.update()
 
-    def update(self):
-        self.set_title(escape_xml(self.file.get_str(self.file.localize_current(DesktopEntry.NAME))))
-        self.set_subtitle(escape_xml(self.file.get_str(self.file.localize_current(DesktopEntry.COMMENT))))
+    def update(
+            self,
+            _desktop_file: Optional[DesktopFile] = None,
+            _field: Optional[Field] = None,
+            _value: Optional[str] = None    
+        ):
+        self.set_title(escape_xml(self.file.get_str(DesktopEntry.NAME)))
+        self.set_subtitle(escape_xml(self.file.get_str(DesktopEntry.COMMENT)))
 
         set_icon_from_name(self.icon, self.file.get_str(DesktopEntry.ICON))
 
@@ -92,27 +97,27 @@ class AppListView(Adw.Bin):
 
         self.bind_model(Gtk.MapListModel.new(files_model, create_row))
 
-    def bind_model(self, model: Gio.ListModel) -> None: # TODO: Does not update when unpinning apps
+    def bind_model(self, model: Gio.ListModel) -> None:
         def sort_files(first: Gio.File, second: Gio.File, data: None):
             first_name = first.file.localize_current(DesktopEntry.NAME)
             second_name = second.file.localize_current(DesktopEntry.NAME)
 
             lt = first.file.get_str(first_name) < second.file.get_str(second_name)
             return -1 if lt else 1
-        
+
         self.listbox.bind_model(Gtk.SortListModel.new(model, Gtk.CustomSorter.new(sort_files)), lambda r: r)
 
-    def items_changed(self, dir_list: Gtk.DirectoryList, *args):
+    def items_changed(
+            self,
+            dir_list: Gtk.DirectoryList,
+            _param: Optional[GLib.Variant] = None
+        ):
         if dir_list.is_loading():
             self.set_state(AppsViewState.LOADING)
         elif dir_list.get_n_items() == 0:
             self.set_state(AppsViewState.EMPTY)
         else:
             self.set_state(AppsViewState.APPS)
-
-    def set_filter(self, predicate: Callable[[AppRow], bool]):
-        raise NotImplemented
-        self.listbox.set_filter_func(predicate)
 
     def connect_entry(self, search_entry: Gtk.SearchEntry):
         def search(entry: Gtk.SearchEntry):
