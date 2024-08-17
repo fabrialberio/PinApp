@@ -25,7 +25,7 @@ from .desktop_file import DesktopFile, DesktopEntry
 from .file_page import FilePage # Required to initialize GObject
 from .config import USER_APPS, APP_PATHS
 from .file_pool import create_gfile_checked
-from .apps_page import AppListView
+from .apps_view import AppListView
 
 
 class WindowTab(Enum):
