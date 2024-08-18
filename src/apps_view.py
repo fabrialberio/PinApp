@@ -27,17 +27,12 @@ class AppRow(Adw.ActionRow):
     flatpak_chip: Gtk.Box = Gtk.Template.Child()
     snap_chip: Gtk.Box = Gtk.Template.Child()
 
-    def __init__(self, gfile: Gio.File):
+    def __init__(self, desktop_file: DesktopFile):
         super().__init__()
 
-        if not gfile.query_exists():
-            self.set_title(gfile.get_path())
-            self.set_subtitle('Does not exist')
-            return
+        self.file = desktop_file
 
-        self.file = DesktopFile.load_from_path(gfile.get_path())
-
-        self.connect('activated', lambda _: self.emit('file-open', gfile))
+        self.connect('activated', lambda _: self.emit('file-open', self.file))
         self.file.connect('field-set', self.update)
         self.update()
 
@@ -88,11 +83,12 @@ class AppListView(Adw.Bin):
 
         def create_row(gfile_info: Gio.FileInfo):
             gfile = gfile_info.get_attribute_object('standard::file')
-            row = AppRow(gfile)
+            desktop_file = DesktopFile.load_from_path(gfile.get_path())
+            row = AppRow(desktop_file)
 
             pinned = gfile.get_parent().get_path() == str(USER_APPS)
             row.pinned_chip.set_visible(self.show_pinned_chip and pinned)
-            row.connect('file-open', lambda _, f: self.emit('file-open', f))
+            row.connect('file-open', lambda _, df: self.emit('file-open', gfile, df))
             return row
 
         self.bind_model(Gtk.MapListModel.new(files_model, create_row))
@@ -127,4 +123,4 @@ class AppListView(Adw.Bin):
 
         search_entry.connect('search-changed', search)
 
-GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT,))
+GObject.signal_new('file-open', AppListView, GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_OBJECT, GObject.TYPE_OBJECT,))

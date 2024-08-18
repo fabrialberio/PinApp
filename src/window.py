@@ -64,8 +64,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.pins_tab.new_app_button.connect('clicked', self.new_file)
         self.new_file_button.connect('clicked', self.new_file)
 
-        def open_file(widget: Gtk.Widget, gfile: Gio.File):
-            self.file_page.load_file(gfile)
+        def open_file(_tab: AppListView, gfile: Gio.File, desktop_file: DesktopFile):
+            self.file_page.load_file(gfile, desktop_file)
             self.set_page(WindowPage.FILE_PAGE)
 
         self.pins_tab.connect('file-open', open_file)

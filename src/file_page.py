@@ -40,6 +40,7 @@ class FilePage(Adw.Bin):
     toolbar_view = Gtk.Template.Child()
     
     gfile: Optional[Gio.File] = None
+    desktop_file: DesktopFile
     file_state = FilePageState.EMPTY
     banner_expanded = True
 
@@ -57,7 +58,7 @@ class FilePage(Adw.Bin):
             case FilePageState.NEW_FILE | FilePageState.LOADED_SYSTEM:
                 pinned_gfile = create_gfile_checked(self.gfile.get_basename(), str(USER_APPS)) # type: ignore
                 self.gfile.copy(pinned_gfile, Gio.FileCopyFlags.OVERWRITE) # type: ignore
-                self.load_file(pinned_gfile)
+                self.load_file(pinned_gfile, self.desktop_file)
             case _:
                 raise ValueError(f'Cannot pin `DesktopFile` at "{self.gfile.get_path()}", it is already pinned.') # type: ignore
 
@@ -139,7 +140,7 @@ class FilePage(Adw.Bin):
                     case FilePageState.LOADED_PINNED:
                         self.file_view.save_file(self.gfile) # type: ignore
                         self.gfile.move(renamed_gfile, Gio.FileCopyFlags.NONE) # type: ignore
-                        self.load_file(renamed_gfile)
+                        self.load_file(renamed_gfile, self.desktop_file)
 
         dialog.connect('response', on_resp)
         dialog.set_transient_for(self.get_root())
@@ -148,12 +149,11 @@ class FilePage(Adw.Bin):
     def duplicate_file(self):
         new_gfile = create_gfile_checked(self.gfile.get_basename(), str(USER_APPS)) # type: ignore
         self.gfile.copy(new_gfile, Gio.FileCopyFlags.OVERWRITE) # type: ignore
+        self.load_file(new_gfile, self.desktop_file)
 
-        self.load_file(new_gfile)
-
-    def load_file(self, gfile: Gio.File, is_new = False):
+    def load_file(self, gfile: Gio.File, desktop_file: DesktopFile, is_new = False):
         self.gfile = gfile
-        desktop_file = DesktopFile.load_from_path(gfile.get_path())
+        self.desktop_file = desktop_file
 
         if is_new:
             self.file_state = FilePageState.NEW_FILE
@@ -162,7 +162,7 @@ class FilePage(Adw.Bin):
         else:
             self.file_state = FilePageState.LOADED_SYSTEM
 
-        self.file_view = FileView(desktop_file)
+        self.file_view = FileView(self.desktop_file)
         self.toolbar_view.set_content(self.file_view)
         self.pin_button.set_visible(self.file_state != FilePageState.LOADED_PINNED)
         self.file_menu_button.set_visible(self.file_state != FilePageState.LOADED_SYSTEM)
@@ -184,7 +184,7 @@ class FilePage(Adw.Bin):
                 self.window_title.set_title(value)
 
         self.file_view.scrolled_window.get_vadjustment().connect('value-changed', update_title_visible) # type: ignore
-        desktop_file.connect('field-set', update_title_text)
+        self.desktop_file.connect('field-set', update_title_text)
 
     """
     def _upload_icon(self):
