@@ -124,18 +124,18 @@ class DesktopFile(GObject.Object):
 
     def set_bool(self, field: Field, value: bool) -> None:
         self._key_file.set_boolean(field.group, field.key, value)
-        self.emit('field-set', field, value)
         self._add_to_model(field)
+        self.emit('field-set', field, value)
 
     def set_str(self, field: Field, value: str) -> None:
         self._key_file.set_string(field.group, field.key, value)
-        self.emit('field-set', field, value)
         self._add_to_model(field)
+        self.emit('field-set', field, value)
 
     def remove(self, field: Field) -> None:
         self._key_file.remove_key(field.group, field.key)
-        self.emit('field-removed', field)
         self._remove_from_model(field)
+        self.emit('field-removed', field)
 
     def localize_current(self, field: Field) -> Field:
         return field.localize(self._key_file.get_locale_for_key(field.group, field.key))

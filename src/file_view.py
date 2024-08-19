@@ -70,14 +70,15 @@ class StringRow(Adw.EntryRow):
     def update_appearance(self):
         field_value = self.file.get_str(self.field, None)
 
-        if field_value is None:
+        if field_value is None:                                     # Field does not exist
+            self.file.set_str(self.field, self.get_text())
+            self._field_state = self.get_text()
+        elif self._field_state == field_value == self.get_text():   # Everything is up-to-date
             ...
-        elif self._field_state == field_value == self.get_text(): # Everything is up-to-date
-            ...
-        elif self._field_state == self.get_text():              # Field has been changed externally
+        elif self._field_state == self.get_text():                  # Field has been changed externally
             self.set_text(field_value)
             self._field_state = field_value
-        elif self._field_state == field_value:                  # Text has been changed by user
+        elif self._field_state == field_value:                      # Text has been changed by user
             self.file.set_str(self.field, self.get_text())
             self._field_state = self.get_text()
 
@@ -116,14 +117,14 @@ class BoolOrStringRow(StringRow):
 
         field_bool_value = self.file.get_bool(self.field, None)
 
-        if field_bool_value is None:
+        if field_bool_value is None:                                                    # Field is not boolean
             ...
-        elif field_bool_value == self._field_bool_state == self.switch.get_active():  # Everything is up-to-date
+        elif field_bool_value == self._field_bool_state == self.switch.get_active():    # Everything is up-to-date
             ...
-        elif self._field_bool_state == self.switch.get_active():                    # Field has been changed externally
+        elif self._field_bool_state == self.switch.get_active():                        # Field has been changed externally
             self.switch.set_active(field_bool_value)
             self._field_bool_state = field_bool_value
-        elif self._field_bool_state == field_bool_value:                            # Switch has been changed by user
+        elif self._field_bool_state == field_bool_value:                                # Switch has been changed by user
             self.file.set_bool(self.field, self.switch.get_active())
             self._field_bool_state = self.switch.get_active()
 
@@ -233,17 +234,23 @@ class FieldRow(BoolOrStringRow):
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
         self.unlocalized_field = field.localize(None)
-        field = self.unlocalized_field
-        
-        super().set_field(file, field)
-        self.locale_select.set_field(file, field)
-        self.locale_select.set_selected(file.localize_current(field).locale())
+
+        super().set_field(file, self.unlocalized_field)
+
+        def on_field_set(_file: DesktopFile, field_: Field, _value: str):
+            if field_.locale() is not None and field_.localize(None) == self.unlocalized_field:
+                print('Updating!')
+                self.locale_select.set_field(file, self.unlocalized_field)
+                self.update_appearance()
+
+        self.file.connect('field-set', on_field_set)
+        self.locale_select.set_field(file, self.unlocalized_field)
+        self.locale_select.set_selected(file.localize_current(self.unlocalized_field).locale())
         self.update_appearance()
 
     def set_locale(self, locale: Optional[str]):
         self.locale = locale
         self.field = self.unlocalized_field.localize(locale)
-        self.set_text(self.file.get_str(self.field))
         self.update_appearance()
 
     def on_remove_button_clicked(self):
@@ -292,8 +299,8 @@ class FileView(Adw.BreakpointBin):
         self.set_file(file)
         self.add_field_button.connect('activated', lambda b: self.show_add_field_dialog())
         
-    def set_file(self, file: DesktopFile):
-        self.file = file
+    def set_file(self, desktop_file: DesktopFile):
+        self.file = desktop_file
 
         set_icon_from_name(self.icon, self.file.get_str(DesktopEntry.ICON))
         self._connect_toggle(self.hidden_toggle, DesktopEntry.NO_DISPLAY)
@@ -307,7 +314,7 @@ class FileView(Adw.BreakpointBin):
                 return False
 
             if item.locale() is not None:
-                if item.localize(None) in file.fields:
+                if item.localize(None) in self.file.fields:
                     return False
 
             return True
@@ -337,7 +344,7 @@ class FileView(Adw.BreakpointBin):
             if field in [DesktopEntry.EXEC, DesktopEntry.TYPE]:
                 row.removable = False
 
-            row.set_field(file, field)
+            row.set_field(desktop_file, field)
             return row
 
         self.fields_listbox.bind_model(Gtk.FilterListModel.new(
@@ -351,17 +358,13 @@ class FileView(Adw.BreakpointBin):
     def show_add_field_dialog(self):
         dialog = AddFieldDialog()
 
-        def update_response_enabled(dialog_: Adw.MessageDialog):
+        def update_response_enabled(_dialog: Adw.MessageDialog):
             dialog.set_response_enabled('add', dialog.key_entry.get_text())
 
-        def add_field(dialog: Adw.MessageDialog, resp: str):
+        def add_field(dialog: Adw.MessageDialog, _resp: str):
             field = Field(DesktopEntry.group, dialog.key_entry.get_text())
-
-            if locale := dialog.locale_entry.get_text():
-                field = field.localize(locale)
-
-            self.file.set_str(field, '')
-            self.set_file(self.file) # Required to update localized fields
+            locale = dialog.locale_entry.get_text() or None
+            self.file.set_str(field.localize(locale), '')
 
         dialog.connect('response', add_field)
         dialog.key_entry.connect('changed', update_response_enabled)
