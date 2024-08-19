@@ -4,7 +4,8 @@ from gettext import gettext as _
 from gi.repository import Adw, Gtk, Gio, GObject # type: ignore
 
 from .desktop_file import DesktopFile, DesktopEntry, Field
-from .config import set_icon_from_name
+from .file_pool import create_gfile_checked
+from .config import set_icon_from_name, APP_DATA_ICONS
 
 
 class RemoveButton(Gtk.Button):
@@ -290,7 +291,7 @@ class FileView(Adw.BreakpointBin):
         super().__init__()
 
         self.set_file(file)
-        self.add_field_button.connect('activated', lambda b: self.show_add_field_dialog())
+        self.add_field_button.connect('activated', self._show_add_field_dialog)
         
     def set_file(self, desktop_file: DesktopFile):
         self.file = desktop_file
@@ -326,11 +327,7 @@ class FileView(Adw.BreakpointBin):
                 def update_icon(row: StringRow):
                     set_icon_from_name(self.icon, row.get_text())
 
-                def show_choose_icon_dialog(button: Gtk.Button):
-                    # TODO
-                    print('Imagine a file picker just appeared')
-
-                button.connect('clicked', show_choose_icon_dialog)
+                button.connect('clicked', self._show_upload_icon_dialog)
                 row.connect('changed', update_icon)
                 row.add_suffix(button)
 
@@ -348,7 +345,7 @@ class FileView(Adw.BreakpointBin):
     def save_file(self, gfile: Gio.File):
         self.file.write_to_path(gfile.get_path())
 
-    def show_add_field_dialog(self):
+    def _show_add_field_dialog(self, _button: Optional[Gtk.Button] = None):
         dialog = AddFieldDialog()
 
         def update_response_enabled(_dialog: Adw.MessageDialog):
@@ -363,6 +360,27 @@ class FileView(Adw.BreakpointBin):
         dialog.key_entry.connect('changed', update_response_enabled)
         dialog.set_transient_for(self.get_root())
         dialog.present()
+
+    def _show_upload_icon_dialog(self, _button: Optional[Gtk.Button] = None):
+        dialog = Gtk.FileChooserNative(
+            title=_('Upload icon'),
+            action=Gtk.FileChooserAction.OPEN,
+            accept_label=_('Open'),
+            cancel_label=_('Cancel')
+        )
+
+        def on_response(dialog: Gtk.FileChooserNative, response: str):
+            if response == Gtk.ResponseType.ACCEPT:
+                gfile = dialog.get_file()    
+                new_gfile = create_gfile_checked(gfile.get_basename(), APP_DATA_ICONS)
+                gfile.copy(new_gfile, Gio.FileCopyFlags.OVERWRITE)
+
+                self.file.set_str(DesktopEntry.ICON, new_gfile.get_path())
+
+        dialog.connect('response', on_response)
+        dialog.set_modal(True)
+        dialog.set_transient_for(self.get_root())
+        dialog.show()
 
     def _connect_toggle(self, button: Gtk.ToggleButton, field: Field):
         def update_field(button: Gtk.ToggleButton):

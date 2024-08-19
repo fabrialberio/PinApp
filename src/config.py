@@ -5,8 +5,9 @@ from gi.repository import Gtk, Gdk, GLib # type: ignore
 
 LOCALE_DIR = Path('/app/share/locale')
 
-APP_DATA = GLib.get_user_data_dir()
-GLib.mkdir_with_parents(APP_DATA + '/icons', 777)
+APP_DATA: str = GLib.get_user_data_dir()
+APP_DATA_ICONS = APP_DATA + '/icons'
+GLib.mkdir_with_parents(APP_DATA_ICONS, 777)
 
 LOCAL_DATA = Path(GLib.get_home_dir()) / '.local/share'
 HOST_DATA = Path('/run/host/usr/share')
