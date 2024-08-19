@@ -65,7 +65,7 @@ class PinAppWindow(Adw.ApplicationWindow):
         self.new_file_button.connect('clicked', self.new_file)
 
         def open_file(_tab: AppListView, gfile: Gio.File, desktop_file: DesktopFile):
-            self.file_page.load_file(gfile, desktop_file)
+            self.file_page.set_file(gfile, desktop_file)
             self.set_page(WindowPage.FILE_PAGE)
 
         self.pins_tab.connect('file-open', open_file)
@@ -180,9 +180,8 @@ class PinAppWindow(Adw.ApplicationWindow):
         desktop_file.set_str(DesktopEntry.TYPE, GLib.KEY_FILE_DESKTOP_TYPE_APPLICATION)
         desktop_file.set_str(DesktopEntry.EXEC, '')
         desktop_file.set_str(DesktopEntry.ICON, '')
-        desktop_file.write_to_path(gfile.get_path())
 
-        self.file_page.load_file(gfile, is_new = True)
+        self.file_page.set_file(gfile, desktop_file, is_new = True)
         self.set_page(WindowPage.FILE_PAGE)
 
     def do_close_request(self, *args):

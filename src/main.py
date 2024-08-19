@@ -32,6 +32,7 @@ from gi.repository import Gtk, Gio, Adw, Gdk, GLib # type: ignore
 
 from .config import LOCALE_DIR, ICON_PATHS
 from .window import PinAppWindow, WindowPage, WindowTab
+from .desktop_file import DesktopFile
 
 
 class PinApp(Adw.Application):  
@@ -45,11 +46,13 @@ class PinApp(Adw.Application):
             self.get_window().present()
 
         def open(app: PinApp, gfiles: list[Gio.File], n_files: int, hint: str):
-            if not gfiles[0].query_exists():
+            gfile = gfiles[0]
+            
+            if not gfile.query_exists():
                 return
 
             window = self.get_window()
-            window.file_page.load_file(gfiles[0])
+            window.file_page.set_file(gfile, DesktopFile.load_from_path(gfile.get_path()))
             window.set_page(WindowPage.FILE_PAGE)
             window.present()
 
