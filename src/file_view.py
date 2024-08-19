@@ -26,14 +26,14 @@ class StringRow(Adw.EntryRow):
     field: Field
     remove_button: Gtk.Button
     _removable: bool = True
-    _field_state: str
+    _previous_value: str
 
     @GObject.Property(type=bool, default=True)
-    def removable(self) -> bool: # type: ignore
+    def removable(self) -> bool:
         return self._removable and self.file.has_field(self.field)
     
     @removable.setter
-    def removable(self, value: bool):
+    def set_removable(self, value: bool):
         self._removable = value
 
     def __init__(self, removable: bool=True) -> None:
@@ -41,55 +41,52 @@ class StringRow(Adw.EntryRow):
 
         self._removable = removable
         self.remove_button = RemoveButton()
-        self.remove_button.connect('clicked', lambda w: self.on_remove_button_clicked())
+        self.remove_button.connect('clicked', self._on_remove_button_clicked)
 
         self.add_suffix(self.remove_button)
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
         self.file = file
         self.field = field
-        self._field_state = self.file.get_str(self.field)
+        self._previous_value = self.file.get_str(self.field)
 
         self.set_title(self.field.key)
         self.set_text(self.file.get_str(self.field))
 
-        def on_text_changed(editable: StringRow):
-            self.update_appearance()
+        self.connect('changed', lambda e: self._update_appearance())
+        self.file.connect('field-set', self._on_field_set)
+        self._update_appearance()
 
-        def on_field_set(file: DesktopFile, field_: Field, value: str):
-            if field_ == self.field:
-                self.update_appearance()
-
-        self.connect('changed', on_text_changed)
-        self.file.connect('field-set', on_field_set)
-        self.update_appearance()
-
-    def on_remove_button_clicked(self):
+    def _on_remove_button_clicked(self, _button: Gtk.Button):
         self.file.remove(self.field)
 
-    def update_appearance(self):
-        field_value = self.file.get_str(self.field, None)
+    def _on_field_set(self, _file: DesktopFile, field: Field, _value: str):
+        if field == self.field:
+            self._update_appearance()
 
-        if field_value is None:                                     # Field does not exist
+    def _update_appearance(self):
+        current_value = self.file.get_str(self.field, None)
+
+        if current_value is None:                                       # Field does not exist
             self.file.set_str(self.field, self.get_text())
-            self._field_state = self.get_text()
-        elif self._field_state == field_value == self.get_text():   # Everything is up-to-date
+            self._previous_value = self.get_text()
+        elif self._previous_value == current_value == self.get_text():  # Everything is up-to-date
             ...
-        elif self._field_state == self.get_text():                  # Field has been changed externally
-            self.set_text(field_value)
-            self._field_state = field_value
-        elif self._field_state == field_value:                      # Text has been changed by user
+        elif self._previous_value == self.get_text():                   # Field has been changed externally
+            self.set_text(current_value)
+            self._previous_value = current_value
+        elif self._previous_value == current_value:                     # Text has been changed by user
             self.file.set_str(self.field, self.get_text())
-            self._field_state = self.get_text()
+            self._previous_value = self.get_text()
 
-        self.remove_button.set_visible(self.removable and not self.get_text())
+        self.remove_button.set_visible(self.set_removable and not self.get_text())
 
 
 class BoolOrStringRow(StringRow):
     __gtype_name__ = 'BoolOrStringRow'
 
     switch: Gtk.Switch
-    _field_bool_state: bool
+    _previous_bool_value: bool
 
     def __init__(self, removable: bool = True) -> None:
         super().__init__(removable)
@@ -101,35 +98,32 @@ class BoolOrStringRow(StringRow):
         self.add_suffix(self.switch)
 
     def set_field(self, file: DesktopFile, field: Field) -> None:
-        self._field_bool_state = file.get_bool(field)        
+        self._previous_bool_value = file.get_bool(field)        
         self.switch.set_active(file.get_bool(field))
         
         super().set_field(file, field)  
 
-        def on_switch_toggled(switch: Gtk.Switch, value: bool):
-            self.update_appearance()
+        self.switch.connect('state-set', lambda s, v: self._update_appearance())
+        self._update_appearance()
 
-        self.switch.connect('state-set', on_switch_toggled)
-        self.update_appearance()
+    def _update_appearance(self):
+        super()._update_appearance()
 
-    def update_appearance(self):
-        super().update_appearance()
+        current_bool_value = self.file.get_bool(self.field, None)
 
-        field_bool_value = self.file.get_bool(self.field, None)
-
-        if field_bool_value is None:                                                    # Field is not boolean
+        if current_bool_value is None:                                                      # Field is not boolean
             ...
-        elif field_bool_value == self._field_bool_state == self.switch.get_active():    # Everything is up-to-date
+        elif current_bool_value == self._previous_bool_value == self.switch.get_active():   # Everything is up-to-date
             ...
-        elif self._field_bool_state == self.switch.get_active():                        # Field has been changed externally
-            self.switch.set_active(field_bool_value)
-            self._field_bool_state = field_bool_value
-        elif self._field_bool_state == field_bool_value:                                # Switch has been changed by user
+        elif self._previous_bool_value == self.switch.get_active():                         # Field has been changed externally
+            self.switch.set_active(current_bool_value)
+            self._previous_bool_value = current_bool_value
+        elif self._previous_bool_value == current_bool_value:                               # Switch has been changed by user
             self.file.set_bool(self.field, self.switch.get_active())
-            self._field_bool_state = self.switch.get_active()
+            self._previous_bool_value = self.switch.get_active()
 
-        self.switch.set_visible(field_bool_value is not None)
-        self.remove_button.set_visible(self.removable and (self.switch.get_visible() or not self.get_text()))
+        self.switch.set_visible(current_bool_value is not None)
+        self.remove_button.set_visible(self.set_removable and (self.switch.get_visible() or not self.get_text()))
 
 
 class LocaleButton(Gtk.MenuButton):
@@ -237,29 +231,29 @@ class FieldRow(BoolOrStringRow):
 
         super().set_field(file, self.unlocalized_field)
 
-        def on_field_set(_file: DesktopFile, field_: Field, _value: str):
-            if field_.locale() is not None and field_.localize(None) == self.unlocalized_field:
-                print('Updating!')
-                self.locale_select.set_field(file, self.unlocalized_field)
-                self.update_appearance()
-
-        self.file.connect('field-set', on_field_set)
         self.locale_select.set_field(file, self.unlocalized_field)
         self.locale_select.set_selected(file.localize_current(self.unlocalized_field).locale())
-        self.update_appearance()
+        self._update_appearance()
 
     def set_locale(self, locale: Optional[str]):
         self.locale = locale
         self.field = self.unlocalized_field.localize(locale)
-        self.update_appearance()
+        self._update_appearance()
 
-    def on_remove_button_clicked(self):
+    def _on_remove_button_clicked(self, _button: Gtk.Button):
         self.file.remove(self.field)
         self.locale_select.set_field(self.file, self.field)
         self.locale_select.set_selected(None)
 
-    def update_appearance(self):
-        super().update_appearance()
+    def _on_field_set(self, _file: DesktopFile, field: Field, _value: str):
+        super()._on_field_set(_file, field, _value)
+
+        if field.locale() is not None and field.localize(None) == self.unlocalized_field:
+            self.locale_select.set_field(self.file, self.unlocalized_field)
+            self._update_appearance()
+
+    def _update_appearance(self):
+        super()._update_appearance()
 
         self.locale_select.set_visible(self.file.locales(self.field))
 
@@ -282,7 +276,6 @@ class FileView(Adw.BreakpointBin):
     __gtype_name__ = 'FileView'
 
     file: DesktopFile
-    field_row_map: dict[Field, StringRow] = {}
 
     scrolled_window: Gtk.ScrolledWindow = Gtk.Template.Child()
     icon: Gtk.Image = Gtk.Template.Child()
@@ -342,7 +335,7 @@ class FileView(Adw.BreakpointBin):
                 row.add_suffix(button)
 
             if field in [DesktopEntry.EXEC, DesktopEntry.TYPE]:
-                row.removable = False
+                row.set_removable = False
 
             row.set_field(desktop_file, field)
             return row
