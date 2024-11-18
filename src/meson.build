@@ -1,34 +1,20 @@
-pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
-moduledir = join_paths(pkgdatadir, 'pinapp')
-
-python = import('python')
-
-conf = configuration_data()
-conf.set('PYTHON', python.find_installation('python3').path())
-conf.set('VERSION', meson.project_version())
-conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
-conf.set('pkgdatadir', pkgdatadir)
-
-configure_file(
-  input: 'pinapp.in',
-  output: 'pinapp',
-  configuration: conf,
-  install: true,
-  install_dir: get_option('bindir')
-)
-
-subdir('ui')
-
 pinapp_sources = [
-  '__init__.py',
-  'apps_view.py',
-  'config.py',
-  'desktop_file.py',
-  'file_page.py',
-  'file_pool.py',
-  'file_view.py',
-  'main.py',
-  'window.py',
+  'main.c',
+  'pinapp-application.c',
+  'pinapp-window.c',
 ]
 
-install_data(pinapp_sources, install_dir: moduledir)
+pinapp_deps = [
+  dependency('gtk4'),
+  dependency('libadwaita-1', version: '>= 1.4'),
+]
+
+pinapp_sources += gnome.compile_resources('pinapp-resources',
+  'pinapp.gresource.xml',
+  c_name: 'pinapp'
+)
+
+executable('pinapp', pinapp_sources,
+  dependencies: pinapp_deps,
+       install: true,
+)
