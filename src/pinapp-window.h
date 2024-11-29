@@ -24,8 +24,9 @@
 
 G_BEGIN_DECLS
 
-#define PINAPP_TYPE_WINDOW (pinapp_window_get_type())
+#define PINAPP_TYPE_WINDOW (pinapp_window_get_type ())
 
-G_DECLARE_FINAL_TYPE (PinappWindow, pinapp_window, PINAPP, WINDOW, AdwApplicationWindow)
+G_DECLARE_FINAL_TYPE (PinappWindow, pinapp_window, PINAPP, WINDOW,
+                      AdwApplicationWindow)
 
 G_END_DECLS

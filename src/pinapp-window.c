@@ -24,10 +24,10 @@
 
 struct _PinappWindow
 {
-	AdwApplicationWindow  parent_instance;
+    AdwApplicationWindow parent_instance;
 
-	/* Template widgets */
-	GtkLabel            *label;
+    /* Template widgets */
+    GtkLabel *label;
 };
 
 G_DEFINE_FINAL_TYPE (PinappWindow, pinapp_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -35,14 +35,15 @@ G_DEFINE_FINAL_TYPE (PinappWindow, pinapp_window, ADW_TYPE_APPLICATION_WINDOW)
 static void
 pinapp_window_class_init (PinappWindowClass *klass)
 {
-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-	gtk_widget_class_set_template_from_resource (widget_class, "/io/github/fabrialberio/pinapp/pinapp-window.ui");
-	gtk_widget_class_bind_template_child (widget_class, PinappWindow, label);
+    gtk_widget_class_set_template_from_resource (
+        widget_class, "/io/github/fabrialberio/pinapp/pinapp-window.ui");
+    gtk_widget_class_bind_template_child (widget_class, PinappWindow, label);
 }
 
 static void
 pinapp_window_init (PinappWindow *self)
 {
-	gtk_widget_init_template (GTK_WIDGET (self));
+    gtk_widget_init_template (GTK_WIDGET (self));
 }
