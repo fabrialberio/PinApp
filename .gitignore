@@ -18,6 +18,7 @@ _build/
 repo/
 *.flatpak
 .buildconfig
+.cache
 
 # IDE dirs
 .vscode/
