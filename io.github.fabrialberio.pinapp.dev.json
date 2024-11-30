@@ -4,19 +4,16 @@
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "pinapp",
-
     "finish-args": [
         "--share=ipc",
         "--socket=fallback-x11",
         "--device=dri",
         "--socket=wayland",
-
         "--filesystem=xdg-data/applications:rw",
         "--filesystem=xdg-data/flatpak:ro",
         "--filesystem=/var/lib/flatpak:ro",
         "--filesystem=/var/lib/snapd:ro"
     ],
-
     "cleanup": [
         "/include",
         "/lib/pkgconfig",
@@ -28,7 +25,6 @@
         "*.la",
         "*.a"
     ],
-
     "modules": [
         {
             "name": "PinApp",
