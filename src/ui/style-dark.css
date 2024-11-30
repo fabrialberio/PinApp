@@ -1,11 +1,11 @@
 .chip-blue {
-	color: @blue_1;
+    color: @blue_1;
 }
 
 .chip-red {
-	color: @yellow_3;
+    color: @yellow_3;
 }
 
 .chip-orange {
-	color: @orange_2;
+    color: @orange_2;
 }

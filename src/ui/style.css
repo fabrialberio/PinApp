@@ -1,49 +1,49 @@
 .chip-box {
-	background-color: alpha(currentColor, .15);
-	border-radius: 999px;
-	padding-left: 8px;
-	padding-right: 8px;
-	padding-top: 4px;
-	padding-bottom: 4px;
+    background-color: alpha(currentColor, .15);
+    border-radius: 999px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .chip-blue {
-	color: @blue_3;
+    color: @blue_3;
 }
 
 .chip-yellow {
-	color: @yellow_5;
+    color: @yellow_5;
 }
 
 .chip-orange {
-	color: @orange_5;
+    color: @orange_5;
 }
 
 
 .app-banner-listbox {
-	background-color: transparent;
+    background-color: transparent;
 }
 
 .app-banner-entry {
-	border-radius: 12px;
+    border-radius: 12px;
 }
 
 .title-1-row text {
-	font-weight: 800;
-	font-size: 20pt;
+    font-weight: 800;
+    font-size: 20pt;
 }
 
 .title-2-row text {
-	font-weight: 800;
-	font-size: 15pt;
+    font-weight: 800;
+    font-size: 15pt;
 }
 
 .pill-toggle-active {
-	background-color: @blue_3;
-	color: @white;
+    background-color: @blue_3;
+    color: @white;
 }
 
 .pill-toggle-active:hover {
-	background-color: @blue_2;
-	color: @white;
+    background-color: @blue_2;
+    color: @white;
 }
