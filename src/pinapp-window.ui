@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk" version="4.0"/>
-  <requires lib="Adw" version="1.0"/>
+  <requires lib="gtk" version="4.0" />
+  <requires lib="Adw" version="1.0" />
   <template class="PinappWindow" parent="AdwApplicationWindow">
     <property name="title" translatable="yes">Pinapp</property>
     <property name="default-width">800</property>
@@ -24,7 +24,7 @@
           <object class="GtkLabel" id="label">
             <property name="label" translatable="yes">Hello, World!</property>
             <style>
-              <class name="title-1"/>
+              <class name="title-1" />
             </style>
           </object>
         </property>

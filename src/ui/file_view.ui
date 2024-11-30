@@ -1,61 +1,61 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class='FileView' parent='AdwBreakpointBin'>
-    <property name='width-request'>330</property>
-    <property name='height-request'>400</property>
+  <template class="FileView" parent="AdwBreakpointBin">
+    <property name="width-request">330</property>
+    <property name="height-request">400</property>
     <child>
-      <object class='GtkScrolledWindow' id='scrolled_window'>
-        <property name='vexpand'>true</property>
+      <object class="GtkScrolledWindow" id="scrolled_window">
+        <property name="vexpand">true</property>
         <child>
-          <object class='AdwClamp'>
+          <object class="AdwClamp">
             <child>
-              <object class='GtkBox'>
-                <property name='orientation'>vertical</property>
-                <property name='spacing'>12</property>
-                <property name='margin-bottom'>24</property>
-                <property name='margin-top'>12</property>
-                <property name='margin-start'>12</property>
-                <property name='margin-end'>12</property>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <property name="margin-bottom">24</property>
+                <property name="margin-top">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
                 <child>
-                  <object class='GtkBox' id='banner_box'>
-                    <property name='orientation'>horizontal</property>
+                  <object class="GtkBox" id="banner_box">
+                    <property name="orientation">horizontal</property>
                     <child>
-                      <object class='GtkImage' id='icon'>
-                        <property name='margin-end'>6</property>
-                        <property name='margin-bottom'>6</property>
-                        <property name='tooltip-text' translatable='yes'>Application icon</property>
-                        <property name='icon-name'>application-x-executable</property>
-                        <property name='pixel-size'>128</property>
+                      <object class="GtkImage" id="icon">
+                        <property name="margin-end">6</property>
+                        <property name="margin-bottom">6</property>
+                        <property name="tooltip-text" translatable="yes">Application icon</property>
+                        <property name="icon-name">application-x-executable</property>
+                        <property name="pixel-size">128</property>
                         <style>
-                          <class name='icon-dropshadow' />
+                          <class name="icon-dropshadow" />
                         </style>
                       </object>
                     </child>
                     <child>
-                      <object class='GtkListBox'>
-                        <property name='valign'>center</property>
-                        <property name='hexpand'>true</property>
-                        <property name='selection-mode'>none</property>
+                      <object class="GtkListBox">
+                        <property name="valign">center</property>
+                        <property name="hexpand">true</property>
+                        <property name="selection-mode">none</property>
                         <style>
-                          <class name='app-banner-listbox' />
+                          <class name="app-banner-listbox" />
                         </style>
                         <child>
-                          <object class='FieldRow' id='name_row'>
-                            <property name='margin-bottom'>6</property>
-                            <property name='height-request'>64</property>
-                            <property name='removable'>false</property>
+                          <object class="FieldRow" id="name_row">
+                            <property name="margin-bottom">6</property>
+                            <property name="height-request">64</property>
+                            <property name="removable">false</property>
                             <style>
-                              <class name='app-banner-entry' />
+                              <class name="app-banner-entry" />
                               <!-- TODO: This should become title-2-row when breakpoint is applied -->
-                              <class name='title-1-row' />
+                              <class name="title-1-row" />
                             </style>
                           </object>
                         </child>
                         <child>
-                          <object class='FieldRow' id='comment_row'>
-                            <property name='removable'>false</property>
+                          <object class="FieldRow" id="comment_row">
+                            <property name="removable">false</property>
                             <style>
-                              <class name='app-banner-entry' />
+                              <class name="app-banner-entry" />
                             </style>
                           </object>
                         </child>
@@ -64,48 +64,48 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkBox' id='pills_box'>
-                    <property name='orientation'>horizontal</property>
-                    <property name='spacing'>6</property>
+                  <object class="GtkBox" id="pills_box">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">6</property>
                     <child>
-                      <object class='GtkToggleButton' id='hidden_toggle'>
-                        <property name='hexpand'>true</property>
+                      <object class="GtkToggleButton" id="hidden_toggle">
+                        <property name="hexpand">true</property>
                         <style>
-                          <class name='pill' />
+                          <class name="pill" />
                         </style>
                         <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>view-conceal-symbolic</property>
-                            <property name='label' translatable='yes'>Hidden</property>
+                          <object class="AdwButtonContent">
+                            <property name="icon-name">view-conceal-symbolic</property>
+                            <property name="label" translatable="yes">Hidden</property>
                           </object>
                         </child>
                       </object>
                     </child>
                     <child>
-                      <object class='GtkToggleButton' id='terminal_toggle'>
-                        <property name='hexpand'>true</property>
+                      <object class="GtkToggleButton" id="terminal_toggle">
+                        <property name="hexpand">true</property>
                         <style>
-                          <class name='pill' />
+                          <class name="pill" />
                         </style>
                         <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>utilities-terminal-symbolic</property>
-                            <property name='label' translatable='yes'>Terminal</property>
+                          <object class="AdwButtonContent">
+                            <property name="icon-name">utilities-terminal-symbolic</property>
+                            <property name="label" translatable="yes">Terminal</property>
                           </object>
                         </child>
                       </object>
                     </child>
                     <child>
-                      <object class='GtkToggleButton' id='autostart_toggle'>
-                        <property name='hexpand'>true</property>
-                        <property name='sensitive'>false</property>
+                      <object class="GtkToggleButton" id="autostart_toggle">
+                        <property name="hexpand">true</property>
+                        <property name="sensitive">false</property>
                         <style>
-                          <class name='pill' />
+                          <class name="pill" />
                         </style>
                         <child>
-                          <object class='AdwButtonContent'>
-                            <property name='icon-name'>media-playback-start-symbolic</property>
-                            <property name='label' translatable='yes'>Autostart</property>
+                          <object class="AdwButtonContent">
+                            <property name="icon-name">media-playback-start-symbolic</property>
+                            <property name="label" translatable="yes">Autostart</property>
                           </object>
                         </child>
                       </object>
@@ -113,23 +113,23 @@
                   </object>
                 </child>
                 <child>
-                  <object class='GtkListBox' id='fields_listbox'>
-                    <property name='selection-mode'>none</property>
+                  <object class="GtkListBox" id="fields_listbox">
+                    <property name="selection-mode">none</property>
                     <style>
-                      <class name='boxed-list' />
+                      <class name="boxed-list" />
                     </style>
                   </object>
                 </child>
                 <child>
-                  <object class='GtkListBox'>
-                    <property name='selection-mode'>none</property>
+                  <object class="GtkListBox">
+                    <property name="selection-mode">none</property>
                     <style>
-                      <class name='boxed-list' />
+                      <class name="boxed-list" />
                     </style>
                     <child>
-                      <object class='AdwButtonRow' id='add_field_button'>
-                        <property name='title' translatable='yes'>Add field</property>
-                        <property name='start-icon-name'>list-add</property>
+                      <object class="AdwButtonRow" id="add_field_button">
+                        <property name="title" translatable="yes">Add field</property>
+                        <property name="start-icon-name">list-add</property>
                       </object>
                     </child>
                   </object>
@@ -141,7 +141,7 @@
       </object>
     </child>
     <child>
-      <object class="AdwBreakpoint" id='compact_breakpoint'>
+      <object class="AdwBreakpoint" id="compact_breakpoint">
         <condition>max-width: 520sp</condition>
         <setter object="banner_box" property="orientation">vertical</setter>
         <setter object="pills_box" property="orientation">vertical</setter>

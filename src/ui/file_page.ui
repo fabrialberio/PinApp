@@ -1,33 +1,33 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class='FilePage' parent='AdwBin'>
+  <template class="FilePage" parent="AdwBin">
     <child>
-      <object class='AdwToolbarView' id='toolbar_view'>
-        <child type='top'>
-          <object class='AdwHeaderBar' id='header_bar'>
-            <property name='show-title'>false</property>
-            <property name='title-widget'>
-              <object class='AdwWindowTitle' id='window_title'>
+      <object class="AdwToolbarView" id="toolbar_view">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="show-title">false</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
               </object>
             </property>
-            <child type='end'>
-              <object class='GtkButton' id='pin_button'>
-                <property name='child'>
-                  <object class='AdwButtonContent'>
-                    <property name='label' translatable='yes'>Pin</property>
-                    <property name='icon-name'>view-pin-symbolic</property>
+            <child type="end">
+              <object class="GtkButton" id="pin_button">
+                <property name="child">
+                  <object class="AdwButtonContent">
+                    <property name="label" translatable="yes">Pin</property>
+                    <property name="icon-name">view-pin-symbolic</property>
                   </object>
                 </property>
                 <style>
-                  <class name='suggested-action'/>
+                  <class name="suggested-action" />
                 </style>
               </object>
             </child>
-            <child type='end'>
-              <object class='GtkMenuButton' id='file_menu_button'>
-                <property name='icon-name'>view-more-symbolic</property>
-                <property name='tooltip-text' translatable='yes'>File menu</property>
-                <property name='popover'>file_menu_popover</property>
+            <child type="end">
+              <object class="GtkMenuButton" id="file_menu_button">
+                <property name="icon-name">view-more-symbolic</property>
+                <property name="tooltip-text" translatable="yes">File menu</property>
+                <property name="popover">file_menu_popover</property>
               </object>
             </child>
           </object>
@@ -36,12 +36,12 @@
     </child>
   </template>
 
-  <object class='GtkPopover' id='file_menu_popover'>
+  <object class="GtkPopover" id="file_menu_popover">
     <style>
-      <class name='menu'/>
+      <class name="menu" />
     </style>
     <child>
-      <object class='GtkBox'>
+      <object class="GtkBox">
         <property name="orientation">1</property>
         <property name="margin-top">6</property>
         <property name="margin-bottom">6</property>

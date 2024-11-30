@@ -1,64 +1,65 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib='gtk' version='4.0'/>
-  <requires lib='libadwaita' version='1.0'/>
+  <requires lib="gtk" version="4.0" />
+  <requires lib="libadwaita" version="1.0" />
   <!-- Main window -->
-  <template class='PinAppWindow' parent='AdwApplicationWindow'>
-    <property name='default-height'>560</property>
-    <property name='default-width'>800</property>
-    <property name='height-request'>400</property>
-    <property name='width-request'>330</property>
-    <property name='content'>
+  <template class="PinAppWindow" parent="AdwApplicationWindow">
+    <property name="default-height">560</property>
+    <property name="default-width">800</property>
+    <property name="height-request">400</property>
+    <property name="width-request">330</property>
+    <property name="content">
       <!-- Main leaflet -->
-      <object class='AdwNavigationView' id='navigation_view'>
+      <object class="AdwNavigationView" id="navigation_view">
         <child>
-          <object class='AdwNavigationPage'>
-            <property name='title' translatable='yes'>Apps</property>
-            <property name='tag'>apps-page</property>
-            <property name='child'>
-              <object class='AdwToolbarView'>
-                <child type='top'>
-                  <object class='GtkBox'>
-                    <property name='orientation'>vertical</property>
+          <object class="AdwNavigationPage">
+            <property name="title" translatable="yes">Apps</property>
+            <property name="tag">apps-page</property>
+            <property name="child">
+              <object class="AdwToolbarView">
+                <child type="top">
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
 
                     <child>
-                      <object class='AdwHeaderBar' id='header_bar'>
-                        <property name='centering-policy'>strict</property>
-                        <property name='title-widget'>
-                          <object class='AdwViewSwitcher' id='view_switcher'>
-                            <property name='stack'>view_stack</property>
-                            <property name='policy'>wide</property>
+                      <object class="AdwHeaderBar" id="header_bar">
+                        <property name="centering-policy">strict</property>
+                        <property name="title-widget">
+                          <object class="AdwViewSwitcher" id="view_switcher">
+                            <property name="stack">view_stack</property>
+                            <property name="policy">wide</property>
                           </object>
                         </property>
-                        <child type='start'>
-                          <object class='GtkButton' id='new_file_button'>
-                            <property name='icon-name'>list-add-symbolic</property>
-                            <property name='tooltip-text' translatable='yes'>Add new app</property>
+                        <child type="start">
+                          <object class="GtkButton" id="new_file_button">
+                            <property name="icon-name">list-add-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Add new app</property>
                           </object>
                         </child>
-                        <child type='end'>
-                          <object class='GtkMenuButton' id='menu_button'>
-                            <property name='tooltip-text' translatable='yes'>Show menu</property>
-                            <property name='icon-name'>open-menu-symbolic</property>
-                            <property name='menu-model'>primary_menu</property>
+                        <child type="end">
+                          <object class="GtkMenuButton" id="menu_button">
+                            <property name="tooltip-text" translatable="yes">Show menu</property>
+                            <property name="icon-name">open-menu-symbolic</property>
+                            <property name="menu-model">primary_menu</property>
                           </object>
                         </child>
-                        <child type='end'>
-                          <object class='GtkToggleButton' id='search_button'>
-                            <property name='tooltip-text' translatable='yes'>Search</property>
-                            <property name='icon-name'>system-search-symbolic</property>
+                        <child type="end">
+                          <object class="GtkToggleButton" id="search_button">
+                            <property name="tooltip-text" translatable="yes">Search</property>
+                            <property name="icon-name">system-search-symbolic</property>
                           </object>
                         </child>
                       </object>
                     </child>
                     <child>
-                      <object class='GtkSearchBar' id='search_bar'>
-                        <property name='search-mode-enabled' bind-source='search_button' bind-property='active' bind-flags='sync-create|bidirectional'/>
-                        <property name='child'>
-                          <object class='AdwClamp'>
-                            <property name='child'>
-                              <object class='GtkSearchEntry' id='search_entry'>
-                                <property name='hexpand'>true</property>
+                      <object class="GtkSearchBar" id="search_bar">
+                        <property name="search-mode-enabled" bind-source="search_button"
+                          bind-property="active" bind-flags="sync-create|bidirectional" />
+                        <property name="child">
+                          <object class="AdwClamp">
+                            <property name="child">
+                              <object class="GtkSearchEntry" id="search_entry">
+                                <property name="hexpand">true</property>
                               </object>
                             </property>
                           </object>
@@ -68,42 +69,42 @@
                   </object>
                 </child>
 
-                <property name='content'>
-                  <object class='AdwViewStack' id='view_stack'>
+                <property name="content">
+                  <object class="AdwViewStack" id="view_stack">
                     <child>
-                      <object class='AdwViewStackPage'>
-                        <property name='name'>pins_tab</property>
-                        <property name='icon-name'>pin-symbolic</property>
-                        <property name='title' translatable='yes'>Your pins</property>
-                        <property name='child'>
-                          <object class='AppListView' id='pins_tab'/>
+                      <object class="AdwViewStackPage">
+                        <property name="name">pins_tab</property>
+                        <property name="icon-name">pin-symbolic</property>
+                        <property name="title" translatable="yes">Your pins</property>
+                        <property name="child">
+                          <object class="AppListView" id="pins_tab" />
                         </property>
                       </object>
                     </child>
                     <child>
-                      <object class='AdwViewStackPage'>
-                        <property name='name'>installed_tab</property>
-                        <property name='icon-name'>installed-symbolic</property>
-                        <property name='title' translatable='yes'>Installed</property>
-                        <property name='child'>
-                          <object class='AppListView' id='installed_tab'/>
+                      <object class="AdwViewStackPage">
+                        <property name="name">installed_tab</property>
+                        <property name="icon-name">installed-symbolic</property>
+                        <property name="title" translatable="yes">Installed</property>
+                        <property name="child">
+                          <object class="AppListView" id="installed_tab" />
                         </property>
                       </object>
                     </child>
                     <child>
-                      <object class='AdwViewStackPage'>
-                        <property name='name'>search_tab</property>
-                        <property name='child'>
-                          <object class='AppListView' id='search_tab'/>
+                      <object class="AdwViewStackPage">
+                        <property name="name">search_tab</property>
+                        <property name="child">
+                          <object class="AppListView" id="search_tab" />
                         </property>
                       </object>
                     </child>
                   </object>
                 </property>
 
-                <child type='bottom'>
-                  <object class='AdwViewSwitcherBar' id='switcher_bar'>
-                    <property name='stack'>view_stack</property>
+                <child type="bottom">
+                  <object class="AdwViewSwitcherBar" id="switcher_bar">
+                    <property name="stack">view_stack</property>
                   </object>
                 </child>
               </object>
@@ -111,10 +112,10 @@
           </object>
         </child>
         <child>
-          <object class='AdwNavigationPage'>
-            <property name='tag'>file-page</property>
-            <property name='child'>
-              <object class='FilePage' id='file_page'></object>
+          <object class="AdwNavigationPage">
+            <property name="tag">file-page</property>
+            <property name="child">
+              <object class="FilePage" id="file_page"></object>
             </property>
           </object>
         </child>
@@ -124,24 +125,24 @@
       <object class="AdwBreakpoint">
         <condition>max-width: 520sp</condition>
         <setter object="switcher_bar" property="reveal">True</setter>
-        <setter object="header_bar" property="title-widget"/>
+        <setter object="header_bar" property="title-widget" />
       </object>
     </child>
   </template>
 
-  <menu id='primary_menu'>
+  <menu id="primary_menu">
     <section>
       <item>
-        <attribute name='label' translatable='yes'>Reload Apps</attribute>
-        <attribute name='action'>app.reload</attribute>
+        <attribute name="label" translatable="yes">Reload Apps</attribute>
+        <attribute name="action">app.reload</attribute>
       </item>
       <item>
-        <attribute name='label' translatable='yes'>Keyboard Shortcuts</attribute>
-        <attribute name='action'>win.show-help-overlay</attribute>
+        <attribute name="label" translatable="yes">Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
       </item>
       <item>
-        <attribute name='label' translatable='yes'>About PinApp</attribute>
-        <attribute name='action'>app.about</attribute>
+        <attribute name="label" translatable="yes">About PinApp</attribute>
+        <attribute name="action">app.about</attribute>
       </item>
     </section>
   </menu>
