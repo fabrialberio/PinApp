@@ -69,6 +69,19 @@ pinapp_application_about_action (GSimpleAction *action, GVariant *parameter,
                                  gpointer user_data)
 {
     static const char *developers[] = { "Fabrizio", NULL };
+    // This would be better handled as _("translator-credits")
+    static const char *translators
+        = "Irénée Thirion (French) <irenee.thirion@e.email>\n "
+          "Sabri Ünal (Turkish) <libreajans@gmail.com>\n "
+          "Fyodor Sobolev (Russian)\n "
+          "David Lapshin (Russian)\n "
+          "Alexmelman88 (Russian)\n "
+          "josushu0 (Spanish)\n "
+          "oscfdezdz (Spanish)\n "
+          "gregorni (German)\n "
+          "Mejans (Occitan)\n "
+          "Vistaus (Dutch)";
+
     PinappApplication *self = user_data;
     GtkWindow *window = NULL;
 
@@ -76,11 +89,21 @@ pinapp_application_about_action (GSimpleAction *action, GVariant *parameter,
 
     window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
-    adw_show_about_dialog (
-        GTK_WIDGET (window), "application-name", "pinapp", "application-icon",
-        "io.github.fabrialberio.pinapp", "developer-name", "Fabrizio",
-        "translator-credits", _ ("translator-credits"), "version", "0.1.0",
-        "developers", developers, "copyright", "© 2024 Fabrizio", NULL);
+    // clang-format off
+    adw_show_about_dialog (GTK_WIDGET (window),
+        "application-name", "PinApp",
+        "application-icon", "io.github.fabrialberio.pinapp",
+        "developer-name", "Fabrizio Alberio",
+        "translator-credits", _ ("translator-credits"),
+        "version", "1.2.0",
+        "developers", developers,
+        "copyright", "Copyright © 2024 Fabrizio",
+        "license-type", GTK_LICENSE_GPL_3_0,
+        "website", "https://github.com/fabrialberio/PinApp",
+        "issue-url", "https://github.com/fabrialberio/PinApp/issues",
+        "translator-credits", translators,
+        NULL);
+    // clang-format on
 }
 
 static void
