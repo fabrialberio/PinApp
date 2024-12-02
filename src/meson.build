@@ -1,7 +1,7 @@
 pinapp_sources = [
     'main.c',
-    'pinapp-application.c',
-    'pinapp-window.c',
+    'pins-application.c',
+    'pins-window.c',
 ]
 
 pinapp_deps = [
@@ -9,7 +9,7 @@ pinapp_deps = [
     dependency('libadwaita-1', version: '>= 1.4'),
 ]
 
-pinapp_sources += gnome.compile_resources('pinapp-resources', 'pinapp.gresource.xml', c_name: 'pinapp')
+pinapp_sources += gnome.compile_resources('pins-resources', 'pins.gresource.xml', c_name: 'pins')
 
 executable(
     'pinapp',

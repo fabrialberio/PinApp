@@ -1,4 +1,4 @@
-/* pinapp-application.c
+/* pins-application.c
  *
  * Copyright 2024 Fabrizio
  *
@@ -21,52 +21,51 @@
 #include "config.h"
 #include <glib/gi18n.h>
 
-#include "pinapp-application.h"
-#include "pinapp-window.h"
+#include "pins-application.h"
+#include "pins-window.h"
 
-struct _PinappApplication
+struct _PinsApplication
 {
     AdwApplication parent_instance;
 };
 
-G_DEFINE_FINAL_TYPE (PinappApplication, pinapp_application,
-                     ADW_TYPE_APPLICATION)
+G_DEFINE_FINAL_TYPE (PinsApplication, pins_application, ADW_TYPE_APPLICATION)
 
-PinappApplication *
-pinapp_application_new (const char *application_id, GApplicationFlags flags)
+PinsApplication *
+pins_application_new (const char *application_id, GApplicationFlags flags)
 {
     g_return_val_if_fail (application_id != NULL, NULL);
 
-    return g_object_new (PINAPP_TYPE_APPLICATION, "application-id",
+    return g_object_new (PINS_TYPE_APPLICATION, "application-id",
                          application_id, "flags", flags, NULL);
 }
 
 static void
-pinapp_application_activate (GApplication *app)
+pins_application_activate (GApplication *app)
 {
     GtkWindow *window;
 
-    g_assert (PINAPP_IS_APPLICATION (app));
+    g_assert (PINS_IS_APPLICATION (app));
 
     window = gtk_application_get_active_window (GTK_APPLICATION (app));
 
     if (window == NULL)
-        window = g_object_new (PINAPP_TYPE_WINDOW, "application", app, NULL);
+        window = g_object_new (PINS_TYPE_WINDOW, "application", app, NULL);
 
     gtk_window_present (window);
 }
 
 static void
-pinapp_application_class_init (PinappApplicationClass *klass)
+pins_application_class_init (PinsApplicationClass *klass)
 {
     GApplicationClass *app_class = G_APPLICATION_CLASS (klass);
 
-    app_class->activate = pinapp_application_activate;
+    app_class->activate = pins_application_activate;
 }
 
 static void
-pinapp_application_about_action (GSimpleAction *action, GVariant *parameter,
-                                 gpointer user_data)
+pins_application_about_action (GSimpleAction *action, GVariant *parameter,
+                               gpointer user_data)
 {
     static const char *developers[] = { "Fabrizio", NULL };
     // This would be better handled as _("translator-credits")
@@ -82,16 +81,16 @@ pinapp_application_about_action (GSimpleAction *action, GVariant *parameter,
           "Mejans (Occitan)\n "
           "Vistaus (Dutch)";
 
-    PinappApplication *self = user_data;
+    PinsApplication *self = user_data;
     GtkWindow *window = NULL;
 
-    g_assert (PINAPP_IS_APPLICATION (self));
+    g_assert (PINS_IS_APPLICATION (self));
 
     window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
     // clang-format off
     adw_show_about_dialog (GTK_WIDGET (window),
-        "application-name", "PinApp",
+        "application-name", "Pins",
         "application-icon", "io.github.fabrialberio.pinapp",
         "developer-name", "Fabrizio Alberio",
         "translator-credits", _ ("translator-credits"),
@@ -99,31 +98,31 @@ pinapp_application_about_action (GSimpleAction *action, GVariant *parameter,
         "developers", developers,
         "copyright", "Copyright © 2024 Fabrizio",
         "license-type", GTK_LICENSE_GPL_3_0,
-        "website", "https://github.com/fabrialberio/PinApp",
-        "issue-url", "https://github.com/fabrialberio/PinApp/issues",
+        "website", "https://github.com/fabrialberio/pinapp",
+        "issue-url", "https://github.com/fabrialberio/pinapp/issues",
         "translator-credits", translators,
         NULL);
     // clang-format on
 }
 
 static void
-pinapp_application_quit_action (GSimpleAction *action, GVariant *parameter,
-                                gpointer user_data)
+pins_application_quit_action (GSimpleAction *action, GVariant *parameter,
+                              gpointer user_data)
 {
-    PinappApplication *self = user_data;
+    PinsApplication *self = user_data;
 
-    g_assert (PINAPP_IS_APPLICATION (self));
+    g_assert (PINS_IS_APPLICATION (self));
 
     g_application_quit (G_APPLICATION (self));
 }
 
 static const GActionEntry app_actions[] = {
-    { "quit", pinapp_application_quit_action },
-    { "about", pinapp_application_about_action },
+    { "quit", pins_application_quit_action },
+    { "about", pins_application_about_action },
 };
 
 static void
-pinapp_application_init (PinappApplication *self)
+pins_application_init (PinsApplication *self)
 {
     g_action_map_add_action_entries (G_ACTION_MAP (self), app_actions,
                                      G_N_ELEMENTS (app_actions), self);

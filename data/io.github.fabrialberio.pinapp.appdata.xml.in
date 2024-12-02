@@ -3,13 +3,13 @@
   <id>io.github.fabrialberio.pinapp</id>
   <launchable type="desktop-id">io.github.fabrialberio.pinapp.desktop</launchable>
   <translation type="gettext">pinapp</translation>
-  <name translatable="no">PinApp</name>
+  <name translatable="no">Pins</name>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <summary>Create and edit app shortcuts</summary>
   <developer_name translatable="no">Fabrizio Alberio</developer_name>
   <description>
-    <p>PinApp is a simple application that lets you customize your app list.</p>
+    <p>Pins is a simple application that lets you customize your app list.</p>
     <p>Some of the possible uses are</p>
     <ul>
       <li>Changing an app icon that doesn't fit in with your theme</li>
@@ -21,26 +21,26 @@
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/1.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/2.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/3.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/4.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/4.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/5.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/5.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
-  <url type="homepage">https://github.com/fabrialberio/PinApp</url>
-  <url type="bugtracker">https://github.com/fabrialberio/PinApp/issues</url>
-  <url type="vcs-browser">https://github.com/fabrialberio/PinApp</url>
-  <url type="translate">https://github.com/fabrialberio/PinApp/tree/master/po</url>
+  <url type="homepage">https://github.com/fabrialberio/pinapp</url>
+  <url type="bugtracker">https://github.com/fabrialberio/pinapp/issues</url>
+  <url type="vcs-browser">https://github.com/fabrialberio/pinapp</url>
+  <url type="translate">https://github.com/fabrialberio/pinapp/tree/master/po</url>
   <recommends>
     <control>pointing</control>
     <control>keyboard</control>

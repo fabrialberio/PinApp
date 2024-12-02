@@ -22,20 +22,20 @@
 
 #include <glib/gi18n.h>
 
-#include "pinapp-application.h"
+#include "pins-application.h"
 
 int
 main (int argc, char *argv[])
 {
-    g_autoptr (PinappApplication) app = NULL;
+    g_autoptr (PinsApplication) app = NULL;
     int ret;
 
     bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
-    app = pinapp_application_new ("io.github.fabrialberio.pinapp",
-                                  G_APPLICATION_DEFAULT_FLAGS);
+    app = pins_application_new ("io.github.fabrialberio.pinapp",
+                                G_APPLICATION_DEFAULT_FLAGS);
     ret = g_application_run (G_APPLICATION (app), argc, argv);
 
     return ret;

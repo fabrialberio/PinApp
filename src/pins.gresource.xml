@@ -2,7 +2,7 @@
 <gresources>
   <gresource prefix="/io/github/fabrialberio/pinapp">
     <file preprocess="xml-stripblanks" alias="gtk/help-overlay.ui">help-overlay.ui</file>
-    <file preprocess="xml-stripblanks">pinapp-window.ui</file>
+    <file preprocess="xml-stripblanks">pins-window.ui</file>
   </gresource>
   <gresource prefix="/io/github/fabrialberio/pinapp/icons/scalable/actions">
     <file alias="snap-symbolic.svg">../data/icons/scalable/actions/snap-symbolic.svg</file>

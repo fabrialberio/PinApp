@@ -1,4 +1,4 @@
-/* pinapp-window.h
+/* pins-application.h
  *
  * Copyright 2024 Fabrizio
  *
@@ -24,9 +24,12 @@
 
 G_BEGIN_DECLS
 
-#define PINAPP_TYPE_WINDOW (pinapp_window_get_type ())
+#define PINS_TYPE_APPLICATION (pins_application_get_type ())
 
-G_DECLARE_FINAL_TYPE (PinappWindow, pinapp_window, PINAPP, WINDOW,
-                      AdwApplicationWindow)
+G_DECLARE_FINAL_TYPE (PinsApplication, pins_application, PINS, APPLICATION,
+                      AdwApplication)
+
+PinsApplication *pins_application_new (const char *application_id,
+                                       GApplicationFlags flags);
 
 G_END_DECLS
