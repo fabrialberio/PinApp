@@ -18,8 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
 #include "pins-window.h"
 
 struct _PinsWindow
@@ -38,12 +36,10 @@ pins_window_class_init (PinsWindowClass *klass)
 {
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-    gtk_widget_class_set_template_from_resource (
-        widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          new_file_button);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_button);
+    gtk_widget_class_set_template_from_resource (widget_class,
+                                                 "/io/github/fabrialberio/pinapp/pins-window.ui");
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow, new_file_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow, search_button);
 }
 
 static void
