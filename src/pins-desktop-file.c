@@ -20,7 +20,8 @@
 
 #include "pins-desktop-file.h"
 
-#define USER_APPS_DIR "~/.local/share/applications/"
+#define USER_APPS_DIR                                                         \
+    g_strconcat (g_get_home_dir (), "/.local/share/applications/", NULL)
 #define DEFAULT_FILENAME "pinned-app"
 #define KEY_FILE_FLAGS                                                        \
     (G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS)
@@ -49,13 +50,17 @@ G_DEFINE_TYPE (PinsDesktopFile, pins_desktop_file, G_TYPE_OBJECT);
  * It is assumed that `file` exists.
  */
 PinsDesktopFile *
-pins_desktop_file_load_from_file (GFile *file, GError **error)
+pins_desktop_file_new_from_file (GFile *file, GError **error)
 {
-    PinsDesktopFile *desktop_file
-        = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
+    PinsDesktopFile *desktop_file;
+    gboolean file_is_user_file;
 
-    gboolean file_is_user_file = g_file_equal (
-        g_file_get_parent (file), g_file_new_for_path (USER_APPS_DIR));
+    desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
+    desktop_file->user_key_file = g_key_file_new ();
+    desktop_file->system_key_file = g_key_file_new ();
+
+    file_is_user_file = g_file_equal (g_file_get_parent (file),
+                                      g_file_new_for_path (USER_APPS_DIR));
 
     if (file_is_user_file)
         {
@@ -71,10 +76,11 @@ pins_desktop_file_load_from_file (GFile *file, GError **error)
                                             g_file_get_path (file),
                                             KEY_FILE_FLAGS, error))
                 {
+                    g_clear_object (&desktop_file);
+
                     return NULL;
                 }
         }
-
     g_key_file_load_from_file (desktop_file->user_key_file,
                                g_file_get_path (desktop_file->user_file),
                                KEY_FILE_FLAGS, NULL);
@@ -130,16 +136,15 @@ pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key,
         }
     else if (err != NULL)
         {
-            g_propagate_error (error, err);
-            return FALSE;
-        }
+            err = NULL;
 
-    value = g_key_file_get_boolean (self->system_key_file,
-                                    G_KEY_FILE_DESKTOP_GROUP, key, &err);
-    if (err != NULL)
-        {
-            g_propagate_error (error, err);
-            return NULL;
+            value = g_key_file_get_boolean (
+                self->system_key_file, G_KEY_FILE_DESKTOP_GROUP, key, &err);
+            if (err != NULL)
+                {
+                    g_propagate_error (error, err);
+                    return FALSE;
+                }
         }
 
     return value;
@@ -156,16 +161,15 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
                                    G_KEY_FILE_DESKTOP_GROUP, key, &err);
     if (err != NULL)
         {
-            g_propagate_error (error, err);
-            return NULL;
-        }
+            err = NULL;
 
-    value = g_key_file_get_string (self->system_key_file,
-                                   G_KEY_FILE_DESKTOP_GROUP, key, &err);
-    if (err != NULL)
-        {
-            g_propagate_error (error, err);
-            return NULL;
+            value = g_key_file_get_string (
+                self->system_key_file, G_KEY_FILE_DESKTOP_GROUP, key, &err);
+            if (err != NULL)
+                {
+                    g_propagate_error (error, err);
+                    return NULL;
+                }
         }
 
     return value;
@@ -182,18 +186,17 @@ pins_desktop_file_get_locale_string (PinsDesktopFile *self, const gchar *key,
         self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, &err);
     if (err != NULL)
         {
-            g_propagate_error (error, err);
-            return NULL;
-        }
+            err = NULL;
 
-    value = g_key_file_get_locale_string (
-        self->system_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, &err);
-    if (err != NULL)
-        {
-            g_propagate_error (error, err);
-            return NULL;
+            value = g_key_file_get_locale_string (self->system_key_file,
+                                                  G_KEY_FILE_DESKTOP_GROUP,
+                                                  key, locale, &err);
+            if (err != NULL)
+                {
+                    g_propagate_error (error, err);
+                    return NULL;
+                }
         }
-
     return value;
 }
 

@@ -29,8 +29,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PinsDesktopFile, pins_desktop_file, PINS, DESKTOP_FILE,
                       GObject);
 
-PinsDesktopFile *pins_desktop_file_load_from_file (GFile *file,
-                                                   GError **error);
+PinsDesktopFile *pins_desktop_file_new_from_file (GFile *file, GError **error);
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
 
 gboolean pins_desktop_file_get_boolean (PinsDesktopFile *self,
