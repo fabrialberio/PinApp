@@ -1,4 +1,4 @@
-/* pins-desktop-file-private.c
+/* pins-desktop-file.h
  *
  * Copyright 2024 Fabrizio
  *

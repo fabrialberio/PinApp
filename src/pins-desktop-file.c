@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "pins-desktop-file-private.h"
+#include "pins-desktop-file.h"
 
 #define USER_APPS_DIR "~/.local/share/applications/"
 #define DEFAULT_FILENAME "pinned-app"
