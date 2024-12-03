@@ -68,9 +68,8 @@
                         <property name="icon-name">pin-symbolic</property>
                         <property name="title" translatable="yes">Your pins</property>
                         <property name="child">
-                          <object class="AdwStatusPage">
-                            <property name="title">Apps grid</property>
-                            <property name="icon-name">view-grid-symbolic</property>
+                          <object class="AdwPreferencesGroup" id="box">
+
                           </object>
                         </property>
                       </object>
