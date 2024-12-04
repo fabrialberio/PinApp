@@ -34,9 +34,20 @@ struct _PinsWindow
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static void
+pins_window_dispose (GObject *object)
+{
+    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_WINDOW);
+
+    G_OBJECT_CLASS (pins_window_parent_class)->dispose (object);
+}
+
+static void
 pins_window_class_init (PinsWindowClass *klass)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+    object_class->dispose = pins_window_dispose;
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");

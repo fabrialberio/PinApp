@@ -24,6 +24,8 @@
 struct _PinsAppRow
 {
     AdwActionRow parent_instance;
+
+    PinsAppIcon *icon;
 };
 
 G_DEFINE_TYPE (PinsAppRow, pins_app_row, ADW_TYPE_ACTION_ROW)
@@ -38,13 +40,10 @@ void
 pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
 {
     gchar *title, *subtitle;
-    PinsAppIcon *icon = pins_app_icon_new ();
 
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    adw_action_row_add_prefix (ADW_ACTION_ROW (self), GTK_WIDGET (icon));
-
-    pins_app_icon_set_desktop_file (icon, desktop_file);
+    pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
     title = pins_desktop_file_get_string (desktop_file,
                                           G_KEY_FILE_DESKTOP_KEY_NAME, NULL);
@@ -56,9 +55,20 @@ pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
 }
 
 static void
+pins_app_row_dispose (GObject *object)
+{
+    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_ROW);
+
+    G_OBJECT_CLASS (pins_app_row_parent_class)->dispose (object);
+}
+
+static void
 pins_app_row_class_init (PinsAppRowClass *klass)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+    object_class->dispose = pins_app_row_dispose;
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-row.ui");
