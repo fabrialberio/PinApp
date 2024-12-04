@@ -64,9 +64,7 @@
                   <object class="AdwViewStack" id="view_stack">
                     <child>
                       <object class="AdwViewStackPage">
-                        <property name="name">pins_tab</property>
-                        <property name="icon-name">pin-symbolic</property>
-                        <property name="title" translatable="yes">Your pins</property>
+                        <property name="name">apps_tab</property>
                         <property name="child">
                           <object class="PinsAppList" id="app_list">
                           </object>
