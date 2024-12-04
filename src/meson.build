@@ -6,6 +6,7 @@ pinapp_sources = [
     'pins-app-row.c',
     'pins-application.c',
     'pins-desktop-file.c',
+    'pins-directories.c',
     'pins-window.c',
 ]
 

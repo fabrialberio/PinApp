@@ -19,9 +19,8 @@
  */
 
 #include "pins-desktop-file.h"
+#include "pins-directories.h"
 
-#define USER_APPS_DIR                                                         \
-    g_strconcat (g_get_home_dir (), "/.local/share/applications/", NULL)
 #define DEFAULT_FILENAME "pinned-app"
 #define KEY_FILE_FLAGS                                                        \
     (G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS)
@@ -54,13 +53,14 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
 {
     PinsDesktopFile *desktop_file;
     gboolean file_is_user_file;
+    gint retval;
 
     desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
     desktop_file->user_key_file = g_key_file_new ();
     desktop_file->system_key_file = g_key_file_new ();
 
-    file_is_user_file = g_file_equal (g_file_get_parent (file),
-                                      g_file_new_for_path (USER_APPS_DIR));
+    file_is_user_file = g_file_equal (
+        g_file_get_parent (file), g_file_new_for_path (pins_user_app_path ()));
 
     if (file_is_user_file)
         {
@@ -69,8 +69,8 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
         }
     else
         {
-            desktop_file->user_file = g_file_new_for_path (
-                g_strconcat (USER_APPS_DIR, g_file_get_basename (file), NULL));
+            desktop_file->user_file = g_file_new_for_path (g_strconcat (
+                pins_user_app_path (), g_file_get_basename (file), NULL));
 
             if (!g_key_file_load_from_file (desktop_file->system_key_file,
                                             g_file_get_path (file),
