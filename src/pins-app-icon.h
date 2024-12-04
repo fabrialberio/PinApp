@@ -30,7 +30,6 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (PinsAppIcon, pins_app_icon, PINS, APP_ICON, GtkWidget)
 
-PinsAppIcon *pins_app_icon_new (void);
 void pins_app_icon_set_desktop_file (PinsAppIcon *self,
                                      PinsDesktopFile *desktop_file);
 

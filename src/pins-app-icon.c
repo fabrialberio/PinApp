@@ -26,19 +26,10 @@ struct _PinsAppIcon
 {
     GtkWidget parent_instance;
 
-    gint pixel_size;
+    GtkImage *image;
 };
 
-enum
-{
-    PROP_0,
-    PROP_PIXEL_SIZE,
-    N_PROPS,
-};
-
-G_DEFINE_TYPE (PinsAppIcon, pins_app_icon, GTK_TYPE_IMAGE)
-
-static GParamSpec *properties[N_PROPS];
+G_DEFINE_TYPE (PinsAppIcon, pins_app_icon, GTK_TYPE_WIDGET)
 
 void
 pins_app_icon_set_icon_name (PinsAppIcon *self, gchar *icon_name)
@@ -50,23 +41,17 @@ pins_app_icon_set_icon_name (PinsAppIcon *self, gchar *icon_name)
         || gtk_icon_theme_has_icon (
             theme, g_strconcat (icon_name, "-symbolic", NULL)))
         {
-            gtk_image_set_from_icon_name (GTK_IMAGE (self), icon_name);
+            gtk_image_set_from_icon_name (self->image, icon_name);
         }
     else if (g_file_query_exists (g_file_new_for_path (icon_name),
                                   g_cancellable_get_current ()))
         {
-            gtk_image_set_from_file (GTK_IMAGE (self), icon_name);
+            gtk_image_set_from_file (self->image, icon_name);
         }
     else
         {
-            gtk_image_set_from_icon_name (GTK_IMAGE (self), DEFAULT_ICON_NAME);
+            gtk_image_set_from_icon_name (self->image, DEFAULT_ICON_NAME);
         }
-}
-
-PinsAppIcon *
-pins_app_icon_new (void)
-{
-    return g_object_new (PINS_TYPE_APP_ICON, NULL);
 }
 
 void
@@ -91,60 +76,32 @@ pins_app_icon_set_desktop_file (PinsAppIcon *self,
 static void
 pins_app_icon_dispose (GObject *object)
 {
+    PinsAppIcon *self = PINS_APP_ICON (object);
+
+    gtk_widget_unparent (GTK_WIDGET (self->image));
+
     G_OBJECT_CLASS (pins_app_icon_parent_class)->dispose (object);
-}
-
-static void
-pins_app_icon_get_property (GObject *object, guint prop_id, GValue *value,
-                            GParamSpec *pspec)
-{
-    PinsAppIcon *self = PINS_APP_ICON (object);
-
-    switch (prop_id)
-        {
-        case PROP_PIXEL_SIZE:
-            g_value_set_int (value, self->pixel_size);
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-        }
-}
-
-static void
-pins_app_icon_set_property (GObject *object, guint prop_id,
-                            const GValue *value, GParamSpec *pspec)
-{
-    PinsAppIcon *self = PINS_APP_ICON (object);
-
-    switch (prop_id)
-        {
-        case PROP_PIXEL_SIZE:
-            self->pixel_size = g_value_get_int (value);
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-        }
 }
 
 static void
 pins_app_icon_class_init (PinsAppIconClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     object_class->dispose = pins_app_icon_dispose;
-    object_class->get_property = pins_app_icon_get_property;
-    object_class->set_property = pins_app_icon_set_property;
 
-    properties[PROP_PIXEL_SIZE] = g_param_spec_int (
-        "pixel-size", "Pixel size", "The display size of the icon in pixels.",
-        0, G_MAXINT, 0, G_PARAM_READWRITE);
-
-    g_object_class_install_properties (object_class, N_PROPS, properties);
+    gtk_widget_class_set_layout_manager_type (widget_class,
+                                              GTK_TYPE_BIN_LAYOUT);
 }
 
 static void
 pins_app_icon_init (PinsAppIcon *self)
 {
-    gtk_image_set_from_icon_name (GTK_IMAGE (self), DEFAULT_ICON_NAME);
-    gtk_widget_add_css_class (GTK_WIDGET (self), "icon-dropshadow");
+    self->image = GTK_IMAGE (gtk_image_new_from_icon_name (DEFAULT_ICON_NAME));
+    gtk_widget_set_parent (GTK_WIDGET (self->image), GTK_WIDGET (self));
+
+    // TODO: Support different pixel sizes
+    gtk_image_set_pixel_size (self->image, 32);
+    gtk_widget_add_css_class (GTK_WIDGET (self->image), "icon-dropshadow");
 }
