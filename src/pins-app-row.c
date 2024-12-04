@@ -72,6 +72,9 @@ pins_app_row_class_init (PinsAppRowClass *klass)
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-row.ui");
+    gtk_widget_class_bind_template_child (widget_class, PinsAppRow, icon);
+
+    g_type_ensure (PINS_TYPE_APP_ICON);
 }
 
 static void

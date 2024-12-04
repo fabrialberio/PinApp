@@ -4,6 +4,13 @@
     <property name="activatable">true</property>
     <property name="title-lines">1</property>
     <property name="subtitle-lines">1</property>
+    <child type="prefix">
+      <object class="PinsAppIcon" id="icon">
+        <layout>
+          <property name="pixel-size">64</property>
+        </layout>
+      </object>
+    </child>
     <child type="suffix">
       <object class="GtkImage">
         <property name="opacity">.6</property>
