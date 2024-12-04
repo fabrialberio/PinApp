@@ -58,7 +58,7 @@ pins_system_app_paths (void)
 }
 
 void
-pins_icon_theme_set_search_paths (GtkIconTheme *theme)
+pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
 {
     // clang-format off
     const gchar * paths[]

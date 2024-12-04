@@ -22,6 +22,7 @@
 
 #include "pins-app-list.h"
 #include "pins-app-row.h"
+#include "pins-directories.h"
 
 struct _PinsWindow
 {
@@ -68,15 +69,22 @@ pins_window_init (PinsWindow *self)
 {
     GFile *file;
     GtkDirectoryList *dir_list;
+    GtkIconTheme *theme;
 
     const gchar *ATTRIBUTES
         = g_strjoin (",", G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
                      G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,
                      G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME, NULL);
 
+    theme = gtk_icon_theme_get_for_display (
+        gtk_widget_get_display (GTK_WIDGET (self)));
+
+    // This is noticeably slow
+    pins_icon_theme_inject_search_paths (theme);
+
     gtk_widget_init_template (GTK_WIDGET (self));
 
-    file = g_file_new_for_path ("/home/fabri/.local/share/applications");
+    file = g_file_new_for_path (pins_user_app_path ());
     dir_list = gtk_directory_list_new (ATTRIBUTES, file);
 
     pins_app_list_set_directory_list (self->app_list, dir_list);
