@@ -1,4 +1,4 @@
-/* pins-app-list.h
+/* pins-app-iterator.h
  *
  * Copyright 2024 Fabrizio
  *
@@ -22,6 +22,7 @@
 
 G_BEGIN_DECLS
 
-GListModel *pins_app_list_new_from_directory_list (GtkDirectoryList *dir_list);
+GListModel *
+pins_app_iterator_new_from_directory_list (GtkDirectoryList *dir_list);
 
 G_END_DECLS

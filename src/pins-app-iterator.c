@@ -1,4 +1,4 @@
-/* pins-app-list.c
+/* pins-app-iterator.c
  *
  * Copyright 2024 Fabrizio
  *
@@ -18,14 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "pins-app-list.h"
+#include "pins-app-iterator.h"
 #include "pins-desktop-file.h"
 
 #define DESKTOP_FILE_CONTENT_TYPE "application/x-desktop"
 #define FILE_INFO_GFILE_ATTR "standard::file"
 
 gboolean
-pins_app_list_filter_match_func (gpointer file_info, gpointer user_data)
+pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
 {
     g_assert (G_IS_FILE_INFO (file_info));
 
@@ -36,7 +36,7 @@ pins_app_list_filter_match_func (gpointer file_info, gpointer user_data)
 }
 
 gpointer
-pins_app_list_map_func (gpointer file_info, gpointer user_data)
+pins_app_iterator_map_func (gpointer file_info, gpointer user_data)
 {
     PinsDesktopFile *desktop_file;
     GError *err;
@@ -58,8 +58,8 @@ pins_app_list_map_func (gpointer file_info, gpointer user_data)
 }
 
 int
-pins_app_list_sort_compare_func (gconstpointer a, gconstpointer b,
-                                 gpointer user_data)
+pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
+                                     gpointer user_data)
 {
     PinsDesktopFile *first = PINS_DESKTOP_FILE ((gpointer)a);
     PinsDesktopFile *second = PINS_DESKTOP_FILE ((gpointer)b);
@@ -77,7 +77,7 @@ pins_app_list_sort_compare_func (gconstpointer a, gconstpointer b,
 }
 
 GListModel *
-pins_app_list_new_from_directory_list (GtkDirectoryList *dir_list)
+pins_app_iterator_new_from_directory_list (GtkDirectoryList *dir_list)
 {
     GtkFilterListModel *filter_model;
     GtkMapListModel *map_model;
@@ -85,15 +85,15 @@ pins_app_list_new_from_directory_list (GtkDirectoryList *dir_list)
 
     filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (dir_list),
-        GTK_FILTER (gtk_custom_filter_new (&pins_app_list_filter_match_func,
-                                           NULL, NULL)));
+        GTK_FILTER (gtk_custom_filter_new (
+            &pins_app_iterator_filter_match_func, NULL, NULL)));
 
-    map_model = gtk_map_list_model_new (G_LIST_MODEL (filter_model),
-                                        &pins_app_list_map_func, NULL, NULL);
+    map_model = gtk_map_list_model_new (
+        G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
 
     sort_model = gtk_sort_list_model_new (
         G_LIST_MODEL (map_model),
-        GTK_SORTER (gtk_custom_sorter_new (pins_app_list_sort_compare_func,
+        GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
     return G_LIST_MODEL (sort_model);
