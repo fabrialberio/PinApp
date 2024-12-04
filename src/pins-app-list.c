@@ -125,6 +125,12 @@ pins_app_list_class_init (PinsAppListClass *klass)
 
     object_class->dispose = pins_app_list_dispose;
 
+    // HACK: Best way i found apply "boxed-list" style class to `ListView`
+    gtk_widget_class_set_css_name (
+        GTK_WIDGET_CLASS (
+            GTK_LIST_VIEW_GET_CLASS (g_object_new (GTK_TYPE_LIST_VIEW, NULL))),
+        "list");
+
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-list.ui");
     gtk_widget_class_bind_template_child (widget_class, PinsAppList,
