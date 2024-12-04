@@ -28,4 +28,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (PinsAppList, pins_app_list, PINS, APP_LIST, AdwBin)
 
+void pins_app_list_set_directory_list (PinsAppList *self,
+                                       GtkDirectoryList *dir_list);
+
 G_END_DECLS

@@ -68,8 +68,7 @@
                         <property name="icon-name">pin-symbolic</property>
                         <property name="title" translatable="yes">Your pins</property>
                         <property name="child">
-                          <object class="AdwPreferencesGroup" id="box">
-
+                          <object class="PinsAppList" id="app_list">
                           </object>
                         </property>
                       </object>

@@ -19,6 +19,8 @@
  */
 
 #include "pins-window.h"
+
+#include "pins-app-list.h"
 #include "pins-app-row.h"
 
 struct _PinsWindow
@@ -28,7 +30,7 @@ struct _PinsWindow
     /* Template widgets */
     GtkButton *new_file_button;
     GtkToggleButton *search_button;
-    AdwPreferencesGroup *box;
+    PinsAppList *app_list;
 };
 
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -51,15 +53,31 @@ pins_window_class_init (PinsWindowClass *klass)
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");
+    g_type_ensure (PINS_TYPE_APP_LIST);
+    g_type_ensure (PINS_TYPE_APP_ROW);
+
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           new_file_button);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           search_button);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow, box);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_list);
 }
 
 static void
 pins_window_init (PinsWindow *self)
 {
+    GFile *file;
+    GtkDirectoryList *dir_list;
+
+    const gchar *ATTRIBUTES
+        = g_strjoin (",", G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+                     G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,
+                     G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME, NULL);
+
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    file = g_file_new_for_path ("/home/fabri/.local/share/applications");
+    dir_list = gtk_directory_list_new (ATTRIBUTES, file);
+
+    pins_app_list_set_directory_list (self->app_list, dir_list);
 }
