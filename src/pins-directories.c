@@ -61,10 +61,7 @@ pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
     // clang-format off
     const gchar * paths[]
         = { "/run/host/usr/share/icons",
-            "/usr/share/icons",
             "/var/lib/flatpak/exports/share/icons",
-            g_strjoin ("/", pins_user_data_path (),
-                        "icons", NULL),
             g_strjoin ("/", pins_user_data_path (),
                         "flatpak/exports/share", "icons", NULL), 
             NULL };
