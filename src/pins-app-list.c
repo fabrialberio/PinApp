@@ -76,10 +76,9 @@ pins_app_list_item_activated_cb (GtkListView *self, guint position,
 }
 
 void
-pins_app_list_set_app_iterator (PinsAppList *self,
-                                PinsAppIterator *app_iterator)
+pins_app_list_set_app_iterator (PinsAppList *self, GListModel *app_iterator)
 {
-    GtkNoSelection *model = gtk_no_selection_new (G_LIST_MODEL (app_iterator));
+    GtkNoSelection *model = gtk_no_selection_new (app_iterator);
     GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
 
     factory = gtk_signal_list_item_factory_new ();

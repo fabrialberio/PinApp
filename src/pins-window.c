@@ -81,7 +81,7 @@ static void
 pins_window_init (PinsWindow *self)
 {
     GtkIconTheme *theme;
-    PinsAppIterator *app_iterator;
+    GListModel *app_iterator;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 

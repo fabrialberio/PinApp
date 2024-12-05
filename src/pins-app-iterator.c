@@ -28,44 +28,6 @@
                G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,                        \
                G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME, NULL)
 
-struct _PinsAppIterator
-{
-    GObject parent_instance;
-
-    GListModel *model;
-};
-
-static void list_model_iface_init (GListModelInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (PinsAppIterator, pins_app_iterator, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (G_TYPE_LIST_MODEL,
-                                                list_model_iface_init))
-
-static void
-pins_app_iterator_items_changed_cb (GListModel *model, guint position,
-                                    guint removed, guint added,
-                                    gpointer user_data)
-{
-    PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
-
-    g_list_model_items_changed (G_LIST_MODEL (self), position, removed, added);
-}
-
-PinsAppIterator *
-pins_app_iterator_new (GListModel *app_list_model)
-{
-    PinsAppIterator *app_iterator
-        = g_object_new (PINS_TYPE_APP_ITERATOR, NULL);
-
-    app_iterator->model = app_list_model;
-
-    g_signal_connect (app_iterator->model, "items-changed",
-                      G_CALLBACK (pins_app_iterator_items_changed_cb),
-                      app_iterator);
-
-    return app_iterator;
-}
-
 gboolean
 pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
 {
@@ -118,7 +80,7 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
     return g_strcmp0 (first_name, second_name);
 }
 
-PinsAppIterator *
+GListModel *
 pins_app_iterator_new_from_directory_list (GListModel *dir_list)
 {
     GtkFilterListModel *filter_model;
@@ -137,10 +99,10 @@ pins_app_iterator_new_from_directory_list (GListModel *dir_list)
         GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
-    return pins_app_iterator_new (G_LIST_MODEL (sort_model));
+    return G_LIST_MODEL (sort_model);
 }
 
-PinsAppIterator *
+GListModel *
 pins_app_iterator_new_from_paths (gchar **paths)
 {
     GListStore *dir_list_store;
@@ -163,57 +125,4 @@ pins_app_iterator_new_from_paths (gchar **paths)
 
     return pins_app_iterator_new_from_directory_list (
         G_LIST_MODEL (flattened_dir_list));
-}
-
-static void
-pins_app_iterator_dispose (GObject *object)
-{
-    PinsAppIterator *self = PINS_APP_ITERATOR (object);
-
-    g_clear_object (&self->model);
-
-    G_OBJECT_CLASS (pins_app_iterator_parent_class)->dispose (object);
-}
-
-static void
-pins_app_iterator_class_init (PinsAppIteratorClass *klass)
-{
-    GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-    object_class->dispose = pins_app_iterator_dispose;
-}
-
-static void
-pins_app_iterator_init (PinsAppIterator *self)
-{
-}
-
-gpointer
-pins_app_iterator_get_item (GListModel *list, guint position)
-{
-    PinsAppIterator *self = PINS_APP_ITERATOR (list);
-
-    return g_list_model_get_item (self->model, position);
-}
-
-GType
-pins_app_iterator_get_item_type (GListModel *list)
-{
-    return PINS_TYPE_DESKTOP_FILE;
-}
-
-guint
-pins_app_iterator_get_n_items (GListModel *list)
-{
-    PinsAppIterator *self = PINS_APP_ITERATOR (list);
-
-    return g_list_model_get_n_items (self->model);
-}
-
-static void
-list_model_iface_init (GListModelInterface *iface)
-{
-    iface->get_item = pins_app_iterator_get_item;
-    iface->get_item_type = pins_app_iterator_get_item_type;
-    iface->get_n_items = pins_app_iterator_get_n_items;
 }
