@@ -22,7 +22,6 @@
 
 G_BEGIN_DECLS
 
-GListModel *
-pins_app_iterator_new_from_directory_list (GtkDirectoryList *dir_list);
+GListModel *pins_app_iterator_new_from_paths (gchar **paths);
 
 G_END_DECLS

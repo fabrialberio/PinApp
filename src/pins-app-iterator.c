@@ -20,9 +20,13 @@
 
 #include "pins-app-iterator.h"
 #include "pins-desktop-file.h"
+#include "pins-directories.h"
 
 #define DESKTOP_FILE_CONTENT_TYPE "application/x-desktop"
-#define FILE_INFO_GFILE_ATTR "standard::file"
+#define DIR_LIST_FILE_ATTRIBUTES                                              \
+    g_strjoin (",", G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,                   \
+               G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,                        \
+               G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME, NULL)
 
 gboolean
 pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
@@ -39,13 +43,13 @@ gpointer
 pins_app_iterator_map_func (gpointer file_info, gpointer user_data)
 {
     PinsDesktopFile *desktop_file;
-    GError *err;
+    GError *err = NULL;
     GFile *file;
 
     g_assert (G_IS_FILE_INFO (file_info));
 
     file = G_FILE (g_file_info_get_attribute_object (G_FILE_INFO (file_info),
-                                                     FILE_INFO_GFILE_ATTR));
+                                                     "standard::file"));
 
     desktop_file = pins_desktop_file_new_from_file (file, &err);
     if (err != NULL)
@@ -77,16 +81,15 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
 }
 
 GListModel *
-pins_app_iterator_new_from_directory_list (GtkDirectoryList *dir_list)
+pins_app_iterator_new_from_directory_list (GListModel *dir_list)
 {
     GtkFilterListModel *filter_model;
     GtkMapListModel *map_model;
     GtkSortListModel *sort_model;
 
     filter_model = gtk_filter_list_model_new (
-        G_LIST_MODEL (dir_list),
-        GTK_FILTER (gtk_custom_filter_new (
-            &pins_app_iterator_filter_match_func, NULL, NULL)));
+        dir_list, GTK_FILTER (gtk_custom_filter_new (
+                      &pins_app_iterator_filter_match_func, NULL, NULL)));
 
     map_model = gtk_map_list_model_new (
         G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
@@ -97,4 +100,29 @@ pins_app_iterator_new_from_directory_list (GtkDirectoryList *dir_list)
                                            NULL, NULL)));
 
     return G_LIST_MODEL (sort_model);
+}
+
+GListModel *
+pins_app_iterator_new_from_paths (gchar **paths)
+{
+    GListStore *dir_list_store;
+    GtkFlattenListModel *flattened_dir_list;
+
+    dir_list_store = g_list_store_new (GTK_TYPE_DIRECTORY_LIST);
+
+    for (int i = 0; i < g_strv_length (paths); i++)
+        {
+            GFile *file = g_file_new_for_path (paths[i]);
+            GtkDirectoryList *dir_list
+                = gtk_directory_list_new (DIR_LIST_FILE_ATTRIBUTES, file);
+
+            g_list_store_append (dir_list_store, dir_list);
+
+            // TODO: Connect notify::loading signals here
+        }
+    flattened_dir_list
+        = gtk_flatten_list_model_new (G_LIST_MODEL (dir_list_store));
+
+    return pins_app_iterator_new_from_directory_list (
+        G_LIST_MODEL (flattened_dir_list));
 }
