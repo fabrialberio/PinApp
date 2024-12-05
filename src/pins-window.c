@@ -20,8 +20,8 @@
 
 #include "pins-window.h"
 
+#include "pins-app-iterator.h"
 #include "pins-app-list.h"
-#include "pins-app-row.h"
 #include "pins-directories.h"
 
 struct _PinsWindow
@@ -55,7 +55,6 @@ pins_window_class_init (PinsWindowClass *klass)
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");
     g_type_ensure (PINS_TYPE_APP_LIST);
-    g_type_ensure (PINS_TYPE_APP_ROW);
 
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           new_file_button);
@@ -67,14 +66,10 @@ pins_window_class_init (PinsWindowClass *klass)
 static void
 pins_window_init (PinsWindow *self)
 {
-    GFile *file;
-    GtkDirectoryList *dir_list;
     GtkIconTheme *theme;
+    GListModel *app_iterator;
 
-    const gchar *ATTRIBUTES
-        = g_strjoin (",", G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                     G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,
-                     G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME, NULL);
+    gtk_widget_init_template (GTK_WIDGET (self));
 
     theme = gtk_icon_theme_get_for_display (
         gtk_widget_get_display (GTK_WIDGET (self)));
@@ -82,10 +77,7 @@ pins_window_init (PinsWindow *self)
     // This is noticeably slow
     pins_icon_theme_inject_search_paths (theme);
 
-    gtk_widget_init_template (GTK_WIDGET (self));
+    app_iterator = pins_app_iterator_new_from_paths (pins_system_app_paths ());
 
-    file = g_file_new_for_path (pins_user_app_path ());
-    dir_list = gtk_directory_list_new (ATTRIBUTES, file);
-
-    pins_app_list_set_directory_list (self->app_list, dir_list);
+    pins_app_list_set_app_iterator (self->app_list, app_iterator);
 }
