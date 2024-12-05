@@ -23,7 +23,7 @@
 G_BEGIN_DECLS
 
 gchar *pins_user_app_path (void);
-gchar **pins_get_user_app_paths (void);
+gchar **pins_system_app_paths (void);
 
 void pins_icon_theme_inject_search_paths (GtkIconTheme *theme);
 
