@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "pins-app-iterator.h"
+
 #include <adwaita.h>
 
 G_BEGIN_DECLS
@@ -29,6 +31,6 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PinsAppList, pins_app_list, PINS, APP_LIST, AdwBin)
 
 void pins_app_list_set_app_iterator (PinsAppList *self,
-                                     GListModel *app_iterator);
+                                     PinsAppIterator *app_iterator);
 
 G_END_DECLS

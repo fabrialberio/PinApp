@@ -18,10 +18,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#pragma once
+
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-GListModel *pins_app_iterator_new_from_paths (gchar **paths);
+#define PINS_TYPE_APP_ITERATOR (pins_app_iterator_get_type ())
+
+G_DECLARE_FINAL_TYPE (PinsAppIterator, pins_app_iterator, PINS, APP_ITERATOR,
+                      GObject);
+
+PinsAppIterator *pins_app_iterator_new_from_paths (gchar **paths);
 
 G_END_DECLS
