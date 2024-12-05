@@ -20,8 +20,6 @@
 
 #include "pins-directories.h"
 
-#define ICON_DIR_NAME "icons"
-
 gchar *
 pins_user_data_path (void)
 {
