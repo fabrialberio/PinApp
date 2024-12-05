@@ -35,6 +35,15 @@ struct _PinsDesktopFile
 
 G_DEFINE_TYPE (PinsDesktopFile, pins_desktop_file, G_TYPE_OBJECT);
 
+enum
+{
+    PROP_0,
+    PROP_SEARCH_STRING,
+    N_PROPS,
+};
+
+static GParamSpec *properties[N_PROPS];
+
 /**
  * Given a `GFile`, it constructs a `PinsDesktopFile` with the following logic:
  *  - If the file is in the system folder and a file with the same name is
@@ -53,7 +62,6 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
 {
     PinsDesktopFile *desktop_file;
     gboolean file_is_user_file;
-    gint retval;
 
     desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
     desktop_file->user_key_file = g_key_file_new ();
@@ -95,6 +103,20 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
                              g_file_get_path (self->user_file), error);
 }
 
+gchar *
+pins_desktop_file_get_search_string (PinsDesktopFile *self)
+{
+    gchar *user_data, *system_data;
+    gsize user_lenght, system_lenght;
+
+    user_data = g_key_file_to_data (self->user_key_file, &user_lenght, NULL);
+    system_data
+        = g_key_file_to_data (self->system_key_file, &system_lenght, NULL);
+
+    return g_ascii_strdown (g_strconcat (user_data, system_data, NULL),
+                            user_lenght + system_lenght);
+}
+
 static void
 pins_desktop_file_dispose (GObject *object)
 {
@@ -108,11 +130,36 @@ pins_desktop_file_dispose (GObject *object)
 }
 
 static void
+pins_desktop_file_get_property (GObject *object, guint prop_id, GValue *value,
+                                GParamSpec *pspec)
+{
+    PinsDesktopFile *self = PINS_DESKTOP_FILE (object);
+
+    switch (prop_id)
+        {
+        case PROP_SEARCH_STRING:
+            g_value_set_string (value,
+                                pins_desktop_file_get_search_string (self));
+            break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+        }
+}
+
+static void
 pins_desktop_file_class_init (PinsDesktopFileClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+    object_class->get_property = pins_desktop_file_get_property;
     object_class->dispose = pins_desktop_file_dispose;
+
+    properties[PROP_SEARCH_STRING]
+        = g_param_spec_string ("search-string", "Search String",
+                               "Data of the file as a searchable string", "",
+                               (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    g_object_class_install_properties (object_class, N_PROPS, properties);
 }
 
 static void
