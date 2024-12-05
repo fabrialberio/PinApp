@@ -20,6 +20,7 @@
 
 #include "pins-app-list.h"
 
+#include "pins-app-iterator.h"
 #include "pins-app-row.h"
 
 struct _PinsAppList

@@ -34,6 +34,7 @@ struct _PinsWindow
     GtkSearchBar *search_bar;
     GtkSearchEntry *search_entry;
     PinsAppList *app_list;
+    PinsAppList *search_list;
 };
 
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -50,6 +51,7 @@ pins_window_dispose (GObject *object)
     g_clear_object (&self->search_bar);
     g_clear_object (&self->search_entry);
     g_clear_object (&self->app_list);
+    g_clear_object (&self->search_list);
 
     G_OBJECT_CLASS (pins_window_parent_class)->dispose (object);
 }
@@ -75,6 +77,8 @@ pins_window_class_init (PinsWindowClass *klass)
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           search_entry);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_list);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
+                                          search_list);
 }
 
 static void
@@ -97,4 +101,5 @@ pins_window_init (PinsWindow *self)
     app_iterator = pins_app_iterator_new_from_paths (pins_system_app_paths ());
 
     pins_app_list_set_app_iterator (self->app_list, app_iterator);
+    pins_app_list_set_app_iterator (self->search_list, app_iterator);
 }
