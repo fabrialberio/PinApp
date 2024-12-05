@@ -62,27 +62,7 @@
                 </child>
 
                 <property name="content">
-                  <object class="AdwViewStack" id="view_stack">
-                    <property name="visible-child-name" bind-source="search_button"
-                      bind-property="active" bind-flags="sync-create" />
-                    <child>
-                      <object class="AdwViewStackPage">
-                        <property name="name">FALSE</property>
-                        <property name="child">
-                          <object class="PinsAppList" id="app_list">
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwViewStackPage">
-                        <property name="name">TRUE</property>
-                        <property name="child">
-                          <object class="PinsAppList" id="search_list">
-                          </object>
-                        </property>
-                      </object>
-                    </child>
+                  <object class="PinsAppList" id="app_list">
                   </object>
                 </property>
               </object>
