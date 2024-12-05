@@ -168,7 +168,7 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
             if (err != NULL)
                 {
                     g_propagate_error (error, err);
-                    return NULL;
+                    return "";
                 }
         }
 
@@ -194,7 +194,7 @@ pins_desktop_file_get_locale_string (PinsDesktopFile *self, const gchar *key,
             if (err != NULL)
                 {
                     g_propagate_error (error, err);
-                    return NULL;
+                    return "";
                 }
         }
     return value;
