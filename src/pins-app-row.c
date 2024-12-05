@@ -50,6 +50,9 @@ pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
     subtitle = pins_desktop_file_get_string (
         desktop_file, G_KEY_FILE_DESKTOP_KEY_COMMENT, NULL);
 
+    title = g_markup_escape_text (title, strlen (title));
+    subtitle = g_markup_escape_text (subtitle, strlen (subtitle));
+
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), title);
     adw_action_row_set_subtitle (ADW_ACTION_ROW (self), subtitle);
 }
