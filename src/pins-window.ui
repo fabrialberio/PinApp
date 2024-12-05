@@ -46,6 +46,7 @@
                       <object class="GtkSearchBar" id="search_bar">
                         <property name="search-mode-enabled" bind-source="search_button"
                           bind-property="active" bind-flags="sync-create|bidirectional" />
+                        <property name="key-capture-widget">navigation_view</property>
                         <property name="child">
                           <object class="AdwClamp">
                             <property name="child">
@@ -62,9 +63,11 @@
 
                 <property name="content">
                   <object class="AdwViewStack" id="view_stack">
+                    <property name="visible-child-name" bind-source="search_button"
+                      bind-property="active" bind-flags="sync-create" />
                     <child>
                       <object class="AdwViewStackPage">
-                        <property name="name">apps_tab</property>
+                        <property name="name">FALSE</property>
                         <property name="child">
                           <object class="PinsAppList" id="app_list">
                           </object>
@@ -73,11 +76,9 @@
                     </child>
                     <child>
                       <object class="AdwViewStackPage">
-                        <property name="name">search_tab</property>
+                        <property name="name">TRUE</property>
                         <property name="child">
-                          <object class="AdwStatusPage">
-                            <property name="title">Search apps</property>
-                            <property name="icon-name">search-symbolic</property>
+                          <object class="PinsAppList" id="search_list">
                           </object>
                         </property>
                       </object>
