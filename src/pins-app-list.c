@@ -49,8 +49,9 @@ pins_app_list_item_bind_cb (GtkSignalListItemFactory *self, GtkListItem *item,
     PinsDesktopFile *desktop_file = gtk_list_item_get_item (item);
     PinsAppRow *row = PINS_APP_ROW (gtk_list_item_get_child (item));
 
+    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
+
     pins_app_row_set_desktop_file (row, desktop_file);
-    // TODO: Connect signal
 }
 
 void
@@ -72,19 +73,14 @@ void
 pins_app_list_item_activated_cb (GtkListView *self, guint position,
                                  gpointer user_data)
 {
+    g_warning ("Not implemented");
 }
 
 void
-pins_app_list_set_directory_list (PinsAppList *self,
-                                  GtkDirectoryList *dir_list)
-
+pins_app_list_set_app_iterator (PinsAppList *self, GListModel *app_iterator)
 {
-    GListModel *app_iterator;
-    GtkNoSelection *selection_model;
+    GtkNoSelection *model = gtk_no_selection_new (app_iterator);
     GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
-
-    app_iterator = pins_app_iterator_new_from_directory_list (dir_list);
-    selection_model = gtk_no_selection_new (app_iterator);
 
     factory = gtk_signal_list_item_factory_new ();
     g_signal_connect_object (
@@ -97,8 +93,7 @@ pins_app_list_set_directory_list (PinsAppList *self,
                              G_CALLBACK (pins_app_list_item_teardown_cb), NULL,
                              0);
 
-    gtk_list_view_set_model (self->list_view,
-                             GTK_SELECTION_MODEL (selection_model));
+    gtk_list_view_set_model (self->list_view, GTK_SELECTION_MODEL (model));
     gtk_list_view_set_factory (self->list_view, factory);
     g_signal_connect_object (self->list_view, "activate",
                              G_CALLBACK (pins_app_list_item_activated_cb),
@@ -130,6 +125,7 @@ pins_app_list_class_init (PinsAppListClass *klass)
         GTK_WIDGET_CLASS (
             GTK_LIST_VIEW_GET_CLASS (g_object_new (GTK_TYPE_LIST_VIEW, NULL))),
         "list");
+    g_type_ensure (PINS_TYPE_APP_ROW);
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-list.ui");
