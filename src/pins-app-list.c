@@ -27,10 +27,34 @@ struct _PinsAppList
 {
     AdwBin parent_instance;
 
+    GtkStringFilter *string_filter;
     GtkListView *list_view;
 };
 
 G_DEFINE_TYPE (PinsAppList, pins_app_list, ADW_TYPE_BIN);
+
+void
+pins_app_list_search_changed_cb (GtkSearchEntry *self,
+                                 GtkStringFilter *user_data)
+{
+    g_assert (GTK_IS_STRING_FILTER (user_data));
+
+    gtk_string_filter_set_search (user_data,
+                                  gtk_editable_get_text (GTK_EDITABLE (self)));
+}
+
+void
+pins_app_list_set_search_entry (PinsAppList *self,
+                                GtkSearchEntry *search_entry)
+{
+    // TODO: Does not work if called after pins_app_list_set_app_iterator
+    self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
+        PINS_TYPE_DESKTOP_FILE, NULL, "search-string"));
+
+    g_signal_connect (search_entry, "search-changed",
+                      G_CALLBACK (pins_app_list_search_changed_cb),
+                      self->string_filter);
+}
 
 void
 pins_app_list_item_setup_cb (GtkSignalListItemFactory *self, GtkListItem *item,
@@ -79,8 +103,13 @@ pins_app_list_item_activated_cb (GtkListView *self, guint position,
 void
 pins_app_list_set_app_iterator (PinsAppList *self, GListModel *app_iterator)
 {
-    GtkNoSelection *model = gtk_no_selection_new (app_iterator);
-    GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
+    GtkFilterListModel *filter_model;
+    GtkNoSelection *model;
+    GtkListItemFactory *factory;
+
+    filter_model = gtk_filter_list_model_new (
+        app_iterator, GTK_FILTER (self->string_filter));
+    model = gtk_no_selection_new (G_LIST_MODEL (filter_model));
 
     factory = gtk_signal_list_item_factory_new ();
     g_signal_connect_object (
@@ -108,6 +137,7 @@ pins_app_list_dispose (GObject *object)
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_LIST);
 
     g_clear_object (&self->list_view);
+    g_clear_object (&self->string_filter);
 
     G_OBJECT_CLASS (pins_app_list_parent_class)->dispose (object);
 }

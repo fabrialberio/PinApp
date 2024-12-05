@@ -30,5 +30,7 @@ G_DECLARE_FINAL_TYPE (PinsAppList, pins_app_list, PINS, APP_LIST, AdwBin)
 
 void pins_app_list_set_app_iterator (PinsAppList *self,
                                      GListModel *app_iterator);
+void pins_app_list_set_search_entry (PinsAppList *self,
+                                     GtkSearchEntry *search_entry);
 
 G_END_DECLS

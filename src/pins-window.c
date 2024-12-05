@@ -101,5 +101,7 @@ pins_window_init (PinsWindow *self)
     app_iterator = pins_app_iterator_new_from_paths (pins_system_app_paths ());
 
     pins_app_list_set_app_iterator (self->app_list, app_iterator);
+
+    pins_app_list_set_search_entry (self->search_list, self->search_entry);
     pins_app_list_set_app_iterator (self->search_list, app_iterator);
 }
