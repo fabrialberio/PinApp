@@ -1,5 +1,6 @@
 pinapp_sources = [
     'main.c',
+    'pins-app-factory.c',
     'pins-app-icon.c',
     'pins-app-iterator.c',
     'pins-app-list.c',
