@@ -21,7 +21,7 @@
 #include "pins-window.h"
 
 #include "pins-app-iterator.h"
-#include "pins-app-list.h"
+#include "pins-app-view.h"
 #include "pins-directories.h"
 
 struct _PinsWindow
@@ -33,8 +33,8 @@ struct _PinsWindow
     GtkToggleButton *search_button;
     GtkSearchBar *search_bar;
     GtkSearchEntry *search_entry;
-    PinsAppList *app_list;
-    PinsAppList *search_list;
+    PinsAppView *app_view;
+    PinsAppView *search_view;
 };
 
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -50,8 +50,8 @@ pins_window_dispose (GObject *object)
     g_clear_object (&self->search_button);
     g_clear_object (&self->search_bar);
     g_clear_object (&self->search_entry);
-    g_clear_object (&self->app_list);
-    g_clear_object (&self->search_list);
+    g_clear_object (&self->app_view);
+    g_clear_object (&self->search_view);
 
     G_OBJECT_CLASS (pins_window_parent_class)->dispose (object);
 }
@@ -66,7 +66,7 @@ pins_window_class_init (PinsWindowClass *klass)
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");
-    g_type_ensure (PINS_TYPE_APP_LIST);
+    g_type_ensure (PINS_TYPE_APP_VIEW);
 
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           new_file_button);
@@ -76,9 +76,9 @@ pins_window_class_init (PinsWindowClass *klass)
                                           search_bar);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           search_entry);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_list);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_view);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_list);
+                                          search_view);
 }
 
 static void
@@ -100,8 +100,10 @@ pins_window_init (PinsWindow *self)
 
     app_iterator = pins_app_iterator_new_from_paths (pins_system_app_paths ());
 
-    pins_app_list_set_app_iterator (self->app_list, app_iterator);
+    pins_app_view_set_app_iterator (self->app_view, app_iterator);
+    pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
 
-    pins_app_list_set_search_entry (self->search_list, self->search_entry);
-    pins_app_list_set_app_iterator (self->search_list, app_iterator);
+    pins_app_view_set_app_iterator (self->search_view, app_iterator);
+    pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
+    pins_app_view_set_search_entry (self->search_view, self->search_entry);
 }
