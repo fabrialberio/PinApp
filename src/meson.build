@@ -4,6 +4,7 @@ pinapp_sources = [
     'pins-app-iterator.c',
     'pins-app-list.c',
     'pins-app-row.c',
+    'pins-app-view.c',
     'pins-application.c',
     'pins-desktop-file.c',
     'pins-directories.c',
