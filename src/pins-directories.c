@@ -55,6 +55,18 @@ pins_system_app_paths (void)
     return g_strv_builder_end (strv_builder);
 }
 
+gchar **
+pins_all_app_paths (void)
+{
+    GStrvBuilder *strv_builder = g_strv_builder_new ();
+
+    g_strv_builder_add (strv_builder, pins_user_app_path ());
+    g_strv_builder_addv (strv_builder,
+                         (const gchar **)pins_system_app_paths ());
+
+    return g_strv_builder_end (strv_builder);
+}
+
 void
 pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
 {
