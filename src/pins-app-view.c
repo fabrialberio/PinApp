@@ -31,7 +31,8 @@ struct _PinsAppView
 {
     AdwBin parent_instance;
 
-    GtkBox *box;
+    AdwBin *apps_bin;
+    AdwViewStack *view_stack;
 
     GtkStringFilter *string_filter;
     GtkFilterListModel *filter_model;
@@ -54,7 +55,7 @@ pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
 
     pins_app_list_set_model (app_list, G_LIST_MODEL (self->filter_model));
 
-    gtk_box_append (self->box, GTK_WIDGET (app_list));
+    adw_bin_set_child (self->apps_bin, GTK_WIDGET (app_list));
 }
 
 void
@@ -84,7 +85,8 @@ pins_app_view_dispose (GObject *object)
 
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_LIST);
 
-    g_clear_object (&self->box);
+    g_clear_object (&self->apps_bin);
+    g_clear_object (&self->view_stack);
     g_clear_object (&self->string_filter);
     g_clear_object (&self->filter_model);
 
@@ -103,7 +105,9 @@ pins_app_view_class_init (PinsAppViewClass *klass)
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-view.ui");
     g_type_ensure (PINS_TYPE_APP_LIST);
 
-    gtk_widget_class_bind_template_child (widget_class, PinsAppView, box);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView, apps_bin);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
+                                          view_stack);
 }
 
 static void
