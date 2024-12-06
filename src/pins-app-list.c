@@ -38,46 +38,10 @@ pins_app_list_new (void)
 }
 
 void
-pins_app_list_item_setup_cb (GtkSignalListItemFactory *self, GtkListItem *item,
-                             gpointer user_data)
-{
-    PinsAppRow *row = pins_app_row_new ();
-
-    gtk_list_item_set_child (item, GTK_WIDGET (row));
-}
-
-void
-pins_app_list_item_bind_cb (GtkSignalListItemFactory *self, GtkListItem *item,
-                            gpointer user_data)
-{
-    PinsDesktopFile *desktop_file = gtk_list_item_get_item (item);
-    PinsAppRow *row = PINS_APP_ROW (gtk_list_item_get_child (item));
-
-    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
-
-    pins_app_row_set_desktop_file (row, desktop_file);
-}
-
-void
-pins_app_list_item_unbind_cb (GtkSignalListItemFactory *self,
-                              GtkListItem *item, gpointer user_data)
-{
-}
-
-void
-pins_app_list_item_teardown_cb (GtkSignalListItemFactory *self,
-                                GtkListItem *item, gpointer user_data)
-{
-    PinsAppRow *row = PINS_APP_ROW (gtk_list_item_get_child (item));
-
-    g_clear_object (&row);
-}
-
-void
 pins_app_list_item_activated_cb (GtkListView *self, guint position,
                                  gpointer user_data)
 {
-    g_warning ("Not implemented");
+    g_warning ("Clicked on row %d.", position);
 }
 
 void
@@ -125,6 +89,27 @@ pins_app_list_class_init (PinsAppListClass *klass)
                                           list_view);
 }
 
+void
+pins_app_list_item_setup_cb (GtkSignalListItemFactory *self, GtkListItem *item,
+                             gpointer user_data)
+{
+    PinsAppRow *row = pins_app_row_new ();
+
+    gtk_list_item_set_child (item, GTK_WIDGET (row));
+}
+
+void
+pins_app_list_item_bind_cb (GtkSignalListItemFactory *self, GtkListItem *item,
+                            gpointer user_data)
+{
+    PinsDesktopFile *desktop_file = gtk_list_item_get_item (item);
+    PinsAppRow *row = PINS_APP_ROW (gtk_list_item_get_child (item));
+
+    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
+
+    pins_app_row_set_desktop_file (row, desktop_file);
+}
+
 static void
 pins_app_list_init (PinsAppList *self)
 {
@@ -136,11 +121,6 @@ pins_app_list_init (PinsAppList *self)
         factory, "setup", G_CALLBACK (pins_app_list_item_setup_cb), NULL, 0);
     g_signal_connect_object (factory, "bind",
                              G_CALLBACK (pins_app_list_item_bind_cb), NULL, 0);
-    g_signal_connect_object (
-        factory, "unbind", G_CALLBACK (pins_app_list_item_unbind_cb), NULL, 0);
-    g_signal_connect_object (factory, "teardown",
-                             G_CALLBACK (pins_app_list_item_teardown_cb), NULL,
-                             0);
 
     gtk_list_view_set_factory (self->list_view, factory);
 }
