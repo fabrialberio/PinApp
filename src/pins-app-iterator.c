@@ -149,36 +149,66 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     pins_app_iterator_set_model (self, G_LIST_MODEL (sort_model));
 }
 
+typedef struct
+{
+    PinsAppIterator *app_iterator;
+    guint path_index;
+    guint n_paths;
+    gboolean *loaded_paths;
+} dir_list_loaded_cb_data;
+
 void
 pins_app_iterator_dir_list_loaded_cb (GtkDirectoryList *self,
                                       GParamSpec *pspec,
-                                      PinsAppIterator *user_data)
+                                      dir_list_loaded_cb_data *user_data)
 {
-    g_assert (PINS_IS_APP_ITERATOR (user_data));
+    g_assert (PINS_IS_APP_ITERATOR (user_data->app_iterator));
 
-    // TODO: Emit when all dir_lists are loaded
-    g_signal_emit (user_data, signals[LOADED], 0);
+    user_data->loaded_paths[user_data->path_index] = TRUE;
+
+    for (int i = 0; i < user_data->n_paths; i++)
+        {
+            if (user_data->loaded_paths[i] == FALSE)
+                {
+                    free (user_data);
+                    return;
+                }
+        }
+
+    g_signal_emit (user_data->app_iterator, signals[LOADED], 0);
+    free (user_data->loaded_paths);
+    free (user_data);
 }
 
 void
 pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 {
+    guint n_paths = g_strv_length (paths);
+    gboolean *loaded_paths = calloc (n_paths, sizeof (gboolean));
+
     GListStore *dir_list_store;
     GtkFlattenListModel *flattened_dir_list;
 
     dir_list_store = g_list_store_new (GTK_TYPE_DIRECTORY_LIST);
 
-    for (int i = 0; i < g_strv_length (paths); i++)
+    for (int i = 0; i < n_paths; i++)
         {
+            dir_list_loaded_cb_data *data;
             GFile *file = g_file_new_for_path (paths[i]);
             GtkDirectoryList *dir_list
                 = gtk_directory_list_new (DIR_LIST_FILE_ATTRIBUTES, file);
 
             g_list_store_append (dir_list_store, dir_list);
 
+            data = malloc (sizeof (dir_list_loaded_cb_data));
+            data->app_iterator = self;
+            data->loaded_paths = loaded_paths;
+            data->n_paths = n_paths;
+            data->path_index = i;
+
             g_signal_connect (
                 dir_list, "notify::loading",
-                G_CALLBACK (pins_app_iterator_dir_list_loaded_cb), self);
+                G_CALLBACK (pins_app_iterator_dir_list_loaded_cb), data);
         }
 
     flattened_dir_list
