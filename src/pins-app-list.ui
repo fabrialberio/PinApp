@@ -6,6 +6,7 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkListView" id="list_view">
+            <property name="single-click-activate">true</property>
             <style>
               <class name="boxed-list" />
             </style>
