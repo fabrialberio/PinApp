@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "pins-application.h"
+#include "pins-directories.h"
 #include "pins-window.h"
 
 struct _PinsApplication
@@ -114,9 +115,24 @@ pins_application_quit_action (GSimpleAction *action, GVariant *parameter,
     g_application_quit (G_APPLICATION (self));
 }
 
+static void
+pins_application_reload_action (GSimpleAction *action, GVariant *parameter,
+                                gpointer user_data)
+{
+    PinsWindow *window;
+
+    g_assert (PINS_IS_APPLICATION (user_data));
+
+    window = PINS_WINDOW (
+        gtk_application_get_active_window (GTK_APPLICATION (user_data)));
+
+    pins_window_reload_apps (window);
+}
+
 static const GActionEntry app_actions[] = {
     { "quit", pins_application_quit_action },
     { "about", pins_application_about_action },
+    { "reload", pins_application_reload_action },
 };
 
 static void
@@ -127,4 +143,7 @@ pins_application_init (PinsApplication *self)
     gtk_application_set_accels_for_action (
         GTK_APPLICATION (self), "app.quit",
         (const char *[]){ "<primary>q", NULL });
+    gtk_application_set_accels_for_action (
+        GTK_APPLICATION (self), "app.reload",
+        (const char *[]){ "<primary>r", NULL });
 }

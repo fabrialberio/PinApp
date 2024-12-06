@@ -29,4 +29,6 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PinsWindow, pins_window, PINS, WINDOW,
                       AdwApplicationWindow)
 
+void pins_window_reload_apps (PinsWindow *self);
+
 G_END_DECLS
