@@ -20,6 +20,7 @@
 
 #include "pins-window.h"
 
+#include "pins-app-iterator.h"
 #include "pins-app-view.h"
 #include "pins-directories.h"
 
@@ -37,19 +38,6 @@ struct _PinsWindow
 };
 
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
-
-void
-pins_window_reload_apps (PinsWindow *self)
-{
-    PinsAppIterator *app_iterator = pins_app_iterator_new ();
-    pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
-
-    pins_app_view_set_app_iterator (self->app_view, app_iterator);
-    pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
-
-    pins_app_view_set_app_iterator (self->search_view, app_iterator);
-    pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
-}
 
 static void
 pins_window_dispose (GObject *object)
@@ -97,6 +85,7 @@ static void
 pins_window_init (PinsWindow *self)
 {
     GtkIconTheme *theme;
+    PinsAppIterator *app_iterator;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -108,7 +97,14 @@ pins_window_init (PinsWindow *self)
 
     gtk_search_bar_connect_entry (self->search_bar,
                                   GTK_EDITABLE (self->search_entry));
-    pins_app_view_set_search_entry (self->search_view, self->search_entry);
 
-    pins_window_reload_apps (self);
+    app_iterator = pins_app_iterator_new ();
+    pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
+
+    pins_app_view_set_app_iterator (self->app_view, app_iterator);
+    pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
+
+    pins_app_view_set_app_iterator (self->search_view, app_iterator);
+    pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
+    pins_app_view_set_search_entry (self->search_view, self->search_entry);
 }
