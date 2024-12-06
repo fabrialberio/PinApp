@@ -150,6 +150,17 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
 }
 
 void
+pins_app_iterator_dir_list_loaded_cb (GtkDirectoryList *self,
+                                      GParamSpec *pspec,
+                                      PinsAppIterator *user_data)
+{
+    g_assert (PINS_IS_APP_ITERATOR (user_data));
+
+    // TODO: Emit when all dir_lists are loaded
+    g_signal_emit (user_data, signals[LOADED], 0);
+}
+
+void
 pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 {
     GListStore *dir_list_store;
@@ -165,8 +176,9 @@ pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 
             g_list_store_append (dir_list_store, dir_list);
 
-            // TODO: Emit when all dir_lists are loaded
-            g_signal_emit (self, signals[LOADED], 0);
+            g_signal_connect (
+                dir_list, "notify::loading",
+                G_CALLBACK (pins_app_iterator_dir_list_loaded_cb), self);
         }
 
     flattened_dir_list
@@ -193,9 +205,9 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 
     object_class->dispose = pins_app_iterator_dispose;
 
-    signals[LOADED]
-        = g_signal_new ("loaded", PINS_TYPE_APP_ITERATOR, G_SIGNAL_RUN_FIRST,
-                        0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+    signals[LOADED] = g_signal_new ("loaded", G_TYPE_FROM_CLASS (klass),
+                                    G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
+                                    G_TYPE_NONE, 0);
 }
 
 static void

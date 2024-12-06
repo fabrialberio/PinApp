@@ -40,12 +40,39 @@ struct _PinsAppView
 
 G_DEFINE_TYPE (PinsAppView, pins_app_view, ADW_TYPE_BIN);
 
+enum
+{
+    PAGE_APPS,
+    PAGE_EMPTY,
+    PAGE_LOADING,
+    N_PAGES,
+};
+
+static gchar *pages[] = {
+    "apps",
+    "empty",
+    "loading",
+};
+
+void
+pins_app_list_app_iterator_loaded_cb (PinsAppIterator *self,
+                                      PinsAppView *user_data)
+{
+    g_assert (PINS_IS_APP_VIEW (user_data));
+
+    adw_view_stack_set_visible_child_name (user_data->view_stack,
+                                           pages[PAGE_APPS]);
+}
+
 void
 pins_app_view_set_app_iterator (PinsAppView *self,
                                 PinsAppIterator *app_iterator)
 {
     self->filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
+
+    g_signal_connect (app_iterator, "loaded",
+                      G_CALLBACK (pins_app_list_app_iterator_loaded_cb), self);
 }
 
 void
@@ -59,13 +86,23 @@ pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
 }
 
 void
-pins_app_list_search_changed_cb (GtkSearchEntry *self,
-                                 GtkStringFilter *user_data)
+pins_app_list_search_changed_cb (GtkSearchEntry *self, PinsAppView *user_data)
 {
-    g_assert (GTK_IS_STRING_FILTER (user_data));
+    g_assert (PINS_IS_APP_VIEW (user_data));
 
-    gtk_string_filter_set_search (user_data,
+    gtk_string_filter_set_search (user_data->string_filter,
                                   gtk_editable_get_text (GTK_EDITABLE (self)));
+
+    if (g_list_model_get_n_items (G_LIST_MODEL (user_data->filter_model)) == 0)
+        {
+            adw_view_stack_set_visible_child_name (user_data->view_stack,
+                                                   pages[PAGE_EMPTY]);
+        }
+    else
+        {
+            adw_view_stack_set_visible_child_name (user_data->view_stack,
+                                                   pages[PAGE_APPS]);
+        }
 }
 
 void
@@ -73,8 +110,7 @@ pins_app_view_set_search_entry (PinsAppView *self,
                                 GtkSearchEntry *search_entry)
 {
     g_signal_connect (search_entry, "search-changed",
-                      G_CALLBACK (pins_app_list_search_changed_cb),
-                      self->string_filter);
+                      G_CALLBACK (pins_app_list_search_changed_cb), self);
     // TODO: Disconnect signal
 }
 
@@ -114,6 +150,9 @@ static void
 pins_app_view_init (PinsAppView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    adw_view_stack_set_visible_child_name (self->view_stack,
+                                           pages[PAGE_LOADING]);
 
     self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
         PINS_TYPE_DESKTOP_FILE, NULL, "search-string"));
