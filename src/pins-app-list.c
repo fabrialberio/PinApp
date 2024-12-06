@@ -40,7 +40,6 @@ pins_app_list_new (void)
 void
 pins_app_list_item_setup_cb (GtkSignalListItemFactory *self, GtkListItem *item,
                              gpointer user_data)
-
 {
     PinsAppRow *row = pins_app_row_new ();
 
@@ -86,6 +85,7 @@ pins_app_list_set_model (PinsAppList *self, GListModel *model)
 {
     GtkNoSelection *selection_model = gtk_no_selection_new (model);
 
+    /// TODO: Freaky behaviour with lots of files!
     gtk_list_view_set_model (self->list_view,
                              GTK_SELECTION_MODEL (selection_model));
 
@@ -118,7 +118,6 @@ pins_app_list_class_init (PinsAppListClass *klass)
         GTK_WIDGET_CLASS (
             GTK_LIST_VIEW_GET_CLASS (g_object_new (GTK_TYPE_LIST_VIEW, NULL))),
         "list");
-    g_type_ensure (PINS_TYPE_APP_ROW);
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-list.ui");
