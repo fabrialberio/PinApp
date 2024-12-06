@@ -2,10 +2,15 @@
 <interface>
   <template class="PinsAppList" parent="AdwBin">
     <property name="child">
-      <object class="GtkListView" id="list_view">
-        <style>
-          <class name="boxed-list" />
-        </style>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkListView" id="list_view">
+            <style>
+              <class name="boxed-list" />
+            </style>
+          </object>
+        </child>
       </object>
     </property>
   </template>
