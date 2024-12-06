@@ -41,6 +41,12 @@ G_DEFINE_TYPE_WITH_CODE (PinsAppIterator, pins_app_iterator, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_LIST_MODEL,
                                                 list_model_iface_init))
 
+PinsAppIterator *
+pins_app_iterator_new (void)
+{
+    return g_object_new (PINS_TYPE_APP_ITERATOR, NULL);
+}
+
 static void
 pins_app_iterator_items_changed_cb (GListModel *model, guint position,
                                     guint removed, guint added,
@@ -51,19 +57,13 @@ pins_app_iterator_items_changed_cb (GListModel *model, guint position,
     g_list_model_items_changed (G_LIST_MODEL (self), position, removed, added);
 }
 
-PinsAppIterator *
-pins_app_iterator_new (GListModel *app_list_model)
+void
+pins_app_iterator_set_model (PinsAppIterator *self, GListModel *app_list_model)
 {
-    PinsAppIterator *app_iterator
-        = g_object_new (PINS_TYPE_APP_ITERATOR, NULL);
+    self->model = app_list_model;
 
-    app_iterator->model = app_list_model;
-
-    g_signal_connect (app_iterator->model, "items-changed",
-                      G_CALLBACK (pins_app_iterator_items_changed_cb),
-                      app_iterator);
-
-    return app_iterator;
+    g_signal_connect (self->model, "items-changed",
+                      G_CALLBACK (pins_app_iterator_items_changed_cb), self);
 }
 
 gboolean
@@ -118,8 +118,9 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
     return g_strcmp0 (first_name, second_name);
 }
 
-PinsAppIterator *
-pins_app_iterator_new_from_directory_list (GListModel *dir_list)
+void
+pins_app_iterator_set_directory_list (PinsAppIterator *self,
+                                      GListModel *dir_list)
 {
     GtkFilterListModel *filter_model;
     GtkMapListModel *map_model;
@@ -137,11 +138,11 @@ pins_app_iterator_new_from_directory_list (GListModel *dir_list)
         GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
-    return pins_app_iterator_new (G_LIST_MODEL (sort_model));
+    pins_app_iterator_set_model (self, G_LIST_MODEL (sort_model));
 }
 
-PinsAppIterator *
-pins_app_iterator_new_from_paths (gchar **paths)
+void
+pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 {
     GListStore *dir_list_store;
     GtkFlattenListModel *flattened_dir_list;
@@ -158,11 +159,12 @@ pins_app_iterator_new_from_paths (gchar **paths)
 
             // TODO: Connect notify::loading signals here
         }
+
     flattened_dir_list
         = gtk_flatten_list_model_new (G_LIST_MODEL (dir_list_store));
 
-    return pins_app_iterator_new_from_directory_list (
-        G_LIST_MODEL (flattened_dir_list));
+    pins_app_iterator_set_directory_list (self,
+                                          G_LIST_MODEL (flattened_dir_list));
 }
 
 static void

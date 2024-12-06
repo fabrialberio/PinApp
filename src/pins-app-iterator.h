@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PinsAppIterator, pins_app_iterator, PINS, APP_ITERATOR,
                       GObject);
 
-PinsAppIterator *pins_app_iterator_new_from_paths (gchar **paths);
+PinsAppIterator *pins_app_iterator_new (void);
+void pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths);
 
 G_END_DECLS

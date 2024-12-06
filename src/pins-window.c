@@ -98,7 +98,8 @@ pins_window_init (PinsWindow *self)
     gtk_search_bar_connect_entry (self->search_bar,
                                   GTK_EDITABLE (self->search_entry));
 
-    app_iterator = pins_app_iterator_new_from_paths (pins_system_app_paths ());
+    app_iterator = pins_app_iterator_new ();
+    pins_app_iterator_set_paths (app_iterator, pins_system_app_paths ());
 
     pins_app_view_set_app_iterator (self->app_view, app_iterator);
     pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
