@@ -41,6 +41,14 @@ G_DEFINE_TYPE_WITH_CODE (PinsAppIterator, pins_app_iterator, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_LIST_MODEL,
                                                 list_model_iface_init))
 
+enum
+{
+    LOADED,
+    N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 PinsAppIterator *
 pins_app_iterator_new (void)
 {
@@ -157,7 +165,8 @@ pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 
             g_list_store_append (dir_list_store, dir_list);
 
-            // TODO: Connect notify::loading signals here
+            // TODO: Emit when all dir_lists are loaded
+            g_signal_emit (self, signals[LOADED], 0);
         }
 
     flattened_dir_list
@@ -183,6 +192,10 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
     object_class->dispose = pins_app_iterator_dispose;
+
+    signals[LOADED]
+        = g_signal_new ("loaded", PINS_TYPE_APP_ITERATOR, G_SIGNAL_RUN_FIRST,
+                        0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
