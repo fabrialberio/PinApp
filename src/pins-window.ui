@@ -69,7 +69,7 @@
                       <object class="AdwViewStackPage">
                         <property name="name">FALSE</property>
                         <property name="child">
-                          <object class="PinsAppList" id="app_list">
+                          <object class="PinsAppView" id="app_view">
                           </object>
                         </property>
                       </object>
@@ -78,7 +78,7 @@
                       <object class="AdwViewStackPage">
                         <property name="name">TRUE</property>
                         <property name="child">
-                          <object class="PinsAppList" id="search_list">
+                          <object class="PinsAppView" id="search_view">
                           </object>
                         </property>
                       </object>
