@@ -20,40 +20,21 @@
 
 #include "pins-app-list.h"
 
-#include "pins-app-iterator.h"
 #include "pins-app-row.h"
 
 struct _PinsAppList
 {
     AdwBin parent_instance;
 
-    GtkStringFilter *string_filter;
     GtkListView *list_view;
 };
 
 G_DEFINE_TYPE (PinsAppList, pins_app_list, ADW_TYPE_BIN);
 
-void
-pins_app_list_search_changed_cb (GtkSearchEntry *self,
-                                 GtkStringFilter *user_data)
+PinsAppList *
+pins_app_list_new (void)
 {
-    g_assert (GTK_IS_STRING_FILTER (user_data));
-
-    gtk_string_filter_set_search (user_data,
-                                  gtk_editable_get_text (GTK_EDITABLE (self)));
-}
-
-void
-pins_app_list_set_search_entry (PinsAppList *self,
-                                GtkSearchEntry *search_entry)
-{
-    // TODO: Does not work if called after pins_app_list_set_app_iterator
-    self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
-        PINS_TYPE_DESKTOP_FILE, NULL, "search-string"));
-
-    g_signal_connect (search_entry, "search-changed",
-                      G_CALLBACK (pins_app_list_search_changed_cb),
-                      self->string_filter);
+    return g_object_new (PINS_TYPE_APP_LIST, NULL);
 }
 
 void
@@ -101,33 +82,15 @@ pins_app_list_item_activated_cb (GtkListView *self, guint position,
 }
 
 void
-pins_app_list_set_app_iterator (PinsAppList *self,
-                                PinsAppIterator *app_iterator)
+pins_app_list_set_model (PinsAppList *self, GListModel *model)
 {
-    GtkFilterListModel *filter_model;
-    GtkNoSelection *model;
-    GtkListItemFactory *factory;
+    GtkNoSelection *selection_model = gtk_no_selection_new (model);
 
-    filter_model = gtk_filter_list_model_new (
-        G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
-    model = gtk_no_selection_new (G_LIST_MODEL (filter_model));
+    gtk_list_view_set_model (self->list_view,
+                             GTK_SELECTION_MODEL (selection_model));
 
-    factory = gtk_signal_list_item_factory_new ();
-    g_signal_connect_object (
-        factory, "setup", G_CALLBACK (pins_app_list_item_setup_cb), NULL, 0);
-    g_signal_connect_object (factory, "bind",
-                             G_CALLBACK (pins_app_list_item_bind_cb), NULL, 0);
-    g_signal_connect_object (
-        factory, "unbind", G_CALLBACK (pins_app_list_item_unbind_cb), NULL, 0);
-    g_signal_connect_object (factory, "teardown",
-                             G_CALLBACK (pins_app_list_item_teardown_cb), NULL,
-                             0);
-
-    gtk_list_view_set_model (self->list_view, GTK_SELECTION_MODEL (model));
-    gtk_list_view_set_factory (self->list_view, factory);
-    g_signal_connect_object (self->list_view, "activate",
-                             G_CALLBACK (pins_app_list_item_activated_cb),
-                             NULL, 0);
+    g_signal_connect (self->list_view, "activate",
+                      G_CALLBACK (pins_app_list_item_activated_cb), NULL);
 }
 
 static void
@@ -138,7 +101,6 @@ pins_app_list_dispose (GObject *object)
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_LIST);
 
     g_clear_object (&self->list_view);
-    g_clear_object (&self->string_filter);
 
     G_OBJECT_CLASS (pins_app_list_parent_class)->dispose (object);
 }
@@ -167,5 +129,19 @@ pins_app_list_class_init (PinsAppListClass *klass)
 static void
 pins_app_list_init (PinsAppList *self)
 {
+    GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
+
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    g_signal_connect_object (
+        factory, "setup", G_CALLBACK (pins_app_list_item_setup_cb), NULL, 0);
+    g_signal_connect_object (factory, "bind",
+                             G_CALLBACK (pins_app_list_item_bind_cb), NULL, 0);
+    g_signal_connect_object (
+        factory, "unbind", G_CALLBACK (pins_app_list_item_unbind_cb), NULL, 0);
+    g_signal_connect_object (factory, "teardown",
+                             G_CALLBACK (pins_app_list_item_teardown_cb), NULL,
+                             0);
+
+    gtk_list_view_set_factory (self->list_view, factory);
 }
