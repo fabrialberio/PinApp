@@ -68,6 +68,9 @@ void
 pins_app_view_set_app_iterator (PinsAppView *self,
                                 PinsAppIterator *app_iterator)
 {
+    adw_view_stack_set_visible_child_name (self->view_stack,
+                                           pages[PAGE_LOADING]);
+
     self->filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
