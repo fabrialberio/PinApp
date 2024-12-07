@@ -62,7 +62,7 @@ static gchar *pages[N_PAGES] = {
 };
 
 void
-pins_app_list_app_iterator_loaded_cb (PinsAppIterator *self,
+pins_app_view_app_iterator_loaded_cb (PinsAppIterator *self,
                                       PinsAppView *user_data)
 {
     g_assert (PINS_IS_APP_VIEW (user_data));
@@ -82,7 +82,7 @@ pins_app_view_set_app_iterator (PinsAppView *self,
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
     g_signal_connect (app_iterator, "loaded",
-                      G_CALLBACK (pins_app_list_app_iterator_loaded_cb), self);
+                      G_CALLBACK (pins_app_view_app_iterator_loaded_cb), self);
 }
 
 void
@@ -113,7 +113,7 @@ pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
 }
 
 void
-pins_app_list_search_changed_cb (GtkSearchEntry *self, PinsAppView *user_data)
+pins_app_view_search_changed_cb (GtkSearchEntry *self, PinsAppView *user_data)
 {
     g_assert (PINS_IS_APP_VIEW (user_data));
 
@@ -137,7 +137,7 @@ pins_app_view_set_search_entry (PinsAppView *self,
                                 GtkSearchEntry *search_entry)
 {
     g_signal_connect (search_entry, "search-changed",
-                      G_CALLBACK (pins_app_list_search_changed_cb), self);
+                      G_CALLBACK (pins_app_view_search_changed_cb), self);
     // TODO: Disconnect signal
 }
 
@@ -146,7 +146,7 @@ pins_app_view_dispose (GObject *object)
 {
     PinsAppView *self = PINS_APP_VIEW (object);
 
-    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_LIST);
+    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
 
     g_clear_object (&self->apps_bin);
     g_clear_object (&self->view_stack);
