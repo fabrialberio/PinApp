@@ -24,6 +24,7 @@
 #include "pins-app-view.h"
 #include "pins-desktop-file.h"
 #include "pins-directories.h"
+#include "pins-file-view.h"
 
 struct _PinsWindow
 {
@@ -34,11 +35,25 @@ struct _PinsWindow
     GtkToggleButton *search_button;
     GtkSearchBar *search_bar;
     GtkSearchEntry *search_entry;
+    AdwNavigationView *navigation_view;
     PinsAppView *app_view;
     PinsAppView *search_view;
+    PinsFileView *file_view;
 };
 
 G_DEFINE_FINAL_TYPE (PinsWindow, pins_window, ADW_TYPE_APPLICATION_WINDOW)
+
+enum
+{
+    PAGE_APPS,
+    PAGE_FILE,
+    N_PAGES,
+};
+
+static gchar *pages[N_PAGES] = {
+    "apps-page",
+    "file-page",
+};
 
 static void
 pins_window_dispose (GObject *object)
@@ -51,8 +66,10 @@ pins_window_dispose (GObject *object)
     g_clear_object (&self->search_button);
     g_clear_object (&self->search_bar);
     g_clear_object (&self->search_entry);
+    g_clear_object (&self->navigation_view);
     g_clear_object (&self->app_view);
     g_clear_object (&self->search_view);
+    g_clear_object (&self->file_view);
 
     G_OBJECT_CLASS (pins_window_parent_class)->dispose (object);
 }
@@ -68,6 +85,7 @@ pins_window_class_init (PinsWindowClass *klass)
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-window.ui");
     g_type_ensure (PINS_TYPE_APP_VIEW);
+    g_type_ensure (PINS_TYPE_FILE_VIEW);
 
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           new_file_button);
@@ -77,9 +95,12 @@ pins_window_class_init (PinsWindowClass *klass)
                                           search_bar);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           search_entry);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
+                                          navigation_view);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_view);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           search_view);
+    gtk_widget_class_bind_template_child (widget_class, PinsWindow, file_view);
 }
 
 void
@@ -90,9 +111,10 @@ pins_window_item_activated_cb (GtkListView *self,
     g_assert (PINS_IS_WINDOW (user_data));
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    gchar *name = pins_desktop_file_get_string (desktop_file, "Name", NULL);
+    pins_file_view_set_desktop_file (user_data->file_view, desktop_file);
 
-    g_warning ("Clicked on row with name %s.", name);
+    adw_navigation_view_push_by_tag (user_data->navigation_view,
+                                     pages[PAGE_FILE]);
 }
 
 static void

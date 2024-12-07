@@ -93,9 +93,7 @@
           <object class="AdwNavigationPage">
             <property name="tag">file-page</property>
             <property name="child">
-              <object class="AdwStatusPage">
-                <property name="title">File page</property>
-                <property name="icon-name">emblem-documents-symbolic</property>
+              <object class="PinsFileView" id="file_view">
               </object>
             </property>
           </object>

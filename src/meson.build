@@ -8,6 +8,7 @@ pinapp_sources = [
     'pins-application.c',
     'pins-desktop-file.c',
     'pins-directories.c',
+    'pins-file-view.c',
     'pins-window.c',
 ]
 

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="PinsFileView" parent="AdwBin">
+    <child>
+      <object class="AdwToolbarView" id="toolbar_view">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="show-title">false</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
+              </object>
+            </property>
+            <child type="end">
+              <object class="GtkButton" id="pin_button">
+                <property name="child">
+                  <object class="AdwButtonContent">
+                    <property name="label" translatable="yes">Pin</property>
+                    <property name="icon-name">view-pin-symbolic</property>
+                  </object>
+                </property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkMenuButton" id="file_menu_button">
+                <property name="icon-name">view-more-symbolic</property>
+                <property name="tooltip-text" translatable="yes">File menu</property>
+                <property name="popover">file_menu_popover</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="content">
+          <object class="GtkScrolledWindow" id="scrolled_window">
+            <property name="vexpand">true</property>
+            <child>
+              <object class="AdwClamp">
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-bottom">24</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <child>
+                      <object class="GtkBox" id="banner_box">
+                        <property name="orientation">horizontal</property>
+                        <child>
+                          <object class="PinsAppIcon" id="icon">
+                            <property name="margin-end">6</property>
+                            <property name="margin-bottom">6</property>
+                            <property name="tooltip-text" translatable="yes">Application icon</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBox">
+                            <property name="valign">center</property>
+                            <property name="hexpand">true</property>
+                            <property name="selection-mode">none</property>
+                            <style>
+                              <class name="app-banner-listbox" />
+                            </style>
+                            <!--
+                        <child>
+                          <object class="FieldRow" id="name_row">
+                            <property name="margin-bottom">6</property>
+                            <property name="height-request">64</property>
+                            <property name="removable">false</property>
+                            <style>
+                              <class name="app-banner-entry" />
+                              <! TODO: This should become title-2-row when breakpoint is applied >
+                              <class name="title-1-row" />
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="FieldRow" id="comment_row">
+                            <property name="removable">false</property>
+                            <style>
+                              <class name="app-banner-entry" />
+                            </style>
+                          </object>
+                        </child>
+                        -->
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBox" id="fields_listbox">
+                        <property name="selection-mode">none</property>
+                        <style>
+                          <class name="boxed-list" />
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBox">
+                        <property name="selection-mode">none</property>
+                        <style>
+                          <class name="boxed-list" />
+                        </style>
+                        <child>
+                          <object class="AdwButtonRow" id="add_field_button">
+                            <property name="title" translatable="yes">Add field</property>
+                            <property name="start-icon-name">list-add</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+
+  <object class="GtkPopover" id="file_menu_popover">
+    <style>
+      <class name="menu" />
+    </style>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">1</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <child>
+          <object class="GtkModelButton" id="unpin_button">
+            <property name="text" translatable="yes">Unpin</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="rename_button">
+            <property name="text" translatable="yes">Rename file</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="duplicate_button">
+            <property name="text" translatable="yes">Duplicate file</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

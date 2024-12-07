@@ -5,6 +5,7 @@
     <file preprocess="xml-stripblanks">pins-app-list.ui</file>
     <file preprocess="xml-stripblanks">pins-app-row.ui</file>
     <file preprocess="xml-stripblanks">pins-app-view.ui</file>
+    <file preprocess="xml-stripblanks">pins-file-view.ui</file>
     <file preprocess="xml-stripblanks">pins-window.ui</file>
   </gresource>
   <gresource prefix="/io/github/fabrialberio/pinapp/icons/scalable/actions">
