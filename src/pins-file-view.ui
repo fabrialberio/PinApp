@@ -53,6 +53,7 @@
                             <property name="margin-end">6</property>
                             <property name="margin-bottom">6</property>
                             <property name="tooltip-text" translatable="yes">Application icon</property>
+                            <property name="pixel-size">128</property>
                           </object>
                         </child>
                         <child>
