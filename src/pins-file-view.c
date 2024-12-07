@@ -21,6 +21,7 @@
 #include "pins-file-view.h"
 
 #include "pins-app-icon.h"
+#include "pins-key-row.h"
 
 struct _PinsFileView
 {
@@ -29,6 +30,8 @@ struct _PinsFileView
     PinsDesktopFile *desktop_file;
 
     PinsAppIcon *icon;
+    PinsKeyRow *name_row;
+    PinsKeyRow *comment_row;
 };
 
 G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BIN);
@@ -65,12 +68,22 @@ pins_file_view_class_init (PinsFileViewClass *klass)
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-file-view.ui");
     g_type_ensure (PINS_TYPE_APP_ICON);
+    g_type_ensure (PINS_TYPE_KEY_ROW);
 
     gtk_widget_class_bind_template_child (widget_class, PinsFileView, icon);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          name_row);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          comment_row);
 }
 
 static void
 pins_file_view_init (PinsFileView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    pins_key_row_set_key (self->name_row, self->desktop_file,
+                          G_KEY_FILE_DESKTOP_KEY_NAME);
+    pins_key_row_set_key (self->comment_row, self->desktop_file,
+                          G_KEY_FILE_DESKTOP_KEY_COMMENT);
 }

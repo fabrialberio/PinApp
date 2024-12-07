@@ -64,28 +64,27 @@
                             <style>
                               <class name="app-banner-listbox" />
                             </style>
-                            <!--
-                        <child>
-                          <object class="FieldRow" id="name_row">
-                            <property name="margin-bottom">6</property>
-                            <property name="height-request">64</property>
-                            <property name="removable">false</property>
-                            <style>
-                              <class name="app-banner-entry" />
-                              <! TODO: This should become title-2-row when breakpoint is applied >
-                              <class name="title-1-row" />
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="FieldRow" id="comment_row">
-                            <property name="removable">false</property>
-                            <style>
-                              <class name="app-banner-entry" />
-                            </style>
-                          </object>
-                        </child>
-                        -->
+                            <child>
+                              <object class="PinsKeyRow" id="name_row">
+                                <property name="margin-bottom">6</property>
+                                <property name="height-request">64</property>
+                                <!-- <property name="removable">false</property> -->
+                                <style>
+                                  <class name="app-banner-entry" />
+                                  <!-- TODO: This should become
+                                  title-2-row when breakpoint is applied -->
+                                  <class name="title-1-row" />
+                                </style>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="PinsKeyRow" id="comment_row">
+                                <!-- <property name="removable">false</property> -->
+                                <style>
+                                  <class name="app-banner-entry" />
+                                </style>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
