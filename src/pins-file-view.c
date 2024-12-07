@@ -24,14 +24,14 @@
 
 struct _PinsFileView
 {
-    AdwBin parent_instance;
+    AdwBreakpointBin parent_instance;
 
     PinsDesktopFile *desktop_file;
 
     PinsAppIcon *icon;
 };
 
-G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BIN);
+G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BREAKPOINT_BIN);
 
 void
 pins_file_view_set_desktop_file (PinsFileView *self,
