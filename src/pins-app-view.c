@@ -42,13 +42,20 @@ G_DEFINE_TYPE (PinsAppView, pins_app_view, ADW_TYPE_BIN);
 
 enum
 {
+    ACTIVATE,
+    N_SIGNALS
+};
+
+enum
+{
     PAGE_APPS,
     PAGE_EMPTY,
     PAGE_LOADING,
     N_PAGES,
 };
 
-static gchar *pages[] = {
+static guint signals[N_SIGNALS];
+static gchar *pages[N_PAGES] = {
     "apps",
     "empty",
     "loading",
@@ -79,6 +86,15 @@ pins_app_view_set_app_iterator (PinsAppView *self,
 }
 
 void
+pins_app_view_item_activated_cb (GtkListView *self, guint position,
+                                 PinsAppView *user_data)
+{
+    g_assert (PINS_IS_APP_VIEW (user_data));
+
+    g_signal_emit (user_data, signals[ACTIVATE], 0, position);
+}
+
+void
 pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
 {
     // TODO: Doesn't work if called before pins_app_view_set_app_iterator
@@ -86,6 +102,9 @@ pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
     pins_app_list_set_model (app_list, G_LIST_MODEL (self->filter_model));
 
     adw_bin_set_child (self->apps_bin, GTK_WIDGET (app_list));
+
+    g_signal_connect (app_list, "activate",
+                      G_CALLBACK (pins_app_view_item_activated_cb), self);
 }
 
 void
@@ -139,6 +158,13 @@ pins_app_view_class_init (PinsAppViewClass *klass)
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     object_class->dispose = pins_app_view_dispose;
+
+    signals[ACTIVATE] = g_signal_new (
+        "activate", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL,
+        NULL, g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_UINT);
+
+    g_signal_set_va_marshaller (signals[ACTIVATE], G_TYPE_FROM_CLASS (klass),
+                                g_cclosure_marshal_VOID__UINTv);
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-view.ui");

@@ -81,6 +81,15 @@ pins_window_class_init (PinsWindowClass *klass)
                                           search_view);
 }
 
+void
+pins_window_item_activated_cb (GtkListView *self, guint position,
+                               PinsWindow *user_data)
+{
+    g_assert (PINS_IS_WINDOW (user_data));
+
+    g_warning ("Clicked on row %d.", position);
+}
+
 static void
 pins_window_init (PinsWindow *self)
 {
@@ -107,4 +116,10 @@ pins_window_init (PinsWindow *self)
     pins_app_view_set_app_iterator (self->search_view, app_iterator);
     pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
     pins_app_view_set_search_entry (self->search_view, self->search_entry);
+
+    g_signal_connect (self->app_view, "activate",
+                      G_CALLBACK (pins_window_item_activated_cb), self);
+
+    g_signal_connect (self->search_view, "activate",
+                      G_CALLBACK (pins_window_item_activated_cb), self);
 }

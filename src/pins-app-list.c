@@ -31,6 +31,14 @@ struct _PinsAppList
 
 G_DEFINE_TYPE (PinsAppList, pins_app_list, ADW_TYPE_BIN);
 
+enum
+{
+    ACTIVATE,
+    N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 PinsAppList *
 pins_app_list_new (void)
 {
@@ -39,9 +47,11 @@ pins_app_list_new (void)
 
 void
 pins_app_list_item_activated_cb (GtkListView *self, guint position,
-                                 gpointer user_data)
+                                 PinsAppList *user_data)
 {
-    g_warning ("Clicked on row %d.", position);
+    g_assert (PINS_IS_APP_LIST (user_data));
+
+    g_signal_emit (user_data, signals[ACTIVATE], 0, position);
 }
 
 void
@@ -54,7 +64,7 @@ pins_app_list_set_model (PinsAppList *self, GListModel *model)
                              GTK_SELECTION_MODEL (selection_model));
 
     g_signal_connect (self->list_view, "activate",
-                      G_CALLBACK (pins_app_list_item_activated_cb), NULL);
+                      G_CALLBACK (pins_app_list_item_activated_cb), self);
 }
 
 static void
@@ -76,6 +86,13 @@ pins_app_list_class_init (PinsAppListClass *klass)
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     object_class->dispose = pins_app_list_dispose;
+
+    signals[ACTIVATE] = g_signal_new (
+        "activate", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL,
+        NULL, g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_UINT);
+
+    g_signal_set_va_marshaller (signals[ACTIVATE], G_TYPE_FROM_CLASS (klass),
+                                g_cclosure_marshal_VOID__UINTv);
 
     // HACK: Best way i found apply "boxed-list" style class to `ListView`
     gtk_widget_class_set_css_name (
