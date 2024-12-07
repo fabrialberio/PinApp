@@ -58,18 +58,7 @@ static gchar *pages[N_PAGES] = {
 static void
 pins_window_dispose (GObject *object)
 {
-    PinsWindow *self = PINS_WINDOW (object);
-
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_WINDOW);
-
-    g_clear_object (&self->new_file_button);
-    g_clear_object (&self->search_button);
-    g_clear_object (&self->search_bar);
-    g_clear_object (&self->search_entry);
-    g_clear_object (&self->navigation_view);
-    g_clear_object (&self->app_view);
-    g_clear_object (&self->search_view);
-    g_clear_object (&self->file_view);
 
     G_OBJECT_CLASS (pins_window_parent_class)->dispose (object);
 }

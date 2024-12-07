@@ -70,11 +70,7 @@ pins_app_list_set_model (PinsAppList *self, GListModel *model)
 static void
 pins_app_list_dispose (GObject *object)
 {
-    PinsAppList *self = PINS_APP_LIST (object);
-
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_LIST);
-
-    g_clear_object (&self->list_view);
 
     G_OBJECT_CLASS (pins_app_list_parent_class)->dispose (object);
 }

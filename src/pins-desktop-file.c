@@ -100,6 +100,9 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
 void
 pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
+    g_warning ("Saving desktop file `%s`",
+               g_file_get_basename (self->user_file));
+
     g_key_file_save_to_file (self->user_key_file,
                              g_file_get_path (self->user_file), error);
 }
@@ -158,22 +161,6 @@ pins_desktop_file_get_search_string (PinsDesktopFile *self)
 }
 
 static void
-pins_desktop_file_dispose (GObject *object)
-{
-    PinsDesktopFile *self = (PinsDesktopFile *)object;
-
-    g_clear_object (&self->user_file);
-    g_clear_object (&self->user_key_file);
-
-    if (self->system_key_file != NULL)
-        {
-            g_clear_object (&self->system_key_file);
-        }
-
-    G_OBJECT_CLASS (pins_desktop_file_parent_class)->dispose (object);
-}
-
-static void
 pins_desktop_file_get_property (GObject *object, guint prop_id, GValue *value,
                                 GParamSpec *pspec)
 {
@@ -196,7 +183,6 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
     object_class->get_property = pins_desktop_file_get_property;
-    object_class->dispose = pins_desktop_file_dispose;
 
     properties[PROP_SEARCH_STRING]
         = g_param_spec_string ("search-string", "Search String",

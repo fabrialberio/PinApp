@@ -177,7 +177,7 @@ pins_app_iterator_dir_list_loaded_cb (GtkDirectoryList *self,
 
     g_signal_emit (user_data->app_iterator, signals[LOADED], 0);
     free (user_data->loaded_paths);
-    free (user_data);
+    g_free (user_data);
 }
 
 void
@@ -200,7 +200,7 @@ pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 
             g_list_store_append (dir_list_store, dir_list);
 
-            data = malloc (sizeof (dir_list_loaded_cb_data));
+            data = g_malloc (sizeof (dir_list_loaded_cb_data));
             data->app_iterator = self;
             data->loaded_paths = loaded_paths;
             data->n_paths = n_paths;
@@ -219,22 +219,8 @@ pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 }
 
 static void
-pins_app_iterator_dispose (GObject *object)
-{
-    PinsAppIterator *self = PINS_APP_ITERATOR (object);
-
-    g_clear_object (&self->model);
-
-    G_OBJECT_CLASS (pins_app_iterator_parent_class)->dispose (object);
-}
-
-static void
 pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 {
-    GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-    object_class->dispose = pins_app_iterator_dispose;
-
     signals[LOADED] = g_signal_new ("loaded", G_TYPE_FROM_CLASS (klass),
                                     G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
                                     G_TYPE_NONE, 0);

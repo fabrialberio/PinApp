@@ -64,14 +64,7 @@ pins_file_view_set_desktop_file (PinsFileView *self,
 static void
 pins_file_view_dispose (GObject *object)
 {
-    PinsFileView *self = PINS_FILE_VIEW (object);
-
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_FILE_VIEW);
-
-    g_clear_object (&self->icon);
-    g_clear_object (&self->name_row);
-    g_clear_object (&self->comment_row);
-    g_clear_object (&self->keys_listbox);
 
     G_OBJECT_CLASS (pins_file_view_parent_class)->dispose (object);
 }

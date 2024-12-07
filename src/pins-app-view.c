@@ -146,12 +146,11 @@ pins_app_view_dispose (GObject *object)
 {
     PinsAppView *self = PINS_APP_VIEW (object);
 
-    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
-
-    g_clear_object (&self->apps_bin);
-    g_clear_object (&self->view_stack);
     g_clear_object (&self->string_filter);
-    g_clear_object (&self->filter_model);
+
+    /// TODO: Cannot dispose successfully, causes exit code 139
+    // g_clear_object (&self->filter_model);
+    // gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
 
     G_OBJECT_CLASS (pins_app_view_parent_class)->dispose (object);
 }
