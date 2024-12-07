@@ -27,11 +27,10 @@ struct _PinsFileView
 {
     AdwBin parent_instance;
 
-    PinsDesktopFile *desktop_file;
-
     PinsAppIcon *icon;
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
+    GtkListBox *keys_listbox;
 };
 
 G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BIN);
@@ -40,19 +39,39 @@ void
 pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
-    /// TODO: Implement
+    gchar **keys;
 
-    gchar *name = pins_desktop_file_get_string (desktop_file, "Name", NULL);
+    gtk_list_box_remove_all (self->keys_listbox);
 
     pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
-    g_warning ("Loading desktop file with name: %s", name);
+    pins_key_row_set_key (self->name_row, desktop_file,
+                          G_KEY_FILE_DESKTOP_KEY_NAME);
+    pins_key_row_set_key (self->comment_row, desktop_file,
+                          G_KEY_FILE_DESKTOP_KEY_COMMENT);
+
+    keys = pins_desktop_file_get_keys (desktop_file);
+
+    for (int i = 0; keys[i] != NULL; i++)
+        {
+            PinsKeyRow *row = pins_key_row_new ();
+            pins_key_row_set_key (row, desktop_file, keys[i]);
+
+            gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
+        }
 }
 
 static void
 pins_file_view_dispose (GObject *object)
 {
+    PinsFileView *self = PINS_FILE_VIEW (object);
+
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_FILE_VIEW);
+
+    g_clear_object (&self->icon);
+    g_clear_object (&self->name_row);
+    g_clear_object (&self->comment_row);
+    g_clear_object (&self->keys_listbox);
 
     G_OBJECT_CLASS (pins_file_view_parent_class)->dispose (object);
 }
@@ -75,15 +94,12 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           name_row);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           comment_row);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          keys_listbox);
 }
 
 static void
 pins_file_view_init (PinsFileView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
-
-    pins_key_row_set_key (self->name_row, self->desktop_file,
-                          G_KEY_FILE_DESKTOP_KEY_NAME);
-    pins_key_row_set_key (self->comment_row, self->desktop_file,
-                          G_KEY_FILE_DESKTOP_KEY_COMMENT);
 }
