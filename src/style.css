@@ -1,0 +1,17 @@
+.app-banner-listbox {
+    background-color: transparent;
+}
+
+.app-banner-listbox>row {
+    border-radius: 12px;
+}
+
+.title-1-row text {
+    font-weight: 800;
+    font-size: 20pt;
+}
+
+.title-2-row text {
+    font-weight: 800;
+    font-size: 15pt;
+}
