@@ -64,8 +64,6 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     gboolean file_is_user_file;
 
     desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
-    desktop_file->user_key_file = g_key_file_new ();
-    desktop_file->system_key_file = g_key_file_new ();
 
     file_is_user_file = g_file_equal (
         g_file_get_parent (file), g_file_new_for_path (pins_user_app_path ()));
@@ -73,13 +71,14 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     if (file_is_user_file)
         {
             desktop_file->user_file = file;
-            desktop_file->system_key_file = g_key_file_new ();
+            desktop_file->system_key_file = NULL;
         }
     else
         {
             desktop_file->user_file = g_file_new_for_path (g_strconcat (
                 pins_user_app_path (), g_file_get_basename (file), NULL));
 
+            desktop_file->system_key_file = g_key_file_new ();
             if (!g_key_file_load_from_file (desktop_file->system_key_file,
                                             g_file_get_path (file),
                                             KEY_FILE_FLAGS, error))
@@ -89,6 +88,8 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
                     return NULL;
                 }
         }
+
+    desktop_file->user_key_file = g_key_file_new ();
     g_key_file_load_from_file (desktop_file->user_key_file,
                                g_file_get_path (desktop_file->user_file),
                                KEY_FILE_FLAGS, NULL);
@@ -101,6 +102,39 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
     g_key_file_save_to_file (self->user_key_file,
                              g_file_get_path (self->user_file), error);
+}
+
+gchar **
+pins_desktop_file_get_keys (PinsDesktopFile *self)
+{
+    GStrvBuilder *strv_builder = g_strv_builder_new ();
+    GStrv user_keys, system_keys;
+    gsize n_user_keys, n_system_keys;
+
+    g_assert (PINS_IS_DESKTOP_FILE (self));
+
+    user_keys = g_key_file_get_keys (
+        self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, &n_user_keys, NULL);
+
+    g_strv_builder_addv (strv_builder, (const gchar **)user_keys);
+
+    if (self->system_key_file != NULL)
+        {
+            system_keys = g_key_file_get_keys (self->system_key_file,
+                                               G_KEY_FILE_DESKTOP_GROUP,
+                                               &n_system_keys, NULL);
+
+            for (int i = 0; i < n_system_keys; i++)
+                {
+                    if (!g_strv_contains ((const gchar *const *)user_keys,
+                                          system_keys[i]))
+                        {
+                            g_strv_builder_add (strv_builder, system_keys[i]);
+                        }
+                }
+        }
+
+    return g_strv_builder_end (strv_builder);
 }
 
 gchar *
@@ -123,8 +157,12 @@ pins_desktop_file_dispose (GObject *object)
     PinsDesktopFile *self = (PinsDesktopFile *)object;
 
     g_clear_object (&self->user_file);
-    g_clear_object (&self->system_key_file);
     g_clear_object (&self->user_key_file);
+
+    if (self->system_key_file != NULL)
+        {
+            g_clear_object (&self->system_key_file);
+        }
 
     G_OBJECT_CLASS (pins_desktop_file_parent_class)->dispose (object);
 }
@@ -183,6 +221,11 @@ pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key,
         }
     else if (err != NULL)
         {
+            if (self->system_key_file == NULL)
+                {
+                    return FALSE;
+                }
+
             err = NULL;
 
             value = g_key_file_get_boolean (
@@ -208,6 +251,11 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
                                    G_KEY_FILE_DESKTOP_GROUP, key, &err);
     if (err != NULL)
         {
+            if (self->system_key_file == NULL)
+                {
+                    return "";
+                }
+
             err = NULL;
 
             value = g_key_file_get_string (
@@ -233,6 +281,11 @@ pins_desktop_file_get_locale_string (PinsDesktopFile *self, const gchar *key,
         self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, &err);
     if (err != NULL)
         {
+            if (self->system_key_file == NULL)
+                {
+                    return "";
+                }
+
             err = NULL;
 
             value = g_key_file_get_locale_string (self->system_key_file,

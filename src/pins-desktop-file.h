@@ -32,6 +32,8 @@ G_DECLARE_FINAL_TYPE (PinsDesktopFile, pins_desktop_file, PINS, DESKTOP_FILE,
 PinsDesktopFile *pins_desktop_file_new_from_file (GFile *file, GError **error);
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
 
+gchar **pins_desktop_file_get_keys (PinsDesktopFile *self);
+
 gboolean pins_desktop_file_get_boolean (PinsDesktopFile *self,
                                         const gchar *key, GError **error);
 gchar *pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
