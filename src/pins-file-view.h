@@ -28,8 +28,7 @@ G_BEGIN_DECLS
 
 #define PINS_TYPE_FILE_VIEW (pins_file_view_get_type ())
 
-G_DECLARE_FINAL_TYPE (PinsFileView, pins_file_view, PINS, FILE_VIEW,
-                      AdwBreakpointBin)
+G_DECLARE_FINAL_TYPE (PinsFileView, pins_file_view, PINS, FILE_VIEW, AdwBin)
 
 void pins_file_view_set_desktop_file (PinsFileView *self,
                                       PinsDesktopFile *desktop_file);
