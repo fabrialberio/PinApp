@@ -22,6 +22,7 @@
 
 #include "pins-app-iterator.h"
 #include "pins-app-view.h"
+#include "pins-desktop-file.h"
 #include "pins-directories.h"
 
 struct _PinsWindow
@@ -82,12 +83,16 @@ pins_window_class_init (PinsWindowClass *klass)
 }
 
 void
-pins_window_item_activated_cb (GtkListView *self, guint position,
+pins_window_item_activated_cb (GtkListView *self,
+                               PinsDesktopFile *desktop_file,
                                PinsWindow *user_data)
 {
     g_assert (PINS_IS_WINDOW (user_data));
+    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    g_warning ("Clicked on row %d.", position);
+    gchar *name = pins_desktop_file_get_string (desktop_file, "Name", NULL);
+
+    g_warning ("Clicked on row with name %s.", name);
 }
 
 static void

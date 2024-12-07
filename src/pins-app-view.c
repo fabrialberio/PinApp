@@ -89,9 +89,14 @@ void
 pins_app_view_item_activated_cb (GtkListView *self, guint position,
                                  PinsAppView *user_data)
 {
+    PinsDesktopFile *desktop_file;
+
     g_assert (PINS_IS_APP_VIEW (user_data));
 
-    g_signal_emit (user_data, signals[ACTIVATE], 0, position);
+    desktop_file = g_list_model_get_item (
+        G_LIST_MODEL (user_data->filter_model), position);
+
+    g_signal_emit (user_data, signals[ACTIVATE], 0, desktop_file);
 }
 
 void
@@ -159,12 +164,9 @@ pins_app_view_class_init (PinsAppViewClass *klass)
 
     object_class->dispose = pins_app_view_dispose;
 
-    signals[ACTIVATE] = g_signal_new (
-        "activate", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL,
-        NULL, g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    g_signal_set_va_marshaller (signals[ACTIVATE], G_TYPE_FROM_CLASS (klass),
-                                g_cclosure_marshal_VOID__UINTv);
+    signals[ACTIVATE] = g_signal_new ("activate", G_TYPE_FROM_CLASS (klass),
+                                      G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
+                                      G_TYPE_NONE, 1, G_TYPE_OBJECT);
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-view.ui");
