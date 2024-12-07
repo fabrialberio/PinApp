@@ -144,6 +144,12 @@ pins_desktop_file_get_search_string (PinsDesktopFile *self)
     gsize user_lenght, system_lenght;
 
     user_data = g_key_file_to_data (self->user_key_file, &user_lenght, NULL);
+
+    if (self->system_key_file == NULL)
+        {
+            return user_data;
+        }
+
     system_data
         = g_key_file_to_data (self->system_key_file, &system_lenght, NULL);
 
