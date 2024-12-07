@@ -55,6 +55,22 @@ static gchar *pages[N_PAGES] = {
     "file-page",
 };
 
+void
+pins_window_save_current_desktop_file (PinsWindow *self)
+{
+    AdwNavigationPage *file_page = adw_navigation_view_find_page (
+        self->navigation_view, pages[PAGE_FILE]);
+    PinsFileView *file_view
+        = PINS_FILE_VIEW (adw_navigation_page_get_child (file_page));
+    PinsDesktopFile *desktop_file
+        = pins_file_view_get_desktop_file (file_view);
+
+    if (desktop_file != NULL)
+        {
+            pins_desktop_file_save (desktop_file, NULL);
+        }
+}
+
 static void
 pins_window_dispose (GObject *object)
 {
@@ -106,6 +122,25 @@ pins_window_item_activated_cb (GtkListView *self,
                                      pages[PAGE_FILE]);
 }
 
+void
+pins_window_file_page_hiding_cb (AdwNavigationPage *self,
+                                 PinsWindow *user_data)
+{
+    g_assert (PINS_IS_WINDOW (user_data));
+
+    pins_window_save_current_desktop_file (user_data);
+}
+
+void
+pins_window_close_request_cb (PinsWindow *self, gpointer user_data)
+{
+    g_assert (PINS_IS_WINDOW (self));
+
+    pins_window_save_current_desktop_file (self);
+
+    gtk_window_close (GTK_WINDOW (self));
+}
+
 static void
 pins_window_init (PinsWindow *self)
 {
@@ -138,4 +173,11 @@ pins_window_init (PinsWindow *self)
 
     g_signal_connect (self->search_view, "activate",
                       G_CALLBACK (pins_window_item_activated_cb), self);
+
+    g_signal_connect (adw_navigation_view_find_page (self->navigation_view,
+                                                     pages[PAGE_FILE]),
+                      "hiding", G_CALLBACK (pins_window_file_page_hiding_cb),
+                      self);
+    g_signal_connect (self, "close-request",
+                      G_CALLBACK (pins_window_close_request_cb), NULL);
 }

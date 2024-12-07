@@ -27,6 +27,8 @@ struct _PinsFileView
 {
     AdwBin parent_instance;
 
+    PinsDesktopFile *desktop_file;
+
     PinsAppIcon *icon;
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
@@ -40,6 +42,8 @@ pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
     gchar **keys;
+
+    self->desktop_file = desktop_file;
 
     gtk_list_box_remove_all (self->keys_listbox);
 
@@ -59,6 +63,12 @@ pins_file_view_set_desktop_file (PinsFileView *self,
 
             gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
         }
+}
+
+PinsDesktopFile *
+pins_file_view_get_desktop_file (PinsFileView *self)
+{
+    return self->desktop_file;
 }
 
 static void
