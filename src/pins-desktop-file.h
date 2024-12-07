@@ -50,6 +50,8 @@ void pins_desktop_file_set_locale_string (PinsDesktopFile *self,
                                           const gchar *key, gchar *value,
                                           const gchar *locale);
 
+gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
+
 gboolean pins_desktop_file_is_key_resettable (PinsDesktopFile *self,
                                               const gchar *key);
 void pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key);

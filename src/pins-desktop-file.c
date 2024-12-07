@@ -31,6 +31,7 @@ struct _PinsDesktopFile
     GFile *user_file;
     GKeyFile *user_key_file;
     GKeyFile *system_key_file;
+    gboolean is_user_only;
 };
 
 G_DEFINE_TYPE (PinsDesktopFile, pins_desktop_file, G_TYPE_OBJECT);
@@ -64,6 +65,8 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     gboolean file_is_user_file;
 
     desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
+    desktop_file->user_key_file = g_key_file_new ();
+    desktop_file->system_key_file = g_key_file_new ();
 
     file_is_user_file = g_file_equal (
         g_file_get_parent (file), g_file_new_for_path (pins_user_app_path ()));
@@ -71,14 +74,13 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     if (file_is_user_file)
         {
             desktop_file->user_file = file;
-            desktop_file->system_key_file = NULL;
+            desktop_file->is_user_only = TRUE;
         }
     else
         {
             desktop_file->user_file = g_file_new_for_path (g_strconcat (
                 pins_user_app_path (), g_file_get_basename (file), NULL));
 
-            desktop_file->system_key_file = g_key_file_new ();
             if (!g_key_file_load_from_file (desktop_file->system_key_file,
                                             g_file_get_path (file),
                                             KEY_FILE_FLAGS, error))
@@ -87,9 +89,10 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
 
                     return NULL;
                 }
+
+            desktop_file->is_user_only = FALSE;
         }
 
-    desktop_file->user_key_file = g_key_file_new ();
     g_key_file_load_from_file (desktop_file->user_key_file,
                                g_file_get_path (desktop_file->user_file),
                                KEY_FILE_FLAGS, NULL);
@@ -121,7 +124,7 @@ pins_desktop_file_get_keys (PinsDesktopFile *self)
 
     g_strv_builder_addv (strv_builder, (const gchar **)user_keys);
 
-    if (self->system_key_file != NULL)
+    if (!self->is_user_only)
         {
             system_keys = g_key_file_get_keys (self->system_key_file,
                                                G_KEY_FILE_DESKTOP_GROUP,
@@ -213,11 +216,6 @@ pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key,
         }
     else if (err != NULL)
         {
-            if (self->system_key_file == NULL)
-                {
-                    return FALSE;
-                }
-
             err = NULL;
 
             value = g_key_file_get_boolean (
@@ -243,11 +241,6 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
                                    G_KEY_FILE_DESKTOP_GROUP, key, &err);
     if (err != NULL)
         {
-            if (self->system_key_file == NULL)
-                {
-                    return "";
-                }
-
             err = NULL;
 
             value = g_key_file_get_string (
@@ -273,11 +266,6 @@ pins_desktop_file_get_locale_string (PinsDesktopFile *self, const gchar *key,
         self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, &err);
     if (err != NULL)
         {
-            if (self->system_key_file == NULL)
-                {
-                    return "";
-                }
-
             err = NULL;
 
             value = g_key_file_get_locale_string (self->system_key_file,
@@ -316,11 +304,10 @@ pins_desktop_file_set_locale_string (PinsDesktopFile *self, const gchar *key,
         self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, value);
 }
 
-void
-pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key)
+gboolean
+pins_desktop_file_is_user_only (PinsDesktopFile *self)
 {
-    g_key_file_remove_key (self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key,
-                           NULL);
+    return self->is_user_only;
 }
 
 gboolean
@@ -328,4 +315,11 @@ pins_desktop_file_is_key_resettable (PinsDesktopFile *self, const gchar *key)
 {
     return g_key_file_has_key (self->user_key_file, G_KEY_FILE_DESKTOP_GROUP,
                                key, NULL);
+}
+
+void
+pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key)
+{
+    g_key_file_remove_key (self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key,
+                           NULL);
 }
