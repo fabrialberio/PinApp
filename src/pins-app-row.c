@@ -37,11 +37,10 @@ pins_app_row_new (void)
 }
 
 void
-pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
+pins_app_row_update_appearance (PinsAppRow *self,
+                                PinsDesktopFile *desktop_file)
 {
     gchar *title, *subtitle;
-
-    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
     pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
@@ -55,6 +54,26 @@ pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), title);
     adw_action_row_set_subtitle (ADW_ACTION_ROW (self), subtitle);
+}
+
+void
+pins_app_row_key_set_cb (PinsDesktopFile *self, gchar *key,
+                         PinsAppRow *user_data)
+{
+    g_assert (PINS_IS_APP_ROW (user_data));
+
+    pins_app_row_update_appearance (user_data, self);
+}
+
+void
+pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
+{
+    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
+
+    g_signal_connect (desktop_file, "key-set",
+                      G_CALLBACK (pins_app_row_key_set_cb), self);
+
+    pins_app_row_update_appearance (self, desktop_file);
 }
 
 static void

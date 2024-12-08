@@ -43,7 +43,14 @@ enum
     N_PROPS,
 };
 
+enum
+{
+    KEY_SET,
+    N_SIGNALS,
+};
+
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 /**
  * Given a `GFile`, it constructs a `PinsDesktopFile` with the following logic:
@@ -192,6 +199,10 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
                                "Data of the file as a searchable string", "",
                                (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
+    signals[KEY_SET] = g_signal_new ("key-set", G_TYPE_FROM_CLASS (klass),
+                                     G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
+                                     G_TYPE_NONE, 1, G_TYPE_STRING);
+
     g_object_class_install_properties (object_class, N_PROPS, properties);
 }
 
@@ -255,37 +266,14 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
     return value;
 }
 
-gchar *
-pins_desktop_file_get_locale_string (PinsDesktopFile *self, const gchar *key,
-                                     const gchar *locale, GError **error)
-{
-    gchar *value;
-    GError *err = NULL;
-
-    value = g_key_file_get_locale_string (
-        self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, &err);
-    if (err != NULL)
-        {
-            err = NULL;
-
-            value = g_key_file_get_locale_string (self->system_key_file,
-                                                  G_KEY_FILE_DESKTOP_GROUP,
-                                                  key, locale, &err);
-            if (err != NULL)
-                {
-                    g_propagate_error (error, err);
-                    return "";
-                }
-        }
-    return value;
-}
-
 void
 pins_desktop_file_set_boolean (PinsDesktopFile *self, const gchar *key,
                                const gboolean value)
 {
     g_key_file_set_boolean (self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key,
                             value);
+
+    g_signal_emit (self, signals[KEY_SET], 0, key);
 }
 
 void
@@ -294,14 +282,8 @@ pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,
 {
     g_key_file_set_string (self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key,
                            value);
-}
 
-void
-pins_desktop_file_set_locale_string (PinsDesktopFile *self, const gchar *key,
-                                     gchar *value, const gchar *locale)
-{
-    g_key_file_set_locale_string (
-        self->user_key_file, G_KEY_FILE_DESKTOP_GROUP, key, locale, value);
+    g_signal_emit (self, signals[KEY_SET], 0, key);
 }
 
 gboolean
