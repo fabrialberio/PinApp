@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="PinsKeyRow" parent="AdwEntryRow">
+    <child type="suffix">
+      <object class="GtkButton">
+        <property name="icon-name">edit-undo-symbolic</property>
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <style>
+          <class name="flat" />
+          <class name="circular" />
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>

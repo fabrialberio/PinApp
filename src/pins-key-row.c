@@ -65,6 +65,8 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
 static void
 pins_key_row_dispose (GObject *object)
 {
+    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_KEY_ROW);
+
     G_OBJECT_CLASS (pins_key_row_parent_class)->dispose (object);
 }
 
@@ -72,11 +74,16 @@ static void
 pins_key_row_class_init (PinsKeyRowClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     object_class->dispose = pins_key_row_dispose;
+
+    gtk_widget_class_set_template_from_resource (
+        widget_class, "/io/github/fabrialberio/pinapp/pins-key-row.ui");
 }
 
 static void
 pins_key_row_init (PinsKeyRow *self)
 {
+    gtk_widget_init_template (GTK_WIDGET (self));
 }
