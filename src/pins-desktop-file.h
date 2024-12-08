@@ -38,17 +38,10 @@ gboolean pins_desktop_file_get_boolean (PinsDesktopFile *self,
                                         const gchar *key, GError **error);
 gchar *pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
                                      GError **error);
-gchar *pins_desktop_file_get_locale_string (PinsDesktopFile *self,
-                                            const gchar *key,
-                                            const gchar *locale,
-                                            GError **error);
 void pins_desktop_file_set_boolean (PinsDesktopFile *self, const gchar *key,
                                     const gboolean value);
 void pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,
                                    const gchar *value);
-void pins_desktop_file_set_locale_string (PinsDesktopFile *self,
-                                          const gchar *key, gchar *value,
-                                          const gchar *locale);
 
 gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
 
