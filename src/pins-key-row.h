@@ -33,5 +33,8 @@ G_DECLARE_FINAL_TYPE (PinsKeyRow, pins_key_row, PINS, KEY_ROW, AdwEntryRow)
 PinsKeyRow *pins_key_row_new (void);
 void pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
                            gchar *key);
+void pins_key_row_set_localized_key (PinsKeyRow *self,
+                                     PinsDesktopFile *desktop_file,
+                                     gchar *key);
 
 G_END_DECLS

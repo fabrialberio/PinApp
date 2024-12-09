@@ -6,9 +6,43 @@
         <property name="icon-name">edit-undo-symbolic</property>
         <property name="valign">center</property>
         <property name="visible">false</property>
+        <property name="tooltip-text" translatable="true">Reset field</property>
         <style>
           <class name="flat" />
           <class name="circular" />
+        </style>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkMenuButton" id="locale_button">
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <property name="tooltip-text" translatable="true">Select locale</property>
+        <property name="child">
+          <object class="AdwButtonContent">
+            <property name="icon-name">preferences-desktop-locale-symbolic</property>
+          </object>
+        </property>
+        <property name="popover">
+          <object class="GtkPopover" id="locale_popover">
+            <property name="child">
+              <object class="GtkScrolledWindow">
+                <property name="propagate-natural-width">true</property>
+                <property name="propagate-natural-height">true</property>
+                <property name="child">
+                  <object class="GtkListView" id="locale_list_view">
+                    <property name="single-click-activate">true</property>
+                  </object>
+                </property>
+              </object>
+            </property>
+            <style>
+              <class name="menu" />
+            </style>
+          </object>
+        </property>
+        <style>
+          <class name="flat" />
         </style>
       </object>
     </child>
