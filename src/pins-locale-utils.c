@@ -84,3 +84,24 @@ _pins_locales_from_keys (gchar **keys)
 
     return g_strv_builder_end (strv_builder);
 }
+
+gboolean
+_pins_key_has_locales (gchar **keys, gchar *key)
+{
+    gchar **current_key_locale = g_malloc_n (2, sizeof (gchar *));
+
+    for (int i = 0; keys[i] != NULL; i++)
+        {
+            current_key_locale = _pins_split_key_locale (keys[i]);
+
+            if (g_strcmp0 (current_key_locale[0], key) == 0
+                && current_key_locale[1] != NULL)
+                {
+                    g_strfreev (current_key_locale);
+                    return TRUE;
+                }
+        }
+
+    g_strfreev (current_key_locale);
+    return FALSE;
+}
