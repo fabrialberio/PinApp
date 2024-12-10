@@ -77,7 +77,7 @@ pins_key_row_locale_menu_item_activated_cb (GtkListView *self, guint position,
 
 void
 pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
-                      gchar *key)
+                      gchar *key, gboolean is_localized)
 {
     gchar *value = pins_desktop_file_get_string (desktop_file, key, NULL);
 
@@ -90,29 +90,24 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     /// TODO: Update text when desktop file changes
     g_signal_connect (GTK_EDITABLE (self), "changed",
                       G_CALLBACK (pins_key_row_text_changed_cb), self);
-}
 
-void
-pins_key_row_set_localized_key (PinsKeyRow *self,
-                                PinsDesktopFile *desktop_file, gchar *key)
+    if (is_localized)
+        {
+            GStrvBuilder *locales_strv_builder = g_strv_builder_new ();
+            GtkSingleSelection *selection_model;
 
-{
-    GStrvBuilder *locales_strv_builder = g_strv_builder_new ();
-    GtkSingleSelection *selection_model;
+            g_strv_builder_add (locales_strv_builder, _ ("( Unlocalized )"));
+            g_strv_builder_addv (
+                locales_strv_builder,
+                (const char **)pins_desktop_file_get_locales (desktop_file));
 
-    pins_key_row_set_key (self, desktop_file, key);
+            selection_model = gtk_single_selection_new (G_LIST_MODEL (
+                gtk_string_list_new ((const char *const *)g_strv_builder_end (
+                    locales_strv_builder))));
 
-    g_strv_builder_add (locales_strv_builder, _ ("( Unlocalized )"));
-    g_strv_builder_addv (
-        locales_strv_builder,
-        (const char **)pins_desktop_file_get_locales (desktop_file));
-
-    selection_model
-        = gtk_single_selection_new (G_LIST_MODEL (gtk_string_list_new (
-            (const char *const *)g_strv_builder_end (locales_strv_builder))));
-
-    gtk_list_view_set_model (self->locale_list_view,
-                             GTK_SELECTION_MODEL (selection_model));
+            gtk_list_view_set_model (self->locale_list_view,
+                                     GTK_SELECTION_MODEL (selection_model));
+        }
 }
 
 static void
