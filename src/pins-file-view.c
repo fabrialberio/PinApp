@@ -22,6 +22,7 @@
 
 #include "pins-app-icon.h"
 #include "pins-key-row.h"
+#include "pins-locale-utils-private.h"
 
 struct _PinsFileView
 {
@@ -49,17 +50,35 @@ pins_file_view_set_desktop_file (PinsFileView *self,
 
     pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
-    pins_key_row_set_key (self->name_row, desktop_file,
-                          G_KEY_FILE_DESKTOP_KEY_NAME);
-    pins_key_row_set_key (self->comment_row, desktop_file,
-                          G_KEY_FILE_DESKTOP_KEY_COMMENT);
-
     keys = pins_desktop_file_get_keys (desktop_file);
+
+    pins_key_row_set_key (
+        self->name_row, desktop_file, G_KEY_FILE_DESKTOP_KEY_NAME,
+        _pins_key_has_locales (keys, G_KEY_FILE_DESKTOP_KEY_NAME));
+    pins_key_row_set_key (
+        self->comment_row, desktop_file, G_KEY_FILE_DESKTOP_KEY_COMMENT,
+        _pins_key_has_locales (keys, G_KEY_FILE_DESKTOP_KEY_COMMENT));
 
     for (int i = 0; keys[i] != NULL; i++)
         {
-            PinsKeyRow *row = pins_key_row_new ();
-            pins_key_row_set_key (row, desktop_file, keys[i]);
+            PinsKeyRow *row;
+
+            /// TODO: What if a key has no unlocalized version?
+            if (_pins_key_has_locales (keys, keys[i])
+                && _pins_split_key_locale (keys[i])[1] != NULL)
+                {
+                    continue;
+                }
+
+            if (g_strcmp0 (keys[i], G_KEY_FILE_DESKTOP_KEY_NAME) == 0
+                || g_strcmp0 (keys[i], G_KEY_FILE_DESKTOP_KEY_COMMENT) == 0)
+                {
+                    continue;
+                }
+
+            row = pins_key_row_new ();
+            pins_key_row_set_key (row, desktop_file, keys[i],
+                                  _pins_key_has_locales (keys, keys[i]));
 
             gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
         }

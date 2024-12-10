@@ -71,7 +71,7 @@ void
 pins_key_row_locale_menu_item_activated_cb (GtkListView *self, guint position,
                                             gpointer user_data)
 {
-
+    /// TODO: Actually set locale
     g_warning ("Selected row at %d", position);
 }
 
@@ -95,6 +95,8 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
         {
             GStrvBuilder *locales_strv_builder = g_strv_builder_new ();
             GtkSingleSelection *selection_model;
+
+            gtk_widget_set_visible (GTK_WIDGET (self->locale_button), TRUE);
 
             g_strv_builder_add (locales_strv_builder, _ ("( Unlocalized )"));
             g_strv_builder_addv (
