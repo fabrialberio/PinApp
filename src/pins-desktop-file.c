@@ -19,7 +19,9 @@
  */
 
 #include "pins-desktop-file.h"
+
 #include "pins-directories.h"
+#include "pins-locale-utils-private.h"
 
 #define DEFAULT_FILENAME "pinned-app"
 #define KEY_FILE_FLAGS                                                        \
@@ -51,69 +53,6 @@ enum
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
-
-/**
- * Returns a 2-element string array containing key and locale (NULL if not
- * present).
- */
-gchar **
-split_key_locale (gchar *localized_key)
-{
-    gchar **key_locale = g_strsplit (localized_key, "[", 2);
-
-    g_assert (key_locale[0] != NULL);
-
-    if (key_locale[1] != NULL)
-        {
-            /// TODO: Does this actually work? (supposed to remove trailing
-            /// ']')
-            key_locale[1]
-                = g_strndup (key_locale[1], strlen (key_locale[1]) - 1);
-        }
-
-    return key_locale;
-}
-
-gchar *
-join_key_locale (gchar *key, gchar *locale)
-{
-    if (locale != NULL)
-        {
-            return g_strdup_printf ("%s[%s]", split_key_locale (key)[0],
-                                    locale);
-        }
-    else
-        {
-            return key;
-        }
-}
-
-gchar **
-locales_from_keys (gchar **keys)
-{
-    gchar *locale = g_malloc (sizeof (gchar *));
-    gchar **locales = g_malloc0_n (g_strv_length (keys), sizeof (gchar *));
-    GStrvBuilder *strv_builder = g_strv_builder_new ();
-
-    for (int i = 0, lenght = 0; keys[i] != NULL; i++)
-        {
-            locale = split_key_locale (keys[i])[1];
-
-            if (locale != NULL
-                && !g_strv_contains ((const gchar *const *)locales, locale))
-                {
-                    locales[lenght] = locale;
-                    lenght++;
-                }
-        }
-
-    g_strv_builder_addv (strv_builder, (const char **)locales);
-
-    g_free (locale);
-    g_strfreev (locales);
-
-    return g_strv_builder_end (strv_builder);
-}
 
 /**
  * Given a `GFile`, it constructs a `PinsDesktopFile` with the following logic:
@@ -216,7 +155,7 @@ pins_desktop_file_get_keys (PinsDesktopFile *self)
 gchar **
 pins_desktop_file_get_locales (PinsDesktopFile *self)
 {
-    return locales_from_keys (pins_desktop_file_get_keys (self));
+    return _pins_locales_from_keys (pins_desktop_file_get_keys (self));
 }
 
 gchar *
