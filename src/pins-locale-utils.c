@@ -90,6 +90,8 @@ _pins_key_has_locales (gchar **keys, gchar *key)
 {
     gchar **current_key_locale = g_malloc_n (2, sizeof (gchar *));
 
+    key = _pins_split_key_locale (key)[0];
+
     for (int i = 0; keys[i] != NULL; i++)
         {
             current_key_locale = _pins_split_key_locale (keys[i]);
