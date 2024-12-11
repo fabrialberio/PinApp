@@ -77,7 +77,7 @@ pins_key_row_locale_menu_item_activated_cb (GtkListView *self, guint position,
 
 void
 pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
-                      gchar *key)
+                      gchar *key, gchar **locales)
 {
     gchar *value = pins_desktop_file_get_string (desktop_file, key, NULL);
 
@@ -90,25 +90,29 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     /// TODO: Update text when desktop file changes
     g_signal_connect (GTK_EDITABLE (self), "changed",
                       G_CALLBACK (pins_key_row_text_changed_cb), self);
-}
 
-void
-pins_key_row_set_locales (PinsKeyRow *self, gchar **locales)
-{
-    GStrvBuilder *locales_strv_builder = g_strv_builder_new ();
-    GtkSingleSelection *selection_model;
+    if (g_strv_length (locales) > 0)
+        {
+            GStrvBuilder *locales_strv_builder = g_strv_builder_new ();
+            GtkSingleSelection *selection_model;
 
-    gtk_widget_set_visible (GTK_WIDGET (self->locale_button), TRUE);
+            gtk_widget_set_visible (GTK_WIDGET (self->locale_button), TRUE);
 
-    g_strv_builder_add (locales_strv_builder, _ ("( Unlocalized )"));
-    g_strv_builder_addv (locales_strv_builder, (const gchar **)locales);
+            g_strv_builder_add (locales_strv_builder, _ ("( Unlocalized )"));
+            g_strv_builder_addv (locales_strv_builder,
+                                 (const gchar **)locales);
 
-    selection_model
-        = gtk_single_selection_new (G_LIST_MODEL (gtk_string_list_new (
-            (const char *const *)g_strv_builder_end (locales_strv_builder))));
+            selection_model = gtk_single_selection_new (G_LIST_MODEL (
+                gtk_string_list_new ((const char *const *)g_strv_builder_end (
+                    locales_strv_builder))));
 
-    gtk_list_view_set_model (self->locale_list_view,
-                             GTK_SELECTION_MODEL (selection_model));
+            gtk_list_view_set_model (self->locale_list_view,
+                                     GTK_SELECTION_MODEL (selection_model));
+        }
+    else
+        {
+            gtk_widget_set_visible (GTK_WIDGET (self->locale_button), FALSE);
+        }
 }
 
 static void
