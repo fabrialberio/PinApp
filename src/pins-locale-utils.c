@@ -72,7 +72,7 @@ _pins_locales_from_keys (gchar **keys)
     g_strv_builder_addv (strv_builder, (const char **)locales);
 
     g_free (locale);
-    g_strfreev (locales);
+    g_free (locales);
 
     return g_strv_builder_end (strv_builder);
 }
