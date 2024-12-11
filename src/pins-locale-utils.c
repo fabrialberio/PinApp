@@ -22,26 +22,18 @@
 
 #include "pins-locale-utils-private.h"
 
-/**
- * Returns a 2-element string array containing key and locale (NULL if not
- * present).
- */
-gchar **
+PinsSplitKey
 _pins_split_key_locale (gchar *localized_key)
 {
-    gchar **key_locale = g_strsplit (localized_key, "[", 2);
+    gchar **split_result = g_strsplit_set (localized_key, "[]", 3);
+    PinsSplitKey result = {
+        .key = split_result[0],
+        .locale = split_result[1],
+    };
 
-    g_assert (key_locale[0] != NULL);
+    g_assert (split_result[0] != NULL);
 
-    if (key_locale[1] != NULL)
-        {
-            /// TODO: Does this actually work? (supposed to remove trailing
-            /// ']')
-            key_locale[1]
-                = g_strndup (key_locale[1], strlen (key_locale[1]) - 1);
-        }
-
-    return key_locale;
+    return result;
 }
 
 gchar *
@@ -49,7 +41,7 @@ _pins_join_key_locale (gchar *key, gchar *locale)
 {
     if (locale != NULL)
         {
-            return g_strdup_printf ("%s[%s]", _pins_split_key_locale (key)[0],
+            return g_strdup_printf ("%s[%s]", _pins_split_key_locale (key).key,
                                     locale);
         }
     else
@@ -67,7 +59,7 @@ _pins_locales_from_keys (gchar **keys)
 
     for (int i = 0, lenght = 0; keys[i] != NULL; i++)
         {
-            locale = _pins_split_key_locale (keys[i])[1];
+            locale = _pins_split_key_locale (keys[i]).locale;
 
             if (locale != NULL
                 && !g_strv_contains ((const gchar *const *)locales, locale))
@@ -86,24 +78,22 @@ _pins_locales_from_keys (gchar **keys)
 }
 
 gboolean
-_pins_key_has_locales (gchar **keys, gchar *key)
+_pins_key_has_locales (gchar **all_keys, gchar *key)
 {
-    gchar **current_key_locale = g_malloc_n (2, sizeof (gchar *));
+    PinsSplitKey split_key;
 
-    key = _pins_split_key_locale (key)[0];
+    key = _pins_split_key_locale (key).key;
 
-    for (int i = 0; keys[i] != NULL; i++)
+    for (int i = 0; all_keys[i] != NULL; i++)
         {
-            current_key_locale = _pins_split_key_locale (keys[i]);
+            split_key = _pins_split_key_locale (all_keys[i]);
 
-            if (g_strcmp0 (current_key_locale[0], key) == 0
-                && current_key_locale[1] != NULL)
+            if (g_strcmp0 (split_key.key, key) == 0
+                && split_key.locale != NULL)
                 {
-                    g_strfreev (current_key_locale);
                     return TRUE;
                 }
         }
 
-    g_strfreev (current_key_locale);
     return FALSE;
 }

@@ -24,9 +24,15 @@
 
 G_BEGIN_DECLS
 
-gchar **_pins_split_key_locale (gchar *localized_key);
+typedef struct
+{
+    gchar *key;
+    gchar *locale;
+} PinsSplitKey;
+
+PinsSplitKey _pins_split_key_locale (gchar *localized_key);
 gchar *_pins_join_key_locale (gchar *key, gchar *locale);
 gchar **_pins_locales_from_keys (gchar **keys);
-gboolean _pins_key_has_locales (gchar **keys, gchar *key);
+gboolean _pins_key_has_locales (gchar **all_keys, gchar *key);
 
 G_END_DECLS
