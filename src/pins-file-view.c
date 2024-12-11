@@ -39,10 +39,29 @@ struct _PinsFileView
 G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BIN);
 
 void
+pins_file_view_setup_row (PinsKeyRow *row, PinsDesktopFile *desktop_file,
+                          gchar *key, gchar **all_keys, gchar **all_locales)
+{
+
+    if (_pins_key_has_locales (all_keys, key))
+        {
+            pins_key_row_set_key (row, desktop_file, key, all_locales);
+        }
+    else
+        {
+            pins_key_row_set_key (row, desktop_file, key,
+                                  g_strv_builder_end (g_strv_builder_new ()));
+        }
+}
+
+void
 pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
-    gchar **keys;
+    gchar **keys = pins_desktop_file_get_keys (desktop_file);
+    gchar **locales = _pins_locales_from_keys (keys);
+    gchar **added_keys = g_malloc0_n (g_strv_length (keys), sizeof (gchar *));
+    gsize n_added_keys = 0;
 
     self->desktop_file = desktop_file;
 
@@ -50,38 +69,39 @@ pins_file_view_set_desktop_file (PinsFileView *self,
 
     pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
-    keys = pins_desktop_file_get_keys (desktop_file);
+    pins_file_view_setup_row (self->name_row, desktop_file,
+                              G_KEY_FILE_DESKTOP_KEY_NAME, keys, locales);
+    pins_file_view_setup_row (self->comment_row, desktop_file,
+                              G_KEY_FILE_DESKTOP_KEY_COMMENT, keys, locales);
 
-    pins_key_row_set_key (
-        self->name_row, desktop_file, G_KEY_FILE_DESKTOP_KEY_NAME,
-        _pins_key_has_locales (keys, G_KEY_FILE_DESKTOP_KEY_NAME));
-    pins_key_row_set_key (
-        self->comment_row, desktop_file, G_KEY_FILE_DESKTOP_KEY_COMMENT,
-        _pins_key_has_locales (keys, G_KEY_FILE_DESKTOP_KEY_COMMENT));
+    added_keys[0] = G_KEY_FILE_DESKTOP_KEY_NAME;
+    added_keys[1] = G_KEY_FILE_DESKTOP_KEY_COMMENT;
+    n_added_keys = 2;
 
     for (int i = 0; keys[i] != NULL; i++)
         {
+            gchar *current_key = _pins_split_key_locale (keys[i]).key;
             PinsKeyRow *row;
 
-            /// TODO: What if a key has no unlocalized version?
-            if (_pins_key_has_locales (keys, keys[i])
-                && _pins_split_key_locale (keys[i])[1] != NULL)
-                {
-                    continue;
-                }
-
-            if (g_strcmp0 (keys[i], G_KEY_FILE_DESKTOP_KEY_NAME) == 0
-                || g_strcmp0 (keys[i], G_KEY_FILE_DESKTOP_KEY_COMMENT) == 0)
+            if (g_strv_contains ((const gchar *const *)added_keys,
+                                 current_key))
                 {
                     continue;
                 }
 
             row = pins_key_row_new ();
-            pins_key_row_set_key (row, desktop_file, keys[i],
-                                  _pins_key_has_locales (keys, keys[i]));
+            pins_file_view_setup_row (row, desktop_file, current_key, keys,
+                                      locales);
+
+            added_keys[n_added_keys] = current_key;
+            n_added_keys++;
 
             gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
         }
+
+    g_strfreev (keys);
+    g_strfreev (locales);
+    g_free (added_keys); /// TODO: Using g_strfreev results in free error
 }
 
 PinsDesktopFile *
