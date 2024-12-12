@@ -87,8 +87,8 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
         }
     else
         {
-            desktop_file->user_file = g_file_new_for_path (g_strconcat (
-                pins_user_app_path (), g_file_get_basename (file), NULL));
+            desktop_file->user_file = g_file_new_for_path (g_strjoin (
+                "/", pins_user_app_path (), g_file_get_basename (file), NULL));
 
             if (!g_key_file_load_from_file (desktop_file->system_key_file,
                                             g_file_get_path (file),
@@ -112,8 +112,7 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
 void
 pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
-    g_warning ("Saving desktop file `%s`",
-               g_file_get_basename (self->user_file));
+    g_warning ("Saving desktop file `%s`", g_file_get_path (self->user_file));
 
     g_key_file_save_to_file (self->user_key_file,
                              g_file_get_path (self->user_file), error);
