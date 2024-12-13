@@ -37,8 +37,8 @@ pins_system_app_paths (void)
 {
     // clang-format off
     const gchar *paths[]
-        = { "/run/host/usr/share/applications",
-            "/usr/share/applications",
+        = { "/usr/share/applications",
+            "/run/host/usr/share/applications",
             "/var/lib/flatpak/exports/share/applications",
             g_strjoin ("/", pins_user_data_path (),
                        "flatpak/exports/share", "applications", NULL),
@@ -60,9 +60,9 @@ pins_all_app_paths (void)
 {
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    g_strv_builder_add (strv_builder, pins_user_app_path ());
     g_strv_builder_addv (strv_builder,
                          (const gchar **)pins_system_app_paths ());
+    g_strv_builder_add (strv_builder, pins_user_app_path ());
 
     return g_strv_builder_end (strv_builder);
 }
