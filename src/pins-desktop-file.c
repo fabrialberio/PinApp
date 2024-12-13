@@ -34,6 +34,7 @@ struct _PinsDesktopFile
     GFile *system_file;
     GKeyFile *key_file;
     GKeyFile *backup_key_file;
+    gchar *saved_data;
 };
 
 G_DEFINE_TYPE (PinsDesktopFile, pins_desktop_file, G_TYPE_OBJECT);
@@ -115,15 +116,32 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
                                        NULL);
         }
 
+    desktop_file->saved_data
+        = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
+
     return desktop_file;
+}
+
+/*
+ * Returns `TRUE` if the file has been changed since the last save.
+ */
+gboolean
+pins_desktop_file_is_edited (PinsDesktopFile *self)
+{
+    return g_strcmp0 (g_key_file_to_data (self->key_file, NULL, NULL),
+                      self->saved_data)
+           != 0;
 }
 
 void
 pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
+    if (!pins_desktop_file_is_edited (self))
+        return;
+
     g_warning ("Saving desktop file `%s`", g_file_get_path (self->user_file));
 
-    /// TODO: Only if is edited
+    self->saved_data = g_key_file_to_data (self->key_file, NULL, NULL);
 
     g_key_file_save_to_file (self->key_file, g_file_get_path (self->user_file),
                              error);
@@ -147,12 +165,7 @@ pins_desktop_file_get_locales (PinsDesktopFile *self)
 gchar *
 pins_desktop_file_get_search_string (PinsDesktopFile *self)
 {
-    gchar *data;
-    gsize lenght;
-
-    data = g_key_file_to_data (self->key_file, &lenght, NULL);
-
-    return g_ascii_strdown (data, lenght);
+    return self->saved_data;
 }
 
 static void
