@@ -99,6 +99,8 @@ pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
     PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
     gboolean is_desktop_file, is_duplicate = FALSE;
 
+    /// TODO: gtk_filter_match: assertion 'item != NULL' failed
+
     g_assert (G_IS_FILE_INFO (file_info));
 
     file = G_FILE (
@@ -155,6 +157,20 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
 }
 
 void
+pins_app_iterator_filter_pending_changed_cb (GtkFilterListModel *model,
+                                             guint amount,
+                                             PinsAppIterator *self)
+{
+    g_assert (GTK_IS_FILTER_LIST_MODEL (model));
+    g_assert (PINS_IS_APP_ITERATOR (self));
+
+    if (gtk_filter_list_model_get_pending (model) == 0)
+        {
+            g_signal_emit (self, signals[LOADED], 0);
+        }
+}
+
+void
 pins_app_iterator_set_directory_list (PinsAppIterator *self,
                                       GListModel *dir_list)
 {
@@ -168,6 +184,10 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     filter_model
         = gtk_filter_list_model_new (G_LIST_MODEL (dir_list), self->filter);
     gtk_filter_list_model_set_incremental (filter_model, TRUE);
+
+    g_signal_connect (filter_model, "notify::pending",
+                      G_CALLBACK (pins_app_iterator_filter_pending_changed_cb),
+                      self);
 
     map_model = gtk_map_list_model_new (
         G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
@@ -183,66 +203,21 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     self->model = G_LIST_MODEL (sort_model);
 }
 
-typedef struct
-{
-    PinsAppIterator *app_iterator;
-    guint path_index;
-    guint n_paths;
-    gboolean *loaded_paths;
-} dir_list_loaded_cb_data;
-
-void
-pins_app_iterator_dir_list_loaded_cb (GtkDirectoryList *self,
-                                      GParamSpec *pspec,
-                                      dir_list_loaded_cb_data *user_data)
-{
-    g_assert (PINS_IS_APP_ITERATOR (user_data->app_iterator));
-
-    user_data->loaded_paths[user_data->path_index] = TRUE;
-
-    for (int i = 0; i < user_data->n_paths; i++)
-        {
-            if (user_data->loaded_paths[i] == FALSE)
-                {
-                    free (user_data);
-                    return;
-                }
-        }
-
-    g_signal_emit (user_data->app_iterator, signals[LOADED], 0);
-    free (user_data->loaded_paths);
-    g_free (user_data);
-}
-
 void
 pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 {
-    guint n_paths = g_strv_length (paths);
-    gboolean *loaded_paths = calloc (n_paths, sizeof (gboolean));
-
     GListStore *dir_list_store;
     GtkFlattenListModel *flattened_dir_list;
 
     dir_list_store = g_list_store_new (GTK_TYPE_DIRECTORY_LIST);
 
-    for (int i = 0; i < n_paths; i++)
+    for (int i = 0; i < g_strv_length (paths); i++)
         {
-            dir_list_loaded_cb_data *data;
             GFile *file = g_file_new_for_path (paths[i]);
             GtkDirectoryList *dir_list
                 = gtk_directory_list_new (DIR_LIST_FILE_ATTRIBUTES, file);
 
             g_list_store_append (dir_list_store, dir_list);
-
-            data = g_malloc (sizeof (dir_list_loaded_cb_data));
-            data->app_iterator = self;
-            data->loaded_paths = loaded_paths;
-            data->n_paths = n_paths;
-            data->path_index = i;
-
-            g_signal_connect (
-                dir_list, "notify::loading",
-                G_CALLBACK (pins_app_iterator_dir_list_loaded_cb), data);
         }
 
     flattened_dir_list
