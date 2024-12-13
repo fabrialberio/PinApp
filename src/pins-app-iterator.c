@@ -32,6 +32,8 @@ struct _PinsAppIterator
 {
     GObject parent_instance;
 
+    gchar **duplicates;
+    GtkFilter *filter;
     GListModel *model;
 };
 
@@ -56,33 +58,59 @@ pins_app_iterator_new (void)
 }
 
 static void
-pins_app_iterator_items_changed_cb (GListModel *model, guint position,
-                                    guint removed, guint added,
-                                    gpointer user_data)
+pins_app_iterator_update_duplicates (GListModel *model, guint position,
+                                     guint removed, guint added,
+                                     gpointer user_data)
 {
     PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
+    GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    g_list_model_items_changed (G_LIST_MODEL (self), position, removed, added);
-}
+    gchar *unique_filenames[g_list_model_get_n_items (model)] = {};
+    gsize n_unique_filenames = 0;
 
-void
-pins_app_iterator_set_model (PinsAppIterator *self, GListModel *app_list_model)
-{
-    self->model = app_list_model;
+    for (int i = 0; i < g_list_model_get_n_items (model); i++)
+        {
+            GFile *file = G_FILE (g_file_info_get_attribute_object (
+                G_FILE_INFO (g_list_model_get_item (model, i)),
+                "standard::file"));
 
-    g_signal_connect (self->model, "items-changed",
-                      G_CALLBACK (pins_app_iterator_items_changed_cb), self);
+            if (g_strv_contains ((const gchar *const *)unique_filenames,
+                                 g_file_get_basename (file)))
+                {
+                    g_strv_builder_add (strv_builder, g_file_get_path (file));
+                }
+            else
+                {
+                    unique_filenames[n_unique_filenames]
+                        = g_file_get_basename (file);
+                    n_unique_filenames++;
+                }
+        }
+
+    self->duplicates = g_strv_builder_end (strv_builder);
+
+    gtk_filter_changed (self->filter, GTK_FILTER_CHANGE_DIFFERENT);
 }
 
 gboolean
 pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
 {
+    GFile *file;
+    PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
+    gboolean is_desktop_file, is_duplicate = FALSE;
+
     g_assert (G_IS_FILE_INFO (file_info));
 
-    // TODO: Remove duplicate files
-    return g_strcmp0 (g_file_info_get_content_type (file_info),
-                      DESKTOP_FILE_CONTENT_TYPE)
-           == 0;
+    file = G_FILE (
+        g_file_info_get_attribute_object (file_info, "standard::file"));
+
+    is_desktop_file = g_strcmp0 (g_file_info_get_content_type (file_info),
+                                 DESKTOP_FILE_CONTENT_TYPE)
+                      == 0;
+    is_duplicate = g_strv_contains ((const gchar *const *)self->duplicates,
+                                    g_file_get_path (file));
+
+    return is_desktop_file && !is_duplicate;
 }
 
 gpointer
@@ -94,8 +122,8 @@ pins_app_iterator_map_func (gpointer file_info, gpointer user_data)
 
     g_assert (G_IS_FILE_INFO (file_info));
 
-    file = G_FILE (g_file_info_get_attribute_object (G_FILE_INFO (file_info),
-                                                     "standard::file"));
+    file = G_FILE (
+        g_file_info_get_attribute_object (file_info, "standard::file"));
 
     desktop_file = pins_desktop_file_new_from_file (file, &err);
     if (err != NULL)
@@ -134,9 +162,12 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     GtkMapListModel *map_model;
     GtkSortListModel *sort_model;
 
-    filter_model = gtk_filter_list_model_new (
-        dir_list, GTK_FILTER (gtk_custom_filter_new (
-                      &pins_app_iterator_filter_match_func, NULL, NULL)));
+    g_signal_connect (G_LIST_MODEL (dir_list), "items-changed",
+                      G_CALLBACK (pins_app_iterator_update_duplicates), self);
+
+    filter_model
+        = gtk_filter_list_model_new (G_LIST_MODEL (dir_list), self->filter);
+    gtk_filter_list_model_set_incremental (filter_model, TRUE);
 
     map_model = gtk_map_list_model_new (
         G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
@@ -146,7 +177,10 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
-    pins_app_iterator_set_model (self, G_LIST_MODEL (sort_model));
+    g_signal_connect_swapped (G_LIST_MODEL (sort_model), "items-changed",
+                              G_CALLBACK (g_list_model_items_changed), self);
+
+    self->model = G_LIST_MODEL (sort_model);
 }
 
 typedef struct
@@ -229,6 +263,8 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 static void
 pins_app_iterator_init (PinsAppIterator *self)
 {
+    self->filter = GTK_FILTER (gtk_custom_filter_new (
+        &pins_app_iterator_filter_match_func, self, NULL));
 }
 
 gpointer
