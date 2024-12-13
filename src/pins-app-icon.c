@@ -64,6 +64,21 @@ pins_app_icon_set_icon_name (PinsAppIcon *self, gchar *icon_name)
 }
 
 void
+pins_app_icon_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
+                          PinsAppIcon *self)
+{
+    g_assert (PINS_IS_APP_ICON (self));
+
+    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_ICON) == 0)
+        {
+            gchar *icon_name = pins_desktop_file_get_string (
+                desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
+
+            pins_app_icon_set_icon_name (self, icon_name);
+        }
+}
+
+void
 pins_app_icon_set_desktop_file (PinsAppIcon *self,
                                 PinsDesktopFile *desktop_file)
 {
@@ -75,9 +90,10 @@ pins_app_icon_set_desktop_file (PinsAppIcon *self,
     icon_name = pins_desktop_file_get_string (
         desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON, &err);
     if (err != NULL)
-        {
-            return;
-        }
+        return;
+
+    g_signal_connect (desktop_file, "key-set",
+                      G_CALLBACK (pins_app_icon_key_set_cb), self);
 
     pins_app_icon_set_icon_name (self, icon_name);
 }
