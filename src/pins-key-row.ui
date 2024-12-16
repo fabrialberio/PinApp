@@ -14,6 +14,18 @@
       </object>
     </child>
     <child type="suffix">
+      <object class="GtkButton" id="remove_button">
+        <property name="icon-name">edit-delete-symbolic</property>
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <property name="tooltip-text" translatable="true">Remove key</property>
+        <style>
+          <class name="flat" />
+          <class name="circular" />
+        </style>
+      </object>
+    </child>
+    <child type="suffix">
       <object class="GtkMenuButton" id="locale_button">
         <property name="valign">center</property>
         <property name="visible">false</property>

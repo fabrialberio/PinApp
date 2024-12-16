@@ -29,6 +29,8 @@ struct _PinsKeyRow
     PinsDesktopFile *desktop_file;
     gchar *key;
 
+    GtkButton *reset_button;
+    GtkButton *remove_button;
     GtkMenuButton *locale_button;
     GtkPopover *locale_popover;
     GtkListView *locale_list_view;
@@ -43,12 +45,37 @@ pins_key_row_new (void)
 }
 
 void
-pins_key_row_text_changed_cb (GtkEditable *self, PinsKeyRow *user_data)
+pins_key_row_update_appearance (PinsKeyRow *self)
 {
-    g_assert (PINS_IS_KEY_ROW (user_data));
+    gboolean reset_button_visible = FALSE, remove_button_visible = FALSE;
+    const gchar *editable_value = gtk_editable_get_text (GTK_EDITABLE (self));
 
-    pins_desktop_file_set_string (user_data->desktop_file, user_data->key,
-                                  gtk_editable_get_text (self));
+    reset_button_visible
+        = pins_desktop_file_is_key_edited (self->desktop_file, self->key)
+          && pins_desktop_file_has_backup_for_key (self->desktop_file,
+                                                   self->key);
+
+    remove_button_visible
+        = strlen (editable_value) == 0
+          && !pins_desktop_file_has_backup_for_key (self->desktop_file,
+                                                    self->key)
+          && pins_desktop_file_has_key (self->desktop_file, self->key);
+
+    gtk_widget_set_visible (GTK_WIDGET (self->reset_button),
+                            reset_button_visible);
+    gtk_widget_set_visible (GTK_WIDGET (self->remove_button),
+                            remove_button_visible);
+}
+
+void
+pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
+{
+    g_assert (PINS_IS_KEY_ROW (self));
+
+    pins_desktop_file_set_string (self->desktop_file, self->key,
+                                  gtk_editable_get_text (editable));
+
+    pins_key_row_update_appearance (self);
 }
 
 void
@@ -79,15 +106,15 @@ void
 pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
                       gchar *key, gchar **locales)
 {
-    gchar *value = pins_desktop_file_get_string (desktop_file, key, NULL);
-
     self->desktop_file = desktop_file;
     self->key = key;
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
-    gtk_editable_set_text (GTK_EDITABLE (self), value);
+    gtk_editable_set_text (
+        GTK_EDITABLE (self),
+        pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
+    pins_key_row_update_appearance (self);
 
-    /// TODO: Update text when desktop file changes
     g_signal_connect_object (GTK_EDITABLE (self), "changed",
                              G_CALLBACK (pins_key_row_text_changed_cb), self,
                              0);
@@ -135,11 +162,29 @@ pins_key_row_class_init (PinsKeyRowClass *klass)
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-key-row.ui");
     gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
+                                          reset_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
+                                          remove_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
                                           locale_button);
     gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
                                           locale_popover);
     gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
                                           locale_list_view);
+}
+
+void
+pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
+{
+    g_assert (PINS_IS_KEY_ROW (self));
+
+    pins_desktop_file_reset_key (self->desktop_file, self->key);
+
+    gtk_editable_set_text (
+        GTK_EDITABLE (self),
+        pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
+
+    pins_key_row_update_appearance (self);
 }
 
 void
@@ -176,6 +221,13 @@ pins_key_row_init (PinsKeyRow *self)
     GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
 
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    g_signal_connect_object (self->reset_button, "clicked",
+                             G_CALLBACK (pins_key_row_reset_key_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->remove_button, "clicked",
+                             G_CALLBACK (pins_key_row_reset_key_cb), self,
+                             G_CONNECT_SWAPPED);
 
     g_signal_connect_object (
         factory, "setup", G_CALLBACK (pins_key_row_locale_menu_item_setup_cb),
