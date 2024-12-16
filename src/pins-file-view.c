@@ -30,6 +30,9 @@ struct _PinsFileView
 
     PinsDesktopFile *desktop_file;
 
+    AdwHeaderBar *header_bar;
+    AdwWindowTitle *window_title;
+    GtkScrolledWindow *scrolled_window;
     PinsAppIcon *icon;
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
@@ -55,6 +58,37 @@ pins_file_view_setup_row (PinsKeyRow *row, PinsDesktopFile *desktop_file,
 }
 
 void
+pins_file_view_update_appearance (PinsFileView *self)
+{
+    adw_window_title_set_title (
+        self->window_title,
+        pins_desktop_file_get_string (self->desktop_file,
+                                      G_KEY_FILE_DESKTOP_KEY_NAME, NULL));
+}
+
+void
+pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
+                           PinsFileView *self)
+{
+    g_assert (PINS_IS_FILE_VIEW (self));
+
+    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0)
+        {
+            pins_file_view_update_appearance (self);
+        }
+}
+
+void
+pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
+                                        PinsFileView *self)
+{
+    g_assert (PINS_IS_FILE_VIEW (self));
+
+    adw_header_bar_set_show_title (self->header_bar,
+                                   gtk_adjustment_get_value (adjustment) > 0);
+}
+
+void
 pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
@@ -64,6 +98,14 @@ pins_file_view_set_desktop_file (PinsFileView *self,
     gsize n_added_keys = 0;
 
     self->desktop_file = desktop_file;
+
+    pins_file_view_update_appearance (self);
+    g_signal_connect_object (self->desktop_file, "key-set",
+                             G_CALLBACK (pins_file_view_key_set_cb), self, 0);
+    g_signal_connect_object (
+        gtk_scrolled_window_get_vadjustment (self->scrolled_window),
+        "value-changed", G_CALLBACK (pins_file_view_update_title_visible_cb),
+        self, 0);
 
     gtk_list_box_remove_all (self->keys_listbox);
 
@@ -131,6 +173,12 @@ pins_file_view_class_init (PinsFileViewClass *klass)
     g_type_ensure (PINS_TYPE_APP_ICON);
     g_type_ensure (PINS_TYPE_KEY_ROW);
 
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          header_bar);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          window_title);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          scrolled_window);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView, icon);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           name_row);
