@@ -271,23 +271,50 @@ pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,
 }
 
 gboolean
-pins_desktop_file_is_key_resettable (PinsDesktopFile *self, const gchar *key)
+pins_desktop_file_has_backup_for_key (PinsDesktopFile *self, const gchar *key)
 {
-    g_warning ("Not implemented");
-    return FALSE;
+    if (self->system_file == NULL)
+        return FALSE;
 
     return g_key_file_has_key (self->backup_key_file, G_KEY_FILE_DESKTOP_GROUP,
                                key, NULL);
 }
 
+gboolean
+pins_desktop_file_has_key (PinsDesktopFile *self, const gchar *key)
+{
+    return g_key_file_has_key (self->key_file, G_KEY_FILE_DESKTOP_GROUP, key,
+                               NULL)
+           || pins_desktop_file_has_backup_for_key (self, key);
+}
+
+gboolean
+pins_desktop_file_is_key_edited (PinsDesktopFile *self, const gchar *key)
+{
+    if (self->system_file == NULL)
+        return TRUE;
+
+    return g_strcmp0 (
+               g_key_file_get_string (self->key_file, G_KEY_FILE_DESKTOP_GROUP,
+                                      key, NULL),
+               g_key_file_get_string (self->backup_key_file,
+                                      G_KEY_FILE_DESKTOP_GROUP, key, NULL))
+           != 0;
+}
+
 void
 pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key)
 {
-    g_warning ("Not implemented");
-    return;
-
-    g_key_file_set_string (self->key_file, G_KEY_FILE_DESKTOP_GROUP, key,
-                           g_key_file_get_string (self->backup_key_file,
-                                                  G_KEY_FILE_DESKTOP_GROUP,
-                                                  key, NULL));
+    if (pins_desktop_file_has_backup_for_key (self, key))
+        {
+            g_key_file_set_string (
+                self->key_file, G_KEY_FILE_DESKTOP_GROUP, key,
+                g_key_file_get_string (self->backup_key_file,
+                                       G_KEY_FILE_DESKTOP_GROUP, key, NULL));
+        }
+    else
+        {
+            g_key_file_remove_key (self->key_file, G_KEY_FILE_DESKTOP_GROUP,
+                                   key, NULL);
+        }
 }
