@@ -168,16 +168,17 @@ pins_window_init (PinsWindow *self)
     pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
     pins_app_view_set_search_entry (self->search_view, self->search_entry);
 
-    g_signal_connect (self->app_view, "activate",
-                      G_CALLBACK (pins_window_item_activated_cb), self);
-
-    g_signal_connect (self->search_view, "activate",
-                      G_CALLBACK (pins_window_item_activated_cb), self);
-
-    g_signal_connect (adw_navigation_view_find_page (self->navigation_view,
-                                                     pages[PAGE_FILE]),
-                      "hiding", G_CALLBACK (pins_window_file_page_hiding_cb),
-                      self);
-    g_signal_connect (self, "close-request",
-                      G_CALLBACK (pins_window_close_request_cb), NULL);
+    g_signal_connect_object (self->app_view, "activate",
+                             G_CALLBACK (pins_window_item_activated_cb), self,
+                             0);
+    g_signal_connect_object (self->search_view, "activate",
+                             G_CALLBACK (pins_window_item_activated_cb), self,
+                             0);
+    g_signal_connect_object (
+        adw_navigation_view_find_page (self->navigation_view,
+                                       pages[PAGE_FILE]),
+        "hiding", G_CALLBACK (pins_window_file_page_hiding_cb), self, 0);
+    g_signal_connect_object (self, "close-request",
+                             G_CALLBACK (pins_window_close_request_cb), NULL,
+                             0);
 }

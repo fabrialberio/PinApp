@@ -81,8 +81,9 @@ pins_app_view_set_app_iterator (PinsAppView *self,
     self->filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
-    g_signal_connect (app_iterator, "loaded",
-                      G_CALLBACK (pins_app_view_app_iterator_loaded_cb), self);
+    g_signal_connect_object (app_iterator, "loaded",
+                             G_CALLBACK (pins_app_view_app_iterator_loaded_cb),
+                             self, 0);
 }
 
 void
@@ -108,8 +109,9 @@ pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
 
     adw_bin_set_child (self->apps_bin, GTK_WIDGET (app_list));
 
-    g_signal_connect (app_list, "activate",
-                      G_CALLBACK (pins_app_view_item_activated_cb), self);
+    g_signal_connect_object (app_list, "activate",
+                             G_CALLBACK (pins_app_view_item_activated_cb),
+                             self, 0);
 }
 
 void
@@ -136,9 +138,9 @@ void
 pins_app_view_set_search_entry (PinsAppView *self,
                                 GtkSearchEntry *search_entry)
 {
-    g_signal_connect (search_entry, "search-changed",
-                      G_CALLBACK (pins_app_view_search_changed_cb), self);
-    // TODO: Disconnect signal
+    g_signal_connect_object (search_entry, "search-changed",
+                             G_CALLBACK (pins_app_view_search_changed_cb),
+                             self, 0);
 }
 
 static void

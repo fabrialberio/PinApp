@@ -70,8 +70,8 @@ pins_app_row_set_desktop_file (PinsAppRow *self, PinsDesktopFile *desktop_file)
 {
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    g_signal_connect (desktop_file, "key-set",
-                      G_CALLBACK (pins_app_row_key_set_cb), self);
+    g_signal_connect_object (desktop_file, "key-set",
+                             G_CALLBACK (pins_app_row_key_set_cb), self, 0);
 
     pins_app_row_update_appearance (self, desktop_file);
 }

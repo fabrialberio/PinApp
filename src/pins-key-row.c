@@ -88,8 +88,9 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     gtk_editable_set_text (GTK_EDITABLE (self), value);
 
     /// TODO: Update text when desktop file changes
-    g_signal_connect (GTK_EDITABLE (self), "changed",
-                      G_CALLBACK (pins_key_row_text_changed_cb), self);
+    g_signal_connect_object (GTK_EDITABLE (self), "changed",
+                             G_CALLBACK (pins_key_row_text_changed_cb), self,
+                             0);
 
     if (g_strv_length (locales) > 0)
         {
@@ -176,12 +177,12 @@ pins_key_row_init (PinsKeyRow *self)
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
-    g_signal_connect (factory, "setup",
-                      G_CALLBACK (pins_key_row_locale_menu_item_setup_cb),
-                      NULL);
-    g_signal_connect (factory, "bind",
-                      G_CALLBACK (pins_key_row_locale_menu_item_bind_cb),
-                      NULL);
+    g_signal_connect_object (
+        factory, "setup", G_CALLBACK (pins_key_row_locale_menu_item_setup_cb),
+        NULL, 0);
+    g_signal_connect_object (
+        factory, "bind", G_CALLBACK (pins_key_row_locale_menu_item_bind_cb),
+        NULL, 0);
 
     gtk_list_view_set_factory (self->locale_list_view, factory);
 

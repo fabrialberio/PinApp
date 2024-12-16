@@ -178,16 +178,17 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     GtkMapListModel *map_model;
     GtkSortListModel *sort_model;
 
-    g_signal_connect (G_LIST_MODEL (dir_list), "items-changed",
-                      G_CALLBACK (pins_app_iterator_update_duplicates), self);
+    g_signal_connect_object (G_LIST_MODEL (dir_list), "items-changed",
+                             G_CALLBACK (pins_app_iterator_update_duplicates),
+                             self, 0);
 
     filter_model
         = gtk_filter_list_model_new (G_LIST_MODEL (dir_list), self->filter);
     gtk_filter_list_model_set_incremental (filter_model, TRUE);
 
-    g_signal_connect (filter_model, "notify::pending",
-                      G_CALLBACK (pins_app_iterator_filter_pending_changed_cb),
-                      self);
+    g_signal_connect_object (
+        filter_model, "notify::pending",
+        G_CALLBACK (pins_app_iterator_filter_pending_changed_cb), self, 0);
 
     map_model = gtk_map_list_model_new (
         G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
@@ -197,8 +198,9 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
-    g_signal_connect_swapped (G_LIST_MODEL (sort_model), "items-changed",
-                              G_CALLBACK (g_list_model_items_changed), self);
+    g_signal_connect_object (G_LIST_MODEL (sort_model), "items-changed",
+                             G_CALLBACK (g_list_model_items_changed), self,
+                             G_CONNECT_SWAPPED);
 
     self->model = G_LIST_MODEL (sort_model);
 }

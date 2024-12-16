@@ -63,8 +63,9 @@ pins_app_list_set_model (PinsAppList *self, GListModel *model)
     gtk_list_view_set_model (self->list_view,
                              GTK_SELECTION_MODEL (selection_model));
 
-    g_signal_connect (self->list_view, "activate",
-                      G_CALLBACK (pins_app_list_item_activated_cb), self);
+    g_signal_connect_object (self->list_view, "activate",
+                             G_CALLBACK (pins_app_list_item_activated_cb),
+                             self, 0);
 }
 
 static void
