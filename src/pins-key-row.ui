@@ -2,11 +2,11 @@
 <interface>
   <template class="PinsKeyRow" parent="AdwEntryRow">
     <child type="suffix">
-      <object class="GtkButton">
-        <property name="icon-name">edit-undo-symbolic</property>
+      <object class="GtkButton" id="reset_button">
+        <property name="icon-name">reset-symbolic</property>
         <property name="valign">center</property>
         <property name="visible">false</property>
-        <property name="tooltip-text" translatable="true">Reset field</property>
+        <property name="tooltip-text" translatable="true">Reset key</property>
         <style>
           <class name="flat" />
           <class name="circular" />
@@ -30,6 +30,7 @@
                 <property name="propagate-natural-width">true</property>
                 <property name="propagate-natural-height">true</property>
                 <property name="child">
+                  <!-- TODO: No padding in row menus -->
                   <object class="GtkListView" id="locale_list_view">
                     <property name="single-click-activate">true</property>
                   </object>

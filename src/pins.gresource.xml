@@ -12,10 +12,11 @@
     <file preprocess="xml-stripblanks">pins-window.ui</file>
   </gresource>
   <gresource prefix="/io/github/fabrialberio/pinapp/icons/scalable/actions">
-    <file alias="snap-symbolic.svg">../data/icons/scalable/actions/snap-symbolic.svg</file>
     <file alias="flatpak-symbolic.svg">../data/icons/scalable/actions/flatpak-symbolic.svg</file>
     <file alias="installed-symbolic.svg">../data/icons/scalable/actions/installed-symbolic.svg</file>
     <file alias="pin-symbolic.svg">../data/icons/scalable/actions/pin-symbolic.svg</file>
+    <file alias="reset-symbolic.svg">../data/icons/scalable/actions/reset-symbolic.svg</file>
+    <file alias="snap-symbolic.svg">../data/icons/scalable/actions/snap-symbolic.svg</file>
     <file alias="unpin-symbolic.svg">../data/icons/scalable/actions/unpin-symbolic.svg</file>
   </gresource>
 </gresources>
