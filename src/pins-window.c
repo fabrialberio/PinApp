@@ -55,15 +55,22 @@ static gchar *pages[N_PAGES] = {
     "file-page",
 };
 
-void
-pins_window_save_current_desktop_file (PinsWindow *self)
+PinsDesktopFile *
+pins_window_get_current_desktop_file (PinsWindow *self)
 {
     AdwNavigationPage *file_page = adw_navigation_view_find_page (
         self->navigation_view, pages[PAGE_FILE]);
     PinsFileView *file_view
         = PINS_FILE_VIEW (adw_navigation_page_get_child (file_page));
+
+    return pins_file_view_get_desktop_file (file_view);
+}
+
+void
+pins_window_save_current_desktop_file (PinsWindow *self)
+{
     PinsDesktopFile *desktop_file
-        = pins_file_view_get_desktop_file (file_view);
+        = pins_window_get_current_desktop_file (self);
 
     if (desktop_file != NULL)
         {
@@ -109,17 +116,38 @@ pins_window_class_init (PinsWindowClass *klass)
 }
 
 void
-pins_window_item_activated_cb (GtkListView *self,
-                               PinsDesktopFile *desktop_file,
-                               PinsWindow *user_data)
+pins_window_file_removed_cb (PinsDesktopFile *desktop_file, PinsWindow *self)
 {
-    g_assert (PINS_IS_WINDOW (user_data));
+    g_assert (PINS_IS_WINDOW (self));
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    pins_file_view_set_desktop_file (user_data->file_view, desktop_file);
+    if (pins_window_get_current_desktop_file (self) != NULL)
+        {
+            adw_navigation_view_pop (self->navigation_view);
+        }
+}
 
-    adw_navigation_view_push_by_tag (user_data->navigation_view,
-                                     pages[PAGE_FILE]);
+void
+pins_window_item_activated_cb (GtkListView *list_view,
+                               PinsDesktopFile *desktop_file, PinsWindow *self)
+{
+    g_assert (PINS_IS_WINDOW (self));
+    g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
+
+    if (pins_window_get_current_desktop_file (self) != NULL)
+        {
+            g_signal_handlers_disconnect_by_func (
+                pins_window_get_current_desktop_file (self),
+                pins_window_file_removed_cb, self);
+        }
+
+    pins_file_view_set_desktop_file (self->file_view, desktop_file);
+
+    g_signal_connect_object (desktop_file, "file-removed",
+                             G_CALLBACK (pins_window_file_removed_cb), self,
+                             0);
+
+    adw_navigation_view_push_by_tag (self->navigation_view, pages[PAGE_FILE]);
 }
 
 void
