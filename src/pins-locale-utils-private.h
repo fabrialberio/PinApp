@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <glib-2.0/glib.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
@@ -34,5 +34,6 @@ PinsSplitKey _pins_split_key_locale (gchar *localized_key);
 gchar *_pins_join_key_locale (gchar *key, gchar *locale);
 gchar **_pins_locales_from_keys (gchar **keys);
 gboolean _pins_key_has_locales (gchar **all_keys, gchar *key);
+void _gtk_string_list_remove_string (GtkStringList *list, gchar *string);
 
 G_END_DECLS
