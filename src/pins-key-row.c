@@ -84,12 +84,16 @@ pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
 {
     g_assert (PINS_IS_KEY_ROW (self));
 
-    if (g_strcmp0 (key, self->key) == 0)
-        {
-            gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
+    if (g_strcmp0 (key, self->key) != 0)
+        return;
 
-            g_object_unref (self);
-        }
+    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0
+        || g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_COMMENT) == 0)
+        return;
+
+    gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
+
+    g_object_unref (self);
 }
 
 void
