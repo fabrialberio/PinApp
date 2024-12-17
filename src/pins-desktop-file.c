@@ -49,6 +49,7 @@ enum
 enum
 {
     KEY_SET,
+    KEY_REMOVED,
     N_SIGNALS,
 };
 
@@ -197,11 +198,15 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
                                "Data of the file as a searchable string", "",
                                (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
+    g_object_class_install_properties (object_class, N_PROPS, properties);
+
     signals[KEY_SET] = g_signal_new ("key-set", G_TYPE_FROM_CLASS (klass),
                                      G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
                                      G_TYPE_NONE, 1, G_TYPE_STRING);
 
-    g_object_class_install_properties (object_class, N_PROPS, properties);
+    signals[KEY_REMOVED] = g_signal_new (
+        "key-removed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST, 0, NULL,
+        NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
 }
 
 static void
@@ -316,5 +321,7 @@ pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key)
         {
             g_key_file_remove_key (self->key_file, G_KEY_FILE_DESKTOP_GROUP,
                                    key, NULL);
+
+            g_signal_emit (self, signals[KEY_REMOVED], 0, key);
         }
 }

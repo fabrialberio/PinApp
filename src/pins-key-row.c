@@ -79,6 +79,20 @@ pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
 }
 
 void
+pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
+                             PinsKeyRow *self)
+{
+    g_assert (PINS_IS_KEY_ROW (self));
+
+    if (g_strcmp0 (key, self->key) == 0)
+        {
+            gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
+
+            g_object_unref (self);
+        }
+}
+
+void
 pins_key_row_locale_changed_cb (GtkMenuButton *self, gchar *selected_locale)
 {
     AdwButtonContent *button_content
@@ -117,6 +131,9 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
 
     g_signal_connect_object (GTK_EDITABLE (self), "changed",
                              G_CALLBACK (pins_key_row_text_changed_cb), self,
+                             0);
+    g_signal_connect_object (self->desktop_file, "key-removed",
+                             G_CALLBACK (pins_key_row_key_removed_cb), self,
                              0);
 
     if (g_strv_length (locales) > 0)
