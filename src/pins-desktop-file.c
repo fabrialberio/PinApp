@@ -50,6 +50,7 @@ enum
 {
     KEY_SET,
     KEY_REMOVED,
+    FILE_REMOVED,
     N_SIGNALS,
 };
 
@@ -123,6 +124,12 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     return desktop_file;
 }
 
+gboolean
+pins_desktop_file_is_user_only (PinsDesktopFile *self)
+{
+    return self->system_file == NULL;
+}
+
 /*
  * Returns `TRUE` if the file has been changed since the last save.
  */
@@ -135,6 +142,14 @@ pins_desktop_file_is_edited (PinsDesktopFile *self)
 }
 
 void
+pins_desktop_file_remove (PinsDesktopFile *self)
+{
+    g_file_delete (self->user_file, NULL, NULL);
+
+    g_signal_emit (self, signals[FILE_REMOVED], 0);
+}
+
+void
 pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
     if (!pins_desktop_file_is_edited (self))
@@ -143,6 +158,14 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
     g_warning ("Saving desktop file `%s`", g_file_get_path (self->user_file));
 
     self->saved_data = g_key_file_to_data (self->key_file, NULL, NULL);
+
+    if (self->system_file != NULL
+        && g_strcmp0 (self->saved_data,
+                      g_key_file_to_data (self->backup_key_file, NULL, NULL))
+               == 0)
+        {
+            g_file_delete (self->user_file, NULL, NULL);
+        }
 
     g_key_file_save_to_file (self->key_file, g_file_get_path (self->user_file),
                              error);
@@ -207,6 +230,10 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
     signals[KEY_REMOVED] = g_signal_new (
         "key-removed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST, 0, NULL,
         NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
+
+    signals[FILE_REMOVED] = g_signal_new (
+        "file-removed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL,
+        NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
