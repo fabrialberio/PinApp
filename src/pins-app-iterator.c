@@ -46,7 +46,7 @@ G_DEFINE_TYPE_WITH_CODE (PinsAppIterator, pins_app_iterator, G_TYPE_OBJECT,
 
 enum
 {
-    LOADED,
+    LOADING,
     N_SIGNALS
 };
 
@@ -166,11 +166,11 @@ pins_app_iterator_filter_pending_changed_cb (GtkFilterListModel *model,
     g_assert (GTK_IS_FILTER_LIST_MODEL (model));
     g_assert (PINS_IS_APP_ITERATOR (self));
 
-    if (gtk_filter_list_model_get_pending (model) == 0)
-        {
-            /// TODO: Also emit signal when pending is not 0 again
-            g_signal_emit (self, signals[LOADED], 0);
-        }
+    g_warning ("Loading emitted (%d)",
+               gtk_filter_list_model_get_pending (model) != 0);
+
+    g_signal_emit (self, signals[LOADING], 0,
+                   gtk_filter_list_model_get_pending (model) != 0);
 }
 
 void
@@ -237,9 +237,9 @@ pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths)
 static void
 pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 {
-    signals[LOADED] = g_signal_new ("loaded", G_TYPE_FROM_CLASS (klass),
-                                    G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
-                                    G_TYPE_NONE, 0);
+    signals[LOADING] = g_signal_new ("loading", G_TYPE_FROM_CLASS (klass),
+                                     G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
+                                     G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 }
 
 static void
