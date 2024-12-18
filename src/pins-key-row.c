@@ -175,6 +175,7 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     gtk_string_list_append (string_list, UNLOCALIZED_STRING);
     gtk_string_list_splice (string_list, 1, 0, (const gchar *const *)locales);
 
+    /// TODO: All locales are selected for rows in keys_listbox
     pins_key_row_set_locale (self, NULL);
     pins_key_row_update_locale_button_visibility (self);
 }
@@ -240,7 +241,7 @@ pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
 
 void
 locale_menu_item_setup_cb (GtkSignalListItemFactory *factory,
-                           GtkListItem *item, gpointer user_data)
+                           GtkListItem *item, PinsKeyRow *self)
 {
     GtkBuilder *builder = gtk_builder_new_from_resource (
         "/io/github/fabrialberio/pinapp/pins-key-row-locale-menu-item.ui");
@@ -327,7 +328,7 @@ pins_key_row_init (PinsKeyRow *self)
                              G_CONNECT_SWAPPED);
 
     g_signal_connect_object (factory, "setup",
-                             G_CALLBACK (locale_menu_item_setup_cb), NULL, 0);
+                             G_CALLBACK (locale_menu_item_setup_cb), self, 0);
     g_signal_connect_object (factory, "bind",
                              G_CALLBACK (locale_menu_item_bind_cb), self, 0);
     g_signal_connect_object (factory, "unbind",
