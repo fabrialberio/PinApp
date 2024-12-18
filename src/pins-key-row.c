@@ -163,8 +163,7 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     self->key = key;
     self->unlocalized_key = key;
 
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
-                                   self->unlocalized_key);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
 
     g_signal_connect_object (self->desktop_file, "key-removed",
                              G_CALLBACK (pins_key_row_key_removed_cb), self,
@@ -177,7 +176,8 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     gtk_string_list_append (string_list, UNLOCALIZED_STRING);
     gtk_string_list_splice (string_list, 1, 0, (const gchar *const *)locales);
 
-    pins_key_row_set_locale (self, NULL);
+    pins_key_row_set_locale (
+        self, pins_desktop_file_get_locale_for_key (desktop_file, key));
     pins_key_row_update_locale_button_visibility (self);
 }
 

@@ -19,8 +19,10 @@
  */
 
 #include "pins-app-iterator.h"
+
 #include "pins-desktop-file.h"
 #include "pins-directories.h"
+#include "pins-locale-utils-private.h"
 
 #define DESKTOP_FILE_CONTENT_TYPE "application/x-desktop"
 #define DIR_LIST_FILE_ATTRIBUTES                                              \
@@ -138,15 +140,20 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
 {
     PinsDesktopFile *first = PINS_DESKTOP_FILE ((gpointer)a);
     PinsDesktopFile *second = PINS_DESKTOP_FILE ((gpointer)b);
-    const gchar *first_name, *second_name;
+    const gchar *first_key, *second_key, *first_name, *second_name;
 
     g_assert (PINS_IS_DESKTOP_FILE (first));
     g_assert (PINS_IS_DESKTOP_FILE (second));
 
-    first_name = pins_desktop_file_get_string (
-        first, G_KEY_FILE_DESKTOP_KEY_NAME, NULL);
-    second_name = pins_desktop_file_get_string (
-        second, G_KEY_FILE_DESKTOP_KEY_NAME, NULL);
+    first_key = _pins_join_key_locale (
+        G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
+                                         first, G_KEY_FILE_DESKTOP_KEY_NAME));
+    first_name = pins_desktop_file_get_string (first, first_key, NULL);
+
+    second_key = _pins_join_key_locale (
+        G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
+                                         second, G_KEY_FILE_DESKTOP_KEY_NAME));
+    second_name = pins_desktop_file_get_string (second, second_key, NULL);
 
     return g_strcmp0 (first_name, second_name);
 }
@@ -161,6 +168,7 @@ pins_app_iterator_filter_pending_changed_cb (GtkFilterListModel *model,
 
     if (gtk_filter_list_model_get_pending (model) == 0)
         {
+            /// TODO: Also emit signal when pending is not 0 again
             g_signal_emit (self, signals[LOADED], 0);
         }
 }

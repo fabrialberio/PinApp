@@ -19,7 +19,9 @@
  */
 
 #include "pins-app-row.h"
+
 #include "pins-app-icon.h"
+#include "pins-locale-utils-private.h"
 
 struct _PinsAppRow
 {
@@ -40,16 +42,22 @@ void
 pins_app_row_update_appearance (PinsAppRow *self,
                                 PinsDesktopFile *desktop_file)
 {
-    gchar *title, *subtitle;
+    gchar *title_key, *subtitle_key, *title, *subtitle;
 
     pins_app_icon_set_desktop_file (self->icon, desktop_file);
 
-    title = pins_desktop_file_get_string (desktop_file,
-                                          G_KEY_FILE_DESKTOP_KEY_NAME, NULL);
-    subtitle = pins_desktop_file_get_string (
-        desktop_file, G_KEY_FILE_DESKTOP_KEY_COMMENT, NULL);
-
+    title_key = _pins_join_key_locale (
+        G_KEY_FILE_DESKTOP_KEY_NAME,
+        pins_desktop_file_get_locale_for_key (desktop_file,
+                                              G_KEY_FILE_DESKTOP_KEY_NAME));
+    title = pins_desktop_file_get_string (desktop_file, title_key, NULL);
     title = g_markup_escape_text (title, strlen (title));
+
+    subtitle_key = _pins_join_key_locale (
+        G_KEY_FILE_DESKTOP_KEY_COMMENT,
+        pins_desktop_file_get_locale_for_key (desktop_file,
+                                              G_KEY_FILE_DESKTOP_KEY_COMMENT));
+    subtitle = pins_desktop_file_get_string (desktop_file, subtitle_key, NULL);
     subtitle = g_markup_escape_text (subtitle, strlen (subtitle));
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), title);
