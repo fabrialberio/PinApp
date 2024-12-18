@@ -114,7 +114,7 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
         GTK_EDITABLE (self),
         pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
 
-    g_signal_emit (self, signals[LOCALE_CHANGED], 0, selected_locale);
+    g_signal_emit (self, signals[LOCALE_CHANGED], 0);
 }
 
 void
@@ -160,9 +160,11 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
         gtk_single_selection_get_model (self->locales_model));
 
     self->desktop_file = desktop_file;
+    self->key = key;
     self->unlocalized_key = key;
 
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
+                                   self->unlocalized_key);
 
     g_signal_connect_object (self->desktop_file, "key-removed",
                              G_CALLBACK (pins_key_row_key_removed_cb), self,
@@ -175,7 +177,6 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     gtk_string_list_append (string_list, UNLOCALIZED_STRING);
     gtk_string_list_splice (string_list, 1, 0, (const gchar *const *)locales);
 
-    /// TODO: All locales are selected for rows in keys_listbox
     pins_key_row_set_locale (self, NULL);
     pins_key_row_update_locale_button_visibility (self);
 }
@@ -198,7 +199,7 @@ pins_key_row_class_init (PinsKeyRowClass *klass)
 
     signals[LOCALE_CHANGED] = g_signal_new (
         "locale-changed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST, 0,
-        NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
+        NULL, NULL, NULL, G_TYPE_NONE, 0);
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-key-row.ui");
@@ -252,18 +253,18 @@ locale_menu_item_setup_cb (GtkSignalListItemFactory *factory,
 }
 
 void
-locale_menu_item_update_icon (PinsKeyRow *self, gchar *selected_locale,
-                              GtkListItem *item)
+locale_menu_item_update_icon (PinsKeyRow *self, GtkListItem *item)
 {
     GtkWidget *icon
         = gtk_widget_get_last_child (gtk_list_item_get_child (item));
     const gchar *locale
         = gtk_string_object_get_string (gtk_list_item_get_item (item));
+    const gchar *current_locale = _pins_split_key_locale (self->key).locale;
 
     if (g_strcmp0 (locale, UNLOCALIZED_STRING) == 0)
         locale = NULL;
 
-    gtk_widget_set_opacity (icon, g_strcmp0 (locale, selected_locale) == 0);
+    gtk_widget_set_opacity (icon, g_strcmp0 (locale, current_locale) == 0);
 }
 
 void
@@ -279,6 +280,7 @@ locale_menu_item_bind_cb (GtkSignalListItemFactory *factory, GtkListItem *item,
 
     g_signal_connect (self, "locale-changed",
                       G_CALLBACK (locale_menu_item_update_icon), item);
+    locale_menu_item_update_icon (self, item);
 
     gtk_label_set_label (label, locale);
 }
