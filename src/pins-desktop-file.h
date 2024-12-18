@@ -46,6 +46,8 @@ void pins_desktop_file_set_boolean (PinsDesktopFile *self, const gchar *key,
 void pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,
                                    const gchar *value);
 
+gchar *pins_desktop_file_get_locale_for_key (PinsDesktopFile *self,
+                                             const gchar *key);
 gboolean pins_desktop_file_has_backup_for_key (PinsDesktopFile *self,
                                                const gchar *key);
 gboolean pins_desktop_file_has_key (PinsDesktopFile *self, const gchar *key);

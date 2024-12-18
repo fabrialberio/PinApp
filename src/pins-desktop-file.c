@@ -302,6 +302,24 @@ pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,
     g_signal_emit (self, signals[KEY_SET], 0, key);
 }
 
+gchar *
+pins_desktop_file_get_locale_for_key (PinsDesktopFile *self, const gchar *key)
+{
+    gchar *locale;
+
+    locale = g_key_file_get_locale_for_key (
+        self->key_file, G_KEY_FILE_DESKTOP_GROUP, key, NULL);
+
+    if (locale != NULL)
+        return locale;
+
+    if (self->system_file == NULL)
+        return NULL;
+
+    return g_key_file_get_locale_for_key (self->backup_key_file,
+                                          G_KEY_FILE_DESKTOP_GROUP, key, NULL);
+}
+
 gboolean
 pins_desktop_file_has_backup_for_key (PinsDesktopFile *self, const gchar *key)
 {
