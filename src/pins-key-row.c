@@ -153,6 +153,7 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     self->unlocalized_key = key;
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
+    pins_key_row_set_locale (self, NULL);
 
     g_signal_connect_object (GTK_EDITABLE (self), "changed",
                              G_CALLBACK (pins_key_row_text_changed_cb), self,
