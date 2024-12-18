@@ -41,6 +41,7 @@
               <object class="GtkScrolledWindow">
                 <property name="propagate-natural-width">true</property>
                 <property name="propagate-natural-height">true</property>
+                <property name="max-content-height">400</property>
                 <property name="child">
                   <!-- TODO: No padding in row menus -->
                   <object class="GtkListView" id="locale_list_view">
