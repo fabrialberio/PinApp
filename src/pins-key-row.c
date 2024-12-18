@@ -98,6 +98,17 @@ pins_key_row_update_locale_button_visibility (PinsKeyRow *self)
 }
 
 void
+pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
+{
+    g_assert (PINS_IS_KEY_ROW (self));
+
+    pins_desktop_file_set_string (self->desktop_file, self->key,
+                                  gtk_editable_get_text (editable));
+
+    pins_key_row_update_reset_buttons_visibility (self);
+}
+
+void
 pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
 {
     AdwButtonContent *button_content
@@ -110,9 +121,15 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
     else
         adw_button_content_set_label (button_content, "");
 
+    g_signal_handlers_block_by_func (GTK_EDITABLE (self),
+                                     pins_key_row_text_changed_cb, self);
+
     gtk_editable_set_text (
         GTK_EDITABLE (self),
         pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
+
+    g_signal_handlers_unblock_by_func (GTK_EDITABLE (self),
+                                       pins_key_row_text_changed_cb, self);
 
     g_signal_emit (self, signals[LOCALE_CHANGED], 0);
 }
@@ -214,17 +231,6 @@ pins_key_row_class_init (PinsKeyRowClass *klass)
                                           locale_popover);
     gtk_widget_class_bind_template_child (widget_class, PinsKeyRow,
                                           locale_list_view);
-}
-
-void
-pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
-{
-    g_assert (PINS_IS_KEY_ROW (self));
-
-    pins_desktop_file_set_string (self->desktop_file, self->key,
-                                  gtk_editable_get_text (editable));
-
-    pins_key_row_update_reset_buttons_visibility (self);
 }
 
 void
