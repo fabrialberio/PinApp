@@ -6,7 +6,7 @@
         <property name="icon-name">edit-undo-symbolic</property>
         <property name="valign">center</property>
         <property name="visible">false</property>
-        <property name="tooltip-text" translatable="true">Reset key</property>
+        <property name="tooltip-text" translatable="yes">Reset key</property>
         <style>
           <class name="flat" />
           <class name="circular" />
@@ -18,7 +18,7 @@
         <property name="icon-name">edit-delete-symbolic</property>
         <property name="valign">center</property>
         <property name="visible">false</property>
-        <property name="tooltip-text" translatable="true">Remove key</property>
+        <property name="tooltip-text" translatable="yes">Remove key</property>
         <style>
           <class name="flat" />
           <class name="circular" />
@@ -29,7 +29,7 @@
       <object class="GtkMenuButton" id="locale_button">
         <property name="valign">center</property>
         <property name="visible">false</property>
-        <property name="tooltip-text" translatable="true">Select locale</property>
+        <property name="tooltip-text" translatable="yes">Select locale</property>
         <property name="child">
           <object class="AdwButtonContent">
             <property name="icon-name">preferences-desktop-locale-symbolic</property>
