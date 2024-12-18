@@ -47,16 +47,12 @@ void
 pins_file_view_setup_row (PinsKeyRow *row, PinsDesktopFile *desktop_file,
                           gchar *key, gchar **all_keys, gchar **all_locales)
 {
+    gchar **locales = { NULL };
 
     if (_pins_key_has_locales (all_keys, key))
-        {
-            pins_key_row_set_key (row, desktop_file, key, all_locales);
-        }
-    else
-        {
-            pins_key_row_set_key (row, desktop_file, key,
-                                  g_strv_builder_end (g_strv_builder_new ()));
-        }
+        locales = all_locales;
+
+    pins_key_row_set_key (row, desktop_file, key, locales);
 }
 
 void
