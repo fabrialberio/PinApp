@@ -90,7 +90,7 @@ pins_app_icon_set_desktop_file (PinsAppIcon *self,
     icon_name = pins_desktop_file_get_string (
         desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON, &err);
     if (err != NULL)
-        return;
+        pins_app_icon_set_icon_name (self, DEFAULT_ICON_NAME);
 
     g_signal_connect_object (desktop_file, "key-set",
                              G_CALLBACK (pins_app_icon_key_set_cb), self, 0);
