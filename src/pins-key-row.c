@@ -58,9 +58,9 @@ pins_key_row_new (void)
 }
 
 void
-pins_key_row_update_button_visibility (PinsKeyRow *self)
+pins_key_row_update_reset_buttons_visibility (PinsKeyRow *self)
 {
-    gboolean reset_button_visible = FALSE, remove_button_visible = FALSE;
+    gboolean reset_button_visible, remove_button_visible, has_other_locales;
     const gchar *editable_value = gtk_editable_get_text (GTK_EDITABLE (self));
 
     reset_button_visible
@@ -68,16 +68,33 @@ pins_key_row_update_button_visibility (PinsKeyRow *self)
           && pins_desktop_file_has_backup_for_key (self->desktop_file,
                                                    self->key);
 
+    has_other_locales
+        = g_strcmp0 (self->key, self->unlocalized_key) == 0
+          && gtk_widget_get_visible (GTK_WIDGET (self->locale_button));
+
     remove_button_visible
         = strlen (editable_value) == 0
           && !pins_desktop_file_has_backup_for_key (self->desktop_file,
                                                     self->key)
-          && pins_desktop_file_has_key (self->desktop_file, self->key);
+          && pins_desktop_file_has_key (self->desktop_file, self->key)
+          && !has_other_locales;
 
     gtk_widget_set_visible (GTK_WIDGET (self->reset_button),
                             reset_button_visible);
     gtk_widget_set_visible (GTK_WIDGET (self->remove_button),
                             remove_button_visible);
+}
+
+void
+pins_key_row_update_locale_button_visibility (PinsKeyRow *self)
+{
+    gboolean locale_button_visible;
+
+    locale_button_visible
+        = g_list_model_get_n_items (G_LIST_MODEL (self->locales_model)) > 1;
+
+    gtk_widget_set_visible (GTK_WIDGET (self->locale_button),
+                            locale_button_visible);
 }
 
 void
@@ -101,17 +118,6 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
 }
 
 void
-pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
-{
-    g_assert (PINS_IS_KEY_ROW (self));
-
-    pins_desktop_file_set_string (self->desktop_file, self->key,
-                                  gtk_editable_get_text (editable));
-
-    pins_key_row_update_button_visibility (self);
-}
-
-void
 pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
                              PinsKeyRow *self)
 {
@@ -131,6 +137,7 @@ pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
                             self->locales_model)),
                         split_key.locale);
                     pins_key_row_set_locale (self, NULL);
+                    pins_key_row_update_locale_button_visibility (self);
                 }
 
             return;
@@ -149,44 +156,27 @@ void
 pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
                       gchar *key, gchar **locales)
 {
+    GtkStringList *string_list = GTK_STRING_LIST (
+        gtk_single_selection_get_model (self->locales_model));
+
     self->desktop_file = desktop_file;
     self->unlocalized_key = key;
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
-    pins_key_row_set_locale (self, NULL);
 
-    g_signal_connect_object (GTK_EDITABLE (self), "changed",
-                             G_CALLBACK (pins_key_row_text_changed_cb), self,
-                             0);
     g_signal_connect_object (self->desktop_file, "key-removed",
                              G_CALLBACK (pins_key_row_key_removed_cb), self,
                              0);
 
-    if (g_strv_length (locales) > 0)
-        {
-            GtkStringList *string_list = GTK_STRING_LIST (
-                gtk_single_selection_get_model (self->locales_model));
+    gtk_string_list_splice (
+        string_list, 0, g_list_model_get_n_items (G_LIST_MODEL (string_list)),
+        NULL);
 
-            gtk_string_list_splice (
-                string_list, 0,
-                g_list_model_get_n_items (G_LIST_MODEL (string_list)), NULL);
+    gtk_string_list_append (string_list, UNLOCALIZED_STRING);
+    gtk_string_list_splice (string_list, 1, 0, (const gchar *const *)locales);
 
-            gtk_widget_set_visible (GTK_WIDGET (self->locale_button), TRUE);
-
-            gtk_string_list_append (string_list, UNLOCALIZED_STRING);
-            gtk_string_list_splice (string_list, 1, 0,
-                                    (const gchar *const *)locales);
-
-            gtk_list_view_set_model (
-                self->locale_list_view,
-                GTK_SELECTION_MODEL (self->locales_model));
-
-            pins_key_row_set_locale (self, NULL);
-        }
-    else
-        {
-            gtk_widget_set_visible (GTK_WIDGET (self->locale_button), FALSE);
-        }
+    pins_key_row_set_locale (self, NULL);
+    pins_key_row_update_locale_button_visibility (self);
 }
 
 static void
@@ -224,6 +214,17 @@ pins_key_row_class_init (PinsKeyRowClass *klass)
 }
 
 void
+pins_key_row_text_changed_cb (GtkEditable *editable, PinsKeyRow *self)
+{
+    g_assert (PINS_IS_KEY_ROW (self));
+
+    pins_desktop_file_set_string (self->desktop_file, self->key,
+                                  gtk_editable_get_text (editable));
+
+    pins_key_row_update_reset_buttons_visibility (self);
+}
+
+void
 pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
 {
     g_assert (PINS_IS_KEY_ROW (self));
@@ -234,7 +235,7 @@ pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
         GTK_EDITABLE (self),
         pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
 
-    pins_key_row_update_button_visibility (self);
+    pins_key_row_update_reset_buttons_visibility (self);
 }
 
 void
@@ -314,6 +315,10 @@ pins_key_row_init (PinsKeyRow *self)
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
+    g_signal_connect_object (GTK_EDITABLE (self), "changed",
+                             G_CALLBACK (pins_key_row_text_changed_cb), self,
+                             0);
+
     g_signal_connect_object (self->reset_button, "clicked",
                              G_CALLBACK (pins_key_row_reset_key_cb), self,
                              G_CONNECT_SWAPPED);
@@ -329,6 +334,8 @@ pins_key_row_init (PinsKeyRow *self)
                              G_CALLBACK (locale_menu_item_unbind_cb), self, 0);
 
     gtk_list_view_set_factory (self->locale_list_view, factory);
+    gtk_list_view_set_model (self->locale_list_view,
+                             GTK_SELECTION_MODEL (self->locales_model));
 
     g_signal_connect_object (self->locale_list_view, "activate",
                              G_CALLBACK (locale_menu_item_activated_cb), self,
