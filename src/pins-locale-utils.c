@@ -54,7 +54,7 @@ gchar **
 _pins_locales_from_keys (gchar **keys)
 {
     gchar *locale = g_malloc (sizeof (gchar *));
-    gchar **locales = g_malloc0_n (g_strv_length (keys), sizeof (gchar *));
+    gchar **locales = g_malloc0_n (g_strv_length (keys) + 1, sizeof (gchar *));
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
     for (int i = 0, lenght = 0; keys[i] != NULL; i++)

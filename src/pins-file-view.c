@@ -91,7 +91,8 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
 {
     gchar **keys = pins_desktop_file_get_keys (self->desktop_file);
     gchar **locales = _pins_locales_from_keys (keys);
-    gchar **added_keys = g_malloc0_n (g_strv_length (keys), sizeof (gchar *));
+    gchar **added_keys
+        = g_malloc0_n (g_strv_length (keys) + 1, sizeof (gchar *));
     gsize n_added_keys = 0;
 
     gtk_list_box_remove_all (self->keys_listbox);
