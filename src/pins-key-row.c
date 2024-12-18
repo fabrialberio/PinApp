@@ -129,6 +129,7 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
     g_signal_handlers_unblock_by_func (GTK_EDITABLE (self),
                                        pins_key_row_text_changed_cb, self);
 
+    pins_key_row_update_reset_buttons_visibility (self);
     g_signal_emit (self, signals[LOCALE_CHANGED], 0);
 }
 
@@ -147,10 +148,6 @@ pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
         {
             if (g_strcmp0 (split_key.key, self->unlocalized_key) == 0)
                 {
-                    _gtk_string_list_remove_string (
-                        GTK_STRING_LIST (gtk_single_selection_get_model (
-                            self->locales_model)),
-                        split_key.locale);
                     pins_key_row_set_locale (self, NULL);
                     pins_key_row_update_locale_button_visibility (self);
                 }
@@ -163,8 +160,6 @@ pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
         return;
 
     gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
-
-    g_object_unref (self);
 }
 
 void

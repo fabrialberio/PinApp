@@ -97,16 +97,3 @@ _pins_key_has_locales (gchar **all_keys, gchar *key)
 
     return FALSE;
 }
-
-void
-_gtk_string_list_remove_string (GtkStringList *list, gchar *string)
-{
-    for (int i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (list)); i++)
-        {
-            if (g_strcmp0 (string, gtk_string_list_get_string (list, i)) == 0)
-                {
-                    gtk_string_list_remove (list, i);
-                    break;
-                }
-        }
-}
