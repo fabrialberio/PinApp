@@ -179,6 +179,7 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     pins_key_row_set_locale (
         self, pins_desktop_file_get_locale_for_key (desktop_file, key));
     pins_key_row_update_locale_button_visibility (self);
+    pins_key_row_update_reset_buttons_visibility (self);
 }
 
 static void
