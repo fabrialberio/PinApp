@@ -38,9 +38,10 @@ struct _PinsFileView
     PinsKeyRow *comment_row;
     GtkListBox *keys_listbox;
     GtkButton *remove_button;
+    AdwBreakpoint *breakpoint;
 };
 
-G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BIN);
+G_DEFINE_TYPE (PinsFileView, pins_file_view, ADW_TYPE_BREAKPOINT_BIN);
 
 void
 pins_file_view_setup_row (PinsKeyRow *row, PinsDesktopFile *desktop_file,
@@ -199,12 +200,28 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           keys_listbox);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           remove_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          breakpoint);
 }
 
 void
-pins_file_view_remove_button_clicked_cb (PinsFileView *self, GtkButton *button)
+pins_file_view_remove_button_clicked_cb (PinsFileView *self)
 {
     pins_desktop_file_remove (self->desktop_file);
+}
+
+void
+breakpoint_apply_cb (PinsFileView *self)
+{
+    gtk_widget_remove_css_class (GTK_WIDGET (self->name_row), "title-1-row");
+    gtk_widget_add_css_class (GTK_WIDGET (self->name_row), "title-2-row");
+}
+
+void
+breakpoint_unapply_cb (PinsFileView *self)
+{
+    gtk_widget_remove_css_class (GTK_WIDGET (self->name_row), "title-2-row");
+    gtk_widget_add_css_class (GTK_WIDGET (self->name_row), "title-1-row");
 }
 
 static void
@@ -216,4 +233,11 @@ pins_file_view_init (PinsFileView *self)
         self->remove_button, "clicked",
         G_CALLBACK (pins_file_view_remove_button_clicked_cb), self,
         G_CONNECT_SWAPPED);
+
+    g_signal_connect_object (self->breakpoint, "apply",
+                             G_CALLBACK (breakpoint_apply_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->breakpoint, "unapply",
+                             G_CALLBACK (breakpoint_unapply_cb), self,
+                             G_CONNECT_SWAPPED);
 }

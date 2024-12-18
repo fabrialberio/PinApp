@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="PinsFileView" parent="AdwBin">
+  <template class="PinsFileView" parent="AdwBreakpointBin">
+    <property name="width-request">200</property>
+    <property name="height-request">200</property>
     <child>
       <object class="AdwToolbarView" id="toolbar_view">
         <child type="top">
@@ -57,8 +59,6 @@
                                 <property name="height-request">64</property>
                                 <style>
                                   <class name="app-banner-entry" />
-                                  <!-- TODO: This should become
-                                  title-2-row when breakpoint is applied -->
                                   <class name="title-1-row" />
                                 </style>
                               </object>
@@ -102,6 +102,15 @@
             </child>
           </object>
         </property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwBreakpoint" id="breakpoint">
+        <condition>max-width: 520sp</condition>
+        <setter object="banner_box" property="orientation">vertical</setter>
+        <setter object="icon" property="margin-end">0</setter>
+        <setter object="icon" property="margin-bottom">24</setter>
+        <setter object="icon" property="pixel-size">96</setter>
       </object>
     </child>
   </template>

@@ -109,6 +109,22 @@ pins_app_icon_dispose (GObject *object)
 }
 
 static void
+pins_app_icon_get_property (GObject *object, guint prop_id, GValue *value,
+                            GParamSpec *pspec)
+{
+    PinsAppIcon *self = PINS_APP_ICON (object);
+
+    switch (prop_id)
+        {
+        case PROP_PIXEL_SIZE:
+            g_value_set_int (value, gtk_image_get_pixel_size (self->image));
+            break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+        }
+}
+
+static void
 pins_app_icon_set_property (GObject *object, guint prop_id,
                             const GValue *value, GParamSpec *pspec)
 {
@@ -130,12 +146,13 @@ pins_app_icon_class_init (PinsAppIconClass *klass)
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
+    object_class->get_property = pins_app_icon_get_property;
     object_class->set_property = pins_app_icon_set_property;
     object_class->dispose = pins_app_icon_dispose;
 
     properties[PROP_PIXEL_SIZE] = g_param_spec_int (
         "pixel-size", "Pixel Size", "Pixel size of the app icon", 0, G_MAXINT,
-        32, (G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS));
+        32, (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
     g_object_class_install_properties (object_class, N_PROPS, properties);
 
