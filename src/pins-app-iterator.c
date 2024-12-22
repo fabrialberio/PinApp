@@ -24,7 +24,6 @@
 #include "pins-directories.h"
 #include "pins-locale-utils-private.h"
 
-#define DESKTOP_FILE_CONTENT_TYPE "application/x-desktop"
 #define DIR_LIST_FILE_ATTRIBUTES                                              \
     g_strjoin (",", G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,                   \
                G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME,                        \
@@ -94,18 +93,18 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
 gboolean
 pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
 {
-    GFile *file;
-    PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
     gboolean is_desktop_file, is_duplicate = FALSE;
-
-    g_assert (G_IS_FILE_INFO (file_info));
-
-    file = G_FILE (
+    PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
+    GFile *file = G_FILE (
         g_file_info_get_attribute_object (file_info, "standard::file"));
+    gchar **split_path = g_strsplit (g_file_get_path (file), ".", -1);
 
-    is_desktop_file = g_strcmp0 (g_file_info_get_content_type (file_info),
-                                 DESKTOP_FILE_CONTENT_TYPE)
-                      == 0;
+    is_desktop_file
+        = g_strcmp0 (g_strconcat (".",
+                                  split_path[g_strv_length (split_path) - 1],
+                                  NULL),
+                     DESKTOP_FILE_SUFFIX)
+          == 0;
     is_duplicate = g_strv_contains ((const gchar *const *)self->duplicates,
                                     g_file_get_path (file));
 
@@ -165,9 +164,6 @@ pins_app_iterator_filter_pending_changed_cb (GtkFilterListModel *model,
 {
     g_assert (GTK_IS_FILTER_LIST_MODEL (model));
     g_assert (PINS_IS_APP_ITERATOR (self));
-
-    g_warning ("Loading emitted (%d)",
-               gtk_filter_list_model_get_pending (model) != 0);
 
     g_signal_emit (self, signals[LOADING], 0,
                    gtk_filter_list_model_get_pending (model) != 0);
