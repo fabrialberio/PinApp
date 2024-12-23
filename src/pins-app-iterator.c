@@ -155,8 +155,18 @@ pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
     return is_desktop_file && !is_duplicate;
 }
 
+void
+desktop_file_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
+                         GtkSorter *sorter)
+{
+    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0)
+        {
+            gtk_sorter_changed (sorter, GTK_SORTER_CHANGE_DIFFERENT);
+        }
+}
+
 gpointer
-pins_app_iterator_map_func (gpointer file_info, gpointer user_data)
+pins_app_iterator_map_func (gpointer file_info, gpointer sorter)
 {
     PinsDesktopFile *desktop_file;
     GError *err = NULL;
@@ -173,6 +183,9 @@ pins_app_iterator_map_func (gpointer file_info, gpointer user_data)
             g_warning ("Could not load desktop file at `%s`",
                        g_file_get_path (file));
         }
+
+    g_signal_connect_object (desktop_file, "key-set",
+                             G_CALLBACK (desktop_file_key_set_cb), sorter, 0);
 
     return desktop_file;
 }
@@ -237,8 +250,11 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
 {
     GtkFilterListModel *filter_model;
     GtkMapListModel *map_model;
+    GtkSorter *sorter = GTK_SORTER (gtk_custom_sorter_new (
+        pins_app_iterator_sort_compare_func, NULL, NULL));
     GtkSortListModel *sort_model;
 
+    /// TODO: Deleting newly created files does not update list
     g_signal_connect_object (G_LIST_MODEL (dir_list), "items-changed",
                              G_CALLBACK (pins_app_iterator_update_duplicates),
                              self, 0);
@@ -253,14 +269,12 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         filter_model, "notify::pending",
         G_CALLBACK (pins_app_iterator_filter_pending_changed_cb), self, 0);
 
-    map_model = gtk_map_list_model_new (
-        G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
+    map_model
+        = gtk_map_list_model_new (G_LIST_MODEL (filter_model),
+                                  &pins_app_iterator_map_func, sorter, NULL);
 
     /// TODO: call gtk_sorter_changed() when filenames change
-    sort_model = gtk_sort_list_model_new (
-        G_LIST_MODEL (map_model),
-        GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
-                                           NULL, NULL)));
+    sort_model = gtk_sort_list_model_new (G_LIST_MODEL (map_model), sorter);
 
     g_signal_connect_object (G_LIST_MODEL (sort_model), "items-changed",
                              G_CALLBACK (desktop_file_model_items_changed_cb),
