@@ -59,7 +59,6 @@ pins_app_list_set_model (PinsAppList *self, GListModel *model)
 {
     GtkNoSelection *selection_model = gtk_no_selection_new (model);
 
-    /// TODO: Causes "g_object_unref: assertion 'G_IS_OBJECT (object)' failed"
     gtk_list_view_set_model (self->list_view,
                              GTK_SELECTION_MODEL (selection_model));
 
