@@ -62,8 +62,8 @@ static gchar *pages[N_PAGES] = {
 };
 
 void
-pins_app_view_app_iterator_loaded_cb (PinsAppIterator *app_iterator,
-                                      gboolean is_loading, PinsAppView *self)
+app_iterator_loading_cb (PinsAppIterator *app_iterator, gboolean is_loading,
+                         PinsAppView *self)
 {
     g_assert (PINS_IS_APP_VIEW (self));
 
@@ -73,6 +73,13 @@ pins_app_view_app_iterator_loaded_cb (PinsAppIterator *app_iterator,
     else
         adw_view_stack_set_visible_child_name (self->view_stack,
                                                pages[PAGE_APPS]);
+}
+
+void
+app_iterator_file_created_cb (PinsAppIterator *app_iterator,
+                              PinsDesktopFile *desktop_file, PinsAppView *self)
+{
+    g_signal_emit (self, signals[ACTIVATE], 0, desktop_file);
 }
 
 void
@@ -86,8 +93,10 @@ pins_app_view_set_app_iterator (PinsAppView *self,
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
     g_signal_connect_object (app_iterator, "loading",
-                             G_CALLBACK (pins_app_view_app_iterator_loaded_cb),
-                             self, 0);
+                             G_CALLBACK (app_iterator_loading_cb), self, 0);
+    g_signal_connect_object (app_iterator, "file-created",
+                             G_CALLBACK (app_iterator_file_created_cb), self,
+                             0);
 }
 
 void
