@@ -106,7 +106,7 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
     added_keys[1] = G_KEY_FILE_DESKTOP_KEY_COMMENT;
     n_added_keys = 2;
 
-    for (int i = 0; keys[i] != NULL; i++)
+    for (int i = 0; i < g_strv_length (keys); i++)
         {
             gchar *current_key = _pins_split_key_locale (keys[i]).key;
             PinsKeyRow *row;

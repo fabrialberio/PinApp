@@ -55,9 +55,10 @@ _pins_locales_from_keys (gchar **keys)
 {
     gchar *locale = g_malloc (sizeof (gchar *));
     gchar **locales = g_malloc0_n (g_strv_length (keys) + 1, sizeof (gchar *));
+
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    for (int i = 0, lenght = 0; keys[i] != NULL; i++)
+    for (int i = 0, lenght = 0; i < g_strv_length (keys); i++)
         {
             locale = _pins_split_key_locale (keys[i]).locale;
 
@@ -84,7 +85,7 @@ _pins_key_has_locales (gchar **all_keys, gchar *key)
 
     key = _pins_split_key_locale (key).key;
 
-    for (int i = 0; all_keys[i] != NULL; i++)
+    for (int i = 0; i < g_strv_length (all_keys); i++)
         {
             split_key = _pins_split_key_locale (all_keys[i]);
 

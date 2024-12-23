@@ -167,6 +167,7 @@ pins_desktop_file_is_edited (PinsDesktopFile *self)
 void
 pins_desktop_file_remove (PinsDesktopFile *self)
 {
+    /// TODO: Deleting doesn't work for newly created files
     g_file_delete (self->user_file, NULL, NULL);
 
     g_signal_emit (self, signals[FILE_REMOVED], 0);
@@ -197,10 +198,20 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 gchar **
 pins_desktop_file_get_keys (PinsDesktopFile *self)
 {
+    gchar **keys;
+    GError *err = NULL;
+
     g_assert (PINS_IS_DESKTOP_FILE (self));
 
-    return g_key_file_get_keys (self->key_file, G_KEY_FILE_DESKTOP_GROUP, NULL,
-                                NULL);
+    keys = g_key_file_get_keys (self->key_file, G_KEY_FILE_DESKTOP_GROUP, NULL,
+                                &err);
+    if (err != NULL)
+        {
+            gchar **empty_strv = { NULL };
+            return empty_strv;
+        }
+
+    return keys;
 }
 
 gchar **
