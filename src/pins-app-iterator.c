@@ -20,6 +20,7 @@
 
 #include "pins-app-iterator.h"
 
+#include "pins-desktop-file.h"
 #include "pins-directories.h"
 #include "pins-locale-utils-private.h"
 

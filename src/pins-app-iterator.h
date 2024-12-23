@@ -22,8 +22,6 @@
 
 #include <gtk/gtk.h>
 
-#include "pins-desktop-file.h"
-
 G_BEGIN_DECLS
 
 #define PINS_TYPE_APP_ITERATOR (pins_app_iterator_get_type ())
