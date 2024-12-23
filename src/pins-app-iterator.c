@@ -273,7 +273,6 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         = gtk_map_list_model_new (G_LIST_MODEL (filter_model),
                                   &pins_app_iterator_map_func, sorter, NULL);
 
-    /// TODO: call gtk_sorter_changed() when filenames change
     sort_model = gtk_sort_list_model_new (G_LIST_MODEL (map_model), sorter);
 
     g_signal_connect_object (G_LIST_MODEL (sort_model), "items-changed",
