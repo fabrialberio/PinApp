@@ -167,7 +167,6 @@ pins_desktop_file_is_edited (PinsDesktopFile *self)
 void
 pins_desktop_file_remove (PinsDesktopFile *self)
 {
-    /// TODO: Deleting doesn't work for newly created files
     g_file_delete (self->user_file, NULL, NULL);
 
     g_signal_emit (self, signals[FILE_REMOVED], 0);
