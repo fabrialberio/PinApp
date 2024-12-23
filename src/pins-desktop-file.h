@@ -34,7 +34,9 @@ G_DECLARE_FINAL_TYPE (PinsDesktopFile, pins_desktop_file, PINS, DESKTOP_FILE,
 /// TODO: Add autostart features
 
 PinsDesktopFile *pins_desktop_file_new_from_file (GFile *file, GError **error);
+
 gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
+void pins_desktop_file_set_default (PinsDesktopFile *self);
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
 void pins_desktop_file_remove (PinsDesktopFile *self);
 

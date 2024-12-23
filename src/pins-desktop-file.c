@@ -18,12 +18,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include <glib/gi18n.h>
+
 #include "pins-desktop-file.h"
 
 #include "pins-directories.h"
 #include "pins-locale-utils-private.h"
 
-#define DEFAULT_FILENAME "pinned-app"
+#define DEFAULT_KEY_NAME _ ("New application")
+#define DEFAULT_KEY_ICON "application-x-executable"
+#define DEFAULT_KEY_EXEC _ ("notify-send \"Hello world!\"")
 #define KEY_FILE_FLAGS G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS
 
 struct _PinsDesktopFile
@@ -124,13 +128,32 @@ pins_desktop_file_new_from_file (GFile *file, GError **error)
     return desktop_file;
 }
 
+void
+pins_desktop_file_set_default (PinsDesktopFile *self)
+{
+    /// TODO: Use template file instead of this
+    /// TODO: Custom icon for new apps
+    pins_desktop_file_set_string (self, G_KEY_FILE_DESKTOP_KEY_NAME,
+                                  DEFAULT_KEY_NAME);
+    pins_desktop_file_set_string (self, G_KEY_FILE_DESKTOP_KEY_TYPE,
+                                  G_KEY_FILE_DESKTOP_TYPE_APPLICATION);
+    pins_desktop_file_set_string (self, G_KEY_FILE_DESKTOP_KEY_ICON,
+                                  DEFAULT_KEY_ICON);
+    pins_desktop_file_set_string (self, G_KEY_FILE_DESKTOP_KEY_EXEC,
+                                  DEFAULT_KEY_EXEC);
+    pins_desktop_file_set_boolean (self, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY,
+                                   FALSE);
+    pins_desktop_file_set_boolean (self, G_KEY_FILE_DESKTOP_KEY_TERMINAL,
+                                   FALSE);
+}
+
 gboolean
 pins_desktop_file_is_user_only (PinsDesktopFile *self)
 {
     return self->system_file == NULL;
 }
 
-/*
+/**
  * Returns `TRUE` if the file has been changed since the last save.
  */
 gboolean
