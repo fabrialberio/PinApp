@@ -20,7 +20,6 @@
 
 #include "pins-app-iterator.h"
 
-#include "pins-desktop-file.h"
 #include "pins-directories.h"
 #include "pins-locale-utils-private.h"
 
@@ -34,6 +33,8 @@ struct _PinsAppIterator
     GObject parent_instance;
 
     gchar **duplicates;
+    gchar **unique_filenames;
+    gboolean just_created_file;
     GListModel *model;
 };
 
@@ -46,6 +47,7 @@ G_DEFINE_TYPE_WITH_CODE (PinsAppIterator, pins_app_iterator, G_TYPE_OBJECT,
 enum
 {
     LOADING,
+    FILE_CREATED,
     N_SIGNALS
 };
 
@@ -57,6 +59,45 @@ pins_app_iterator_new (void)
     return g_object_new (PINS_TYPE_APP_ITERATOR, NULL);
 }
 
+void
+pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
+                                    gchar *suffix, GError **error)
+{
+    gchar increment[8] = "";
+    gchar *filename;
+    GFile *file;
+    GError *err = NULL;
+
+    if (self->just_created_file)
+        return;
+
+    for (int i = 0; i < 999999; i++)
+        {
+            if (i > 0)
+                sprintf (increment, "-%d", i);
+
+            filename = g_strconcat (basename, increment, suffix, NULL);
+            if (!g_strv_contains ((const gchar **)self->unique_filenames,
+                                  filename))
+                {
+                    break;
+                }
+        }
+
+    file = g_file_new_for_path (
+        g_strconcat (pins_user_app_path (), "/", filename, NULL));
+    g_file_create (file, G_FILE_CREATE_NONE, NULL, &err);
+    if (err != NULL)
+        {
+            g_warning ("Could not create new file `%s`",
+                       g_file_get_path (file));
+            g_propagate_error (error, err);
+            return;
+        }
+
+    self->just_created_file = TRUE;
+}
+
 static void
 pins_app_iterator_update_duplicates (GListModel *model, guint position,
                                      guint removed, guint added,
@@ -65,29 +106,31 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
     PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    gchar *unique_filenames[g_list_model_get_n_items (model)] = {};
+    gchar *unique_filenames[g_list_model_get_n_items (model) + 1] = {};
     gsize n_unique_filenames = 0;
 
     for (int i = 0; i < g_list_model_get_n_items (model); i++)
         {
+            GFileInfo *file_info
+                = G_FILE_INFO (g_list_model_get_item (model, i));
             GFile *file = G_FILE (g_file_info_get_attribute_object (
-                G_FILE_INFO (g_list_model_get_item (model, i)),
-                "standard::file"));
+                file_info, "standard::file"));
 
             if (g_strv_contains ((const gchar *const *)unique_filenames,
-                                 g_file_get_basename (file)))
+                                 g_file_info_get_display_name (file_info)))
                 {
                     g_strv_builder_add (strv_builder, g_file_get_path (file));
                 }
             else
                 {
                     unique_filenames[n_unique_filenames]
-                        = g_file_get_basename (file);
+                        = (gchar *)g_file_info_get_display_name (file_info);
                     n_unique_filenames++;
                 }
         }
 
     self->duplicates = g_strv_builder_end (strv_builder);
+    self->unique_filenames = g_strdupv (unique_filenames);
 }
 
 gboolean
@@ -170,6 +213,24 @@ pins_app_iterator_filter_pending_changed_cb (GtkFilterListModel *model,
 }
 
 void
+desktop_file_model_items_changed_cb (GListModel *model, guint position,
+                                     guint removed, guint added,
+                                     PinsAppIterator *self)
+{
+    if (added > 0 && self->just_created_file)
+        {
+            PinsDesktopFile *desktop_file
+                = PINS_DESKTOP_FILE (g_list_model_get_item (model, position));
+
+            pins_desktop_file_set_default (desktop_file);
+            g_signal_emit (self, signals[FILE_CREATED], 0, desktop_file);
+            self->just_created_file = FALSE;
+        }
+
+    g_list_model_items_changed (G_LIST_MODEL (self), position, removed, added);
+}
+
+void
 pins_app_iterator_set_directory_list (PinsAppIterator *self,
                                       GListModel *dir_list)
 {
@@ -194,14 +255,15 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
     map_model = gtk_map_list_model_new (
         G_LIST_MODEL (filter_model), &pins_app_iterator_map_func, NULL, NULL);
 
+    /// TODO: call gtk_sorter_changed() when filenames change
     sort_model = gtk_sort_list_model_new (
         G_LIST_MODEL (map_model),
         GTK_SORTER (gtk_custom_sorter_new (pins_app_iterator_sort_compare_func,
                                            NULL, NULL)));
 
     g_signal_connect_object (G_LIST_MODEL (sort_model), "items-changed",
-                             G_CALLBACK (g_list_model_items_changed), self,
-                             G_CONNECT_SWAPPED);
+                             G_CALLBACK (desktop_file_model_items_changed_cb),
+                             self, 0);
 
     self->model = G_LIST_MODEL (sort_model);
 }
@@ -236,11 +298,16 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
     signals[LOADING] = g_signal_new ("loading", G_TYPE_FROM_CLASS (klass),
                                      G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
                                      G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
+
+    signals[FILE_CREATED] = g_signal_new (
+        "file-created", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST, 0, NULL,
+        NULL, NULL, G_TYPE_NONE, 1, G_TYPE_OBJECT);
 }
 
 static void
 pins_app_iterator_init (PinsAppIterator *self)
 {
+    self->just_created_file = FALSE;
 }
 
 gpointer

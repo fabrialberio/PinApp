@@ -22,6 +22,8 @@
 
 #include <gtk/gtk.h>
 
+#include "pins-desktop-file.h"
+
 G_BEGIN_DECLS
 
 #define PINS_TYPE_APP_ITERATOR (pins_app_iterator_get_type ())
@@ -31,5 +33,9 @@ G_DECLARE_FINAL_TYPE (PinsAppIterator, pins_app_iterator, PINS, APP_ITERATOR,
 
 PinsAppIterator *pins_app_iterator_new (void);
 void pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths);
+
+void pins_app_iterator_create_user_file (PinsAppIterator *self,
+                                         gchar *basename, gchar *suffix,
+                                         GError **error);
 
 G_END_DECLS
