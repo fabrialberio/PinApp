@@ -30,6 +30,8 @@ struct _PinsWindow
 {
     AdwApplicationWindow parent_instance;
 
+    PinsAppIterator *app_iterator;
+
     /* Template widgets */
     GtkButton *new_file_button;
     GtkToggleButton *search_button;
@@ -128,8 +130,7 @@ pins_window_file_removed_cb (PinsDesktopFile *desktop_file, PinsWindow *self)
 }
 
 void
-pins_window_item_activated_cb (GtkListView *list_view,
-                               PinsDesktopFile *desktop_file, PinsWindow *self)
+pins_window_load_file (PinsWindow *self, PinsDesktopFile *desktop_file)
 {
     g_assert (PINS_IS_WINDOW (self));
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
@@ -148,6 +149,13 @@ pins_window_item_activated_cb (GtkListView *list_view,
                              0);
 
     adw_navigation_view_push_by_tag (self->navigation_view, pages[PAGE_FILE]);
+}
+
+void
+pins_window_new_file (PinsWindow *self)
+{
+    pins_app_iterator_create_user_file (self->app_iterator, "pinned-app",
+                                        DESKTOP_FILE_SUFFIX, NULL);
 }
 
 void
@@ -173,7 +181,6 @@ static void
 pins_window_init (PinsWindow *self)
 {
     GtkIconTheme *theme;
-    PinsAppIterator *app_iterator;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -186,22 +193,26 @@ pins_window_init (PinsWindow *self)
     gtk_search_bar_connect_entry (self->search_bar,
                                   GTK_EDITABLE (self->search_entry));
 
-    app_iterator = pins_app_iterator_new ();
-    pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
+    self->app_iterator = pins_app_iterator_new ();
+    pins_app_iterator_set_paths (self->app_iterator, pins_all_app_paths ());
 
-    pins_app_view_set_app_iterator (self->app_view, app_iterator);
+    pins_app_view_set_app_iterator (self->app_view, self->app_iterator);
     pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
 
-    pins_app_view_set_app_iterator (self->search_view, app_iterator);
+    pins_app_view_set_app_iterator (self->search_view, self->app_iterator);
     pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
     pins_app_view_set_search_entry (self->search_view, self->search_entry);
 
+    g_signal_connect_object (self->new_file_button, "clicked",
+                             G_CALLBACK (pins_window_new_file), self,
+                             G_CONNECT_SWAPPED);
+
     g_signal_connect_object (self->app_view, "activate",
-                             G_CALLBACK (pins_window_item_activated_cb), self,
-                             0);
+                             G_CALLBACK (pins_window_load_file), self,
+                             G_CONNECT_SWAPPED);
     g_signal_connect_object (self->search_view, "activate",
-                             G_CALLBACK (pins_window_item_activated_cb), self,
-                             0);
+                             G_CALLBACK (pins_window_load_file), self,
+                             G_CONNECT_SWAPPED);
     g_signal_connect_object (
         adw_navigation_view_find_page (self->navigation_view,
                                        pages[PAGE_FILE]),
