@@ -21,12 +21,18 @@
 #pragma once
 
 #include <gio/gio.h>
+#include <glib/gi18n.h>
 
 G_BEGIN_DECLS
 
 #define PINS_TYPE_DESKTOP_FILE (pins_desktop_file_get_type ())
 
 #define DESKTOP_FILE_SUFFIX ".desktop"
+#define PINS_DESKTOP_FILE_DEFAULT_CONTENT                                     \
+    g_strconcat ("[Desktop Entry]\nName=", _ ("New application"),             \
+                 "\nType=", G_KEY_FILE_DESKTOP_TYPE_APPLICATION,              \
+                 "\nIcon=", "application-x-executable",                       \
+                 "\nExec=", _ ("notify-send \"Hello world!\""), NULL)
 
 G_DECLARE_FINAL_TYPE (PinsDesktopFile, pins_desktop_file, PINS, DESKTOP_FILE,
                       GObject);
@@ -36,7 +42,6 @@ G_DECLARE_FINAL_TYPE (PinsDesktopFile, pins_desktop_file, PINS, DESKTOP_FILE,
 PinsDesktopFile *pins_desktop_file_new_from_file (GFile *file, GError **error);
 
 gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
-void pins_desktop_file_set_default (PinsDesktopFile *self);
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
 void pins_desktop_file_remove (PinsDesktopFile *self);
 
