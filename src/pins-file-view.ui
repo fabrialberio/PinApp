@@ -74,6 +74,7 @@
                         </child>
                       </object>
                     </child>
+                    <!-- TODO: Implement quick toggles -->
                     <child>
                       <object class="GtkListBox" id="keys_listbox">
                         <property name="selection-mode">none</property>
@@ -84,12 +85,14 @@
                     </child>
                     <child>
                       <object class="GtkListBox">
+                        <!-- TODO: Add icon row with option to load from folder -->
                         <property name="selection-mode">none</property>
                         <style>
                           <class name="boxed-list" />
                         </style>
                         <child>
                           <object class="AdwButtonRow" id="add_key_button">
+                            <!-- TODO: Implement adding keys -->
                             <property name="title" translatable="yes">Add key</property>
                             <property name="start-icon-name">list-add-symbolic</property>
                           </object>
@@ -128,11 +131,13 @@
         <property name="margin-end">6</property>
         <child>
           <object class="GtkModelButton" id="remove_button">
-            <property name="text" translatable="yes">_Remove file</property>
+            <!-- TODO: Add remove warning dialog -->
+            <property name="text" translatable="yes">D_elete</property>
           </object>
         </child>
         <child>
           <object class="GtkModelButton" id="duplicate_button">
+            <!-- TODO: Implement duplicating files -->
             <property name="text" translatable="yes">_Duplicate</property>
           </object>
         </child>

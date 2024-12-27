@@ -204,7 +204,7 @@ pins_file_view_class_init (PinsFileViewClass *klass)
 void
 pins_file_view_remove_button_clicked_cb (PinsFileView *self)
 {
-    pins_desktop_file_remove (self->desktop_file);
+    pins_desktop_file_delete (self->desktop_file);
 }
 
 void

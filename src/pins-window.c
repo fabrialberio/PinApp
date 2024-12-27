@@ -118,7 +118,7 @@ pins_window_class_init (PinsWindowClass *klass)
 }
 
 void
-pins_window_file_removed_cb (PinsDesktopFile *desktop_file, PinsWindow *self)
+pins_window_file_deleted_cb (PinsDesktopFile *desktop_file, PinsWindow *self)
 {
     g_assert (PINS_IS_WINDOW (self));
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
@@ -139,13 +139,13 @@ pins_window_load_file (PinsWindow *self, PinsDesktopFile *desktop_file)
         {
             g_signal_handlers_disconnect_by_func (
                 pins_window_get_current_desktop_file (self),
-                pins_window_file_removed_cb, self);
+                pins_window_file_deleted_cb, self);
         }
 
     pins_file_view_set_desktop_file (self->file_view, desktop_file);
 
     g_signal_connect_object (desktop_file, "file-removed",
-                             G_CALLBACK (pins_window_file_removed_cb), self,
+                             G_CALLBACK (pins_window_file_deleted_cb), self,
                              0);
 
     adw_navigation_view_push_by_tag (self->navigation_view, pages[PAGE_FILE]);
