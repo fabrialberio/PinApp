@@ -67,6 +67,7 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
     gchar increment[8] = "";
     gchar *filename;
     GFile *file;
+    GOutputStream *stream;
     GError *err = NULL;
 
     if (self->just_created_file)
@@ -88,13 +89,21 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
 
     file = g_file_new_for_path (
         g_strconcat (pins_user_app_path (), "/", filename, NULL));
-    g_file_create (file, G_FILE_CREATE_NONE, NULL, &err);
+    stream = g_io_stream_get_output_stream (G_IO_STREAM (
+        g_file_create_readwrite (file, G_FILE_CREATE_NONE, NULL, &err)));
     if (err != NULL)
         {
             g_propagate_error (error, err);
             return;
         }
 
+    g_output_stream_write (stream, PINS_DESKTOP_FILE_DEFAULT_CONTENT,
+                           strlen (PINS_DESKTOP_FILE_DEFAULT_CONTENT), NULL,
+                           &err);
+    if (err != NULL)
+        g_propagate_error (error, err);
+
+    g_output_stream_close (stream, NULL, NULL);
     self->just_created_file = TRUE;
 }
 
