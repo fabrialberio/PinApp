@@ -62,7 +62,7 @@ pins_app_iterator_new (void)
 
 void
 pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
-                                    gchar *suffix, GError **error)
+                                    GError **error)
 {
     gchar increment[8] = "";
     gchar *filename;
@@ -77,7 +77,8 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
             if (i > 0)
                 sprintf (increment, "-%d", i);
 
-            filename = g_strconcat (basename, increment, suffix, NULL);
+            filename = g_strconcat (basename, increment,
+                                    PINS_DESKTOP_FILE_SUFFIX, NULL);
             if (!g_strv_contains ((const gchar **)self->unique_filenames,
                                   filename))
                 {
@@ -90,8 +91,6 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
     g_file_create (file, G_FILE_CREATE_NONE, NULL, &err);
     if (err != NULL)
         {
-            g_warning ("Could not create new file `%s`",
-                       g_file_get_path (file));
             g_propagate_error (error, err);
             return;
         }
@@ -147,7 +146,7 @@ pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
         = g_strcmp0 (g_strconcat (".",
                                   split_path[g_strv_length (split_path) - 1],
                                   NULL),
-                     DESKTOP_FILE_SUFFIX)
+                     PINS_DESKTOP_FILE_SUFFIX)
           == 0;
     is_duplicate = g_strv_contains ((const gchar *const *)self->duplicates,
                                     g_file_get_path (file));
@@ -236,7 +235,7 @@ desktop_file_model_items_changed_cb (GListModel *model, guint position,
             PinsDesktopFile *desktop_file
                 = PINS_DESKTOP_FILE (g_list_model_get_item (model, position));
 
-            pins_desktop_file_set_default (desktop_file);
+            // pins_desktop_file_set_default (desktop_file);
             g_signal_emit (self, signals[FILE_CREATED], 0, desktop_file);
             self->just_created_file = FALSE;
         }
@@ -254,7 +253,18 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         pins_app_iterator_sort_compare_func, NULL, NULL));
     GtkSortListModel *sort_model;
 
-    /// TODO: Deleting newly created files does not update list
+    /** TODO:
+    This works
+     1. Create file
+     2. Delete file
+     3. File deleted successfully
+
+    This doesn't work:
+     1. Create file
+     2. Edit file
+     3. Delete file
+     4. File phisically deleted, but dir list no longer updates
+    */
     g_signal_connect_object (G_LIST_MODEL (dir_list), "items-changed",
                              G_CALLBACK (pins_app_iterator_update_duplicates),
                              self, 0);

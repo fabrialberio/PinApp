@@ -27,7 +27,7 @@ G_BEGIN_DECLS
 
 #define PINS_TYPE_DESKTOP_FILE (pins_desktop_file_get_type ())
 
-#define DESKTOP_FILE_SUFFIX ".desktop"
+#define PINS_DESKTOP_FILE_SUFFIX ".desktop"
 #define PINS_DESKTOP_FILE_DEFAULT_CONTENT                                     \
     g_strconcat ("[Desktop Entry]\nName=", _ ("New application"),             \
                  "\nType=", G_KEY_FILE_DESKTOP_TYPE_APPLICATION,              \

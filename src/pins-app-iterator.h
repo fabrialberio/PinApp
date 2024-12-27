@@ -33,7 +33,6 @@ PinsAppIterator *pins_app_iterator_new (void);
 void pins_app_iterator_set_paths (PinsAppIterator *self, gchar **paths);
 
 void pins_app_iterator_create_user_file (PinsAppIterator *self,
-                                         gchar *basename, gchar *suffix,
-                                         GError **error);
+                                         gchar *basename, GError **error);
 
 G_END_DECLS

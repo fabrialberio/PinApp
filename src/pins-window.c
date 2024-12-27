@@ -155,7 +155,7 @@ void
 pins_window_new_file (PinsWindow *self)
 {
     pins_app_iterator_create_user_file (self->app_iterator, "pinned-app",
-                                        DESKTOP_FILE_SUFFIX, NULL);
+                                        NULL);
 }
 
 void
