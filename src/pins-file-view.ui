@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <!-- TODO: Custom UI for opened files? -->
   <template class="PinsFileView" parent="AdwBreakpointBin">
     <property name="width-request">200</property>
     <property name="height-request">200</property>
@@ -38,6 +39,7 @@
                       <object class="GtkBox" id="banner_box">
                         <property name="orientation">horizontal</property>
                         <child>
+                          <!-- TODO: Add edit button in the corner -->
                           <object class="PinsAppIcon" id="icon">
                             <property name="margin-end">6</property>
                             <property name="margin-bottom">6</property>
@@ -95,6 +97,7 @@
                             <!-- TODO: Implement adding keys -->
                             <property name="title" translatable="yes">Add key</property>
                             <property name="start-icon-name">list-add-symbolic</property>
+                            <property name="sensitive">false</property>
                           </object>
                         </child>
                       </object>
