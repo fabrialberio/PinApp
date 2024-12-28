@@ -151,11 +151,13 @@ pins_desktop_file_delete (PinsDesktopFile *self)
 void
 pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
+    g_autoptr (GOutputStream) stream = NULL;
+    g_autoptr (GError) err = NULL;
+
     if (!pins_desktop_file_is_edited (self))
         return;
 
     g_return_if_fail (g_file_query_exists (self->user_file, NULL));
-    g_warning ("Saving desktop file `%s`", g_file_get_path (self->user_file));
 
     self->saved_data = g_key_file_to_data (self->key_file, NULL, NULL);
 
@@ -167,8 +169,18 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
             g_file_delete (self->user_file, NULL, NULL);
         }
 
-    g_key_file_save_to_file (self->key_file, g_file_get_path (self->user_file),
-                             error);
+    stream = g_io_stream_get_output_stream (
+        G_IO_STREAM (g_file_open_readwrite (self->user_file, NULL, &err)));
+    if (err != NULL)
+        {
+            g_propagate_error (error, err);
+            g_output_stream_close (stream, NULL, NULL);
+            return;
+        }
+
+    g_output_stream_write (stream, self->saved_data, strlen (self->saved_data),
+                           NULL, NULL);
+    g_output_stream_close (stream, NULL, NULL);
 }
 
 gchar **
