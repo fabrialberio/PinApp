@@ -21,7 +21,6 @@
 #pragma once
 
 #include "pins-app-iterator.h"
-#include "pins-app-list.h"
 
 #include <adwaita.h>
 
@@ -33,9 +32,5 @@ G_DECLARE_FINAL_TYPE (PinsAppView, pins_app_view, PINS, APP_VIEW, AdwBin)
 
 void pins_app_view_set_app_iterator (PinsAppView *self,
                                      PinsAppIterator *app_iterator);
-void pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list);
-// void pins_app_view_set_app_grid (PinsAppView *self, PinsAppGrid *app_grid);
-void pins_app_view_set_search_entry (PinsAppView *self,
-                                     GtkSearchEntry *search_entry);
 
 G_END_DECLS

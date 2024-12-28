@@ -30,16 +30,8 @@ struct _PinsWindow
 {
     AdwApplicationWindow parent_instance;
 
-    PinsAppIterator *app_iterator;
-
-    /* Template widgets */
-    GtkButton *new_file_button;
-    GtkToggleButton *search_button;
-    GtkSearchBar *search_bar;
-    GtkSearchEntry *search_entry;
     AdwNavigationView *navigation_view;
     PinsAppView *app_view;
-    PinsAppView *search_view;
     PinsFileView *file_view;
 };
 
@@ -102,18 +94,8 @@ pins_window_class_init (PinsWindowClass *klass)
     g_type_ensure (PINS_TYPE_FILE_VIEW);
 
     gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          new_file_button);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_button);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_bar);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_entry);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
                                           navigation_view);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow, app_view);
-    gtk_widget_class_bind_template_child (widget_class, PinsWindow,
-                                          search_view);
     gtk_widget_class_bind_template_child (widget_class, PinsWindow, file_view);
 }
 
@@ -152,13 +134,6 @@ pins_window_load_file (PinsWindow *self, PinsDesktopFile *desktop_file)
 }
 
 void
-pins_window_new_file (PinsWindow *self)
-{
-    pins_app_iterator_create_user_file (self->app_iterator, "pinned-app",
-                                        NULL);
-}
-
-void
 pins_window_file_page_hiding_cb (AdwNavigationPage *self,
                                  PinsWindow *user_data)
 {
@@ -181,6 +156,7 @@ static void
 pins_window_init (PinsWindow *self)
 {
     GtkIconTheme *theme;
+    PinsAppIterator *app_iterator;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -190,29 +166,15 @@ pins_window_init (PinsWindow *self)
     // This is noticeably slow
     pins_icon_theme_inject_search_paths (theme);
 
-    gtk_search_bar_connect_entry (self->search_bar,
-                                  GTK_EDITABLE (self->search_entry));
+    app_iterator = pins_app_iterator_new ();
+    pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
 
-    self->app_iterator = pins_app_iterator_new ();
-    pins_app_iterator_set_paths (self->app_iterator, pins_all_app_paths ());
-
-    pins_app_view_set_app_iterator (self->app_view, self->app_iterator);
-    pins_app_view_set_app_list (self->app_view, pins_app_list_new ());
-
-    pins_app_view_set_app_iterator (self->search_view, self->app_iterator);
-    pins_app_view_set_app_list (self->search_view, pins_app_list_new ());
-    pins_app_view_set_search_entry (self->search_view, self->search_entry);
-
-    g_signal_connect_object (self->new_file_button, "clicked",
-                             G_CALLBACK (pins_window_new_file), self,
-                             G_CONNECT_SWAPPED);
+    pins_app_view_set_app_iterator (self->app_view, app_iterator);
 
     g_signal_connect_object (self->app_view, "activate",
                              G_CALLBACK (pins_window_load_file), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->search_view, "activate",
-                             G_CALLBACK (pins_window_load_file), self,
-                             G_CONNECT_SWAPPED);
+
     g_signal_connect_object (
         adw_navigation_view_find_page (self->navigation_view,
                                        pages[PAGE_FILE]),

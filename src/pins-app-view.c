@@ -31,11 +31,15 @@ struct _PinsAppView
 {
     AdwBin parent_instance;
 
-    AdwBin *apps_bin;
-    AdwViewStack *view_stack;
-
     GtkStringFilter *string_filter;
     GtkFilterListModel *filter_model;
+
+    GtkButton *new_file_button;
+    GtkToggleButton *search_button;
+    GtkSearchBar *search_bar;
+    GtkSearchEntry *search_entry;
+    AdwViewStack *view_stack;
+    PinsAppList *app_list;
 };
 
 G_DEFINE_TYPE (PinsAppView, pins_app_view, ADW_TYPE_BIN);
@@ -92,68 +96,14 @@ pins_app_view_set_app_iterator (PinsAppView *self,
     self->filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
+    pins_app_list_set_model (self->app_list,
+                             G_LIST_MODEL (self->filter_model));
+
     g_signal_connect_object (app_iterator, "loading",
                              G_CALLBACK (app_iterator_loading_cb), self, 0);
     g_signal_connect_object (app_iterator, "file-created",
                              G_CALLBACK (app_iterator_file_created_cb), self,
                              0);
-}
-
-void
-pins_app_view_item_activated_cb (GtkListView *self, guint position,
-                                 PinsAppView *user_data)
-{
-    PinsDesktopFile *desktop_file;
-
-    g_assert (PINS_IS_APP_VIEW (user_data));
-
-    desktop_file = g_list_model_get_item (
-        G_LIST_MODEL (user_data->filter_model), position);
-
-    g_signal_emit (user_data, signals[ACTIVATE], 0, desktop_file);
-}
-
-void
-pins_app_view_set_app_list (PinsAppView *self, PinsAppList *app_list)
-{
-    // TODO: Doesn't work if called before pins_app_view_set_app_iterator
-
-    pins_app_list_set_model (app_list, G_LIST_MODEL (self->filter_model));
-
-    adw_bin_set_child (self->apps_bin, GTK_WIDGET (app_list));
-
-    g_signal_connect_object (app_list, "activate",
-                             G_CALLBACK (pins_app_view_item_activated_cb),
-                             self, 0);
-}
-
-void
-pins_app_view_search_changed_cb (GtkSearchEntry *self, PinsAppView *user_data)
-{
-    g_assert (PINS_IS_APP_VIEW (user_data));
-
-    gtk_string_filter_set_search (user_data->string_filter,
-                                  gtk_editable_get_text (GTK_EDITABLE (self)));
-
-    if (g_list_model_get_n_items (G_LIST_MODEL (user_data->filter_model)) == 0)
-        {
-            adw_view_stack_set_visible_child_name (user_data->view_stack,
-                                                   pages[PAGE_EMPTY]);
-        }
-    else
-        {
-            adw_view_stack_set_visible_child_name (user_data->view_stack,
-                                                   pages[PAGE_APPS]);
-        }
-}
-
-void
-pins_app_view_set_search_entry (PinsAppView *self,
-                                GtkSearchEntry *search_entry)
-{
-    g_signal_connect_object (search_entry, "search-changed",
-                             G_CALLBACK (pins_app_view_search_changed_cb),
-                             self, 0);
 }
 
 static void
@@ -163,9 +113,7 @@ pins_app_view_dispose (GObject *object)
 
     g_clear_object (&self->string_filter);
 
-    /// TODO: Cannot dispose successfully, causes exit code 139
-    // g_clear_object (&self->filter_model);
-    // gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
+    gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
 
     G_OBJECT_CLASS (pins_app_view_parent_class)->dispose (object);
 }
@@ -186,9 +134,60 @@ pins_app_view_class_init (PinsAppViewClass *klass)
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-view.ui");
     g_type_ensure (PINS_TYPE_APP_LIST);
 
-    gtk_widget_class_bind_template_child (widget_class, PinsAppView, apps_bin);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
+                                          new_file_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
+                                          search_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
+                                          search_bar);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
+                                          search_entry);
     gtk_widget_class_bind_template_child (widget_class, PinsAppView,
                                           view_stack);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView, app_list);
+}
+
+void
+pins_app_view_search_changed_cb (GtkSearchEntry *entry, PinsAppView *self)
+{
+    g_assert (PINS_IS_APP_VIEW (self));
+
+    gtk_string_filter_set_search (
+        self->string_filter, gtk_editable_get_text (GTK_EDITABLE (entry)));
+
+    if (g_list_model_get_n_items (G_LIST_MODEL (self->filter_model)) == 0)
+        {
+            adw_view_stack_set_visible_child_name (self->view_stack,
+                                                   pages[PAGE_EMPTY]);
+        }
+    else
+        {
+            adw_view_stack_set_visible_child_name (self->view_stack,
+                                                   pages[PAGE_APPS]);
+        }
+}
+
+void
+pins_app_view_create_file_cb (PinsAppView *self)
+{
+    PinsAppIterator *app_iterator = PINS_APP_ITERATOR (
+        gtk_filter_list_model_get_model (self->filter_model));
+
+    pins_app_iterator_create_user_file (app_iterator, "pinned-app", NULL);
+}
+
+void
+pins_app_view_item_activated_cb (GtkListView *self, guint position,
+                                 PinsAppView *user_data)
+{
+    PinsDesktopFile *desktop_file;
+
+    g_assert (PINS_IS_APP_VIEW (user_data));
+
+    desktop_file = g_list_model_get_item (
+        G_LIST_MODEL (user_data->filter_model), position);
+
+    g_signal_emit (user_data, signals[ACTIVATE], 0, desktop_file);
 }
 
 static void
@@ -196,9 +195,22 @@ pins_app_view_init (PinsAppView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
 
+    self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
+        PINS_TYPE_DESKTOP_FILE, NULL, "search-string"));
+
     adw_view_stack_set_visible_child_name (self->view_stack,
                                            pages[PAGE_LOADING]);
 
-    self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
-        PINS_TYPE_DESKTOP_FILE, NULL, "search-string"));
+    gtk_search_bar_connect_entry (self->search_bar,
+                                  GTK_EDITABLE (self->search_entry));
+
+    g_signal_connect_object (self->search_entry, "search-changed",
+                             G_CALLBACK (pins_app_view_search_changed_cb),
+                             self, 0);
+    g_signal_connect_object (self->app_list, "activate",
+                             G_CALLBACK (pins_app_view_item_activated_cb),
+                             self, 0);
+    g_signal_connect_object (self->new_file_button, "clicked",
+                             G_CALLBACK (pins_app_view_create_file_cb), self,
+                             G_CONNECT_SWAPPED);
 }
