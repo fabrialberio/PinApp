@@ -22,11 +22,15 @@
 
 #include <adwaita.h>
 
+#include "pins-desktop-file.h"
+
 G_BEGIN_DECLS
 
 #define PINS_TYPE_WINDOW (pins_window_get_type ())
 
 G_DECLARE_FINAL_TYPE (PinsWindow, pins_window, PINS, WINDOW,
                       AdwApplicationWindow)
+
+void pins_window_load_file (PinsWindow *self, PinsDesktopFile *desktop_file);
 
 G_END_DECLS
