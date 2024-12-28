@@ -35,7 +35,7 @@ main (int argc, char *argv[])
     textdomain (GETTEXT_PACKAGE);
 
     app = pins_application_new ("io.github.fabrialberio.pinapp",
-                                G_APPLICATION_DEFAULT_FLAGS);
+                                G_APPLICATION_HANDLES_OPEN);
     ret = g_application_run (G_APPLICATION (app), argc, argv);
 
     return ret;

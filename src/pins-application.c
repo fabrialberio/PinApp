@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "pins-application.h"
+#include "pins-desktop-file.h"
 #include "pins-window.h"
 
 struct _PinsApplication
@@ -42,16 +43,41 @@ pins_application_new (const char *application_id, GApplicationFlags flags)
 static void
 pins_application_activate (GApplication *app)
 {
-    GtkWindow *window;
+    GtkWindow *window
+        = gtk_application_get_active_window (GTK_APPLICATION (app));
 
     g_assert (PINS_IS_APPLICATION (app));
-
-    window = gtk_application_get_active_window (GTK_APPLICATION (app));
 
     if (window == NULL)
         window = g_object_new (PINS_TYPE_WINDOW, "application", app, NULL);
 
-    gtk_window_present (window);
+    gtk_window_present (GTK_WINDOW (window));
+}
+
+static void
+pins_application_open (GApplication *app, GFile **files, gint n_files,
+                       const gchar *hint)
+{
+    PinsWindow *window;
+    PinsDesktopFile *desktop_file;
+    GError *err = NULL;
+
+    g_return_if_fail (g_file_query_exists (files[0], NULL));
+
+    g_application_activate (app);
+
+    window = PINS_WINDOW (
+        gtk_application_get_active_window (GTK_APPLICATION (app)));
+
+    desktop_file = pins_desktop_file_new_from_user_file (files[0], &err);
+    if (err != NULL)
+        {
+            g_critical ("Error opening file at `%s`: %s",
+                        g_file_get_path (files[0]), err->message);
+            return;
+        }
+
+    pins_window_load_file (window, desktop_file);
 }
 
 static void
@@ -127,4 +153,7 @@ pins_application_init (PinsApplication *self)
     gtk_application_set_accels_for_action (
         GTK_APPLICATION (self), "app.quit",
         (const char *[]){ "<primary>q", NULL });
+
+    g_signal_connect_object (G_APPLICATION (self), "open",
+                             G_CALLBACK (pins_application_open), self, 0);
 }
