@@ -79,6 +79,8 @@ pins_desktop_file_new_from_user_file (GFile *file, GError **error)
     desktop_file->saved_data
         = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
 
+    g_object_ref (G_OBJECT (desktop_file->user_file));
+
     return desktop_file;
 }
 
@@ -124,6 +126,9 @@ pins_desktop_file_new_from_system_file (GFile *file, GError **error)
 
     desktop_file->saved_data
         = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
+
+    g_object_ref (G_OBJECT (desktop_file->user_file));
+    g_object_ref (G_OBJECT (desktop_file->system_file));
 
     return desktop_file;
 }
@@ -190,7 +195,8 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
     if (!pins_desktop_file_is_edited (self))
         return;
 
-    self->saved_data = g_key_file_to_data (self->key_file, NULL, NULL);
+    self->saved_data
+        = g_strdup (g_key_file_to_data (self->key_file, NULL, NULL));
 
     if (self->system_file != NULL
         && g_strcmp0 (self->saved_data,
@@ -239,10 +245,13 @@ pins_desktop_file_get_locales (PinsDesktopFile *self)
     return _pins_locales_from_keys (pins_desktop_file_get_keys (self));
 }
 
-gchar *
-pins_desktop_file_get_search_string (PinsDesktopFile *self)
+static void
+pins_desktop_file_dispose (GObject *object)
 {
-    return self->saved_data;
+    PinsDesktopFile *self = PINS_DESKTOP_FILE (object);
+
+    g_clear_object (&self->user_file);
+    g_clear_object (&self->system_file);
 }
 
 static void
@@ -254,8 +263,7 @@ pins_desktop_file_get_property (GObject *object, guint prop_id, GValue *value,
     switch (prop_id)
         {
         case PROP_SEARCH_STRING:
-            g_value_set_string (value,
-                                pins_desktop_file_get_search_string (self));
+            g_value_set_string (value, self->saved_data);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -267,6 +275,7 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+    object_class->dispose = pins_desktop_file_dispose;
     object_class->get_property = pins_desktop_file_get_property;
 
     properties[PROP_SEARCH_STRING]
