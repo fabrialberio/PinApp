@@ -262,18 +262,6 @@ pins_app_iterator_set_directory_list (PinsAppIterator *self,
         pins_app_iterator_sort_compare_func, NULL, NULL));
     GtkSortListModel *sort_model;
 
-    /** TODO:
-    This works
-     1. Create file
-     2. Delete file
-     3. File deleted successfully
-
-    This doesn't work:
-     1. Create file
-     2. Edit file
-     3. Delete file
-     4. File phisically deleted, but dir list no longer updates
-    */
     g_signal_connect_object (G_LIST_MODEL (dir_list), "items-changed",
                              G_CALLBACK (pins_app_iterator_update_duplicates),
                              self, 0);
