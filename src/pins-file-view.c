@@ -20,6 +20,7 @@
 
 #include "pins-file-view.h"
 
+#include "pins-add-key-dialog-private.h"
 #include "pins-app-icon.h"
 #include "pins-key-row.h"
 #include "pins-locale-utils-private.h"
@@ -29,6 +30,7 @@ struct _PinsFileView
     AdwBin parent_instance;
 
     PinsDesktopFile *desktop_file;
+    gchar **keys;
 
     AdwHeaderBar *header_bar;
     AdwWindowTitle *window_title;
@@ -37,6 +39,7 @@ struct _PinsFileView
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
     GtkListBox *keys_listbox;
+    AdwButtonRow *add_key_button;
     GtkButton *remove_button;
     AdwBreakpoint *breakpoint;
 };
@@ -70,6 +73,11 @@ pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
 {
     g_assert (PINS_IS_FILE_VIEW (self));
 
+    if (!g_strv_contains ((const gchar *const *)self->keys, key))
+        {
+            pins_file_view_set_desktop_file (self, self->desktop_file);
+        }
+
     if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0)
         {
             pins_file_view_update_title (self);
@@ -89,26 +97,27 @@ pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
 void
 pins_file_view_setup_keys_listbox (PinsFileView *self)
 {
-    gchar **keys = pins_desktop_file_get_keys (self->desktop_file);
-    gchar **locales = _pins_locales_from_keys (keys);
+    gchar **locales = _pins_locales_from_keys (self->keys);
     gchar **added_keys
-        = g_malloc0_n (g_strv_length (keys) + 1, sizeof (gchar *));
+        = g_malloc0_n (g_strv_length (self->keys) + 1, sizeof (gchar *));
     gsize n_added_keys = 0;
 
     gtk_list_box_remove_all (self->keys_listbox);
 
     pins_file_view_setup_row (self->name_row, self->desktop_file,
-                              G_KEY_FILE_DESKTOP_KEY_NAME, keys, locales);
+                              G_KEY_FILE_DESKTOP_KEY_NAME, self->keys,
+                              locales);
     pins_file_view_setup_row (self->comment_row, self->desktop_file,
-                              G_KEY_FILE_DESKTOP_KEY_COMMENT, keys, locales);
+                              G_KEY_FILE_DESKTOP_KEY_COMMENT, self->keys,
+                              locales);
 
     added_keys[0] = G_KEY_FILE_DESKTOP_KEY_NAME;
     added_keys[1] = G_KEY_FILE_DESKTOP_KEY_COMMENT;
     n_added_keys = 2;
 
-    for (int i = 0; i < g_strv_length (keys); i++)
+    for (int i = 0; i < g_strv_length (self->keys); i++)
         {
-            gchar *current_key = _pins_split_key_locale (keys[i]).key;
+            gchar *current_key = _pins_split_key_locale (self->keys[i]).key;
             PinsKeyRow *row;
 
             if (g_strv_contains ((const gchar *const *)added_keys,
@@ -119,7 +128,7 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
 
             row = pins_key_row_new ();
             pins_file_view_setup_row (row, self->desktop_file, current_key,
-                                      keys, locales);
+                                      self->keys, locales);
 
             added_keys[n_added_keys] = current_key;
             n_added_keys++;
@@ -127,7 +136,6 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
             gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
         }
 
-    g_strfreev (keys);
     g_strfreev (locales);
     g_free (added_keys); /// TODO: Using g_strfreev results in free error
 }
@@ -137,6 +145,9 @@ pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
     self->desktop_file = desktop_file;
+    self->keys = pins_desktop_file_get_keys (self->desktop_file);
+
+    /// TODO: Disconnect previous signals (also in other methods)
 
     pins_file_view_update_title (self);
     g_signal_connect_object (self->desktop_file, "key-set",
@@ -146,7 +157,7 @@ pins_file_view_set_desktop_file (PinsFileView *self,
         "value-changed", G_CALLBACK (pins_file_view_update_title_visible_cb),
         self, 0);
 
-    pins_app_icon_set_desktop_file (self->icon, desktop_file);
+    pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
 
     gtk_widget_set_visible (
         GTK_WIDGET (self->remove_button),
@@ -196,13 +207,23 @@ pins_file_view_class_init (PinsFileViewClass *klass)
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           keys_listbox);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          add_key_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           remove_button);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           breakpoint);
 }
 
 void
-pins_file_view_remove_button_clicked_cb (PinsFileView *self)
+add_key_button_clicked_cb (PinsFileView *self)
+{
+    _pins_add_key_dialog_present (
+        GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (self))),
+        self->desktop_file);
+}
+
+void
+remove_button_clicked_cb (PinsFileView *self)
 {
     pins_desktop_file_delete (self->desktop_file);
 }
@@ -226,10 +247,12 @@ pins_file_view_init (PinsFileView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
 
-    g_signal_connect_object (
-        self->remove_button, "clicked",
-        G_CALLBACK (pins_file_view_remove_button_clicked_cb), self,
-        G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->add_key_button, "activated",
+                             G_CALLBACK (add_key_button_clicked_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->remove_button, "clicked",
+                             G_CALLBACK (remove_button_clicked_cb), self,
+                             G_CONNECT_SWAPPED);
 
     g_signal_connect_object (self->breakpoint, "apply",
                              G_CALLBACK (breakpoint_apply_cb), self,

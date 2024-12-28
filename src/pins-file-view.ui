@@ -94,10 +94,8 @@
                         </style>
                         <child>
                           <object class="AdwButtonRow" id="add_key_button">
-                            <!-- TODO: Implement adding keys -->
                             <property name="title" translatable="yes">Add key</property>
                             <property name="start-icon-name">list-add-symbolic</property>
-                            <property name="sensitive">false</property>
                           </object>
                         </child>
                       </object>
