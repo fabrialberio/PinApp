@@ -25,6 +25,8 @@
 
 #define KEY_FILE_FLAGS G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS
 
+/// TODO: Add autostart features
+
 struct _PinsDesktopFile
 {
     GObject parent_instance;
@@ -56,6 +58,76 @@ enum
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
 
+PinsDesktopFile *
+pins_desktop_file_new_from_user_file (GFile *file, GError **error)
+{
+    PinsDesktopFile *desktop_file
+        = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
+    GError *err = NULL;
+
+    desktop_file->user_file = file;
+    desktop_file->system_file = NULL;
+
+    g_key_file_load_from_file (desktop_file->key_file, g_file_get_path (file),
+                               KEY_FILE_FLAGS, &err);
+    if (err != NULL)
+        {
+            g_propagate_error (error, err);
+            return NULL;
+        }
+
+    desktop_file->saved_data
+        = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
+
+    return desktop_file;
+}
+
+PinsDesktopFile *
+pins_desktop_file_new_from_system_file (GFile *file, GError **error)
+{
+    PinsDesktopFile *desktop_file
+        = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
+    GError *err = NULL;
+
+    desktop_file->user_file = g_file_new_for_path (g_strjoin (
+        "/", pins_user_app_path (), g_file_get_basename (file), NULL));
+    desktop_file->system_file = file;
+
+    if (g_file_query_exists (desktop_file->user_file, NULL))
+        {
+
+            g_key_file_load_from_file (
+                desktop_file->key_file,
+                g_file_get_path (desktop_file->user_file), KEY_FILE_FLAGS,
+                &err);
+        }
+    else
+        {
+            g_key_file_load_from_file (
+                desktop_file->key_file,
+                g_file_get_path (desktop_file->system_file), KEY_FILE_FLAGS,
+                &err);
+        }
+    if (err != NULL)
+        {
+            g_propagate_error (error, err);
+            return NULL;
+        }
+
+    g_key_file_load_from_file (desktop_file->backup_key_file,
+                               g_file_get_path (file), KEY_FILE_FLAGS, &err);
+    if (err != NULL)
+        {
+            g_propagate_error (error, err);
+            return NULL;
+        }
+
+    desktop_file->saved_data
+        = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
+
+    return desktop_file;
+}
+
 /**
  * Given a `GFile`, it constructs a `PinsDesktopFile` with the following logic:
  *  - If the file is in the system folder and a file with the same name is
@@ -73,52 +145,13 @@ PinsDesktopFile *
 pins_desktop_file_new_from_file (GFile *file, GError **error)
 {
     PinsDesktopFile *desktop_file;
-    gboolean file_is_user_file;
-
-    desktop_file = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
-    desktop_file->key_file = g_key_file_new ();
-    desktop_file->backup_key_file = g_key_file_new ();
-
-    file_is_user_file = g_file_equal (
+    gboolean file_is_user_file = g_file_equal (
         g_file_get_parent (file), g_file_new_for_path (pins_user_app_path ()));
 
     if (file_is_user_file)
-        {
-            desktop_file->user_file = file;
-            desktop_file->system_file = NULL;
-
-            g_key_file_load_from_file (desktop_file->key_file,
-                                       g_file_get_path (file), KEY_FILE_FLAGS,
-                                       NULL);
-        }
+        return pins_desktop_file_new_from_user_file (file, error);
     else
-        {
-            desktop_file->user_file = g_file_new_for_path (g_strjoin (
-                "/", pins_user_app_path (), g_file_get_basename (file), NULL));
-            desktop_file->system_file = file;
-
-            if (g_file_query_exists (desktop_file->user_file, NULL))
-                {
-
-                    g_key_file_load_from_file (
-                        desktop_file->key_file,
-                        g_file_get_path (desktop_file->user_file),
-                        KEY_FILE_FLAGS, NULL);
-                }
-            else
-                {
-                    g_key_file_load_from_file (desktop_file->key_file,
-                                               g_file_get_path (file),
-                                               KEY_FILE_FLAGS, NULL);
-                }
-
-            g_key_file_load_from_file (desktop_file->backup_key_file,
-                                       g_file_get_path (file), KEY_FILE_FLAGS,
-                                       NULL);
-        }
-
-    desktop_file->saved_data
-        = g_key_file_to_data (desktop_file->key_file, NULL, NULL);
+        return pins_desktop_file_new_from_system_file (file, error);
 
     return desktop_file;
 }
@@ -156,8 +189,6 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 
     if (!pins_desktop_file_is_edited (self))
         return;
-
-    g_return_if_fail (g_file_query_exists (self->user_file, NULL));
 
     self->saved_data = g_key_file_to_data (self->key_file, NULL, NULL);
 
@@ -261,6 +292,8 @@ pins_desktop_file_class_init (PinsDesktopFileClass *klass)
 static void
 pins_desktop_file_init (PinsDesktopFile *self)
 {
+    self->key_file = g_key_file_new ();
+    self->backup_key_file = g_key_file_new ();
 }
 
 gboolean
