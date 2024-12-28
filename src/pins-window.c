@@ -144,9 +144,13 @@ pins_window_file_page_hiding_cb (AdwNavigationPage *self,
 void
 pins_window_close_request_cb (PinsWindow *self, gpointer user_data)
 {
+    const gchar *current_page_tag = adw_navigation_page_get_tag (
+        adw_navigation_view_get_visible_page (self->navigation_view));
+
     g_assert (PINS_IS_WINDOW (self));
 
-    pins_window_save_current_desktop_file (self);
+    if (g_strcmp0 (current_page_tag, pages[PAGE_FILE]) == 0)
+        pins_window_save_current_desktop_file (self);
 
     gtk_window_close (GTK_WINDOW (self));
 }
