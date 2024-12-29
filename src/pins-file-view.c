@@ -144,18 +144,18 @@ void
 pins_file_view_set_desktop_file (PinsFileView *self,
                                  PinsDesktopFile *desktop_file)
 {
-    self->desktop_file = desktop_file;
-    self->keys = pins_desktop_file_get_keys (self->desktop_file);
+    if (self->desktop_file != NULL)
+        {
+            g_signal_handlers_disconnect_by_func (
+                self->desktop_file, pins_file_view_key_set_cb, self);
+        }
 
-    /// TODO: Disconnect previous signals (also in other methods)
+    self->desktop_file = g_object_ref (desktop_file);
+    self->keys = pins_desktop_file_get_keys (self->desktop_file);
 
     pins_file_view_update_title (self);
     g_signal_connect_object (self->desktop_file, "key-set",
                              G_CALLBACK (pins_file_view_key_set_cb), self, 0);
-    g_signal_connect_object (
-        gtk_scrolled_window_get_vadjustment (self->scrolled_window),
-        "value-changed", G_CALLBACK (pins_file_view_update_title_visible_cb),
-        self, 0);
 
     pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
 
@@ -260,4 +260,9 @@ pins_file_view_init (PinsFileView *self)
     g_signal_connect_object (self->breakpoint, "unapply",
                              G_CALLBACK (breakpoint_unapply_cb), self,
                              G_CONNECT_SWAPPED);
+
+    g_signal_connect_object (
+        gtk_scrolled_window_get_vadjustment (self->scrolled_window),
+        "value-changed", G_CALLBACK (pins_file_view_update_title_visible_cb),
+        self, 0);
 }
