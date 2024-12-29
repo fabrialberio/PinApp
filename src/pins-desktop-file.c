@@ -252,6 +252,8 @@ pins_desktop_file_dispose (GObject *object)
 
     g_clear_object (&self->user_file);
     g_clear_object (&self->system_file);
+    g_clear_object (&self->key_file);
+    g_clear_object (&self->backup_key_file);
 }
 
 static void
