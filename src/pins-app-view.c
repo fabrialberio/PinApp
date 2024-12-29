@@ -97,7 +97,7 @@ pins_app_view_set_app_iterator (PinsAppView *self,
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
     pins_app_list_set_model (self->app_list,
-                             G_LIST_MODEL (self->filter_model));
+                             G_LIST_MODEL (g_object_ref (self->filter_model)));
 
     g_signal_connect_object (app_iterator, "loading",
                              G_CALLBACK (app_iterator_loading_cb), self, 0);
@@ -112,6 +112,7 @@ pins_app_view_dispose (GObject *object)
     PinsAppView *self = PINS_APP_VIEW (object);
 
     g_clear_object (&self->string_filter);
+    g_clear_object (&self->filter_model);
 
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_APP_VIEW);
 
