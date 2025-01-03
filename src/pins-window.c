@@ -64,10 +64,13 @@ pins_window_save_current_desktop_file (PinsWindow *self)
 {
     PinsDesktopFile *desktop_file
         = pins_window_get_current_desktop_file (self);
+    GError *err = NULL;
 
     if (desktop_file != NULL)
         {
-            pins_desktop_file_save (desktop_file, NULL);
+            pins_desktop_file_save (desktop_file, &err);
+            if (err != NULL)
+                g_warning ("Error saving file: %s", err->message);
         }
 }
 
