@@ -43,8 +43,11 @@
                 <property name="propagate-natural-height">true</property>
                 <property name="max-content-height">400</property>
                 <property name="child">
-                  <!-- TODO: No padding in row menus -->
                   <object class="GtkListView" id="locale_list_view">
+                    <property name="margin-top">6</property>
+                    <property name="margin-bottom">6</property>
+                    <property name="margin-start">6</property>
+                    <property name="margin-end">6</property>
                     <property name="single-click-activate">true</property>
                   </object>
                 </property>
