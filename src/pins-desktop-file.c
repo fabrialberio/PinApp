@@ -191,12 +191,12 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
 {
     g_autoptr (GOutputStream) stream = NULL;
     g_autoptr (GError) err = NULL;
+    gsize lenght;
 
     if (!pins_desktop_file_is_edited (self))
         return;
 
-    self->saved_data
-        = g_strdup (g_key_file_to_data (self->key_file, NULL, NULL));
+    self->saved_data = g_key_file_to_data (self->key_file, &lenght, NULL);
 
     if (self->system_file != NULL
         && g_strcmp0 (self->saved_data,
@@ -207,7 +207,8 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
         }
 
     stream = g_io_stream_get_output_stream (
-        G_IO_STREAM (g_file_open_readwrite (self->user_file, NULL, &err)));
+        G_IO_STREAM (g_file_replace_readwrite (
+            self->user_file, NULL, FALSE, G_FILE_CREATE_NONE, NULL, &err)));
     if (err != NULL)
         {
             g_propagate_error (error, err);
