@@ -85,6 +85,13 @@ pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
 }
 
 void
+pins_file_view_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
+                               PinsFileView *self)
+{
+    pins_file_view_set_desktop_file (self, self->desktop_file);
+}
+
+void
 pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
                                         PinsFileView *self)
 {
@@ -148,6 +155,8 @@ pins_file_view_set_desktop_file (PinsFileView *self,
         {
             g_signal_handlers_disconnect_by_func (
                 self->desktop_file, pins_file_view_key_set_cb, self);
+            g_signal_handlers_disconnect_by_func (
+                self->desktop_file, pins_file_view_key_removed_cb, self);
         }
 
     self->desktop_file = g_object_ref (desktop_file);
@@ -156,6 +165,9 @@ pins_file_view_set_desktop_file (PinsFileView *self,
     pins_file_view_update_title (self);
     g_signal_connect_object (self->desktop_file, "key-set",
                              G_CALLBACK (pins_file_view_key_set_cb), self, 0);
+    g_signal_connect_object (self->desktop_file, "key-removed",
+                             G_CALLBACK (pins_file_view_key_removed_cb), self,
+                             0);
 
     pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
 

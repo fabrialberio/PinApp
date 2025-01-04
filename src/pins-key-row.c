@@ -158,8 +158,6 @@ pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
     if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0
         || g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_COMMENT) == 0)
         return;
-
-    gtk_widget_set_visible (GTK_WIDGET (self), FALSE);
 }
 
 void
