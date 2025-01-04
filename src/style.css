@@ -15,3 +15,8 @@
     font-weight: 800;
     font-size: 15pt;
 }
+
+.cutout {
+    border-radius: 9999px;
+    padding: 2px;
+}

@@ -31,11 +31,14 @@ struct _PinsFileView
 
     PinsDesktopFile *desktop_file;
     gchar **keys;
+    PinsKeyRow *icon_row;
 
     AdwHeaderBar *header_bar;
     AdwWindowTitle *window_title;
     GtkScrolledWindow *scrolled_window;
     PinsAppIcon *icon;
+    GtkButton *edit_icon_button;
+    GtkButton *load_icon_button;
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
     GtkListBox *keys_listbox;
@@ -129,13 +132,14 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
 
             if (g_strv_contains ((const gchar *const *)added_keys,
                                  current_key))
-                {
-                    continue;
-                }
+                continue;
 
             row = pins_key_row_new ();
             pins_file_view_setup_row (row, self->desktop_file, current_key,
                                       self->keys, locales);
+
+            if (!g_strcmp0 (current_key, G_KEY_FILE_DESKTOP_KEY_ICON))
+                self->icon_row = g_object_ref (row);
 
             added_keys[n_added_keys] = current_key;
             n_added_keys++;
@@ -187,7 +191,11 @@ pins_file_view_get_desktop_file (PinsFileView *self)
 static void
 pins_file_view_dispose (GObject *object)
 {
+    PinsFileView *self = PINS_FILE_VIEW (object);
+
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_FILE_VIEW);
+
+    g_clear_object (&self->icon_row);
 
     G_OBJECT_CLASS (pins_file_view_parent_class)->dispose (object);
 }
@@ -213,6 +221,10 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           scrolled_window);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView, icon);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          edit_icon_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          load_icon_button);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           name_row);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           comment_row);
@@ -224,6 +236,25 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           remove_button);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           breakpoint);
+}
+
+void
+edit_icon_button_clicked_cb (PinsFileView *self)
+{
+    if (!pins_desktop_file_has_key (self->desktop_file,
+                                    G_KEY_FILE_DESKTOP_KEY_ICON))
+        {
+            pins_desktop_file_set_string (self->desktop_file,
+                                          G_KEY_FILE_DESKTOP_KEY_ICON, "");
+        }
+
+    gtk_widget_grab_focus (GTK_WIDGET (self->icon_row));
+}
+
+void
+load_icon_button_clicked_cb (PinsFileView *self)
+{
+    /// TODO: Implement uploading icon
 }
 
 void
@@ -258,6 +289,13 @@ static void
 pins_file_view_init (PinsFileView *self)
 {
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    g_signal_connect_object (self->edit_icon_button, "clicked",
+                             G_CALLBACK (edit_icon_button_clicked_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->load_icon_button, "clicked",
+                             G_CALLBACK (load_icon_button_clicked_cb), self,
+                             G_CONNECT_SWAPPED);
 
     g_signal_connect_object (self->add_key_button, "activated",
                              G_CALLBACK (add_key_button_clicked_cb), self,
