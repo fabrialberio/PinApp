@@ -252,9 +252,27 @@ edit_icon_button_clicked_cb (PinsFileView *self)
 }
 
 void
+load_icon_dialog_closed_cb (GObject *dialog, GAsyncResult *res,
+                            gpointer user_data)
+{
+    PinsFileView *self = PINS_FILE_VIEW (user_data);
+    GFile *file
+        = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), res, NULL);
+
+    pins_desktop_file_set_string (self->desktop_file,
+                                  G_KEY_FILE_DESKTOP_KEY_ICON,
+                                  g_file_get_path (file));
+}
+
+void
 load_icon_button_clicked_cb (PinsFileView *self)
 {
-    /// TODO: Implement uploading icon
+    GtkFileDialog *dialog = gtk_file_dialog_new ();
+
+    gtk_file_dialog_set_title (dialog, _ ("Load icon"));
+    gtk_file_dialog_open (dialog,
+                          GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (self))),
+                          NULL, load_icon_dialog_closed_cb, self);
 }
 
 void

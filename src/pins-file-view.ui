@@ -81,8 +81,9 @@
                                 </style>
                                 <property name="child">
                                   <object class="GtkButton" id="load_icon_button">
-                                    <property name="tooltip-text" translatable="yes">Load icon from
-                                      file</property>
+                                    <property
+                                      name="tooltip-text"
+                                      translatable="yes">Load icon from file</property>
                                     <property name="focusable">True</property>
                                     <property name="icon-name">folder-open-symbolic</property>
                                     <style>
