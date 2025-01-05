@@ -134,6 +134,34 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
 }
 
 void
+pins_key_row_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
+                         PinsKeyRow *self)
+{
+    gchar *desktop_file_value;
+    gchar *editable_value;
+
+    if (g_strcmp0 (key, self->key) != 0)
+        return;
+
+    /// TODO: Sometimes this is slow
+
+    desktop_file_value
+        = pins_desktop_file_get_string (desktop_file, key, NULL);
+    editable_value = (gchar *)gtk_editable_get_text (GTK_EDITABLE (self));
+
+    if (g_strcmp0 (desktop_file_value, editable_value) != 0)
+        {
+            g_signal_handlers_block_by_func (
+                GTK_EDITABLE (self), pins_key_row_text_changed_cb, self);
+
+            gtk_editable_set_text (GTK_EDITABLE (self), desktop_file_value);
+
+            g_signal_handlers_unblock_by_func (
+                GTK_EDITABLE (self), pins_key_row_text_changed_cb, self);
+        }
+}
+
+void
 pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
                              PinsKeyRow *self)
 {
@@ -173,6 +201,8 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
 
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), key);
 
+    g_signal_connect_object (self->desktop_file, "key-set",
+                             G_CALLBACK (pins_key_row_key_set_cb), self, 0);
     g_signal_connect_object (self->desktop_file, "key-removed",
                              G_CALLBACK (pins_key_row_key_removed_cb), self,
                              0);
