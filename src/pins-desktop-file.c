@@ -206,9 +206,8 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
             g_file_delete (self->user_file, NULL, NULL);
         }
 
-    stream = g_io_stream_get_output_stream (
-        G_IO_STREAM (g_file_replace_readwrite (
-            self->user_file, NULL, FALSE, G_FILE_CREATE_NONE, NULL, &err)));
+    stream = G_OUTPUT_STREAM (g_file_replace (self->user_file, NULL, FALSE,
+                                              G_FILE_CREATE_NONE, NULL, &err));
     if (err != NULL)
         {
             g_propagate_error (error, err);
@@ -216,8 +215,7 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
             return;
         }
 
-    g_output_stream_write (stream, self->saved_data, strlen (self->saved_data),
-                           NULL, NULL);
+    g_output_stream_write (stream, self->saved_data, lenght, NULL, NULL);
     g_output_stream_close (stream, NULL, NULL);
 }
 
