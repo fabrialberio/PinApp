@@ -42,7 +42,7 @@ struct _PinsFileView
     PinsKeyRow *comment_row;
     GtkListBox *keys_listbox;
     AdwButtonRow *add_key_button;
-    GtkButton *remove_button;
+    GtkButton *delete_button;
     AdwBreakpoint *breakpoint;
 };
 
@@ -200,7 +200,7 @@ pins_file_view_set_desktop_file (PinsFileView *self,
     pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
 
     gtk_widget_set_visible (
-        GTK_WIDGET (self->remove_button),
+        GTK_WIDGET (self->delete_button),
         pins_desktop_file_is_user_only (self->desktop_file));
 
     pins_file_view_setup_keys_listbox (self);
@@ -253,7 +253,7 @@ pins_file_view_class_init (PinsFileViewClass *klass)
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           add_key_button);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
-                                          remove_button);
+                                          delete_button);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           breakpoint);
 }
@@ -338,7 +338,7 @@ pins_file_view_init (PinsFileView *self)
     g_signal_connect_object (self->add_key_button, "activated",
                              G_CALLBACK (add_key_button_clicked_cb), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->remove_button, "clicked",
+    g_signal_connect_object (self->delete_button, "clicked",
                              G_CALLBACK (remove_button_clicked_cb), self,
                              G_CONNECT_SWAPPED);
 

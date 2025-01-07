@@ -175,8 +175,7 @@
         <property name="margin-start">6</property>
         <property name="margin-end">6</property>
         <child>
-          <!-- TODO: Rename id to delete_button -->
-          <object class="GtkModelButton" id="remove_button">
+          <object class="GtkModelButton" id="delete_button">
             <!-- TODO: Add remove warning dialog -->
             <property name="text" translatable="yes">D_elete</property>
           </object>
