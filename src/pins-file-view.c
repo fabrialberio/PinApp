@@ -31,7 +31,6 @@ struct _PinsFileView
 
     PinsDesktopFile *desktop_file;
     gchar **keys;
-    PinsKeyRow *icon_row;
 
     AdwHeaderBar *header_bar;
     AdwWindowTitle *window_title;
@@ -71,6 +70,33 @@ pins_file_view_update_title (PinsFileView *self)
 }
 
 void
+pins_file_view_focus_key_row (PinsFileView *self, gchar *key)
+{
+    GtkListBoxRow *row;
+    gchar *current_key, *locale;
+
+    locale = _pins_split_key_locale (key).locale;
+    key = _pins_split_key_locale (key).key;
+
+    for (int i = 0;
+         (row = gtk_list_box_get_row_at_index (self->keys_listbox, i)) != NULL;
+         i++)
+        {
+            current_key = _pins_split_key_locale (
+                              pins_key_row_get_key (PINS_KEY_ROW (row)))
+                              .key;
+
+            if (!g_strcmp0 (current_key, key))
+                {
+                    gtk_widget_grab_focus (GTK_WIDGET (row));
+
+                    if (locale != NULL)
+                        pins_key_row_set_locale (PINS_KEY_ROW (row), locale);
+                }
+        }
+}
+
+void
 pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
                            PinsFileView *self)
 {
@@ -79,9 +105,10 @@ pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
     if (!g_strv_contains ((const gchar *const *)self->keys, key))
         {
             pins_file_view_set_desktop_file (self, self->desktop_file);
+            pins_file_view_focus_key_row (self, key);
         }
 
-    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0)
+    if (!g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME))
         {
             pins_file_view_update_title (self);
         }
@@ -138,9 +165,6 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
             pins_file_view_setup_row (row, self->desktop_file, current_key,
                                       self->keys, locales);
 
-            if (!g_strcmp0 (current_key, G_KEY_FILE_DESKTOP_KEY_ICON))
-                self->icon_row = g_object_ref (row);
-
             added_keys[n_added_keys] = current_key;
             n_added_keys++;
 
@@ -191,11 +215,7 @@ pins_file_view_get_desktop_file (PinsFileView *self)
 static void
 pins_file_view_dispose (GObject *object)
 {
-    PinsFileView *self = PINS_FILE_VIEW (object);
-
     gtk_widget_dispose_template (GTK_WIDGET (object), PINS_TYPE_FILE_VIEW);
-
-    g_clear_object (&self->icon_row);
 
     G_OBJECT_CLASS (pins_file_view_parent_class)->dispose (object);
 }
@@ -248,7 +268,7 @@ edit_icon_button_clicked_cb (PinsFileView *self)
                                           G_KEY_FILE_DESKTOP_KEY_ICON, "");
         }
 
-    gtk_widget_grab_focus (GTK_WIDGET (self->icon_row));
+    pins_file_view_focus_key_row (self, G_KEY_FILE_DESKTOP_KEY_ICON);
 }
 
 void
