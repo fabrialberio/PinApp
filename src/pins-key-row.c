@@ -220,6 +220,12 @@ pins_key_row_set_key (PinsKeyRow *self, PinsDesktopFile *desktop_file,
     pins_key_row_update_reset_buttons_visibility (self);
 }
 
+gchar *
+pins_key_row_get_key (PinsKeyRow *self)
+{
+    return self->key;
+}
+
 static void
 pins_key_row_dispose (GObject *object)
 {
