@@ -153,6 +153,9 @@ pins_application_init (PinsApplication *self)
     gtk_application_set_accels_for_action (
         GTK_APPLICATION (self), "app.quit",
         (const char *[]){ "<primary>q", NULL });
+    gtk_application_set_accels_for_action (
+        GTK_APPLICATION (self), "win.new-app",
+        (const char *[]){ "<primary>n", NULL });
 
     g_signal_connect_object (G_APPLICATION (self), "open",
                              G_CALLBACK (pins_application_open), self, 0);
