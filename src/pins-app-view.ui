@@ -10,9 +10,10 @@
               <object class="AdwHeaderBar" id="header_bar">
                 <property name="centering-policy">strict</property>
                 <child type="start">
-                  <object class="GtkButton" id="new_file_button">
+                  <object class="GtkButton">
                     <property name="icon-name">list-add-symbolic</property>
                     <property name="tooltip-text" translatable="yes">Add new app</property>
+                    <property name="action-name">win.new-app</property>
                   </object>
                 </child>
                 <child type="end">

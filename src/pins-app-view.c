@@ -34,7 +34,6 @@ struct _PinsAppView
     GtkStringFilter *string_filter;
     GtkFilterListModel *filter_model;
 
-    GtkButton *new_file_button;
     GtkToggleButton *search_button;
     GtkSearchBar *search_bar;
     GtkSearchEntry *search_entry;
@@ -136,8 +135,6 @@ pins_app_view_class_init (PinsAppViewClass *klass)
     g_type_ensure (PINS_TYPE_APP_LIST);
 
     gtk_widget_class_bind_template_child (widget_class, PinsAppView,
-                                          new_file_button);
-    gtk_widget_class_bind_template_child (widget_class, PinsAppView,
                                           search_button);
     gtk_widget_class_bind_template_child (widget_class, PinsAppView,
                                           search_bar);
@@ -166,15 +163,6 @@ pins_app_view_search_changed_cb (GtkSearchEntry *entry, PinsAppView *self)
             adw_view_stack_set_visible_child_name (self->view_stack,
                                                    pages[PAGE_APPS]);
         }
-}
-
-void
-pins_app_view_create_file_cb (PinsAppView *self)
-{
-    PinsAppIterator *app_iterator = PINS_APP_ITERATOR (
-        gtk_filter_list_model_get_model (self->filter_model));
-
-    pins_app_iterator_create_user_file (app_iterator, "pinned-app", NULL);
 }
 
 void
@@ -211,7 +199,4 @@ pins_app_view_init (PinsAppView *self)
     g_signal_connect_object (self->app_list, "activate",
                              G_CALLBACK (pins_app_view_item_activated_cb),
                              self, 0);
-    g_signal_connect_object (self->new_file_button, "clicked",
-                             G_CALLBACK (pins_app_view_create_file_cb), self,
-                             G_CONNECT_SWAPPED);
 }

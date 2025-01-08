@@ -158,11 +158,21 @@ pins_window_close_request_cb (PinsWindow *self, gpointer user_data)
     gtk_window_close (GTK_WINDOW (self));
 }
 
+void
+pins_window_add_new_app_cb (GSimpleAction *action, GVariant *param,
+                            PinsAppIterator *app_iterator)
+{
+    g_assert (PINS_IS_APP_ITERATOR (app_iterator));
+
+    pins_app_iterator_create_user_file (app_iterator, "pinned-app", NULL);
+}
+
 static void
 pins_window_init (PinsWindow *self)
 {
     GtkIconTheme *theme;
     PinsAppIterator *app_iterator;
+    GSimpleAction *action;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -173,6 +183,14 @@ pins_window_init (PinsWindow *self)
     pins_icon_theme_inject_search_paths (theme);
 
     app_iterator = pins_app_iterator_new ();
+
+    action = g_simple_action_new ("new-app", NULL);
+    g_signal_connect_object (action, "activate",
+                             G_CALLBACK (pins_window_add_new_app_cb),
+                             app_iterator, 0);
+    g_action_map_add_action (G_ACTION_MAP (self), G_ACTION (action));
+    g_object_unref (G_OBJECT (action));
+
     pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
 
     pins_app_view_set_app_iterator (self->app_view, app_iterator);
