@@ -190,6 +190,7 @@ pins_app_iterator_map_func (gpointer file_info, gpointer sorter)
         {
             g_warning ("Could not load desktop file at `%s`",
                        g_file_get_path (file));
+            return NULL; /// TODO: Handle invalid files
         }
 
     g_signal_connect_object (desktop_file, "key-set",
@@ -206,8 +207,8 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
     PinsDesktopFile *second = PINS_DESKTOP_FILE ((gpointer)b);
     const gchar *first_key, *second_key, *first_name, *second_name;
 
-    g_assert (PINS_IS_DESKTOP_FILE (first));
-    g_assert (PINS_IS_DESKTOP_FILE (second));
+    g_return_val_if_fail (PINS_IS_DESKTOP_FILE (first), 0);
+    g_return_val_if_fail (PINS_IS_DESKTOP_FILE (second), 0);
 
     first_key = _pins_join_key_locale (
         G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
@@ -244,7 +245,6 @@ desktop_file_model_items_changed_cb (GListModel *model, guint position,
             PinsDesktopFile *desktop_file
                 = PINS_DESKTOP_FILE (g_list_model_get_item (model, position));
 
-            // pins_desktop_file_set_default (desktop_file);
             g_signal_emit (self, signals[FILE_CREATED], 0, desktop_file);
             self->just_created_file = FALSE;
         }
