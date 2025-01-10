@@ -23,6 +23,8 @@
 #include "pins-directories.h"
 #include "pins-locale-utils-private.h"
 
+#include <fcntl.h>
+
 #define KEY_FILE_FLAGS G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS
 
 /// TODO: Add autostart features
@@ -192,6 +194,7 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
     g_autoptr (GOutputStream) stream = NULL;
     g_autoptr (GError) err = NULL;
     gsize lenght;
+    int fd;
 
     if (!pins_desktop_file_is_edited (self))
         return;
@@ -206,17 +209,11 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
             g_file_delete (self->user_file, NULL, NULL);
         }
 
-    stream = G_OUTPUT_STREAM (g_file_replace (self->user_file, NULL, FALSE,
-                                              G_FILE_CREATE_NONE, NULL, &err));
-    if (err != NULL)
-        {
-            g_propagate_error (error, err);
-            g_output_stream_close (stream, NULL, NULL);
-            return;
-        }
+    /// TODO: Find a better way of saving files
+    fd = open (g_file_get_path (self->user_file), O_WRONLY);
 
-    g_output_stream_write (stream, self->saved_data, lenght, NULL, NULL);
-    g_output_stream_close (stream, NULL, NULL);
+    write (fd, self->saved_data, lenght);
+    close (fd);
 }
 
 gchar **
