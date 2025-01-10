@@ -35,16 +35,14 @@ pins_user_app_path (void)
 gchar **
 pins_system_app_paths (void)
 {
-    // clang-format off
     const gchar *paths[]
         = { "/usr/share/applications",
             "/run/host/usr/share/applications",
             "/var/lib/flatpak/exports/share/applications",
-            g_strjoin ("/", pins_user_data_path (),
-                       "flatpak/exports/share", "applications", NULL),
+            g_strjoin ("/", pins_user_data_path (), "flatpak/exports/share",
+                       "applications", NULL),
             "/var/lib/snapd/desktop/applications",
             NULL };
-    // clang-format on
 
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
@@ -70,14 +68,12 @@ pins_all_app_paths (void)
 void
 pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
 {
-    // clang-format off
-    const gchar * paths[]
+    const gchar *paths[]
         = { "/run/host/usr/share/icons",
             "/var/lib/flatpak/exports/share/icons",
-            g_strjoin ("/", pins_user_data_path (),
-                        "flatpak/exports/share", "icons", NULL), 
+            g_strjoin ("/", pins_user_data_path (), "flatpak/exports/share",
+                       "icons", NULL),
             NULL };
-    // clang-format on
 
     GStrvBuilder *strv_builder = g_strv_builder_new ();
     g_strv_builder_addv (strv_builder, paths);
