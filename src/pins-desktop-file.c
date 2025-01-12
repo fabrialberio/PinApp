@@ -93,8 +93,8 @@ pins_desktop_file_new_from_system_file (GFile *file, GError **error)
         = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
     GError *err = NULL;
 
-    desktop_file->user_file = g_file_new_for_path (g_strjoin (
-        "/", pins_user_app_path (), g_file_get_basename (file), NULL));
+    desktop_file->user_file = g_file_new_for_path (g_build_filename (
+        pins_user_app_path (), g_file_get_basename (file), NULL));
     desktop_file->system_file = file;
 
     if (g_file_query_exists (desktop_file->user_file, NULL))

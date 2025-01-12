@@ -23,13 +23,13 @@
 gchar *
 pins_user_data_path (void)
 {
-    return g_strjoin ("/", g_get_home_dir (), ".local/share", NULL);
+    return g_build_filename (g_get_home_dir (), ".local/share", NULL);
 }
 
 gchar *
 pins_user_app_path (void)
 {
-    return g_strjoin ("/", pins_user_data_path (), "applications", NULL);
+    return g_build_filename (pins_user_data_path (), "applications", NULL);
 }
 
 gchar **
@@ -39,8 +39,8 @@ pins_system_app_paths (void)
         = { "/usr/share/applications",
             "/run/host/usr/share/applications",
             "/var/lib/flatpak/exports/share/applications",
-            g_strjoin ("/", pins_user_data_path (), "flatpak/exports/share",
-                       "applications", NULL),
+            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
+                              "applications", NULL),
             "/var/lib/snapd/desktop/applications",
             NULL };
 
@@ -71,8 +71,8 @@ pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
     const gchar *paths[]
         = { "/run/host/usr/share/icons",
             "/var/lib/flatpak/exports/share/icons",
-            g_strjoin ("/", pins_user_data_path (), "flatpak/exports/share",
-                       "icons", NULL),
+            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
+                              "icons", NULL),
             NULL };
 
     GStrvBuilder *strv_builder = g_strv_builder_new ();
