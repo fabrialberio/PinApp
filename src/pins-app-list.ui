@@ -17,6 +17,9 @@
                   <!-- Freaky behaviour with lots of files because GtkListView is supposed to be
                   directly inside of GtkScrolledWindow -->
                   <object class="GtkListView" id="list_view">
+                    <!-- Having AdwActionRow descendants in a GtkListView causes
+                    `gtk_list_box_row_grab_focus: assertion 'box != NULL' failed` error because they
+                    expect to be in a GtkListBox -->
                     <property name="single-click-activate">true</property>
                     <style>
                       <class name="boxed-list" />
