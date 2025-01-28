@@ -94,7 +94,7 @@ pins_desktop_file_new_from_system_file (GFile *file, GError **error)
     GError *err = NULL;
 
     desktop_file->user_file = g_file_new_for_path (g_build_filename (
-        pins_user_app_path (), g_file_get_basename (file), NULL));
+        pins_desktop_file_user_path (), g_file_get_basename (file), NULL));
     desktop_file->system_file = file;
 
     if (g_file_query_exists (desktop_file->user_file, NULL))
@@ -152,8 +152,9 @@ PinsDesktopFile *
 pins_desktop_file_new_from_file (GFile *file, GError **error)
 {
     PinsDesktopFile *desktop_file;
-    gboolean file_is_user_file = g_file_equal (
-        g_file_get_parent (file), g_file_new_for_path (pins_user_app_path ()));
+    gboolean file_is_user_file
+        = g_file_equal (g_file_get_parent (file),
+                        g_file_new_for_path (pins_desktop_file_user_path ()));
 
     if (file_is_user_file)
         return pins_desktop_file_new_from_user_file (file, error);

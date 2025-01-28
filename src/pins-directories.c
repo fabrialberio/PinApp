@@ -27,30 +27,9 @@ pins_user_data_path (void)
 }
 
 gchar *
-pins_user_app_path (void)
+pins_desktop_file_user_path (void)
 {
     return g_build_filename (pins_user_data_path (), "applications", NULL);
-}
-
-gchar **
-pins_system_app_paths (void)
-{
-    const gchar *paths[]
-        = { "/usr/share/applications",
-            "/run/host/usr/share/applications",
-            "/var/lib/flatpak/exports/share/applications",
-            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
-                              "applications", NULL),
-            "/var/lib/snapd/desktop/applications",
-            NULL };
-
-    GStrvBuilder *strv_builder = g_strv_builder_new ();
-
-    g_strv_builder_addv (strv_builder, paths);
-    g_strv_builder_addv (strv_builder,
-                         (const gchar **)g_get_system_data_dirs ());
-
-    return g_strv_builder_end (strv_builder);
 }
 
 gchar **
@@ -68,7 +47,7 @@ pins_desktop_file_search_paths (void)
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
     g_strv_builder_addv (strv_builder, system_paths);
-    g_strv_builder_add (strv_builder, pins_user_app_path ());
+    g_strv_builder_add (strv_builder, pins_desktop_file_user_path ());
 
     return g_strv_builder_end (strv_builder);
 }
