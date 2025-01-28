@@ -191,7 +191,8 @@ pins_window_init (PinsWindow *self)
     g_action_map_add_action (G_ACTION_MAP (self), G_ACTION (action));
     g_object_unref (G_OBJECT (action));
 
-    pins_app_iterator_set_paths (app_iterator, pins_all_app_paths ());
+    pins_app_iterator_set_paths (app_iterator,
+                                 pins_desktop_file_search_paths ());
 
     pins_app_view_set_app_iterator (self->app_view, app_iterator);
 

@@ -54,12 +54,20 @@ pins_system_app_paths (void)
 }
 
 gchar **
-pins_all_app_paths (void)
+pins_desktop_file_search_paths (void)
 {
+    const gchar *system_paths[]
+        = { "/usr/share/applications",
+            "/run/host/usr/share/applications",
+            "/var/lib/flatpak/exports/share/applications",
+            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
+                              "applications", NULL),
+            "/var/lib/snapd/desktop/applications",
+            NULL };
+
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    g_strv_builder_addv (strv_builder,
-                         (const gchar **)pins_system_app_paths ());
+    g_strv_builder_addv (strv_builder, system_paths);
     g_strv_builder_add (strv_builder, pins_user_app_path ());
 
     return g_strv_builder_end (strv_builder);
@@ -68,6 +76,7 @@ pins_all_app_paths (void)
 void
 pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
 {
+    /// TODO: Aggiungere path a XDG_DATA_DIRS invece di fare così
     const gchar *paths[]
         = { "/run/host/usr/share/icons",
             "/var/lib/flatpak/exports/share/icons",
