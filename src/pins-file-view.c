@@ -108,8 +108,6 @@ autostart_switch_state_set_cb (PinsFileView *self, gboolean state)
 void
 invisible_switch_state_set_cb (PinsFileView *self, gboolean state)
 {
-    g_warning ("state-set cb");
-
     pins_desktop_file_set_boolean (self->desktop_file,
                                    G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY, state);
     gtk_switch_set_active (self->invisible_switch, state);
