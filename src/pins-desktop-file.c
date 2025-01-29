@@ -27,14 +27,13 @@
 
 #define KEY_FILE_FLAGS G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS
 
-/// TODO: Add autostart features
-
 struct _PinsDesktopFile
 {
     GObject parent_instance;
 
     GFile *user_file;
     GFile *system_file;
+    GFile *autostart_file;
     GKeyFile *key_file;
     GKeyFile *backup_key_file;
     gchar *saved_data;
@@ -69,6 +68,8 @@ pins_desktop_file_new_from_user_file (GFile *file, GError **error)
 
     desktop_file->user_file = file;
     desktop_file->system_file = NULL;
+    desktop_file->autostart_file = g_file_new_build_filename (
+        pins_desktop_file_autostart_path (), g_file_get_basename (file), NULL);
 
     g_key_file_load_from_file (desktop_file->key_file, g_file_get_path (file),
                                KEY_FILE_FLAGS, &err);
@@ -93,9 +94,11 @@ pins_desktop_file_new_from_system_file (GFile *file, GError **error)
         = g_object_new (PINS_TYPE_DESKTOP_FILE, NULL);
     GError *err = NULL;
 
-    desktop_file->user_file = g_file_new_for_path (g_build_filename (
-        pins_desktop_file_user_path (), g_file_get_basename (file), NULL));
+    desktop_file->user_file = g_file_new_build_filename (
+        pins_desktop_file_user_path (), g_file_get_basename (file), NULL);
     desktop_file->system_file = file;
+    desktop_file->autostart_file = g_file_new_build_filename (
+        pins_desktop_file_autostart_path (), g_file_get_basename (file), NULL);
 
     if (g_file_query_exists (desktop_file->user_file, NULL))
         {
@@ -170,6 +173,12 @@ pins_desktop_file_is_user_only (PinsDesktopFile *self)
     return self->system_file == NULL;
 }
 
+gboolean
+pins_desktop_file_is_autostart (PinsDesktopFile *self)
+{
+    return g_file_query_exists (self->autostart_file, NULL);
+}
+
 /**
  * Returns `TRUE` if the file has been changed since the last save.
  */
@@ -210,11 +219,24 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
             g_file_delete (self->user_file, NULL, NULL);
         }
 
-    /// TODO: Find a better way of saving files
+    /// TODO: Find a more GObject-oriented way to save files
     fd = open (g_file_get_path (self->user_file), O_WRONLY);
 
     write (fd, self->saved_data, lenght);
     close (fd);
+}
+
+void
+pins_desktop_file_set_autostart (PinsDesktopFile *self, gboolean value)
+{
+    if (value == pins_desktop_file_is_autostart (self))
+        return;
+
+    if (value)
+        g_key_file_save_to_file (self->key_file,
+                                 g_file_get_path (self->autostart_file), NULL);
+    else
+        g_file_delete (self->autostart_file, NULL, NULL);
 }
 
 gchar **

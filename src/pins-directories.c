@@ -32,6 +32,12 @@ pins_desktop_file_user_path (void)
     return g_build_filename (pins_user_data_path (), "applications", NULL);
 }
 
+gchar *
+pins_desktop_file_autostart_path (void)
+{
+    return g_build_filename (g_get_home_dir (), ".config/autostart", NULL);
+}
+
 gchar **
 pins_desktop_file_search_paths (void)
 {
