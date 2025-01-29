@@ -3,7 +3,7 @@
   <template class="PinsKeyRow" parent="AdwEntryRow">
     <child type="suffix">
       <object class="GtkButton" id="reset_button">
-        <property name="icon-name">edit-undo-symbolic</property>
+        <property name="icon-name">erase-symbolic</property>
         <property name="valign">center</property>
         <property name="visible">false</property>
         <property name="tooltip-text" translatable="yes">Reset key</property>
