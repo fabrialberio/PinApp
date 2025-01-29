@@ -41,6 +41,7 @@ struct _PinsFileView
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
     GtkSwitch *autostart_switch;
+    GtkSwitch *invisible_switch;
     GtkListBox *keys_listbox;
     AdwButtonRow *add_key_button;
     GtkButton *delete_button;
@@ -98,6 +99,23 @@ pins_file_view_focus_key_row (PinsFileView *self, gchar *key)
 }
 
 void
+autostart_switch_state_set_cb (PinsFileView *self, gboolean state)
+{
+    pins_desktop_file_set_autostart (self->desktop_file, state);
+    gtk_switch_set_active (self->autostart_switch, state);
+}
+
+void
+invisible_switch_state_set_cb (PinsFileView *self, gboolean state)
+{
+    g_warning ("state-set cb");
+
+    pins_desktop_file_set_boolean (self->desktop_file,
+                                   G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY, state);
+    gtk_switch_set_active (self->invisible_switch, state);
+}
+
+void
 pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
                            PinsFileView *self)
 {
@@ -110,8 +128,24 @@ pins_file_view_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
         }
 
     if (!g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME))
+        pins_file_view_update_title (self);
+    else if (!g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY))
         {
-            pins_file_view_update_title (self);
+            gboolean value = pins_desktop_file_get_boolean (
+                self->desktop_file, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY);
+
+            if (gtk_switch_get_state (self->invisible_switch) != value)
+                {
+                    g_signal_handlers_block_by_func (
+                        self->invisible_switch, invisible_switch_state_set_cb,
+                        self);
+
+                    gtk_switch_set_active (self->invisible_switch, value);
+
+                    g_signal_handlers_unblock_by_func (
+                        self->invisible_switch, invisible_switch_state_set_cb,
+                        self);
+                }
         }
 }
 
@@ -130,13 +164,6 @@ pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
 
     adw_header_bar_set_show_title (self->header_bar,
                                    gtk_adjustment_get_value (adjustment) > 0);
-}
-
-void
-autostart_switch_state_set_cb (PinsFileView *self, gboolean state)
-{
-    pins_desktop_file_set_autostart (self->desktop_file, state);
-    gtk_switch_set_active (self->autostart_switch, state);
 }
 
 void
@@ -195,6 +222,8 @@ pins_file_view_set_desktop_file (PinsFileView *self,
                 self->desktop_file, pins_file_view_key_removed_cb, self);
             g_signal_handlers_disconnect_by_func (
                 self->desktop_file, autostart_switch_state_set_cb, self);
+            g_signal_handlers_disconnect_by_func (
+                self->desktop_file, invisible_switch_state_set_cb, self);
         }
 
     self->desktop_file = g_object_ref (desktop_file);
@@ -205,6 +234,10 @@ pins_file_view_set_desktop_file (PinsFileView *self,
     gtk_switch_set_active (
         self->autostart_switch,
         pins_desktop_file_is_autostart (self->desktop_file));
+    gtk_switch_set_active (
+        self->invisible_switch,
+        pins_desktop_file_get_boolean (self->desktop_file,
+                                       G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY));
 
     g_signal_connect_object (self->desktop_file, "key-set",
                              G_CALLBACK (pins_file_view_key_set_cb), self, 0);
@@ -213,6 +246,9 @@ pins_file_view_set_desktop_file (PinsFileView *self,
                              0);
     g_signal_connect_object (self->autostart_switch, "state-set",
                              G_CALLBACK (autostart_switch_state_set_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->invisible_switch, "state-set",
+                             G_CALLBACK (invisible_switch_state_set_cb), self,
                              G_CONNECT_SWAPPED);
 
     gtk_widget_set_visible (
@@ -266,6 +302,8 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           comment_row);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           autostart_switch);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          invisible_switch);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           keys_listbox);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,

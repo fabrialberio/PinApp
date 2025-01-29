@@ -145,6 +145,25 @@
                             </child>
                           </object>
                         </child>
+                        <child>
+                          <object class="AdwActionRow">
+                            <property name="title" translatable="yes">Invisible</property>
+                            <property
+                              name="subtitle"
+                              translatable="yes">Hide this application in the app menu</property>
+                            <property name="activatable-widget">invisible_switch</property>
+                            <child type="prefix">
+                              <object class="GtkImage">
+                                <property name="icon-name">view-conceal-symbolic</property>
+                              </object>
+                            </child>
+                            <child type="suffix">
+                              <object class="GtkSwitch" id="invisible_switch">
+                                <property name="valign">center</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
