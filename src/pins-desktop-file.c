@@ -327,8 +327,7 @@ pins_desktop_file_init (PinsDesktopFile *self)
 }
 
 gboolean
-pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key,
-                               GError **error)
+pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key)
 {
     gboolean value;
     GError *err = NULL;
@@ -337,21 +336,15 @@ pins_desktop_file_get_boolean (PinsDesktopFile *self, const gchar *key,
                                     key, &err);
     if (g_error_matches (err, G_KEY_FILE_ERROR,
                          G_KEY_FILE_ERROR_INVALID_VALUE))
-        {
-            return TRUE;
-        }
-    else
-        {
-            g_propagate_error (error, err);
-            return FALSE;
-        }
+        return TRUE;
+    else if (err != NULL)
+        return FALSE;
 
     return value;
 }
 
 gchar *
-pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
-                              GError **error)
+pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key)
 {
     gchar *value;
     GError *err = NULL;
@@ -359,10 +352,7 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
     value = g_key_file_get_string (self->key_file, G_KEY_FILE_DESKTOP_GROUP,
                                    key, &err);
     if (err != NULL)
-        {
-            g_propagate_error (error, err);
-            return "";
-        }
+        return "";
 
     return value;
 }

@@ -58,10 +58,10 @@ pins_app_row_update_appearance (PinsAppRow *self,
 
     adw_preferences_row_set_title (
         ADW_PREFERENCES_ROW (self),
-        pins_desktop_file_get_string (desktop_file, title_key, NULL));
+        pins_desktop_file_get_string (desktop_file, title_key));
     adw_action_row_set_subtitle (
         ADW_ACTION_ROW (self),
-        pins_desktop_file_get_string (desktop_file, subtitle_key, NULL));
+        pins_desktop_file_get_string (desktop_file, subtitle_key));
 }
 
 void

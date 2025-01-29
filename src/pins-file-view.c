@@ -67,7 +67,7 @@ pins_file_view_update_title (PinsFileView *self)
     adw_window_title_set_title (
         self->window_title,
         pins_desktop_file_get_string (self->desktop_file,
-                                      G_KEY_FILE_DESKTOP_KEY_NAME, NULL));
+                                      G_KEY_FILE_DESKTOP_KEY_NAME));
 }
 
 void

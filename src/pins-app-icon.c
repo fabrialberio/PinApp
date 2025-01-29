@@ -72,7 +72,7 @@ pins_app_icon_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
     if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_ICON) == 0)
         {
             gchar *icon_name = pins_desktop_file_get_string (
-                desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
+                desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON);
 
             pins_app_icon_set_icon_name (self, icon_name);
         }
@@ -82,14 +82,13 @@ void
 pins_app_icon_set_desktop_file (PinsAppIcon *self,
                                 PinsDesktopFile *desktop_file)
 {
-    GError *err = NULL;
     gchar *icon_name;
 
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
-    icon_name = pins_desktop_file_get_string (
-        desktop_file, G_KEY_FILE_DESKTOP_KEY_ICON, &err);
-    if (err != NULL)
+    icon_name = pins_desktop_file_get_string (desktop_file,
+                                              G_KEY_FILE_DESKTOP_KEY_ICON);
+    if (!g_strcmp0 (icon_name, ""))
         pins_app_icon_set_icon_name (self, DEFAULT_ICON_NAME);
 
     g_signal_connect_object (desktop_file, "key-set",

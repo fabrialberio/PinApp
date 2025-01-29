@@ -124,7 +124,7 @@ pins_key_row_set_locale (PinsKeyRow *self, gchar *selected_locale)
 
     gtk_editable_set_text (
         GTK_EDITABLE (self),
-        pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
+        pins_desktop_file_get_string (self->desktop_file, self->key));
 
     g_signal_handlers_unblock_by_func (GTK_EDITABLE (self),
                                        pins_key_row_text_changed_cb, self);
@@ -145,8 +145,7 @@ pins_key_row_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
 
     /// TODO: Sometimes this is slow
 
-    desktop_file_value
-        = pins_desktop_file_get_string (desktop_file, key, NULL);
+    desktop_file_value = pins_desktop_file_get_string (desktop_file, key);
     editable_value = (gchar *)gtk_editable_get_text (GTK_EDITABLE (self));
 
     if (g_strcmp0 (desktop_file_value, editable_value) != 0)
@@ -269,7 +268,7 @@ pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
 
     gtk_editable_set_text (
         GTK_EDITABLE (self),
-        pins_desktop_file_get_string (self->desktop_file, self->key, NULL));
+        pins_desktop_file_get_string (self->desktop_file, self->key));
 
     pins_key_row_update_reset_buttons_visibility (self);
 }

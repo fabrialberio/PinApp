@@ -52,9 +52,8 @@ gchar **pins_desktop_file_get_keys (PinsDesktopFile *self);
 gchar **pins_desktop_file_get_locales (PinsDesktopFile *self);
 
 gboolean pins_desktop_file_get_boolean (PinsDesktopFile *self,
-                                        const gchar *key, GError **error);
-gchar *pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key,
-                                     GError **error);
+                                        const gchar *key);
+gchar *pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key);
 void pins_desktop_file_set_boolean (PinsDesktopFile *self, const gchar *key,
                                     const gboolean value);
 void pins_desktop_file_set_string (PinsDesktopFile *self, const gchar *key,

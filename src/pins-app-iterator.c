@@ -213,12 +213,12 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
     first_key = _pins_join_key_locale (
         G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
                                          first, G_KEY_FILE_DESKTOP_KEY_NAME));
-    first_name = pins_desktop_file_get_string (first, first_key, NULL);
+    first_name = pins_desktop_file_get_string (first, first_key);
 
     second_key = _pins_join_key_locale (
         G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
                                          second, G_KEY_FILE_DESKTOP_KEY_NAME));
-    second_name = pins_desktop_file_get_string (second, second_key, NULL);
+    second_name = pins_desktop_file_get_string (second, second_key);
 
     return g_strcmp0 (first_name, second_name);
 }
