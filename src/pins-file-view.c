@@ -40,6 +40,7 @@ struct _PinsFileView
     GtkButton *load_icon_button;
     PinsKeyRow *name_row;
     PinsKeyRow *comment_row;
+    GtkSwitch *autostart_switch;
     GtkListBox *keys_listbox;
     AdwButtonRow *add_key_button;
     GtkButton *delete_button;
@@ -132,6 +133,13 @@ pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
 }
 
 void
+autostart_switch_state_set_cb (PinsFileView *self, gboolean state)
+{
+    pins_desktop_file_set_autostart (self->desktop_file, state);
+    gtk_switch_set_active (self->autostart_switch, state);
+}
+
+void
 pins_file_view_setup_keys_listbox (PinsFileView *self)
 {
     gchar **locales = _pins_locales_from_keys (self->keys);
@@ -185,19 +193,27 @@ pins_file_view_set_desktop_file (PinsFileView *self,
                 self->desktop_file, pins_file_view_key_set_cb, self);
             g_signal_handlers_disconnect_by_func (
                 self->desktop_file, pins_file_view_key_removed_cb, self);
+            g_signal_handlers_disconnect_by_func (
+                self->desktop_file, autostart_switch_state_set_cb, self);
         }
 
     self->desktop_file = g_object_ref (desktop_file);
     self->keys = pins_desktop_file_get_keys (self->desktop_file);
 
     pins_file_view_update_title (self);
+    pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
+    gtk_switch_set_active (
+        self->autostart_switch,
+        pins_desktop_file_is_autostart (self->desktop_file));
+
     g_signal_connect_object (self->desktop_file, "key-set",
                              G_CALLBACK (pins_file_view_key_set_cb), self, 0);
     g_signal_connect_object (self->desktop_file, "key-removed",
                              G_CALLBACK (pins_file_view_key_removed_cb), self,
                              0);
-
-    pins_app_icon_set_desktop_file (self->icon, self->desktop_file);
+    g_signal_connect_object (self->autostart_switch, "state-set",
+                             G_CALLBACK (autostart_switch_state_set_cb), self,
+                             G_CONNECT_SWAPPED);
 
     gtk_widget_set_visible (
         GTK_WIDGET (self->delete_button),
@@ -248,6 +264,8 @@ pins_file_view_class_init (PinsFileViewClass *klass)
                                           name_row);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           comment_row);
+    gtk_widget_class_bind_template_child (widget_class, PinsFileView,
+                                          autostart_switch);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
                                           keys_listbox);
     gtk_widget_class_bind_template_child (widget_class, PinsFileView,
