@@ -13,11 +13,11 @@
               <object class="AdwWindowTitle" id="window_title">
               </object>
             </property>
+            <!-- TODO: Implement duplicating files -->
             <child type="end">
-              <object class="GtkMenuButton" id="file_menu_button">
-                <property name="icon-name">view-more-symbolic</property>
-                <property name="tooltip-text" translatable="yes">File menu</property>
-                <property name="popover">file_menu_popover</property>
+              <object class="GtkButton" id="delete_button">
+                <property name="icon-name">user-trash-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Delete</property>
               </object>
             </child>
           </object>
@@ -203,31 +203,4 @@
       </object>
     </child>
   </template>
-
-  <object class="GtkPopover" id="file_menu_popover">
-    <style>
-      <class name="menu" />
-    </style>
-    <child>
-      <object class="GtkBox">
-        <property name="orientation">1</property>
-        <property name="margin-top">6</property>
-        <property name="margin-bottom">6</property>
-        <property name="margin-start">6</property>
-        <property name="margin-end">6</property>
-        <child>
-          <object class="GtkModelButton" id="delete_button">
-            <!-- TODO: Add remove warning dialog -->
-            <property name="text" translatable="yes">D_elete</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="duplicate_button">
-            <!-- TODO: Implement duplicating files -->
-            <property name="text" translatable="yes">_Duplicate</property>
-          </object>
-        </child>
-      </object>
-    </child>
-  </object>
 </interface>
