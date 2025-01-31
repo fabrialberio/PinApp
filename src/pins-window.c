@@ -22,7 +22,6 @@
 
 #include "pins-app-iterator.h"
 #include "pins-app-view.h"
-#include "pins-directories.h"
 #include "pins-file-view.h"
 
 struct _PinsWindow
@@ -170,17 +169,10 @@ pins_window_add_new_app_cb (GSimpleAction *action, GVariant *param,
 static void
 pins_window_init (PinsWindow *self)
 {
-    GtkIconTheme *theme;
     PinsAppIterator *app_iterator;
     GSimpleAction *action;
 
     gtk_widget_init_template (GTK_WIDGET (self));
-
-    theme = gtk_icon_theme_get_for_display (
-        gtk_widget_get_display (GTK_WIDGET (self)));
-
-    // This is noticeably slow
-    pins_icon_theme_inject_search_paths (theme);
 
     app_iterator = pins_app_iterator_new ();
 
@@ -190,9 +182,6 @@ pins_window_init (PinsWindow *self)
                              app_iterator, 0);
     g_action_map_add_action (G_ACTION_MAP (self), G_ACTION (action));
     g_object_unref (G_OBJECT (action));
-
-    pins_app_iterator_set_paths (app_iterator,
-                                 pins_desktop_file_search_paths ());
 
     pins_app_view_set_app_iterator (self->app_view, app_iterator);
 

@@ -321,6 +321,8 @@ pins_app_iterator_init (PinsAppIterator *self)
 {
     self->unique_filenames = g_hash_table_new (g_str_hash, g_str_equal);
     self->just_created_file = FALSE;
+
+    pins_app_iterator_set_paths (self, pins_desktop_file_search_paths ());
 }
 
 gpointer
