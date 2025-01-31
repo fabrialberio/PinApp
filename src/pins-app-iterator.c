@@ -34,7 +34,7 @@ struct _PinsAppIterator
     GObject parent_instance;
 
     gchar **duplicates;
-    gchar **unique_filenames;
+    GHashTable *unique_filenames;
     gboolean just_created_file;
     GListModel *model;
 };
@@ -80,11 +80,8 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
 
             filename = g_strconcat (basename, increment,
                                     PINS_DESKTOP_FILE_SUFFIX, NULL);
-            if (!g_strv_contains ((const gchar **)self->unique_filenames,
-                                  filename))
-                {
-                    break;
-                }
+            if (!g_hash_table_contains (self->unique_filenames, filename))
+                break;
         }
 
     file = g_file_new_for_path (
@@ -110,13 +107,12 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
 static void
 pins_app_iterator_update_duplicates (GListModel *model, guint position,
                                      guint removed, guint added,
-                                     gpointer user_data)
+                                     PinsAppIterator *self)
 {
-    PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    gchar *unique_filenames[g_list_model_get_n_items (model) + 1] = {};
-    gsize n_unique_filenames = 0;
+    g_hash_table_foreach (self->unique_filenames, (GHFunc)g_free, NULL);
+    g_hash_table_remove_all (self->unique_filenames);
 
     for (int i = 0; i < g_list_model_get_n_items (model); i++)
         {
@@ -124,22 +120,17 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
                 = G_FILE_INFO (g_list_model_get_item (model, i));
             GFile *file = G_FILE (g_file_info_get_attribute_object (
                 file_info, "standard::file"));
+            gchar *display_name
+                = (gchar *)g_file_info_get_display_name (file_info);
 
-            if (g_strv_contains ((const gchar *const *)unique_filenames,
-                                 g_file_info_get_display_name (file_info)))
-                {
-                    g_strv_builder_add (strv_builder, g_file_get_path (file));
-                }
+            if (g_hash_table_contains (self->unique_filenames, display_name))
+                g_strv_builder_add (strv_builder, g_file_get_path (file));
             else
-                {
-                    unique_filenames[n_unique_filenames]
-                        = (gchar *)g_file_info_get_display_name (file_info);
-                    n_unique_filenames++;
-                }
+                g_hash_table_add (self->unique_filenames,
+                                  g_strdup (display_name));
         }
 
     self->duplicates = g_strv_builder_end (strv_builder);
-    self->unique_filenames = g_strdupv (unique_filenames);
 }
 
 gboolean
@@ -149,7 +140,7 @@ pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
     PinsAppIterator *self = PINS_APP_ITERATOR (user_data);
     GFile *file = G_FILE (
         g_file_info_get_attribute_object (file_info, "standard::file"));
-    gchar **split_path = g_strsplit (g_file_get_path (file), ".", -1);
+    g_auto (GStrv) split_path = g_strsplit (g_file_get_path (file), ".", -1);
 
     is_desktop_file
         = g_strcmp0 (g_strconcat (".",
@@ -328,6 +319,7 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 static void
 pins_app_iterator_init (PinsAppIterator *self)
 {
+    self->unique_filenames = g_hash_table_new (g_str_hash, g_str_equal);
     self->just_created_file = FALSE;
 }
 
