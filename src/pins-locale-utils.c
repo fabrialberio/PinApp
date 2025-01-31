@@ -22,14 +22,21 @@
 
 #include "pins-locale-utils-private.h"
 
-PinsSplitKey
-_pins_split_key_locale (gchar *localized_key)
+void
+_pins_split_key_clear (PinsSplitKey *split_key)
 {
-    gchar **split_result = g_strsplit_set (localized_key, "[]", 3);
-    PinsSplitKey result = {
-        .key = split_result[0],
-        .locale = split_result[1],
-    };
+    g_free (split_key->key);
+    g_free (split_key->locale);
+}
+
+PinsSplitKey
+_pins_split_key_locale (const gchar *localized_key)
+{
+    g_auto (GStrv) split_result = g_strsplit_set (localized_key, "[]", 3);
+    PinsSplitKey result = { NULL, NULL };
+
+    result.key = g_strdup (split_result[0]);
+    result.locale = g_strdup (split_result[1]);
 
     g_assert (split_result[0] != NULL);
 
@@ -37,63 +44,52 @@ _pins_split_key_locale (gchar *localized_key)
 }
 
 gchar *
-_pins_join_key_locale (gchar *key, gchar *locale)
+_pins_join_key_locale (gchar *key, const gchar *locale)
 {
     if (locale != NULL)
-        {
-            return g_strdup_printf ("%s[%s]", _pins_split_key_locale (key).key,
-                                    locale);
-        }
+        return g_strdup_printf ("%s[%s]", _pins_split_key_locale (key).key,
+                                locale);
     else
-        {
-            return key;
-        }
+        return key;
 }
 
 gchar **
 _pins_locales_from_keys (gchar **keys)
 {
-    gchar *locale = g_malloc (sizeof (gchar *));
-    gchar **locales = g_malloc0_n (g_strv_length (keys) + 1, sizeof (gchar *));
-
+    GHashTable *unique_locales = g_hash_table_new (g_str_hash, g_str_equal);
     GStrvBuilder *strv_builder = g_strv_builder_new ();
 
-    for (int i = 0, lenght = 0; i < g_strv_length (keys); i++)
+    for (int i = 0; i < g_strv_length (keys); i++)
         {
-            locale = _pins_split_key_locale (keys[i]).locale;
+            PinsSplitKey split = _pins_split_key_locale (keys[i]);
+            g_free (split.key);
 
-            if (locale != NULL
-                && !g_strv_contains ((const gchar *const *)locales, locale))
+            if (split.locale != NULL
+                && !g_hash_table_contains (unique_locales, split.locale))
                 {
-                    locales[lenght] = locale;
-                    lenght++;
+                    g_strv_builder_add (strv_builder, split.locale);
+                    g_hash_table_add (unique_locales, split.locale);
                 }
         }
 
-    g_strv_builder_addv (strv_builder, (const char **)locales);
-
-    g_free (locale);
-    g_free (locales);
-
+    g_hash_table_foreach (unique_locales, (GHFunc)g_free, NULL);
+    g_hash_table_destroy (unique_locales);
     return g_strv_builder_end (strv_builder);
 }
 
 gboolean
-_pins_key_has_locales (gchar **all_keys, gchar *key)
+_pins_key_has_locales (gchar **all_keys, const gchar *key)
 {
-    PinsSplitKey split_key;
+    g_auto (PinsSplitKey) split, current;
 
-    key = _pins_split_key_locale (key).key;
+    split = _pins_split_key_locale (key);
 
     for (int i = 0; i < g_strv_length (all_keys); i++)
         {
-            split_key = _pins_split_key_locale (all_keys[i]);
+            current = _pins_split_key_locale (all_keys[i]);
 
-            if (g_strcmp0 (split_key.key, key) == 0
-                && split_key.locale != NULL)
-                {
-                    return TRUE;
-                }
+            if (!g_strcmp0 (current.key, split.key) && current.locale != NULL)
+                return TRUE;
         }
 
     return FALSE;

@@ -30,10 +30,12 @@ typedef struct
     gchar *locale;
 } PinsSplitKey;
 
-PinsSplitKey _pins_split_key_locale (gchar *localized_key);
-gchar *_pins_join_key_locale (gchar *key, gchar *locale);
+void _pins_split_key_clear (PinsSplitKey *split_key);
+G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC (PinsSplitKey, _pins_split_key_clear);
+
+PinsSplitKey _pins_split_key_locale (const gchar *localized_key);
+gchar *_pins_join_key_locale (gchar *key, const gchar *locale);
 gchar **_pins_locales_from_keys (gchar **keys);
-gboolean _pins_key_has_locales (gchar **all_keys, gchar *key);
-void _gtk_string_list_remove_string (GtkStringList *list, gchar *string);
+gboolean _pins_key_has_locales (gchar **all_keys, const gchar *key);
 
 G_END_DECLS
