@@ -164,27 +164,21 @@ void
 pins_key_row_key_removed_cb (PinsDesktopFile *desktop_file, gchar *key,
                              PinsKeyRow *self)
 {
-    PinsSplitKey split_key = _pins_split_key_locale (key);
+    g_auto (PinsSplitKey) split = _pins_split_key_locale (key);
 
     g_assert (PINS_IS_KEY_ROW (self));
 
-    if (g_strcmp0 (key, self->key) != 0)
+    if (g_strcmp0 (key, self->key))
         return;
 
-    if (split_key.locale != NULL)
+    if (split.locale != NULL)
         {
-            if (g_strcmp0 (split_key.key, self->unlocalized_key) == 0)
+            if (!g_strcmp0 (split.key, self->unlocalized_key))
                 {
                     pins_key_row_set_locale (self, NULL);
                     pins_key_row_update_locale_button_visibility (self);
                 }
-
-            return;
         }
-
-    if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0
-        || g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_COMMENT) == 0)
-        return;
 }
 
 void
@@ -290,9 +284,11 @@ locale_menu_item_update_icon (PinsKeyRow *self, GtkListItem *item)
 {
     GtkWidget *icon
         = gtk_widget_get_last_child (gtk_list_item_get_child (item));
-    const gchar *locale
-        = gtk_string_object_get_string (gtk_list_item_get_item (item));
-    const gchar *current_locale = _pins_split_key_locale (self->key).locale;
+    const gchar *locale, *current_locale;
+    g_auto (PinsSplitKey) split = _pins_split_key_locale (self->key);
+
+    locale = gtk_string_object_get_string (gtk_list_item_get_item (item));
+    current_locale = split.locale;
 
     if (g_strcmp0 (locale, UNLOCALIZED_STRING) == 0)
         locale = NULL;

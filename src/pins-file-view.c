@@ -75,25 +75,25 @@ void
 pins_file_view_focus_key_row (PinsFileView *self, gchar *key)
 {
     GtkListBoxRow *row;
-    gchar *current_key, *locale;
+    g_auto (PinsSplitKey) split, current;
 
-    locale = _pins_split_key_locale (key).locale;
-    key = _pins_split_key_locale (key).key;
+    split = _pins_split_key_locale (key);
+    key = split.key;
 
     for (int i = 0;
          (row = gtk_list_box_get_row_at_index (self->keys_listbox, i)) != NULL;
          i++)
         {
-            current_key = _pins_split_key_locale (
-                              pins_key_row_get_key (PINS_KEY_ROW (row)))
-                              .key;
+            current = _pins_split_key_locale (
+                pins_key_row_get_key (PINS_KEY_ROW (row)));
 
-            if (!g_strcmp0 (current_key, key))
+            if (!g_strcmp0 (current.key, key))
                 {
                     gtk_widget_grab_focus (GTK_WIDGET (row));
 
-                    if (locale != NULL)
-                        pins_key_row_set_locale (PINS_KEY_ROW (row), locale);
+                    if (split.locale != NULL)
+                        pins_key_row_set_locale (PINS_KEY_ROW (row),
+                                                 split.locale);
                 }
         }
 }
@@ -167,10 +167,8 @@ pins_file_view_update_title_visible_cb (GtkAdjustment *adjustment,
 void
 pins_file_view_setup_keys_listbox (PinsFileView *self)
 {
-    gchar **locales = _pins_locales_from_keys (self->keys);
-    gchar **added_keys
-        = g_malloc0_n (g_strv_length (self->keys) + 1, sizeof (gchar *));
-    gsize n_added_keys = 0;
+    g_auto (GStrv) locales = _pins_locales_from_keys (self->keys);
+    GHashTable *added_keys = g_hash_table_new (g_str_hash, g_str_equal);
 
     gtk_list_box_remove_all (self->keys_listbox);
 
@@ -181,31 +179,29 @@ pins_file_view_setup_keys_listbox (PinsFileView *self)
                               G_KEY_FILE_DESKTOP_KEY_COMMENT, self->keys,
                               locales);
 
-    added_keys[0] = G_KEY_FILE_DESKTOP_KEY_NAME;
-    added_keys[1] = G_KEY_FILE_DESKTOP_KEY_COMMENT;
-    n_added_keys = 2;
+    g_hash_table_add (added_keys, g_strdup (G_KEY_FILE_DESKTOP_KEY_NAME));
+    g_hash_table_add (added_keys, g_strdup (G_KEY_FILE_DESKTOP_KEY_COMMENT));
 
     for (int i = 0; i < g_strv_length (self->keys); i++)
         {
             gchar *current_key = _pins_split_key_locale (self->keys[i]).key;
             PinsKeyRow *row;
 
-            if (g_strv_contains ((const gchar *const *)added_keys,
-                                 current_key))
+            if (g_hash_table_contains (added_keys, current_key))
                 continue;
 
-            row = pins_key_row_new ();
-            pins_file_view_setup_row (row, self->desktop_file, current_key,
-                                      self->keys, locales);
+            g_hash_table_add (added_keys, current_key);
 
-            added_keys[n_added_keys] = current_key;
-            n_added_keys++;
+            row = pins_key_row_new ();
+            pins_file_view_setup_row (row, self->desktop_file,
+                                      g_strdup (current_key), self->keys,
+                                      locales);
 
             gtk_list_box_append (self->keys_listbox, GTK_WIDGET (row));
         }
 
-    g_strfreev (locales);
-    g_free (added_keys); /// TODO: Using g_strfreev results in free error
+    g_hash_table_foreach (added_keys, (GHFunc)g_free, NULL);
+    g_hash_table_destroy (added_keys);
 }
 
 void
