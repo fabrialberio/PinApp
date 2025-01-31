@@ -26,6 +26,6 @@ gchar *pins_desktop_file_user_path (void);
 gchar *pins_desktop_file_autostart_path (void);
 gchar **pins_desktop_file_search_paths (void);
 
-void pins_icon_theme_inject_search_paths (GtkIconTheme *theme);
+void pins_environ_inject_search_paths (void);
 
 G_END_DECLS

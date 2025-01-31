@@ -39,43 +39,39 @@ pins_desktop_file_autostart_path (void)
 }
 
 gchar **
+pins_search_paths (void)
+{
+    GStrvBuilder *builder = g_strv_builder_new ();
+
+    g_strv_builder_add_many (builder, "/usr/share", "/run/host/usr/share",
+                             "/var/lib/flatpak/exports/share",
+                             g_build_filename (pins_user_data_path (),
+                                               "flatpak/exports/share", NULL),
+                             "/var/lib/snapd/desktop/", NULL);
+
+    return g_strv_builder_end (builder);
+}
+
+gchar **
 pins_desktop_file_search_paths (void)
 {
-    const gchar *system_paths[]
-        = { "/usr/share/applications",
-            "/run/host/usr/share/applications",
-            "/var/lib/flatpak/exports/share/applications",
-            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
-                              "applications", NULL),
-            "/var/lib/snapd/desktop/applications",
-            NULL };
+    GStrvBuilder *builder = g_strv_builder_new ();
+    g_auto (GStrv) search_paths = pins_search_paths ();
 
-    GStrvBuilder *strv_builder = g_strv_builder_new ();
+    for (int i = 0; i < g_strv_length (search_paths); i++)
+        g_strv_builder_add (
+            builder, g_build_filename (search_paths[i], "applications", NULL));
 
-    g_strv_builder_addv (strv_builder, system_paths);
-    g_strv_builder_add (strv_builder, pins_desktop_file_user_path ());
+    g_strv_builder_add (builder, pins_desktop_file_user_path ());
 
-    return g_strv_builder_end (strv_builder);
+    return g_strv_builder_end (builder);
 }
 
 void
-pins_icon_theme_inject_search_paths (GtkIconTheme *theme)
+pins_environ_inject_search_paths (void)
 {
-    /// TODO: Aggiungere path a XDG_DATA_DIRS invece di fare così
-    const gchar *paths[]
-        = { "/run/host/usr/share/icons",
-            "/var/lib/flatpak/exports/share/icons",
-            g_build_filename (pins_user_data_path (), "flatpak/exports/share",
-                              "icons", NULL),
-            NULL };
-
-    GStrvBuilder *strv_builder = g_strv_builder_new ();
-    g_strv_builder_addv (strv_builder, paths);
-    g_strv_builder_addv (strv_builder,
-                         (const gchar **)g_get_system_data_dirs ());
-    g_strv_builder_addv (
-        strv_builder, (const gchar **)gtk_icon_theme_get_search_path (theme));
-
-    gtk_icon_theme_set_search_path (
-        theme, (const gchar *const *)g_strv_builder_end (strv_builder));
+    g_setenv ("XDG_DATA_DIRS",
+              g_strjoin (":", g_getenv ("XDG_DATA_DIRS"),
+                         g_strjoinv (":", pins_search_paths ()), NULL),
+              TRUE);
 }
