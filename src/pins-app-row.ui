@@ -11,7 +11,6 @@
     </child>
     <child type="suffix">
       <object class="GtkImage">
-        <property name="opacity">.6</property>
         <property name="icon-name">go-next-symbolic</property>
       </object>
     </child>
