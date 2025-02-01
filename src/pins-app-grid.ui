@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="PinsAppGrid" parent="AdwBin">
+    <property name="child">
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="child">
+          <object class="AdwClampScrollable">
+            <property name="maximum-size">960</property>
+            <child>
+              <object class="GtkGridView" id="grid_view">
+                <property name="single-click-activate">true</property>
+                <style>
+                  <class name="app-grid" />
+                </style>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

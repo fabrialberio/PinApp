@@ -1,4 +1,4 @@
-/* pins-app-list.h
+/* pins-app-tile.h
  *
  * Copyright 2024 Fabrizio
  *
@@ -22,13 +22,16 @@
 
 #include <adwaita.h>
 
+#include "pins-desktop-file.h"
+
 G_BEGIN_DECLS
 
-#define PINS_TYPE_APP_LIST (pins_app_list_get_type ())
+#define PINS_TYPE_APP_TILE (pins_app_tile_get_type ())
 
-G_DECLARE_FINAL_TYPE (PinsAppList, pins_app_list, PINS, APP_LIST, AdwBin)
+G_DECLARE_FINAL_TYPE (PinsAppTile, pins_app_tile, PINS, APP_TILE, GtkBox)
 
-PinsAppList *pins_app_list_new (void);
-void pins_app_list_set_model (PinsAppList *self, GListModel *model);
+PinsAppTile *pins_app_tile_new (void);
+void pins_app_tile_set_desktop_file (PinsAppTile *self,
+                                     PinsDesktopFile *desktop_file);
 
 G_END_DECLS

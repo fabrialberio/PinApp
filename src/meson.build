@@ -1,10 +1,10 @@
 pinapp_sources = [
     'main.c',
     'pins-add-key-dialog.c',
+    'pins-app-grid.c',
     'pins-app-icon.c',
     'pins-app-iterator.c',
-    'pins-app-list.c',
-    'pins-app-row.c',
+    'pins-app-tile.c',
     'pins-app-view.c',
     'pins-application.c',
     'pins-desktop-file.c',

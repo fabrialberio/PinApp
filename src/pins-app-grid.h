@@ -1,4 +1,4 @@
-/* pins-app-row.h
+/* pins-app-grid.h
  *
  * Copyright 2024 Fabrizio
  *
@@ -22,16 +22,13 @@
 
 #include <adwaita.h>
 
-#include "pins-desktop-file.h"
-
 G_BEGIN_DECLS
 
-#define PINS_TYPE_APP_ROW (pins_app_row_get_type ())
+#define PINS_TYPE_APP_GRID (pins_app_grid_get_type ())
 
-G_DECLARE_FINAL_TYPE (PinsAppRow, pins_app_row, PINS, APP_ROW, AdwActionRow)
+G_DECLARE_FINAL_TYPE (PinsAppGrid, pins_app_grid, PINS, APP_GRID, AdwBin)
 
-PinsAppRow *pins_app_row_new (void);
-void pins_app_row_set_desktop_file (PinsAppRow *self,
-                                    PinsDesktopFile *desktop_file);
+PinsAppGrid *pins_app_grid_new (void);
+void pins_app_grid_set_model (PinsAppGrid *self, GListModel *model);
 
 G_END_DECLS

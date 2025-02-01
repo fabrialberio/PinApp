@@ -24,7 +24,7 @@
 
 #include "pins-app-view.h"
 
-#include "pins-app-list.h"
+#include "pins-app-grid.h"
 #include "pins-desktop-file.h"
 
 struct _PinsAppView
@@ -38,7 +38,7 @@ struct _PinsAppView
     GtkSearchBar *search_bar;
     GtkSearchEntry *search_entry;
     AdwViewStack *view_stack;
-    PinsAppList *app_list;
+    PinsAppGrid *app_grid;
 };
 
 G_DEFINE_TYPE (PinsAppView, pins_app_view, ADW_TYPE_BIN);
@@ -95,7 +95,7 @@ pins_app_view_set_app_iterator (PinsAppView *self,
     self->filter_model = gtk_filter_list_model_new (
         G_LIST_MODEL (app_iterator), GTK_FILTER (self->string_filter));
 
-    pins_app_list_set_model (self->app_list,
+    pins_app_grid_set_model (self->app_grid,
                              G_LIST_MODEL (g_object_ref (self->filter_model)));
 
     g_signal_connect_object (app_iterator, "loading",
@@ -132,7 +132,7 @@ pins_app_view_class_init (PinsAppViewClass *klass)
 
     gtk_widget_class_set_template_from_resource (
         widget_class, "/io/github/fabrialberio/pinapp/pins-app-view.ui");
-    g_type_ensure (PINS_TYPE_APP_LIST);
+    g_type_ensure (PINS_TYPE_APP_GRID);
 
     gtk_widget_class_bind_template_child (widget_class, PinsAppView,
                                           search_button);
@@ -142,7 +142,7 @@ pins_app_view_class_init (PinsAppViewClass *klass)
                                           search_entry);
     gtk_widget_class_bind_template_child (widget_class, PinsAppView,
                                           view_stack);
-    gtk_widget_class_bind_template_child (widget_class, PinsAppView, app_list);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppView, app_grid);
 }
 
 void
@@ -196,7 +196,7 @@ pins_app_view_init (PinsAppView *self)
     g_signal_connect_object (self->search_entry, "search-changed",
                              G_CALLBACK (pins_app_view_search_changed_cb),
                              self, 0);
-    g_signal_connect_object (self->app_list, "activate",
+    g_signal_connect_object (self->app_grid, "activate",
                              G_CALLBACK (pins_app_view_item_activated_cb),
                              self, 0);
 }
