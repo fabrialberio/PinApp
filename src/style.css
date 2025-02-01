@@ -20,3 +20,8 @@
     border-radius: 9999px;
     padding: 2px;
 }
+
+.app-grid {
+    padding: 12px;
+    background: transparent;
+}
