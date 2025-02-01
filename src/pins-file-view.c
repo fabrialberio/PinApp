@@ -354,9 +354,9 @@ add_key_button_clicked_cb (PinsFileView *self)
 }
 
 void
-remove_button_clicked_cb (PinsFileView *self)
+delete_button_clicked_cb (PinsFileView *self)
 {
-    pins_desktop_file_delete (self->desktop_file);
+    pins_desktop_file_trash (self->desktop_file);
 }
 
 void
@@ -389,7 +389,7 @@ pins_file_view_init (PinsFileView *self)
                              G_CALLBACK (add_key_button_clicked_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->delete_button, "clicked",
-                             G_CALLBACK (remove_button_clicked_cb), self,
+                             G_CALLBACK (delete_button_clicked_cb), self,
                              G_CONNECT_SWAPPED);
 
     g_signal_connect_object (self->breakpoint, "apply",

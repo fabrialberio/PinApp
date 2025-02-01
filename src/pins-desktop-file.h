@@ -45,7 +45,7 @@ gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
 gboolean pins_desktop_file_is_autostart (PinsDesktopFile *self);
 
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
-void pins_desktop_file_delete (PinsDesktopFile *self);
+void pins_desktop_file_trash (PinsDesktopFile *self);
 void pins_desktop_file_set_autostart (PinsDesktopFile *self, gboolean value);
 
 gchar **pins_desktop_file_get_keys (PinsDesktopFile *self);

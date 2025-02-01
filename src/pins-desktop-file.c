@@ -191,9 +191,13 @@ pins_desktop_file_is_edited (PinsDesktopFile *self)
 }
 
 void
-pins_desktop_file_delete (PinsDesktopFile *self)
+pins_desktop_file_trash (PinsDesktopFile *self)
 {
-    g_file_delete (self->user_file, NULL, NULL);
+    g_autoptr (GError) err = NULL;
+
+    g_file_trash (self->user_file, NULL, &err);
+    if (g_error_matches (err, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED))
+        g_file_delete (self->user_file, NULL, NULL);
 
     g_signal_emit (self, signals[FILE_DELETED], 0);
 }
