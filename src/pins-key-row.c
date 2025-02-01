@@ -148,7 +148,7 @@ pins_key_row_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
     desktop_file_value = pins_desktop_file_get_string (desktop_file, key);
     editable_value = (gchar *)gtk_editable_get_text (GTK_EDITABLE (self));
 
-    if (g_strcmp0 (desktop_file_value, editable_value) != 0)
+    if (g_strcmp0 (desktop_file_value, editable_value))
         {
             g_signal_handlers_block_by_func (
                 GTK_EDITABLE (self), pins_key_row_text_changed_cb, self);
@@ -157,6 +157,9 @@ pins_key_row_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
 
             g_signal_handlers_unblock_by_func (
                 GTK_EDITABLE (self), pins_key_row_text_changed_cb, self);
+
+            pins_key_row_update_locale_button_visibility (self);
+            pins_key_row_update_reset_buttons_visibility (self);
         }
 }
 
