@@ -43,11 +43,13 @@ pins_search_paths (void)
 {
     GStrvBuilder *builder = g_strv_builder_new ();
 
-    g_strv_builder_add_many (builder, "/usr/share", "/run/host/usr/share",
-                             "/var/lib/flatpak/exports/share",
+    /// TODO: Some apps don't appear (e.g. nautilus, baobab, disks, system
+    /// monitor, software, sysprof)
+    g_strv_builder_add_many (builder, "/var/lib/snapd/desktop/",
                              g_build_filename (pins_user_data_path (),
                                                "flatpak/exports/share", NULL),
-                             "/var/lib/snapd/desktop/", NULL);
+                             "/var/lib/flatpak/exports/share",
+                             "/run/host/usr/share", "/usr/share", NULL);
 
     return g_strv_builder_end (builder);
 }
@@ -71,7 +73,7 @@ void
 pins_environ_inject_search_paths (void)
 {
     g_setenv ("XDG_DATA_DIRS",
-              g_strjoin (":", g_getenv ("XDG_DATA_DIRS"),
-                         g_strjoinv (":", pins_search_paths ()), NULL),
+              g_strjoin (":", g_strjoinv (":", pins_search_paths ()),
+                         g_getenv ("XDG_DATA_DIRS"), NULL),
               TRUE);
 }
