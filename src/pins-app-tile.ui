@@ -4,6 +4,10 @@
     <property name="orientation">vertical</property>
     <property name="hexpand">false</property>
     <property name="halign">center</property>
+    <property name="width-request">96</property>
+    <property name="margin-top">6</property>
+    <property name="margin-bottom">6</property>
+    <property name="spacing">6</property>
     <child>
       <object class="PinsAppIcon" id="icon">
         <property name="pixel-size">64</property>
@@ -11,7 +15,6 @@
     </child>
     <child>
       <object class="GtkLabel" id="title">
-        <property name="max-width-chars">40</property>
         <property name="ellipsize">end</property>
       </object>
     </child>
