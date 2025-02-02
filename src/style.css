@@ -1,5 +1,5 @@
 .app-banner-listbox {
-    background-color: transparent;
+    background: transparent;
 }
 
 .app-banner-listbox>row {
@@ -24,4 +24,10 @@
 .app-grid {
     padding: 12px;
     background: transparent;
+}
+
+.app-grid>child {
+    border-radius: 24px;
+    margin-left: 6px;
+    margin-right: 6px;
 }
