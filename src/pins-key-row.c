@@ -60,12 +60,12 @@ pins_key_row_new (void)
 void
 pins_key_row_update_reset_buttons_visibility (PinsKeyRow *self)
 {
-    gboolean reset_button_visible, remove_button_visible,
-        unlocalized_with_other_locales;
+    gboolean reset_button_visible = FALSE, remove_button_visible = FALSE,
+             unlocalized_with_other_locales;
     const gchar *editable_value = gtk_editable_get_text (GTK_EDITABLE (self));
 
     reset_button_visible
-        = pins_desktop_file_has_backup_for_key (self->desktop_file, self->key)
+        = !pins_desktop_file_is_user_only (self->desktop_file)
           && pins_desktop_file_is_key_edited (self->desktop_file, self->key);
 
     unlocalized_with_other_locales
@@ -73,7 +73,7 @@ pins_key_row_update_reset_buttons_visibility (PinsKeyRow *self)
           && gtk_widget_get_visible (GTK_WIDGET (self->locale_button));
 
     remove_button_visible
-        = !pins_desktop_file_has_backup_for_key (self->desktop_file, self->key)
+        = pins_desktop_file_is_user_only (self->desktop_file)
           && pins_desktop_file_has_key (self->desktop_file, self->key)
           && strlen (editable_value) == 0 && !unlocalized_with_other_locales;
 
