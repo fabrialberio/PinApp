@@ -263,10 +263,6 @@ pins_key_row_reset_key_cb (PinsKeyRow *self, gpointer user_data)
 
     pins_desktop_file_reset_key (self->desktop_file, self->key);
 
-    gtk_editable_set_text (
-        GTK_EDITABLE (self),
-        pins_desktop_file_get_string (self->desktop_file, self->key));
-
     pins_key_row_update_reset_buttons_visibility (self);
 }
 

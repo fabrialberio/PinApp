@@ -440,6 +440,8 @@ pins_desktop_file_reset_key (PinsDesktopFile *self, const gchar *key)
                 self->key_file, G_KEY_FILE_DESKTOP_GROUP, key,
                 g_key_file_get_string (self->backup_key_file,
                                        G_KEY_FILE_DESKTOP_GROUP, key, NULL));
+
+            g_signal_emit (self, signals[KEY_SET], 0, key);
         }
     else
         {
