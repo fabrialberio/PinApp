@@ -84,8 +84,8 @@ pins_app_iterator_create_user_file (PinsAppIterator *self, gchar *basename,
                 break;
         }
 
-    file = g_file_new_for_path (
-        g_build_filename (pins_desktop_file_user_path (), filename, NULL));
+    file = g_file_new_build_filename (pins_desktop_file_user_path (), filename,
+                                      NULL);
     stream = g_io_stream_get_output_stream (G_IO_STREAM (
         g_file_create_readwrite (file, G_FILE_CREATE_NONE, NULL, &err)));
     if (err != NULL)
