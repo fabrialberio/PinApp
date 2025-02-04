@@ -22,6 +22,7 @@
 
 #include "pins-app-iterator.h"
 #include "pins-app-view.h"
+#include "pins-directories.h"
 #include "pins-file-view.h"
 
 struct _PinsWindow
@@ -173,6 +174,8 @@ pins_window_init (PinsWindow *self)
     GSimpleAction *action;
 
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    pins_inject_icon_search_paths ();
 
     app_iterator = pins_app_iterator_new ();
 

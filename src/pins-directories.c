@@ -21,48 +21,43 @@
 #include "pins-directories.h"
 
 gchar *
-pins_user_data_path (void)
+parse_filename (gchar *parse_name)
 {
-    return g_build_filename (g_get_home_dir (), ".local/share", NULL);
+    // Necessary to expand "~/" prefix to actual user home dir
+    return g_file_get_path (g_file_parse_name (parse_name));
 }
 
 gchar *
 pins_desktop_file_user_path (void)
 {
-    return g_build_filename (pins_user_data_path (), "applications", NULL);
+    g_autoptr (GSettings) settings
+        = g_settings_new ("io.github.fabrialberio.pinapp");
+
+    return parse_filename (g_settings_get_string (settings, "user-path"));
 }
 
 gchar *
 pins_desktop_file_autostart_path (void)
 {
-    return g_build_filename (g_get_home_dir (), ".config/autostart", NULL);
-}
+    g_autoptr (GSettings) settings
+        = g_settings_new ("io.github.fabrialberio.pinapp");
 
-gchar **
-pins_search_paths (void)
-{
-    GStrvBuilder *builder = g_strv_builder_new ();
-
-    /// TODO: Some apps don't appear (e.g. nautilus, baobab, disks, system
-    /// monitor, software, sysprof)
-    g_strv_builder_add_many (builder, "/var/lib/snapd/desktop/",
-                             g_build_filename (pins_user_data_path (),
-                                               "flatpak/exports/share", NULL),
-                             "/var/lib/flatpak/exports/share",
-                             "/run/host/usr/share", "/usr/share", NULL);
-
-    return g_strv_builder_end (builder);
+    return parse_filename (g_settings_get_string (settings, "autostart-path"));
 }
 
 gchar **
 pins_desktop_file_search_paths (void)
 {
     GStrvBuilder *builder = g_strv_builder_new ();
-    g_auto (GStrv) search_paths = pins_search_paths ();
+    g_autoptr (GSettings) settings
+        = g_settings_new ("io.github.fabrialberio.pinapp");
+    g_auto (GStrv) search_paths
+        = g_settings_get_strv (settings, "search-paths");
 
     for (int i = 0; i < g_strv_length (search_paths); i++)
-        g_strv_builder_add (
-            builder, g_build_filename (search_paths[i], "applications", NULL));
+        g_strv_builder_add (builder,
+                            g_build_filename (parse_filename (search_paths[i]),
+                                              "applications", NULL));
 
     g_strv_builder_add (builder, pins_desktop_file_user_path ());
 
@@ -70,10 +65,24 @@ pins_desktop_file_search_paths (void)
 }
 
 void
-pins_environ_inject_search_paths (void)
+pins_inject_icon_search_paths (void)
 {
-    g_setenv ("XDG_DATA_DIRS",
-              g_strjoin (":", g_strjoinv (":", pins_search_paths ()),
-                         g_getenv ("XDG_DATA_DIRS"), NULL),
-              TRUE);
+    GStrvBuilder *builder = g_strv_builder_new ();
+    g_autoptr (GSettings) settings
+        = g_settings_new ("io.github.fabrialberio.pinapp");
+    g_auto (GStrv) search_paths
+        = g_settings_get_strv (settings, "search-paths");
+    g_autoptr (GtkIconTheme) theme
+        = gtk_icon_theme_get_for_display (gdk_display_get_default ());
+
+    for (int i = 0; i < g_strv_length (search_paths); i++)
+        g_strv_builder_add (builder,
+                            g_build_filename (parse_filename (search_paths[i]),
+                                              "icons", NULL));
+
+    g_strv_builder_addv (
+        builder, (const gchar **)gtk_icon_theme_get_search_path (theme));
+
+    gtk_icon_theme_set_search_path (
+        theme, (const gchar *const *)g_strv_builder_end (builder));
 }

@@ -35,9 +35,6 @@ main (int argc, char *argv[])
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
-    // Inject additional icon search paths in XDG_DATA_DIRS
-    pins_environ_inject_search_paths ();
-
     app = pins_application_new ("io.github.fabrialberio.pinapp",
                                 G_APPLICATION_HANDLES_OPEN);
     ret = g_application_run (G_APPLICATION (app), argc, argv);
