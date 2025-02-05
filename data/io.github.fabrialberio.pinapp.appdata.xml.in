@@ -27,13 +27,16 @@
   </branding>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/1.png</image>
+      <image>
+        https://raw.githubusercontent.com/fabrialberio/Pins/3003a5825e155df7fff4bdedec12b478165d7de8/data/appstream/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/2.png</image>
+      <image>
+        https://raw.githubusercontent.com/fabrialberio/Pins/3003a5825e155df7fff4bdedec12b478165d7de8/data/appstream/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/3.png</image>
+      <image>
+        https://raw.githubusercontent.com/fabrialberio/Pins/3003a5825e155df7fff4bdedec12b478165d7de8/data/appstream/3.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
