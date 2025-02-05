@@ -9,15 +9,12 @@
         "/run/host/usr/share",
         "/usr/share"
         ]</default>
-      <summary>Application search paths</summary>
     </key>
     <key name="user-path" type="s">
       <default>"~/.local/share/applications"</default>
-      <summary>User application path</summary>
     </key>
     <key name="autostart-path" type="s">
       <default>"~/.config/autostart"</default>
-      <summary>Autostart application path</summary>
     </key>
   </schema>
 </schemalist>
