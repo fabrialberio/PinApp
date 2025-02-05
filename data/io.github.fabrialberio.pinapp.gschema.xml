@@ -3,6 +3,7 @@
   <schema id="io.github.fabrialberio.pinapp" path="/io/github/fabrialberio/pinapp/">
     <key name="search-paths" type="as">
       <default>[
+        "~/.local/share/xdg-desktop-portal",
         "/var/lib/snapd/desktop",
         "~/.local/share/flatpak/exports/share",
         "/var/lib/flatpak/exports/share",

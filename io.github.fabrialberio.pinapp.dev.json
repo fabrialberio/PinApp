@@ -13,7 +13,8 @@
         "--filesystem=xdg-data/applications:rw",
         "--filesystem=xdg-data/flatpak:ro",
         "--filesystem=/var/lib/flatpak:ro",
-        "--filesystem=/var/lib/snapd:ro"
+        "--filesystem=/var/lib/snapd:ro",
+        "--filesystem=~/.local/share/xdg-desktop-portal:ro"
     ],
     "cleanup": [
         "/include",
