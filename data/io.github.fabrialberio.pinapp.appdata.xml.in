@@ -58,6 +58,21 @@
         </ul>
       </description>
     </release>
+    <release version="2.0.0" date="2025-02-05">
+      <description translate="no">
+        <p>What's changed</p>
+        <ul>
+          <li>New app grid view</li>
+          <li>New app icon editing shortcuts</li>
+          <li>Added autostart application support</li>
+          <li>New quick toggle to hide applications</li>
+          <li>New "erase changes" option for system files</li>
+          <li>Added support for GNOME Web webapps</li>
+          <li>Revised desktop file backend</li>
+          <li>Improved performance by removing Python</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.0" date="2022-09-04">
       <description translate="no">
         <p>What's changed</p>
@@ -162,7 +177,7 @@
         </ul>
       </description>
     </release>
-    <release version="1.1.2" date="2022-10-09">
+    <release version="1." date="2022-10-09">
       <description translate="no">
         <p>What's changed</p>
         <ul>
