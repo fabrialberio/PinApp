@@ -7,221 +7,291 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-04 14:12+0200\n"
-"PO-Revision-Date: 2023-09-06 14:41+0200\n"
+"POT-Creation-Date: 2025-02-05 18:01+0100\n"
+"PO-Revision-Date: 2025-02-05 18:05+0100\n"
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: \n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
-#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:1
-#: ../data/io.github.fabrialberio.pinapp.appdata.xml.in.h:1
-#: ../src/ui/apps_page_dialogs.ui.h:5
-msgid "Create and edit application shortcuts"
+#: data/io.github.fabrialberio.pinapp.desktop.in:3 src/pins-window.ui:14
+msgid "Pins"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.desktop.in:4
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:9
+#, fuzzy
+#| msgid "Create and edit application shortcuts"
+msgid "Create and edit app shortcuts"
 msgstr "Maak en bewerk snelkoppelingen"
 
-#: ../data/io.github.fabrialberio.pinapp.desktop.in.h:2
+#: data/io.github.fabrialberio.pinapp.desktop.in:11
 msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Apps;Toepassingen;Programma's;Snelkoppelingen;Pictogrammen;"
 
-#: ../src/ui/apps_page_dialogs.ui.h:1
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
+msgid "PinApp is a simple application that lets you customize your app list."
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
+msgid "Some of the possible uses are"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:18
+msgid "Changing an app icon that doesn't fit in with your theme"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
+msgid "Creating custom shortcuts to websites"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:20
+msgid "Hiding apps you don't want to see"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:21
+msgid "Editing properties in .desktop files"
+msgstr ""
+
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:23
+msgid ""
+"The app is made with Libadwaita and GTK4, with consideration for small-"
+"screen devices"
+msgstr ""
+
+#: src/help-overlay.ui:11
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Algemeen"
 
-#: ../src/ui/apps_page_dialogs.ui.h:2
+#: src/help-overlay.ui:14
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr "Sneltoetsen tonen"
 
-#: ../src/ui/apps_page_dialogs.ui.h:3
+#: src/help-overlay.ui:20
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Afsluiten"
 
-#: ../src/ui/apps_page_dialogs.ui.h:4
+#: src/help-overlay.ui:26
 msgctxt "shortcut window"
 msgid "Add new app"
 msgstr "Toepassing toevoegen"
 
-#: ../src/ui/apps_page_dialogs.ui.h:5
-msgctxt "shortcut window"
-msgid "Search"
-msgstr "Zoeken"
-
-#: ../src/ui/apps_page_dialogs.ui.h:6
-msgctxt "shortcut window"
-msgid "App editing"
-msgstr "Toepassing bewerken"
-
-#: ../src/ui/apps_page_dialogs.ui.h:7
-msgctxt "shortcut window"
-msgid "Close"
-msgstr "Sluiten"
-
-#: ../src/ui/file_page_dialogs.ui.h:1
-msgid "Add new key"
-msgstr "Item toevoegen"
-
-#: ../src/ui/file_page_dialogs.ui.h:2 ../src/file_page.py:85
-msgid "Locale"
-msgstr "Taal"
-
-#: ../src/ui/file_page_dialogs.ui.h:3
-msgid "Key name"
-msgstr "Itemnaam"
-
-#: ../src/ui/file_page_dialogs.ui.h:4 ../src/file_page.py:391
-msgid "Cancel"
-msgstr "Annuleren"
-
-#: ../src/ui/file_page_dialogs.ui.h:5 ../src/ui/file_page.ui.h:5
-msgid "Add"
-msgstr "Toevoegen"
-
-#: ../src/ui/file_page_dialogs.ui.h:6
-msgid "Unpin this app?"
-msgstr "Toepassing losmaken?"
-
-#: ../src/ui/file_page_dialogs.ui.h:7
-msgid "If you unpin an app, your changes will be permanently lost."
-msgstr "Als u de toepassing losmaakt, dan worden alle aanpassingen gewist."
-
-#: ../src/ui/file_page_dialogs.ui.h:8
-msgid "Unpin"
-msgstr "Losmaken"
-
-#: ../src/ui/file_page_dialogs.ui.h:9
-msgid "Save changes?"
-msgstr "Wĳzigingen opslaan?"
-
-#: ../src/ui/file_page_dialogs.ui.h:10
-msgid "If you leave without pinning the file, your changes will be permanently lost."
-msgstr "Als u afsluit zonder het bestand vast te maken, dan worden alle aanpassingen gewist."
-
-#: ../src/ui/file_page_dialogs.ui.h:11
-msgid "Discard"
-msgstr "Verwerpen"
-
-#: ../src/ui/file_page_dialogs.ui.h:12 ../src/ui/file_page.ui.h:1
-msgid "Pin"
-msgstr "Vastmaken"
-
-#: ../src/ui/file_page_dialogs.ui.h:13
-msgid "Rename file"
-msgstr "Naam wijzigen"
-
-#: ../src/ui/file_page_dialogs.ui.h:14
-msgid "File name"
-msgstr "Bestandsnaam"
-
-#: ../src/ui/file_page_dialogs.ui.h:15
-msgid "Rename"
-msgstr "Naam wijzigen"
-
-#: ../src/ui/file_page.ui.h:2
-msgid "File menu"
-msgstr "Bestandsmenu"
-
-#: ../src/ui/file_page.ui.h:3
-msgid "Application icon"
-msgstr "Toepassingspictogram"
-
-#: ../src/ui/file_page.ui.h:4
-msgid "Localized values"
-msgstr "Vertaalde items"
-
-#: ../src/ui/file_page.ui.h:6
-msgid "String Values"
-msgstr "Vaste items"
-
-#: ../src/ui/file_page.ui.h:7
-msgid "Boolean Values"
-msgstr "Booleanwaarden"
-
-#: ../src/ui/file_page.ui.h:8
-msgid "Error opening file"
-msgstr "Het bestand kan niet worden geopend"
-
-#: ../src/ui/window.ui.h:1
-msgid "PinApp"
-msgstr "PinApp"
-
-#: ../src/ui/window.ui.h:2 ../src/apps_page.py:164
+#: src/pins-app-view.ui:15 src/pins-app-view.ui:101
 msgid "Add new app"
 msgstr "Toepassing toevoegen"
 
-#: ../src/ui/window.ui.h:3
+#: src/pins-app-view.ui:21
 msgid "Show menu"
 msgstr "Menu tonen"
 
-#: ../src/ui/window.ui.h:4
+#: src/pins-app-view.ui:28
 msgid "Search"
 msgstr "Zoeken"
 
-#: ../src/ui/window.ui.h:5
-msgid "Your pins"
-msgstr "Mĳn snelkoppelingen"
-
-#: ../src/ui/window.ui.h:6
-msgid "Installed"
-msgstr "Geïnstalleerd"
-
-#: ../src/ui/window.ui.h:7
-msgid "Reload Apps"
-msgstr "Toepassingen herladen"
-
-#: ../src/ui/window.ui.h:8
-msgid "Keyboard Shortcuts"
-msgstr "Sneltoetsen"
-
-#: ../src/ui/window.ui.h:9
-msgid "About PinApp"
-msgstr "Over PinApp"
-
-#: ../src/apps_page.py:156
-msgid "No apps found"
-msgstr "Er zĳn geen toepassingen beschikbaar"
-
-#: ../src/apps_page.py:170
-msgid "Applications you install will appear here"
-msgstr "Geïnstalleerde toepassingen worden hier getoond"
-
-#: ../src/apps_page.py:174
-msgid "Error loading apps"
-msgstr "De toepassingen kunnen niet worden geladen"
-
-#: ../src/apps_page.py:180
+#: src/pins-app-view.ui:74
 msgid "Loading apps…"
 msgstr "Bezig met laden…"
 
-#: ../src/apps_page.py:300
-msgid "No results found"
-msgstr "Er zĳn geen zoekresultaten"
+#: src/pins-app-view.ui:89
+msgid "No apps found"
+msgstr "Er zĳn geen toepassingen beschikbaar"
 
-#: ../src/apps_page.py:301
-msgid "Try searching for something else"
-msgstr "Probeer een andere zoekopdracht"
+#: src/pins-app-view.ui:120
+#, fuzzy
+#| msgid "Keyboard Shortcuts"
+msgid "_Keyboard Shortcuts"
+msgstr "Sneltoetsen"
 
-#: ../src/file_page.py:351
-msgid "No string values present"
-msgstr "Er zĳn geen items beschikbaar"
+#: src/pins-app-view.ui:124
+#, fuzzy
+#| msgid "About PinApp"
+msgid "_About Pins"
+msgstr "Over PinApp"
 
-#: ../src/file_page.py:356
-msgid "No boolean values present"
-msgstr "Er zĳn geen booleanwaarden beschikbaar"
+#: src/pins-file-view.ui:20
+msgid "Delete"
+msgstr ""
 
-#: ../src/file_page.py:388
-msgid "Upload icon"
+#: src/pins-file-view.ui:64
+msgid "Edit icon"
+msgstr ""
+
+#: src/pins-file-view.ui:86
+msgid "Load icon from file"
+msgstr ""
+
+#: src/pins-file-view.ui:131
+msgid "Autostart"
+msgstr ""
+
+#: src/pins-file-view.ui:134
+msgid "Launch this application on login"
+msgstr ""
+
+#: src/pins-file-view.ui:150
+msgid "Invisible"
+msgstr ""
+
+#: src/pins-file-view.ui:153
+msgid "Hide this application in the app menu"
+msgstr ""
+
+#: src/pins-file-view.ui:185
+#, fuzzy
+#| msgid "Add new key"
+msgid "Add key"
+msgstr "Item toevoegen"
+
+#: src/pins-key-row.ui:9
+#, fuzzy
+#| msgid "Save changes?"
+msgid "Erase changes"
+msgstr "Wĳzigingen opslaan?"
+
+#: src/pins-key-row.ui:21
+msgid "Remove key"
+msgstr ""
+
+#: src/pins-key-row.ui:32
+msgid "Select locale"
+msgstr ""
+
+#: src/pins-add-key-dialog.c:79
+msgid "Add new key"
+msgstr "Item toevoegen"
+
+#: src/pins-add-key-dialog.c:84
+#, fuzzy
+#| msgid "Cancel"
+msgid "_Cancel"
+msgstr "Annuleren"
+
+#: src/pins-add-key-dialog.c:85
+msgid "_Add"
+msgstr ""
+
+#: src/pins-add-key-dialog.c:94
+msgid "Key"
+msgstr ""
+
+#: src/pins-file-view.c:349
+#, fuzzy
+#| msgid "Upload icon"
+msgid "Load icon"
 msgstr "Pictogram bĳwerken"
 
-#: ../src/file_page.py:390
-msgid "Open"
-msgstr "Openen"
+#: src/pins-key-row.c:26
+msgid "(Unlocalized)"
+msgstr ""
 
-#: ../src/window.py:153
-msgid "Desktop files"
-msgstr "Desktopbestanden"
+#~ msgctxt "shortcut window"
+#~ msgid "Search"
+#~ msgstr "Zoeken"
+
+#~ msgctxt "shortcut window"
+#~ msgid "App editing"
+#~ msgstr "Toepassing bewerken"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Close"
+#~ msgstr "Sluiten"
+
+#~ msgid "Locale"
+#~ msgstr "Taal"
+
+#~ msgid "Key name"
+#~ msgstr "Itemnaam"
+
+#~ msgid "Add"
+#~ msgstr "Toevoegen"
+
+#~ msgid "Unpin this app?"
+#~ msgstr "Toepassing losmaken?"
+
+#~ msgid "If you unpin an app, your changes will be permanently lost."
+#~ msgstr "Als u de toepassing losmaakt, dan worden alle aanpassingen gewist."
+
+#~ msgid "Unpin"
+#~ msgstr "Losmaken"
+
+#~ msgid ""
+#~ "If you leave without pinning the file, your changes will be permanently "
+#~ "lost."
+#~ msgstr ""
+#~ "Als u afsluit zonder het bestand vast te maken, dan worden alle "
+#~ "aanpassingen gewist."
+
+#~ msgid "Discard"
+#~ msgstr "Verwerpen"
+
+#~ msgid "Pin"
+#~ msgstr "Vastmaken"
+
+#~ msgid "Rename file"
+#~ msgstr "Naam wijzigen"
+
+#~ msgid "File name"
+#~ msgstr "Bestandsnaam"
+
+#~ msgid "Rename"
+#~ msgstr "Naam wijzigen"
+
+#~ msgid "File menu"
+#~ msgstr "Bestandsmenu"
+
+#~ msgid "Application icon"
+#~ msgstr "Toepassingspictogram"
+
+#~ msgid "Localized values"
+#~ msgstr "Vertaalde items"
+
+#~ msgid "String Values"
+#~ msgstr "Vaste items"
+
+#~ msgid "Boolean Values"
+#~ msgstr "Booleanwaarden"
+
+#~ msgid "Error opening file"
+#~ msgstr "Het bestand kan niet worden geopend"
+
+#~ msgid "PinApp"
+#~ msgstr "PinApp"
+
+#~ msgid "Your pins"
+#~ msgstr "Mĳn snelkoppelingen"
+
+#~ msgid "Installed"
+#~ msgstr "Geïnstalleerd"
+
+#~ msgid "Reload Apps"
+#~ msgstr "Toepassingen herladen"
+
+#~ msgid "Applications you install will appear here"
+#~ msgstr "Geïnstalleerde toepassingen worden hier getoond"
+
+#~ msgid "Error loading apps"
+#~ msgstr "De toepassingen kunnen niet worden geladen"
+
+#~ msgid "No results found"
+#~ msgstr "Er zĳn geen zoekresultaten"
+
+#~ msgid "Try searching for something else"
+#~ msgstr "Probeer een andere zoekopdracht"
+
+#~ msgid "No string values present"
+#~ msgstr "Er zĳn geen items beschikbaar"
+
+#~ msgid "No boolean values present"
+#~ msgstr "Er zĳn geen booleanwaarden beschikbaar"
+
+#~ msgid "Open"
+#~ msgstr "Openen"
+
+#~ msgid "Desktop files"
+#~ msgstr "Desktopbestanden"
