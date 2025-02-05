@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=io.github.fabrialberio.pinapp
+Exec=@bindir@/pinapp --gapplication-service
