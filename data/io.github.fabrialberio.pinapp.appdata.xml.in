@@ -21,6 +21,10 @@
       <li>editing properties in .desktop files.</li>
     </ul>
   </description>
+  <branding>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
+    <color type="primary" scheme_preference="dark">#1a5fb4</color>
+  </branding>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/1.png</image>
