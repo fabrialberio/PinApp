@@ -12,15 +12,14 @@
     <name translate="no">Fabrizio Alberio</name>
   </developer>
   <description>
-    <p>PinApp is a simple application that lets you customize your app list.</p>
-    <p>Some of the possible uses are</p>
+    <p>Pins allows you to customize your app menu by editing .desktop files.</p>
+    <p>Some of the things you can do are:</p>
     <ul>
-      <li>Changing an app icon that doesn't fit in with your theme</li>
-      <li>Creating custom shortcuts to websites</li>
-      <li>Hiding apps you don't want to see</li>
-      <li>Editing properties in .desktop files</li>
+      <li>changing an app icon that doesn't fit in with your theme,</li>
+      <li>creating custom shortcuts to websites,</li>
+      <li>hiding apps you don't want to see,</li>
+      <li>editing properties in .desktop files.</li>
     </ul>
-    <p>The app is made with Libadwaita and GTK4, with consideration for small-screen devices</p>
   </description>
   <screenshots>
     <screenshot type="default">

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 18:01+0100\n"
-"PO-Revision-Date: 2025-02-05 18:02+0100\n"
+"POT-Creation-Date: 2025-02-05 19:17+0100\n"
+"PO-Revision-Date: 2025-02-05 19:18+0100\n"
 "Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
 "Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
 "Language: it\n"
@@ -32,38 +32,30 @@ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applicazioni;Scorciatoie;Icone;"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
-msgid "PinApp is a simple application that lets you customize your app list."
+msgid "Pins allows you to customize your app menu by editing .desktop files."
 msgstr ""
-"PinApp è una semplica applicazione per personalizzare l'elenco delle "
-"applicazioni."
+"Pins permette di personalizzare il menù delle applicazioni modificando i "
+"file .desktop."
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
-msgid "Some of the possible uses are"
+msgid "Some of the things you can do are:"
 msgstr "Alcuni dei possibili utilizzi sono:"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:18
-msgid "Changing an app icon that doesn't fit in with your theme"
-msgstr "Cambiare l'icona di un'applicazione che stona con il tema"
+msgid "changing an app icon that doesn't fit in with your theme,"
+msgstr "cambiare l'icona di un'applicazione che stona con il tema,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
-msgid "Creating custom shortcuts to websites"
-msgstr "Creare scorciatoie personalizzate a siti web"
+msgid "creating custom shortcuts to websites,"
+msgstr "creare scorciatoie personalizzate a siti web,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:20
-msgid "Hiding apps you don't want to see"
-msgstr "Nascondere applicazioni"
+msgid "hiding apps you don't want to see,"
+msgstr "nascondere applicazioni,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:21
-msgid "Editing properties in .desktop files"
-msgstr "Modificare i file .desktop"
-
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:23
-msgid ""
-"The app is made with Libadwaita and GTK4, with consideration for small-"
-"screen devices"
-msgstr ""
-"L'app è sviluppata con libadwaita e GTK4, prendendo in considerazione "
-"l'usabilità su dispositivi a schermo piccolo."
+msgid "editing properties in .desktop files."
+msgstr "modificare i file .desktop."
 
 #: src/help-overlay.ui:11
 msgctxt "shortcut window"
@@ -180,6 +172,19 @@ msgstr "Carica icona"
 #: src/pins-key-row.c:26
 msgid "(Unlocalized)"
 msgstr "(Non localizzato)"
+
+#~ msgid ""
+#~ "PinApp is a simple application that lets you customize your app list."
+#~ msgstr ""
+#~ "PinApp è una semplica applicazione per personalizzare l'elenco delle "
+#~ "applicazioni."
+
+#~ msgid ""
+#~ "The app is made with Libadwaita and GTK4, with consideration for small-"
+#~ "screen devices"
+#~ msgstr ""
+#~ "L'app è sviluppata con libadwaita e GTK4, prendendo in considerazione "
+#~ "l'usabilità su dispositivi a schermo piccolo."
 
 #~ msgid "Application search paths"
 #~ msgstr "Percorsi di ricerca applicazioni"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 18:01+0100\n"
+"POT-Creation-Date: 2025-02-05 19:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,33 +31,27 @@ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
-msgid "PinApp is a simple application that lets you customize your app list."
+msgid "Pins allows you to customize your app menu by editing .desktop files."
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
-msgid "Some of the possible uses are"
+msgid "Some of the things you can do are:"
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:18
-msgid "Changing an app icon that doesn't fit in with your theme"
+msgid "changing an app icon that doesn't fit in with your theme,"
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
-msgid "Creating custom shortcuts to websites"
+msgid "creating custom shortcuts to websites,"
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:20
-msgid "Hiding apps you don't want to see"
+msgid "hiding apps you don't want to see,"
 msgstr ""
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:21
-msgid "Editing properties in .desktop files"
-msgstr ""
-
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:23
-msgid ""
-"The app is made with Libadwaita and GTK4, with consideration for small-"
-"screen devices"
+msgid "editing properties in .desktop files."
 msgstr ""
 
 #: src/help-overlay.ui:11
