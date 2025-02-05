@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/3.png">
+  <img src="https://raw.githubusercontent.com/fabrialberio/pinapp/master/data/appstream/2.png">
 </div>
 
 ## Features
@@ -9,5 +9,5 @@
 - Change properties in .desktop files
 - GTK4 & libadwaita
 
-## Supported platforms
-Should work on any distro as long as the desktop environment is GNOME
+## Known issues
+Due to the limitations of the Flatpak sandbox, not all .desktop files are visible by default. It is still possible to open the files individually.
