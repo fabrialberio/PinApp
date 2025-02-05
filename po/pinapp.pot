@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 17:43+0100\n"
+"POT-Creation-Date: 2025-02-05 18:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,18 +58,6 @@ msgstr ""
 msgid ""
 "The app is made with Libadwaita and GTK4, with consideration for small-"
 "screen devices"
-msgstr ""
-
-#: data/io.github.fabrialberio.pinapp.gschema.xml:12
-msgid "Application search paths"
-msgstr ""
-
-#: data/io.github.fabrialberio.pinapp.gschema.xml:16
-msgid "User application path"
-msgstr ""
-
-#: data/io.github.fabrialberio.pinapp.gschema.xml:20
-msgid "Autostart application path"
 msgstr ""
 
 #: src/help-overlay.ui:11
