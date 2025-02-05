@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include <glib/gi18n.h>
+
 #include "pins-file-view.h"
 
 #include "pins-add-key-dialog-private.h"
