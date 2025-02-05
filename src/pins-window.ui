@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0" />
+  <requires lib="Adw" version="1.0" />
+  <template class="PinsWindow" parent="AdwApplicationWindow">
+    <property name="default-height">560</property>
+    <property name="default-width">800</property>
+    <property name="height-request">400</property>
+    <property name="width-request">330</property>
+    <property name="content">
+      <object class="AdwNavigationView" id="navigation_view">
+        <child>
+          <object class="AdwNavigationPage">
+            <property name="title" translatable="yes">Pins</property>
+            <property name="tag">apps-page</property>
+            <property name="child">
+              <object class="PinsAppView" id="app_view">
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwNavigationPage">
+            <property name="title">File page</property>
+            <property name="tag">file-page</property>
+            <property name="child">
+              <object class="PinsFileView" id="file_view">
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

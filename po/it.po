@@ -7,23 +7,23 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-24 21:16+0200\n"
-"PO-Revision-Date: 2023-09-24 21:22+0200\n"
+"POT-Creation-Date: 2025-02-05 18:01+0100\n"
+"PO-Revision-Date: 2025-02-05 18:02+0100\n"
 "Last-Translator: Fabrizio Alberio <fabrizio.alberio@gmail.com>\n"
 "Language-Team: Italian <fabrizio.alberio@gmail.com>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Gtranslator 45.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.4\n"
 
-#: data/io.github.fabrialberio.pinapp.desktop.in:3 src/ui/window.ui:16
-msgid "PinApp"
-msgstr "PinApp"
+#: data/io.github.fabrialberio.pinapp.desktop.in:3 src/pins-window.ui:14
+msgid "Pins"
+msgstr "Pins"
 
 #: data/io.github.fabrialberio.pinapp.desktop.in:4
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:8
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:9
 msgid "Create and edit app shortcuts"
 msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
 
@@ -31,33 +31,33 @@ msgstr "Crea e modifica le scorciatoie delle tue applicazioni"
 msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applicazioni;Scorciatoie;Icone;"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:11
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
 msgid "PinApp is a simple application that lets you customize your app list."
 msgstr ""
 "PinApp è una semplica applicazione per personalizzare l'elenco delle "
 "applicazioni."
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:12
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
 msgid "Some of the possible uses are"
 msgstr "Alcuni dei possibili utilizzi sono:"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:14
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:18
 msgid "Changing an app icon that doesn't fit in with your theme"
 msgstr "Cambiare l'icona di un'applicazione che stona con il tema"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
 msgid "Creating custom shortcuts to websites"
 msgstr "Creare scorciatoie personalizzate a siti web"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:20
 msgid "Hiding apps you don't want to see"
 msgstr "Nascondere applicazioni"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:17
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:21
 msgid "Editing properties in .desktop files"
 msgstr "Modificare i file .desktop"
 
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
+#: data/io.github.fabrialberio.pinapp.appdata.xml.in:23
 msgid ""
 "The app is made with Libadwaita and GTK4, with consideration for small-"
 "screen devices"
@@ -65,210 +65,237 @@ msgstr ""
 "L'app è sviluppata con libadwaita e GTK4, prendendo in considerazione "
 "l'usabilità su dispositivi a schermo piccolo."
 
-#: src/ui/apps_page_dialogs.ui:29
+#: src/help-overlay.ui:11
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Generale"
 
-#: src/ui/apps_page_dialogs.ui:32
+#: src/help-overlay.ui:14
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
-msgstr "Scorciatoie"
+msgstr "Mostra scorciatoie"
 
-#: src/ui/apps_page_dialogs.ui:38
+#: src/help-overlay.ui:20
 msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Chiude la finestra"
 
-#: src/ui/apps_page_dialogs.ui:44
+#: src/help-overlay.ui:26
 msgctxt "shortcut window"
 msgid "Add new app"
 msgstr "Aggiunge una nuova applicazione"
 
-#: src/ui/apps_page_dialogs.ui:50
-msgctxt "shortcut window"
-msgid "Search"
-msgstr "Cerca"
-
-#: src/ui/apps_page_dialogs.ui:58
-msgctxt "shortcut window"
-msgid "App editing"
-msgstr "Modifica"
-
-#: src/ui/apps_page_dialogs.ui:61
-msgctxt "shortcut window"
-msgid "Close"
-msgstr "Chiudi"
-
-#: src/ui/file_page_dialogs.ui:5
-msgid "Add new key"
-msgstr "Aggiungi chiave"
-
-#: src/ui/file_page_dialogs.ui:12 src/file_page.py:85
-msgid "Locale"
-msgstr "Località"
-
-#: src/ui/file_page_dialogs.ui:18
-msgid "Key name"
-msgstr "Nome della chiave"
-
-#: src/ui/file_page_dialogs.ui:24 src/ui/file_page_dialogs.ui:35
-#: src/ui/file_page_dialogs.ui:46 src/ui/file_page_dialogs.ui:75
-#: src/file_page.py:391
-msgid "Cancel"
-msgstr "Annulla"
-
-#: src/ui/file_page_dialogs.ui:25 src/ui/file_page.ui:106
-#: src/ui/file_page.ui:126 src/ui/file_page.ui:145
-msgid "Add"
-msgstr "Aggiungi"
-
-#: src/ui/file_page_dialogs.ui:30
-msgid "Unpin this app?"
-msgstr "Rimuovere l'applicazione?"
-
-#: src/ui/file_page_dialogs.ui:31
-msgid "If you unpin an app, your changes will be permanently lost."
-msgstr "Se rimuovi un'applicazione, le tue modifiche saranno perse per sempre."
-
-#: src/ui/file_page_dialogs.ui:36 src/ui/file_page.ui:203
-msgid "Unpin"
-msgstr "Rimuovi"
-
-#: src/ui/file_page_dialogs.ui:41
-msgid "Save changes?"
-msgstr "Salvare le modifiche?\t"
-
-#: src/ui/file_page_dialogs.ui:42
-msgid ""
-"If you leave without pinning the file, your changes will be permanently lost."
-msgstr ""
-"Se esci senza appuntare l'applicazione, le tue modifiche saranno perse per "
-"sempre."
-
-#: src/ui/file_page_dialogs.ui:47
-msgid "Discard"
-msgstr "Scarta"
-
-#: src/ui/file_page_dialogs.ui:48 src/ui/file_page.ui:28
-msgid "Pin"
-msgstr "Appunta"
-
-#: src/ui/file_page_dialogs.ui:54 src/ui/file_page.ui:208
-msgid "Rename file"
-msgstr "Rinomina file"
-
-#: src/ui/file_page_dialogs.ui:61
-msgid "File name"
-msgstr "Nome file"
-
-#: src/ui/file_page_dialogs.ui:76
-msgid "Rename"
-msgstr "Rinomina"
-
-#: src/ui/file_page.ui:41
-msgid "File menu"
-msgstr "Menu del file"
-
-#: src/ui/file_page.ui:74
-msgid "Application icon"
-msgstr "Icona dell'applicazione"
-
-#: src/ui/file_page.ui:98
-msgid "Localized values"
-msgstr "Valori con località"
-
-#: src/ui/file_page.ui:118
-msgid "String Values"
-msgstr "Valori di Testo"
-
-#: src/ui/file_page.ui:137
-msgid "Boolean Values"
-msgstr "Valori Booleani"
-
-#: src/ui/file_page.ui:168
-msgid "Error opening file"
-msgstr "Errore nell'apertura del file"
-
-#: src/ui/file_page.ui:213
-msgid "Duplicate file"
-msgstr "Duplica file"
-
-#: src/ui/window.ui:38 src/apps_page.py:164
+#: src/pins-app-view.ui:15 src/pins-app-view.ui:101
 msgid "Add new app"
 msgstr "Aggiungi applicazione"
 
-#: src/ui/window.ui:44
+#: src/pins-app-view.ui:21
 msgid "Show menu"
 msgstr "Mostra menu"
 
-#: src/ui/window.ui:51
+#: src/pins-app-view.ui:28
 msgid "Search"
 msgstr "Cerca"
 
-#: src/ui/window.ui:79
-msgid "Your pins"
-msgstr "Appuntate"
-
-#: src/ui/window.ui:89
-msgid "Installed"
-msgstr "Installate"
-
-#: src/ui/window.ui:139
-msgid "Reload Apps"
-msgstr "Ricarica applicazioni"
-
-#: src/ui/window.ui:143
-msgid "Keyboard Shortcuts"
-msgstr "Scorciatoie da tastiera"
-
-#: src/ui/window.ui:147
-msgid "About PinApp"
-msgstr "Informazioni su PinApp"
-
-#: src/apps_page.py:156
-msgid "No apps found"
-msgstr "Nessuna applicazione trovata"
-
-#: src/apps_page.py:170
-msgid "Applications you install will appear here"
-msgstr "Le applicazioni installate appariranno qui"
-
-#: src/apps_page.py:174
-msgid "Error loading apps"
-msgstr "Errore caricamento applicazioni"
-
-#: src/apps_page.py:180
+#: src/pins-app-view.ui:74
 msgid "Loading apps…"
 msgstr "Caricamento applicazioni…"
 
-#: src/apps_page.py:300
-msgid "No results found"
-msgstr "Nessun risultato trovato"
+#: src/pins-app-view.ui:89
+msgid "No apps found"
+msgstr "Nessuna applicazione trovata"
 
-#: src/apps_page.py:301
-msgid "Try searching for something else"
-msgstr "Prova a cercare qualcos'altro"
+#: src/pins-app-view.ui:120
+msgid "_Keyboard Shortcuts"
+msgstr "_Scorciatoie da tastiera"
 
-#: src/file_page.py:351
-msgid "No string values present"
-msgstr "Nessun valore di testo presente"
+#: src/pins-app-view.ui:124
+msgid "_About Pins"
+msgstr "_Informazioni su Pins"
 
-#: src/file_page.py:356
-msgid "No boolean values present"
-msgstr "Nessun valore booleano presente"
+#: src/pins-file-view.ui:20
+msgid "Delete"
+msgstr "Elimina"
 
-#: src/file_page.py:388
-msgid "Upload icon"
+#: src/pins-file-view.ui:64
+msgid "Edit icon"
+msgstr "Modifica icona"
+
+#: src/pins-file-view.ui:86
+msgid "Load icon from file"
+msgstr "Carica icona da file"
+
+#: src/pins-file-view.ui:131
+msgid "Autostart"
+msgstr "Avvio automatico"
+
+#: src/pins-file-view.ui:134
+msgid "Launch this application on login"
+msgstr "Avvia quest'applicazione all'accesso"
+
+#: src/pins-file-view.ui:150
+msgid "Invisible"
+msgstr "Invisibile"
+
+#: src/pins-file-view.ui:153
+msgid "Hide this application in the app menu"
+msgstr "Nascondi quest'applicazione nel menu"
+
+#: src/pins-file-view.ui:185
+msgid "Add key"
+msgstr "Aggiungi chiave"
+
+#: src/pins-key-row.ui:9
+msgid "Erase changes"
+msgstr "Cancella modifiche"
+
+#: src/pins-key-row.ui:21
+msgid "Remove key"
+msgstr "Rimuovi chiave"
+
+#: src/pins-key-row.ui:32
+msgid "Select locale"
+msgstr "Seleziona localizzazione"
+
+#: src/pins-add-key-dialog.c:79
+msgid "Add new key"
+msgstr "Aggiungi chiave"
+
+#: src/pins-add-key-dialog.c:84
+msgid "_Cancel"
+msgstr "Annulla"
+
+#: src/pins-add-key-dialog.c:85
+msgid "_Add"
+msgstr "Aggiungi"
+
+#: src/pins-add-key-dialog.c:94
+msgid "Key"
+msgstr "Chiave"
+
+#: src/pins-file-view.c:349
+msgid "Load icon"
 msgstr "Carica icona"
 
-#: src/file_page.py:390
-msgid "Open"
-msgstr "Apri"
+#: src/pins-key-row.c:26
+msgid "(Unlocalized)"
+msgstr "(Non localizzato)"
 
-#: src/window.py:153
-msgid "Desktop files"
-msgstr "File desktop"
+#~ msgid "Application search paths"
+#~ msgstr "Percorsi di ricerca applicazioni"
+
+#~ msgid "User application path"
+#~ msgstr "Percorso delle applicazioni utente"
+
+#~ msgid "Autostart application path"
+#~ msgstr "Percorso delle applicazioni ad avvio automatico"
+
+#~ msgid "PinApp"
+#~ msgstr "PinApp"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Search"
+#~ msgstr "Cerca"
+
+#~ msgctxt "shortcut window"
+#~ msgid "App editing"
+#~ msgstr "Modifica"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Close"
+#~ msgstr "Chiudi"
+
+#~ msgid "Locale"
+#~ msgstr "Località"
+
+#~ msgid "Key name"
+#~ msgstr "Nome della chiave"
+
+#~ msgid "Add"
+#~ msgstr "Aggiungi"
+
+#~ msgid "Unpin this app?"
+#~ msgstr "Rimuovere l'applicazione?"
+
+#~ msgid "If you unpin an app, your changes will be permanently lost."
+#~ msgstr ""
+#~ "Se rimuovi un'applicazione, le tue modifiche saranno perse per sempre."
+
+#~ msgid "Unpin"
+#~ msgstr "Rimuovi"
+
+#~ msgid ""
+#~ "If you leave without pinning the file, your changes will be permanently "
+#~ "lost."
+#~ msgstr ""
+#~ "Se esci senza appuntare l'applicazione, le tue modifiche saranno perse "
+#~ "per sempre."
+
+#~ msgid "Discard"
+#~ msgstr "Scarta"
+
+#~ msgid "Pin"
+#~ msgstr "Appunta"
+
+#~ msgid "Rename file"
+#~ msgstr "Rinomina file"
+
+#~ msgid "File name"
+#~ msgstr "Nome file"
+
+#~ msgid "Rename"
+#~ msgstr "Rinomina"
+
+#~ msgid "File menu"
+#~ msgstr "Menu del file"
+
+#~ msgid "Localized values"
+#~ msgstr "Valori con località"
+
+#~ msgid "String Values"
+#~ msgstr "Valori di Testo"
+
+#~ msgid "Boolean Values"
+#~ msgstr "Valori Booleani"
+
+#~ msgid "Error opening file"
+#~ msgstr "Errore nell'apertura del file"
+
+#~ msgid "Duplicate file"
+#~ msgstr "Duplica file"
+
+#~ msgid "Your pins"
+#~ msgstr "Appuntate"
+
+#~ msgid "Installed"
+#~ msgstr "Installate"
+
+#~ msgid "Reload Apps"
+#~ msgstr "Ricarica applicazioni"
+
+#~ msgid "Applications you install will appear here"
+#~ msgstr "Le applicazioni installate appariranno qui"
+
+#~ msgid "Error loading apps"
+#~ msgstr "Errore caricamento applicazioni"
+
+#~ msgid "No results found"
+#~ msgstr "Nessun risultato trovato"
+
+#~ msgid "Try searching for something else"
+#~ msgstr "Prova a cercare qualcos'altro"
+
+#~ msgid "No string values present"
+#~ msgstr "Nessun valore di testo presente"
+
+#~ msgid "No boolean values present"
+#~ msgstr "Nessun valore booleano presente"
+
+#~ msgid "Open"
+#~ msgstr "Apri"
+
+#~ msgid "Desktop files"
+#~ msgstr "File desktop"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Save and close"

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="pinapp">
-	<schema id="io.github.fabrialberio.pinapp" path="/io/github/fabrialberio/pinapp/">
-	</schema>
+  <schema id="io.github.fabrialberio.pinapp" path="/io/github/fabrialberio/pinapp/">
+    <key name="search-paths" type="as">
+      <default>[
+        "~/.local/share/xdg-desktop-portal",
+        "/var/lib/snapd/desktop",
+        "~/.local/share/flatpak/exports/share",
+        "/var/lib/flatpak/exports/share",
+        "/run/host/usr/share",
+        "/usr/share"
+        ]</default>
+    </key>
+    <key name="user-path" type="s">
+      <default>"~/.local/share/applications"</default>
+    </key>
+    <key name="autostart-path" type="s">
+      <default>"~/.config/autostart"</default>
+    </key>
+  </schema>
 </schemalist>

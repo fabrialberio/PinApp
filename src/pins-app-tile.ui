@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="PinsAppTile" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="hexpand">false</property>
+    <property name="halign">center</property>
+    <property name="width-request">96</property>
+    <property name="margin-top">8</property>
+    <property name="margin-bottom">8</property>
+    <property name="margin-start">6</property>
+    <property name="margin-end">6</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="PinsAppIcon" id="icon">
+        <property name="pixel-size">64</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="title">
+        <property name="ellipsize">end</property>
+      </object>
+    </child>
+  </template>
+</interface>

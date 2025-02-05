@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="PinsKeyRow" parent="AdwEntryRow">
+    <child type="suffix">
+      <object class="GtkButton" id="reset_button">
+        <property name="icon-name">erase-symbolic</property>
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <property name="tooltip-text" translatable="yes">Erase changes</property>
+        <style>
+          <class name="flat" />
+          <class name="circular" />
+        </style>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkButton" id="remove_button">
+        <property name="icon-name">edit-delete-symbolic</property>
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <property name="tooltip-text" translatable="yes">Remove key</property>
+        <style>
+          <class name="flat" />
+          <class name="circular" />
+        </style>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkMenuButton" id="locale_button">
+        <property name="valign">center</property>
+        <property name="visible">false</property>
+        <property name="tooltip-text" translatable="yes">Select locale</property>
+        <property name="child">
+          <object class="AdwButtonContent">
+            <property name="icon-name">preferences-desktop-locale-symbolic</property>
+          </object>
+        </property>
+        <property name="popover">
+          <object class="GtkPopover" id="locale_popover">
+            <property name="child">
+              <object class="GtkScrolledWindow">
+                <property name="propagate-natural-width">true</property>
+                <property name="propagate-natural-height">true</property>
+                <property name="max-content-height">400</property>
+                <property name="child">
+                  <object class="GtkListView" id="locale_list_view">
+                    <property name="margin-top">6</property>
+                    <property name="margin-bottom">6</property>
+                    <property name="margin-start">6</property>
+                    <property name="margin-end">6</property>
+                    <property name="single-click-activate">true</property>
+                  </object>
+                </property>
+              </object>
+            </property>
+            <style>
+              <class name="menu" />
+            </style>
+          </object>
+        </property>
+        <style>
+          <class name="flat" />
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>
