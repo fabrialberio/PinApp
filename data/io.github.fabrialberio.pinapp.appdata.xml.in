@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
+<component type="desktop-application">
   <id>io.github.fabrialberio.pinapp</id>
   <launchable type="desktop-id">io.github.fabrialberio.pinapp.desktop</launchable>
   <translation type="gettext">pinapp</translation>
-  <name translate="no">PinApp</name>
+  <name translate="no">Pins</name>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <summary>Create and edit app shortcuts</summary>
@@ -27,20 +27,20 @@
   </branding>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/1.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/2.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/fabrialberio/PinApp/master/data/appstream/3.png</image>
+      <image>https://raw.githubusercontent.com/fabrialberio/Pins/master/data/appstream/3.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
-  <url type="homepage">https://github.com/fabrialberio/PinApp</url>
-  <url type="bugtracker">https://github.com/fabrialberio/PinApp/issues</url>
-  <url type="vcs-browser">https://github.com/fabrialberio/PinApp</url>
-  <url type="translate">https://github.com/fabrialberio/PinApp/tree/master/po</url>
+  <url type="homepage">https://github.com/fabrialberio/Pins</url>
+  <url type="bugtracker">https://github.com/fabrialberio/Pins/issues</url>
+  <url type="vcs-browser">https://github.com/fabrialberio/Pins</url>
+  <url type="translate">https://github.com/fabrialberio/Pins/tree/master/po</url>
   <recommends>
     <control>pointing</control>
     <control>keyboard</control>
