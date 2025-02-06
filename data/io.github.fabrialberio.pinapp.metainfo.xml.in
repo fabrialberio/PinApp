@@ -47,6 +47,7 @@
   <url type="bugtracker">https://github.com/fabrialberio/Pins/issues</url>
   <url type="vcs-browser">https://github.com/fabrialberio/Pins</url>
   <url type="translate">https://github.com/fabrialberio/Pins/tree/master/po</url>
+  <url type="donation">https://github.com/sponsors/fabrialberio?frequency=one-time</url>
   <recommends>
     <control>pointing</control>
     <control>keyboard</control>
