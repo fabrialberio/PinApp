@@ -56,12 +56,7 @@
               <object class="AdwViewStackPage">
                 <property name="name">apps</property>
                 <property name="child">
-                  <object class="AdwBin" id="apps_bin">
-                    <property name="hexpand">true</property>
-                    <property name="child">
-                      <object class="PinsAppGrid" id="app_grid">
-                      </object>
-                    </property>
+                  <object class="PinsAppGrid" id="app_grid">
                   </object>
                 </property>
               </object>
