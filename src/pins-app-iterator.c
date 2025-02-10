@@ -33,7 +33,7 @@ struct _PinsAppIterator
 {
     GObject parent_instance;
 
-    gchar **duplicates;
+    GHashTable *duplicate_paths;
     GHashTable *unique_filenames;
     gboolean just_created_file;
     GListModel *model;
@@ -109,10 +109,11 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
                                      guint removed, guint added,
                                      PinsAppIterator *self)
 {
-    GStrvBuilder *strv_builder = g_strv_builder_new ();
-
     g_hash_table_foreach (self->unique_filenames, (GHFunc)g_free, NULL);
     g_hash_table_remove_all (self->unique_filenames);
+
+    g_hash_table_foreach (self->duplicate_paths, (GHFunc)g_free, NULL);
+    g_hash_table_remove_all (self->duplicate_paths);
 
     for (int i = 0; i < g_list_model_get_n_items (model); i++)
         {
@@ -120,18 +121,15 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
                 = G_FILE_INFO (g_list_model_get_item (model, i));
             GFile *file = G_FILE (g_file_info_get_attribute_object (
                 file_info, "standard::file"));
-            gchar *display_name
-                = (gchar *)g_file_info_get_display_name (file_info);
+            gchar *display_name = (gchar *)g_file_get_basename (file);
 
             if (g_hash_table_contains (self->unique_filenames, display_name))
-                g_strv_builder_add (strv_builder, g_file_get_path (file));
+                g_hash_table_add (self->duplicate_paths,
+                                  g_file_get_path (file));
             else
                 g_hash_table_add (self->unique_filenames,
                                   g_strdup (display_name));
         }
-
-    g_free (self->duplicates);
-    self->duplicates = g_strv_builder_end (strv_builder);
 }
 
 gboolean
@@ -149,8 +147,8 @@ pins_app_iterator_filter_match_func (gpointer file_info, gpointer user_data)
                                   NULL),
                      PINS_DESKTOP_FILE_SUFFIX)
           == 0;
-    is_duplicate = g_strv_contains ((const gchar *const *)self->duplicates,
-                                    g_file_get_path (file));
+    is_duplicate = g_hash_table_contains (self->duplicate_paths,
+                                          g_file_get_path (file));
 
     return is_desktop_file && !is_duplicate;
 }
@@ -331,6 +329,7 @@ static void
 pins_app_iterator_init (PinsAppIterator *self)
 {
     self->unique_filenames = g_hash_table_new (g_str_hash, g_str_equal);
+    self->duplicate_paths = g_hash_table_new (g_str_hash, g_str_equal);
     self->just_created_file = FALSE;
 
     pins_app_iterator_set_paths (self, pins_desktop_file_search_paths ());
