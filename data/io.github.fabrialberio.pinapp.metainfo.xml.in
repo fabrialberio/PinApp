@@ -54,6 +54,16 @@
     <control>touch</control>
   </recommends>
   <releases>
+    <release version="2.0.1" date="2025-02-10">
+      <description translate="no">
+        <p>Fixes</p>
+        <ul>
+          <li>Some system apps didn't appear</li>
+          <li>Saving changes did not work properly</li>
+          <li>Directory for loaded icons was not created</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.0.0" date="2025-02-05">
       <description translate="no">
         <p>What's changed</p>
