@@ -328,12 +328,13 @@ load_icon_dialog_closed_cb (GObject *dialog, GAsyncResult *res,
                             gpointer user_data)
 {
     PinsFileView *self = PINS_FILE_VIEW (user_data);
-    GFile *sandbox_file
+    g_autoptr (GFile) sandbox_file
         = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), res, NULL);
-    GFile *file
+    g_autoptr (GFile) file
         = g_file_new_build_filename (g_get_user_data_dir (), "user-icons",
                                      g_file_get_basename (sandbox_file), NULL);
 
+    g_file_make_directory_with_parents (g_file_get_parent (file), NULL, NULL);
     g_file_copy (sandbox_file, file, G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
 
     pins_desktop_file_set_string (self->desktop_file,
