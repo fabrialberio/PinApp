@@ -221,10 +221,11 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
                == 0)
         {
             g_file_delete (self->user_file, NULL, NULL);
+            return;
         }
 
-    /// TODO: Find a more GObject-oriented way to save files
-    fd = open (g_file_get_path (self->user_file), O_WRONLY);
+    fd = open (g_file_get_path (self->user_file), O_WRONLY | O_CREAT | O_TRUNC,
+               S_IRWXU | S_IRWXG | S_IRWXO);
 
     write (fd, self->saved_data, lenght);
     close (fd);
