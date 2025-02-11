@@ -11,7 +11,7 @@
         "--socket=wayland",
         "--filesystem=host:ro",
         "--filesystem=~/.config/autostart:create",
-        "--filesystem=xdg-data/applications:create",
+        "--filesystem=xdg-data/applications:rw",
         "--filesystem=xdg-data/flatpak:ro",
         "--filesystem=/var/lib/flatpak:ro",
         "--filesystem=/var/lib/snapd:ro",
