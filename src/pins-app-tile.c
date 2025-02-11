@@ -28,6 +28,7 @@ struct _PinsAppTile
     GtkBox parent_instance;
 
     PinsAppIcon *icon;
+    AdwBin *invisible_glyph;
     GtkLabel *title;
 };
 
@@ -58,7 +59,8 @@ pins_app_tile_update_appearance (PinsAppTile *self,
 
     invisible = !pins_desktop_file_is_shown (desktop_file);
 
-    gtk_widget_set_opacity (GTK_WIDGET (self->icon), invisible ? 0.6 : 1);
+    gtk_widget_set_opacity (GTK_WIDGET (self->icon), invisible ? 0.5 : 1);
+    gtk_widget_set_visible (GTK_WIDGET (self->invisible_glyph), invisible);
 }
 
 void
@@ -100,6 +102,8 @@ pins_app_tile_class_init (PinsAppTileClass *klass)
     g_type_ensure (PINS_TYPE_APP_ICON);
 
     gtk_widget_class_bind_template_child (widget_class, PinsAppTile, icon);
+    gtk_widget_class_bind_template_child (widget_class, PinsAppTile,
+                                          invisible_glyph);
     gtk_widget_class_bind_template_child (widget_class, PinsAppTile, title);
 }
 

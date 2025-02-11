@@ -2,8 +2,7 @@
 <interface>
   <template class="PinsAppTile" parent="GtkBox">
     <property name="orientation">vertical</property>
-    <property name="hexpand">false</property>
-    <property name="halign">center</property>
+    <property name="hexpand">true</property>
     <property name="width-request">96</property>
     <property name="margin-top">8</property>
     <property name="margin-bottom">8</property>
@@ -11,8 +10,28 @@
     <property name="margin-end">6</property>
     <property name="spacing">6</property>
     <child>
-      <object class="PinsAppIcon" id="icon">
-        <property name="pixel-size">64</property>
+      <object class="GtkOverlay">
+        <child>
+          <object class="PinsAppIcon" id="icon">
+            <property name="pixel-size">64</property>
+          </object>
+        </child>
+        <child type="overlay">
+          <object class="AdwBin" id="invisible_glyph">
+            <property name="halign">end</property>
+            <property name="valign">start</property>
+            <property name="margin-end">3</property>
+            <property name="visible">false</property>
+            <property name="child">
+              <object class="GtkImage">
+                <property name="icon-name">view-conceal-symbolic</property>
+                <style>
+                  <class name="glyph" />
+                </style>
+              </object>
+            </property>
+          </object>
+        </child>
       </object>
     </child>
     <child>
