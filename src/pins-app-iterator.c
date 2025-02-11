@@ -195,19 +195,10 @@ pins_app_iterator_sort_compare_func (gconstpointer a, gconstpointer b,
 {
     PinsDesktopFile *first = PINS_DESKTOP_FILE ((gpointer)a);
     PinsDesktopFile *second = PINS_DESKTOP_FILE ((gpointer)b);
-    gboolean first_invisible, second_invisible;
     const gchar *first_key, *second_key, *first_name, *second_name;
 
     g_return_val_if_fail (PINS_IS_DESKTOP_FILE (first), 0);
     g_return_val_if_fail (PINS_IS_DESKTOP_FILE (second), 0);
-
-    first_invisible = pins_desktop_file_get_boolean (
-        first, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY);
-    second_invisible = pins_desktop_file_get_boolean (
-        second, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY);
-
-    if (first_invisible != second_invisible)
-        return first_invisible ? 1 : -1;
 
     first_key = _pins_join_key_locale (
         G_KEY_FILE_DESKTOP_KEY_NAME, pins_desktop_file_get_locale_for_key (
