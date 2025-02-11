@@ -82,7 +82,7 @@ void
 pins_app_icon_set_desktop_file (PinsAppIcon *self,
                                 PinsDesktopFile *desktop_file)
 {
-    g_autofree gchar *icon_name = NULL;
+    gchar *icon_name = NULL;
 
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
