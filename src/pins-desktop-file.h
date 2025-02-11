@@ -42,7 +42,9 @@ PinsDesktopFile *pins_desktop_file_new_from_user_file (GFile *file,
 PinsDesktopFile *pins_desktop_file_new_from_file (GFile *file, GError **error);
 
 gboolean pins_desktop_file_is_user_only (PinsDesktopFile *self);
+gboolean pins_desktop_file_is_user_edited (PinsDesktopFile *self);
 gboolean pins_desktop_file_is_autostart (PinsDesktopFile *self);
+gboolean pins_desktop_file_is_shown (PinsDesktopFile *self);
 
 void pins_desktop_file_save (PinsDesktopFile *self, GError **error);
 void pins_desktop_file_trash (PinsDesktopFile *self);

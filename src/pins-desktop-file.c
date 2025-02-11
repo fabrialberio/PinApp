@@ -174,20 +174,53 @@ pins_desktop_file_is_user_only (PinsDesktopFile *self)
 }
 
 gboolean
+pins_desktop_file_is_user_edited (PinsDesktopFile *self)
+{
+    return g_file_query_exists (self->user_file, NULL);
+}
+
+gboolean
 pins_desktop_file_is_autostart (PinsDesktopFile *self)
 {
     return g_file_query_exists (self->autostart_file, NULL);
 }
 
-/**
- * Returns `TRUE` if the file has been changed since the last save.
- */
 gboolean
-pins_desktop_file_is_edited (PinsDesktopFile *self)
+pins_desktop_file_is_shown (PinsDesktopFile *self)
 {
-    return g_strcmp0 (g_key_file_to_data (self->key_file, NULL, NULL),
-                      self->saved_data)
-           != 0;
+    gboolean hidden, no_display;
+    const gchar *current_desktop = NULL;
+    g_auto (GStrv) only_shown_in = NULL, not_shown_in = NULL;
+
+    hidden
+        = pins_desktop_file_get_boolean (self, G_KEY_FILE_DESKTOP_KEY_HIDDEN);
+    no_display = pins_desktop_file_get_boolean (
+        self, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY);
+
+    if (hidden || no_display)
+        return FALSE;
+
+    current_desktop = g_getenv ("XDG_CURRENT_DESKTOP");
+
+    if (current_desktop == NULL)
+        return TRUE;
+
+    only_shown_in = g_key_file_get_string_list (
+        self->key_file, G_KEY_FILE_DESKTOP_GROUP,
+        G_KEY_FILE_DESKTOP_KEY_ONLY_SHOW_IN, NULL, NULL);
+    not_shown_in = g_key_file_get_string_list (
+        self->key_file, G_KEY_FILE_DESKTOP_GROUP,
+        G_KEY_FILE_DESKTOP_KEY_NOT_SHOW_IN, NULL, NULL);
+
+    if (only_shown_in != NULL)
+        return g_strv_contains ((const gchar *const *)only_shown_in,
+                                current_desktop);
+
+    if (not_shown_in != NULL)
+        return !g_strv_contains ((const gchar *const *)not_shown_in,
+                                 current_desktop);
+
+    return TRUE;
 }
 
 void
@@ -210,7 +243,8 @@ pins_desktop_file_save (PinsDesktopFile *self, GError **error)
     gsize lenght;
     int fd;
 
-    if (!pins_desktop_file_is_edited (self))
+    if (!g_strcmp0 (g_key_file_to_data (self->key_file, NULL, NULL),
+                    self->saved_data))
         return;
 
     self->saved_data = g_key_file_to_data (self->key_file, &lenght, NULL);
