@@ -56,8 +56,7 @@ pins_app_tile_update_appearance (PinsAppTile *self,
     gtk_label_set_text (
         self->title, pins_desktop_file_get_string (desktop_file, title_key));
 
-    invisible = pins_desktop_file_get_boolean (
-        desktop_file, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY);
+    invisible = !pins_desktop_file_is_shown (desktop_file);
 
     gtk_widget_set_opacity (GTK_WIDGET (self->icon), invisible ? 0.6 : 1);
 }
