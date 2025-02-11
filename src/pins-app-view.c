@@ -154,22 +154,18 @@ pins_app_view_search_changed_cb (GtkSearchEntry *entry, PinsAppView *self)
         self->string_filter, gtk_editable_get_text (GTK_EDITABLE (entry)));
 
     if (g_list_model_get_n_items (G_LIST_MODEL (self->filter_model)) == 0)
-        {
-            adw_view_stack_set_visible_child_name (self->view_stack,
-                                                   pages[PAGE_EMPTY]);
-        }
+        adw_view_stack_set_visible_child_name (self->view_stack,
+                                               pages[PAGE_EMPTY]);
     else
-        {
-            adw_view_stack_set_visible_child_name (self->view_stack,
-                                                   pages[PAGE_APPS]);
-        }
+        adw_view_stack_set_visible_child_name (self->view_stack,
+                                               pages[PAGE_APPS]);
 }
 
 void
 pins_app_view_item_activated_cb (GtkListView *self, guint position,
                                  PinsAppView *user_data)
 {
-    PinsDesktopFile *desktop_file;
+    g_autoptr (PinsDesktopFile) desktop_file = NULL;
 
     g_assert (PINS_IS_APP_VIEW (user_data));
 
@@ -182,6 +178,18 @@ pins_app_view_item_activated_cb (GtkListView *self, guint position,
 static void
 pins_app_view_init (PinsAppView *self)
 {
+    g_autoptr (GSettings) settings = NULL;
+    g_autoptr (GSimpleActionGroup) group = NULL;
+    g_autoptr (GAction) action = NULL;
+
+    settings = g_settings_new ("io.github.fabrialberio.pinapp");
+    group = g_simple_action_group_new ();
+    action = g_settings_create_action (settings, "show-all-apps");
+
+    g_action_map_add_action (G_ACTION_MAP (group), action);
+    gtk_widget_insert_action_group (GTK_WIDGET (self), "app-view",
+                                    G_ACTION_GROUP (group));
+
     gtk_widget_init_template (GTK_WIDGET (self));
 
     self->string_filter = gtk_string_filter_new (gtk_property_expression_new (
