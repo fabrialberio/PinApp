@@ -45,22 +45,22 @@ pins_app_icon_set_icon_name (PinsAppIcon *self, gchar *icon_name)
 {
     GtkIconTheme *theme
         = gtk_icon_theme_get_for_display (gdk_display_get_default ());
+    g_autofree gchar *host_filename
+        = g_build_filename ("/run/host", icon_name, NULL);
+
+    if (!g_strcmp0 (icon_name, ""))
+        gtk_image_set_from_icon_name (self->image, DEFAULT_ICON_NAME);
 
     if (gtk_icon_theme_has_icon (theme, icon_name)
         || gtk_icon_theme_has_icon (
             theme, g_strconcat (icon_name, "-symbolic", NULL)))
-        {
-            gtk_image_set_from_icon_name (self->image, icon_name);
-        }
-    else if (g_file_query_exists (g_file_new_for_path (icon_name),
-                                  g_cancellable_get_current ()))
-        {
-            gtk_image_set_from_file (self->image, icon_name);
-        }
+        gtk_image_set_from_icon_name (self->image, icon_name);
+    else if (g_file_test (icon_name, G_FILE_TEST_IS_REGULAR))
+        gtk_image_set_from_file (self->image, icon_name);
+    else if (g_file_test (host_filename, G_FILE_TEST_IS_REGULAR))
+        gtk_image_set_from_file (self->image, host_filename);
     else
-        {
-            gtk_image_set_from_icon_name (self->image, DEFAULT_ICON_NAME);
-        }
+        gtk_image_set_from_icon_name (self->image, DEFAULT_ICON_NAME);
 }
 
 void
@@ -82,14 +82,12 @@ void
 pins_app_icon_set_desktop_file (PinsAppIcon *self,
                                 PinsDesktopFile *desktop_file)
 {
-    gchar *icon_name;
+    g_autofree gchar *icon_name = NULL;
 
     g_assert (PINS_IS_DESKTOP_FILE (desktop_file));
 
     icon_name = pins_desktop_file_get_string (desktop_file,
                                               G_KEY_FILE_DESKTOP_KEY_ICON);
-    if (!g_strcmp0 (icon_name, ""))
-        pins_app_icon_set_icon_name (self, DEFAULT_ICON_NAME);
 
     g_signal_connect_object (desktop_file, "key-set",
                              G_CALLBACK (pins_app_icon_key_set_cb), self, 0);
