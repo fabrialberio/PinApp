@@ -391,7 +391,7 @@ pins_desktop_file_get_string (PinsDesktopFile *self, const gchar *key)
     value = g_key_file_get_string (self->key_file, G_KEY_FILE_DESKTOP_GROUP,
                                    key, &err);
     if (err != NULL)
-        return "";
+        return g_strdup ("");
 
     return value;
 }
