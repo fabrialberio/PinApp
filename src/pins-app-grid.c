@@ -52,6 +52,13 @@ item_activated_cb (PinsAppGrid *self, guint position)
 }
 
 void
+items_changed_cb (PinsAppGrid *self)
+{
+    // Fixes grid not being scrolled to the top when opening the app.
+    gtk_grid_view_scroll_to (self->grid_view, 0, GTK_LIST_SCROLL_NONE, NULL);
+}
+
+void
 pins_app_grid_set_model (PinsAppGrid *self, GListModel *model)
 {
     GtkNoSelection *selection_model = gtk_no_selection_new (model);
@@ -61,6 +68,9 @@ pins_app_grid_set_model (PinsAppGrid *self, GListModel *model)
 
     g_signal_connect_object (self->grid_view, "activate",
                              G_CALLBACK (item_activated_cb), self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (model, "items-changed",
+                             G_CALLBACK (items_changed_cb), self,
                              G_CONNECT_SWAPPED);
 }
 
