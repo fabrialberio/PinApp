@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pinapp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 18:01+0100\n"
-"PO-Revision-Date: 2025-02-05 18:04+0100\n"
+"POT-Creation-Date: 2025-02-05 19:17+0100\n"
+"PO-Revision-Date: 2025-02-11 18:00+0100\n"
 "Last-Translator: Irénée Thirion <irenee.thirion@e.email>\n"
 "Language-Team: FrenchLanguage: fr\n"
 "Language: fr\n"
@@ -17,16 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.5\n"
 
 #: data/io.github.fabrialberio.pinapp.desktop.in:3 src/pins-window.ui:14
 msgid "Pins"
-msgstr ""
+msgstr "Pins"
 
 #: data/io.github.fabrialberio.pinapp.desktop.in:4
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:9
-#, fuzzy
-#| msgid "Create and edit application shortcuts"
 msgid "Create and edit app shortcuts"
 msgstr "Créez et modifiez les raccourcis d’applications"
 
@@ -35,34 +33,28 @@ msgid "GNOME;GTK;Apps;Shortcuts;Icons;"
 msgstr "GNOME;GTK;Applications;Raccourcis;Icônes;"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:15
-msgid "PinApp is a simple application that lets you customize your app list."
-msgstr ""
+msgid "Pins allows you to customize your app menu by editing .desktop files."
+msgstr "Pins vous permet de personnaliser votre grille d’applications en modifiant leurs fichiers .desktop."
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:16
-msgid "Some of the possible uses are"
-msgstr ""
+msgid "Some of the things you can do are:"
+msgstr "Vous pouvez notamment :"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:18
-msgid "Changing an app icon that doesn't fit in with your theme"
-msgstr ""
+msgid "changing an app icon that doesn't fit in with your theme,"
+msgstr "changer l’icône d’une application qui ne correspond pas à votre thème,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:19
-msgid "Creating custom shortcuts to websites"
-msgstr ""
+msgid "creating custom shortcuts to websites,"
+msgstr "créer des raccourcis personnalisés vers des sites web,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:20
-msgid "Hiding apps you don't want to see"
-msgstr ""
+msgid "hiding apps you don't want to see,"
+msgstr "masquer des applications que vous ne voulez pas voir,"
 
 #: data/io.github.fabrialberio.pinapp.appdata.xml.in:21
-msgid "Editing properties in .desktop files"
-msgstr ""
-
-#: data/io.github.fabrialberio.pinapp.appdata.xml.in:23
-msgid ""
-"The app is made with Libadwaita and GTK4, with consideration for small-"
-"screen devices"
-msgstr ""
+msgid "editing properties in .desktop files."
+msgstr "modifier les propriétés des fichiers .desktop."
 
 #: src/help-overlay.ui:11
 msgctxt "shortcut window"
@@ -94,7 +86,7 @@ msgstr "Afficher le menu"
 
 #: src/pins-app-view.ui:28
 msgid "Search"
-msgstr ""
+msgstr "Rechercher"
 
 #: src/pins-app-view.ui:74
 msgid "Loading apps…"
@@ -105,84 +97,74 @@ msgid "No apps found"
 msgstr "Aucune application trouvée"
 
 #: src/pins-app-view.ui:120
-#, fuzzy
-#| msgid "Keyboard Shortcuts"
 msgid "_Keyboard Shortcuts"
-msgstr "Raccourcis clavier"
+msgstr "_Raccourcis clavier"
 
 #: src/pins-app-view.ui:124
-#, fuzzy
-#| msgid "About PinApp"
 msgid "_About Pins"
-msgstr "À propos de PinApp"
+msgstr "À _propos de Pins"
 
 #: src/pins-file-view.ui:20
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: src/pins-file-view.ui:64
 msgid "Edit icon"
-msgstr ""
+msgstr "Modifier l’icône"
 
 #: src/pins-file-view.ui:86
 msgid "Load icon from file"
-msgstr ""
+msgstr "Charger une icône depuis un fichier"
 
 #: src/pins-file-view.ui:131
 msgid "Autostart"
-msgstr ""
+msgstr "Démarrage automatique"
 
 #: src/pins-file-view.ui:134
 msgid "Launch this application on login"
-msgstr ""
+msgstr "Lancer cette application au démarrage"
 
 #: src/pins-file-view.ui:150
 msgid "Invisible"
-msgstr ""
+msgstr "Invisible"
 
 #: src/pins-file-view.ui:153
 msgid "Hide this application in the app menu"
-msgstr ""
+msgstr "Masquer cette application dans la grille des applications"
 
 #: src/pins-file-view.ui:185
-#, fuzzy
-#| msgid "Add new key"
 msgid "Add key"
-msgstr "Ajouter une nouvelle clé"
+msgstr "Ajouter une clé"
 
 #: src/pins-key-row.ui:9
 msgid "Erase changes"
-msgstr ""
+msgstr "Effacer les changements"
 
 #: src/pins-key-row.ui:21
 msgid "Remove key"
-msgstr ""
+msgstr "Supprimer la clé"
 
 #: src/pins-key-row.ui:32
 msgid "Select locale"
-msgstr ""
+msgstr "Sélectionner une langue"
 
 #: src/pins-add-key-dialog.c:79
 msgid "Add new key"
 msgstr "Ajouter une nouvelle clé"
 
 #: src/pins-add-key-dialog.c:84
-#, fuzzy
-#| msgid "Cancel"
 msgid "_Cancel"
-msgstr "Annuler"
+msgstr "A_nnuler"
 
 #: src/pins-add-key-dialog.c:85
 msgid "_Add"
-msgstr ""
+msgstr "_Ajouter"
 
 #: src/pins-add-key-dialog.c:94
 msgid "Key"
-msgstr ""
+msgstr "Clé"
 
 #: src/pins-file-view.c:349
-#, fuzzy
-#| msgid "Upload icon"
 msgid "Load icon"
 msgstr "Charger une icône"
 
@@ -222,8 +204,7 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "If you unpin an app, your changes will be permanently lost."
-#~ msgstr ""
-#~ "Si vous désépinglez cette application, elle sera supprimée pour toujours."
+#~ msgstr "Si vous désépinglez cette application, elle sera supprimée pour toujours."
 
 #~ msgid "Unpin"
 #~ msgstr "Désépingler"
