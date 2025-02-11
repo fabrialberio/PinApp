@@ -38,6 +38,7 @@
                 <property name="key-capture-widget">toolbar_view</property>
                 <property name="child">
                   <object class="AdwClamp">
+                    <property name="maximum-size">360</property>
                     <property name="child">
                       <object class="GtkSearchEntry" id="search_entry">
                         <property name="hexpand">true</property>
