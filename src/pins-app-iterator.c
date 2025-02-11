@@ -37,6 +37,7 @@ struct _PinsAppIterator
     GHashTable *unique_filenames;
     gboolean just_created_file;
     GListModel *model;
+    GtkFilterListModel *filter_model;
 };
 
 static void list_model_iface_init (GListModelInterface *iface);
@@ -117,11 +118,14 @@ pins_app_iterator_update_duplicates (GListModel *model, guint position,
 
     for (int i = 0; i < g_list_model_get_n_items (model); i++)
         {
-            GFileInfo *file_info
-                = G_FILE_INFO (g_list_model_get_item (model, i));
-            GFile *file = G_FILE (g_file_info_get_attribute_object (
+            g_autoptr (GFileInfo) file_info = NULL;
+            GFile *file;
+            g_autofree gchar *display_name;
+
+            file_info = G_FILE_INFO (g_list_model_get_item (model, i));
+            file = G_FILE (g_file_info_get_attribute_object (
                 file_info, "standard::file"));
-            gchar *display_name = (gchar *)g_file_get_basename (file);
+            display_name = (gchar *)g_file_get_basename (file);
 
             if (g_hash_table_contains (self->unique_filenames, display_name))
                 g_hash_table_add (self->duplicate_paths,
@@ -158,9 +162,7 @@ desktop_file_key_set_cb (PinsDesktopFile *desktop_file, gchar *key,
                          GtkSorter *sorter)
 {
     if (g_strcmp0 (key, G_KEY_FILE_DESKTOP_KEY_NAME) == 0)
-        {
-            gtk_sorter_changed (sorter, GTK_SORTER_CHANGE_DIFFERENT);
-        }
+        gtk_sorter_changed (sorter, GTK_SORTER_CHANGE_DIFFERENT);
 }
 
 gpointer
@@ -247,37 +249,12 @@ void
 pins_app_iterator_set_directory_list (PinsAppIterator *self,
                                       GListModel *dir_list)
 {
-    GtkFilterListModel *filter_model;
-    GtkMapListModel *map_model;
-    GtkSorter *sorter = GTK_SORTER (gtk_custom_sorter_new (
-        pins_app_iterator_sort_compare_func, NULL, NULL));
-    GtkSortListModel *sort_model;
+    gtk_filter_list_model_set_model (self->filter_model,
+                                     G_LIST_MODEL (dir_list));
 
     g_signal_connect_object (G_LIST_MODEL (dir_list), "items-changed",
                              G_CALLBACK (pins_app_iterator_update_duplicates),
                              self, 0);
-
-    filter_model = gtk_filter_list_model_new (
-        G_LIST_MODEL (dir_list),
-        GTK_FILTER (gtk_custom_filter_new (
-            &pins_app_iterator_filter_match_func, self, NULL)));
-    gtk_filter_list_model_set_incremental (filter_model, TRUE);
-
-    g_signal_connect_object (
-        filter_model, "notify::pending",
-        G_CALLBACK (pins_app_iterator_filter_pending_changed_cb), self, 0);
-
-    map_model
-        = gtk_map_list_model_new (G_LIST_MODEL (filter_model),
-                                  &pins_app_iterator_map_func, sorter, NULL);
-
-    sort_model = gtk_sort_list_model_new (G_LIST_MODEL (map_model), sorter);
-
-    g_signal_connect_object (G_LIST_MODEL (sort_model), "items-changed",
-                             G_CALLBACK (desktop_file_model_items_changed_cb),
-                             self, 0);
-
-    self->model = G_LIST_MODEL (sort_model);
 }
 
 void
@@ -319,9 +296,34 @@ pins_app_iterator_class_init (PinsAppIteratorClass *klass)
 static void
 pins_app_iterator_init (PinsAppIterator *self)
 {
+    GtkSorter *sorter;
+    GtkMapListModel *map_model;
+
     self->unique_filenames = g_hash_table_new (g_str_hash, g_str_equal);
     self->duplicate_paths = g_hash_table_new (g_str_hash, g_str_equal);
     self->just_created_file = FALSE;
+
+    self->filter_model = gtk_filter_list_model_new (
+        NULL, GTK_FILTER (gtk_custom_filter_new (
+                  &pins_app_iterator_filter_match_func, self, NULL)));
+    gtk_filter_list_model_set_incremental (self->filter_model, TRUE);
+
+    sorter = GTK_SORTER (gtk_custom_sorter_new (
+        pins_app_iterator_sort_compare_func, NULL, NULL));
+
+    map_model
+        = gtk_map_list_model_new (G_LIST_MODEL (self->filter_model),
+                                  &pins_app_iterator_map_func, sorter, NULL);
+
+    self->model = G_LIST_MODEL (
+        gtk_sort_list_model_new (G_LIST_MODEL (map_model), sorter));
+
+    g_signal_connect_object (
+        self->filter_model, "notify::pending",
+        G_CALLBACK (pins_app_iterator_filter_pending_changed_cb), self, 0);
+    g_signal_connect_object (self->model, "items-changed",
+                             G_CALLBACK (desktop_file_model_items_changed_cb),
+                             self, 0);
 
     pins_app_iterator_set_paths (self, pins_desktop_file_search_paths ());
 }
